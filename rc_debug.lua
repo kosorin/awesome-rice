@@ -1,0 +1,3 @@
+DEBUG = true
+
+require("rc")

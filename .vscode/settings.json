@@ -1,0 +1,13 @@
+{
+    "Lua.diagnostics.globals": [
+        "dump",
+        "DEBUG",
+        "awesome",
+        "client",
+        "mouse",
+        "mousegrabber",
+        "screen",
+        "tag",
+        "root",
+    ],
+}

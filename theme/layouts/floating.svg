@@ -1,0 +1,11 @@
+<svg viewBox="0 0 96 64" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <rect id="primary-clip" x="8" y="4" width="63" height="44" rx="4" ry="4" />
+  </defs>
+  <mask id="secondary-mask">
+    <rect id="bg" x="0" y="0" width="100%" height="100%" fill="white" />
+    <use xlink:href="#primary-clip" fill="black" />
+  </mask>
+  <rect class="primary" x="8" y="4" width="56" height="37" rx="4" ry="4" />
+  <rect class="secondary" mask="url(#secondary-mask)" x="36" y="26" width="52" height="34" rx="4" ry="4" />
+</svg>
