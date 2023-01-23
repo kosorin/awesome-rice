@@ -1,0 +1,18 @@
+# AwesomeWM library directories
+# [temporarily disabled]
+# /awful
+# /beautiful
+# /gears
+# /menubar
+# /naughty
+# /ruled
+# /wibox
+
+# Visual Studio Code
+*.code-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
