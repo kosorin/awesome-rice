@@ -13,6 +13,7 @@ local gtimer = require("gears.timer")
 local gtable = require("gears.table")
 local capsule = require("widget.capsule")
 local mebox = require("widget.mebox")
+local clock_icon = require("widget.clock_icon")
 local aplacement = require("awful.placement")
 local widget_helper = require("helpers.widget")
 
@@ -100,7 +101,7 @@ function datetime_widget.new(wibar)
                 id = "icon",
                 widget = wibox.widget.imagebox,
                 resize = true,
-                stylesheet = "path { fill: " .. style.foreground .. "; }",
+                stylesheet = clock_icon.generate_style(style.foreground),
             },
             {
                 id = "text",
@@ -168,15 +169,11 @@ function datetime_widget.new(wibar)
     end)
 
     gtimer {
-        timeout = 5 * 60,
+        timeout = 60,
         autostart = true,
         call_now = true,
         callback = function()
-            local date = os.date("*t")
-            local index = (((12 + date.hour + floor(0.5 + (date.min / 60))) - 1) % 12) + 1
-            local icon_name = "clock-time-" .. index
-            local icon = beautiful.dir .. "/icons/" .. icon_name .. ".svg"
-            self._private.widgets.clock.icon:set_image(icon)
+            self._private.widgets.clock.icon:set_image(clock_icon.generate_svg())
         end,
     }
 
