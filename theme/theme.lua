@@ -9,6 +9,7 @@ local gfilesystem = require("gears.filesystem")
 local dpi = dpi
 local tcolor = require("theme.color")
 local capsule = require("widget.capsule")
+local pango = require("utils.pango")
 
 
 ---------------------------------------------------------------------------------------------------
@@ -350,11 +351,13 @@ theme.mebox = {
             if text_widget then
                 local color = theme.common.foreground_66
                 local text = item.text or ""
-                text_widget:set_markup("<span \
-                    size='smaller' \
-                    text_transform='uppercase' \
-                    foreground='" .. color .. "' \
-                    weight='bold'>" .. text .. "</span>")
+                text_widget:set_markup(pango.span {
+                    size = "smaller",
+                    text_transform = "uppercase",
+                    foreground = color,
+                    weight = "bold",
+                    text,
+                })
             end
         end,
     },
@@ -511,9 +514,7 @@ theme.mebox.default_style = {
             local text_widget = self:get_children_by_id("#text")[1]
             if text_widget then
                 local text = item.text or ""
-                text_widget:set_markup("<span foreground='"
-                    .. style.foreground .. "' weight='bold'>"
-                    .. text .. "</span>")
+                text_widget:set_markup(pango.span { foreground = style.foreground, weight = "bold", text, })
             end
 
             local submenu_icon_widget = self:get_children_by_id("#submenu_icon")[1]
@@ -592,10 +593,10 @@ theme.bindbox.default_style = {
     find_highlight_background = nil,
     find_highlight_foreground = theme.common.urgent_bright,
 
-    group_path_separator_markup = "<span fgalpha='50%'>  </span>",
-    slash_separator_markup = "<span fgalpha='50%' size='smaller'> / </span>",
-    plus_separator_markup = "<span fgalpha='50%'>+</span>",
-    range_separator_markup = "<span fgalpha='50%'>..</span>",
+    group_path_separator_markup = pango.span { fgalpha = "50%", "  ", },
+    slash_separator_markup = pango.span { fgalpha = "50%", size = "smaller", " / ", },
+    plus_separator_markup = pango.span { fgalpha = "50%", "+", },
+    range_separator_markup = pango.span { fgalpha = "50%", "..", },
 
     status_style = {
         background = theme.palette.black_50,

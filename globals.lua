@@ -13,19 +13,3 @@ dump = DEBUG and gdebug.dump or function(data, tag, depth)
 end
 
 dpi = require("beautiful.xresources").apply_dpi
-
-function span(text, foreground, background, args)
-    local s = "<span "
-    if background then
-        s = s .. "background='" .. background .. "' "
-    end
-    if foreground then
-        s = s .. "foreground='" .. foreground .. "' "
-    end
-    if args then
-        for k, v in pairs(args) do
-            s = s .. k .. "='" .. v .. "' "
-        end
-    end
-    return s .. ">" .. text .. "</span>"
-end

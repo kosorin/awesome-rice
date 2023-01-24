@@ -8,6 +8,7 @@ local dpi = dpi
 local humanizer = require("utils.humanizer")
 local gtable = require("gears.table")
 local capsule = require("widget.capsule")
+local pango = require("utils.pango")
 
 
 local network_widget = { mt = {} }
@@ -31,10 +32,6 @@ local styles = {
         }),
 }
 
-local function colorize_span(text, color)
-    return "<span foreground='" .. color .. "'>" .. text .. "</span>"
-end
-
 local function colorize_path(color)
     return "path { fill: " .. color .. "; }"
 end
@@ -42,7 +39,7 @@ end
 local function refresh_info(container_widget, style, text, icon)
     local text_widget = container_widget:get_children_by_id("text")[1]
     text = style.text or text or ""
-    text_widget:set_markup(colorize_span(text, style.foreground))
+    text_widget:set_markup(pango.span { foreground = style.foreground, text, })
 
     local icon_widget = container_widget:get_children_by_id("icon")[1]
     icon = style.icon or icon

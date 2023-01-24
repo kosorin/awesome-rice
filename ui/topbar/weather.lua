@@ -19,20 +19,11 @@ local gtable = require("gears.table")
 local setmetatable = setmetatable
 local aplacement = require("awful.placement")
 local widget_helper = require("helpers.widget")
+local pango = require("utils.pango")
 
-
-local thin_space = "<span size='xx-small'> </span>"
-
-local function pango(text, color)
-    if color then
-        return "<span foreground='" .. color .. "'>" .. text .. "</span>"
-    else
-        return text
-    end
-end
 
 local function set_text(widget, id, index, text, color)
-    widget:get_children_by_id(id)[index]:set_markup(pango(text, color))
+    widget:get_children_by_id(id)[index]:set_markup(pango.span { foreground = color, text, })
 end
 
 local function set_icon(widget, id, index, icon, color)
@@ -61,18 +52,18 @@ function weather_widget:refresh()
         self:apply_style(style)
 
         if is_rain then
-            local precipitation_rate_text = string.format("%.1f" .. thin_space .. "mm/h", data.precipitation_rate)
+            local precipitation_rate_text = string.format("%.1f" .. pango.thin_space .. "mm/h", data.precipitation_rate)
             set_text(self._private.widgets.precipitation, "text", 1, precipitation_rate_text, style.foreground)
             set_icon(self._private.widgets.precipitation, "icon", 1, nil, style.foreground)
             list_layout:add(self._private.widgets.precipitation)
         end
 
-        local temperature_text = string.format("%.1f" .. thin_space .. "&#176;C", data.temperature)
+        local temperature_text = string.format("%.1f" .. pango.thin_space .. "&#176;C", data.temperature)
         set_text(self._private.widgets.temperature, "text", 1, temperature_text, style.foreground)
         set_icon(self._private.widgets.temperature, "icon", 1, nil, style.foreground)
         list_layout:add(self._private.widgets.temperature)
 
-        local indoor_text = string.format("%.1f" .. thin_space .. "&#176;C", data.indoor_temperature)
+        local indoor_text = string.format("%.1f" .. pango.thin_space .. "&#176;C", data.indoor_temperature)
         set_text(self._private.widgets.indoor, "text", 1, indoor_text, style.foreground)
         set_icon(self._private.widgets.indoor, "icon", 1, nil, style.foreground)
         list_layout:add(self._private.widgets.indoor)

@@ -21,13 +21,13 @@ local btn = pbinding.button
 local tree = require("utils.tree")
 local capsule = require("widget.capsule")
 local noice = require("widget.noice")
-local span = span
+local pango = require("utils.pango")
 
 
 local bindbox = { mt = {} }
 
-local s25p = "<span size='25%'> </span>"
-local s50p = "<span size='50%'> </span>"
+local s25p = pango.span { size = "25%", " ", }
+local s50p = pango.span { size = "50%", " ", }
 local force_ltr = "&#x200E;"
 local mouse_label_icon = "" --    
 local labels = {
@@ -173,7 +173,11 @@ local function highlight_text(self, text, args)
     end
 
     if #substitutions == 0 then
-        return span(text, self.find_dim_foreground, self.find_dim_background), false
+        return pango.span {
+            fgcolor = self.find_dim_foreground,
+            bgcolor = self.find_dim_background,
+            text,
+        }, false
     end
 
     table.sort(substitutions, function(a, b) return a.from < b.from end)
@@ -202,9 +206,12 @@ local function highlight_text(self, text, args)
     return table.concat(gtable.map(function(part)
         local capture = string.sub(text, part.from, part.to)
         if part.matched then
-            return span(capture, self.find_highlight_foreground, self.find_highlight_background, {
+            return pango.span {
+                fgcolor = self.find_highlight_foreground,
+                bgcolor = self.find_highlight_background,
                 bgalpha = "100%",
-            })
+                capture,
+            }
         else
             return capture
         end
@@ -218,22 +225,29 @@ local function get_group_markup(self, node, path)
     local foreground = select(2, node:find_parent(function(n) return n.state.fg end, true))
         or (is_ruled and self.group_ruled_foreground or self.group_foreground)
     local text = " " .. table.concat(path, self.group_path_separator_markup) .. " "
-    return span(text, foreground, background)
+    return pango.span {
+        fgcolor = foreground,
+        bgcolor = background,
+        text,
+    }
 end
 
 local function get_trigger_markup(self, binding)
 
     local function trigger_box(content)
-        return span(" " .. content .. " ", nil, self.trigger_background, {
+        return pango.span {
+            bgcolor = self.trigger_background,
             bgalpha = self.trigger_background_alpha,
-        })
+            " " .. content .. " ",
+        }
     end
 
     local function trigger_target(target)
-        return span(" (" .. target .. ")", nil, nil, {
+        return pango.span {
             fgalpha = "50%",
             size = "smaller",
-        })
+            " (" .. target .. ")",
+        }
     end
 
     local modifier_markup = ""

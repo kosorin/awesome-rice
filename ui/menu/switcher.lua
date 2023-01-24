@@ -14,6 +14,7 @@ local btn = binding.button
 local tcolor = require("theme.color")
 local mebox = require("widget.mebox")
 local capsule = require("widget.capsule")
+local pango = require("utils.pango")
 
 
 return mebox {
@@ -33,12 +34,12 @@ return mebox {
             items[#items + 1] = {
                 client = client,
                 active = client.active,
-                text = format("<span fgalpha='65%%'>/%s/</span>"
-                    .. "<b>%s</b> "
-                    .. "<span weight='light' fgalpha='65%%' size='medium'>%s</span>",
-                    tag and tag.name or "",
-                    client.class or "",
-                    client.name or ""),
+                text = pango.span {
+                    pango.span { fgalpha = "65%", "/", tag and tag.name or "", "/", },
+                    pango.b(client.class or ""),
+                    " ",
+                    pango.span { fgalpha = "65%", weight = "light", size = "medium", client.name or "", },
+                },
                 on_hide = function(item)
                     if not item.selected then
                         return
@@ -110,10 +111,11 @@ return mebox {
 
             local text_widget = self:get_children_by_id("#text")[1]
             if text_widget then
-                local text = item.text or ""
-                text_widget:set_markup("<span size='larger' foreground='"
-                    .. style.foreground .. "'>"
-                    .. text .. "</span>")
+                text_widget:set_markup(pango.span {
+                    size = "larger",
+                    foreground = style.foreground,
+                    item.text or "",
+                })
             end
         end,
     },

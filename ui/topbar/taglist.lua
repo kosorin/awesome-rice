@@ -23,6 +23,7 @@ local tag_menu_template = require("ui.menu.templates.tag")
 local aplacement = require("awful.placement")
 local widget_helper = require("helpers.widget")
 local screen_helper = require("helpers.screen")
+local pango = require("utils.pango")
 
 
 local taglist = { mt = {} }
@@ -163,7 +164,7 @@ function taglist.new(wibar)
 
                 if item.text then
                     if not item.text:set_markup_silently(text) then
-                        item.text:set_markup("<i>&lt;Invalid text&gt;</i>")
+                        item.text:set_markup(pango.i("&lt;Invalid text&gt;"))
                     end
                 end
 

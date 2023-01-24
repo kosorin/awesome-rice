@@ -8,6 +8,7 @@ local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
 local gtable = require("gears.table")
+local pango = require("utils.pango")
 
 
 local client_menu_template = { mt = {} }
@@ -107,7 +108,7 @@ function client_menu_template.new()
                     local text = opacity
                         and tostring(floor((opacity * 100) + 0.5))
                         or "--"
-                    value_widget:set_markup(text .. "<span size='xx-small'> </span>%")
+                    value_widget:set_markup(text .. pango.thin_space .. "%")
                 end
 
                 local function change_opacity(menu, value)

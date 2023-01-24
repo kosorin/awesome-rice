@@ -22,6 +22,7 @@ local capsule = require("widget.capsule")
 local aplacement = require("awful.placement")
 local widget_helper = require("helpers.widget")
 local mebox = require("widget.mebox")
+local pango = require("utils.pango")
 
 
 local torrent_widget = { mt = {} }
@@ -92,9 +93,8 @@ function torrent_widget:refresh()
 
     self:apply_style(style)
 
-    local markup = "<span foreground='" .. style.foreground .. "'>" .. text .. "</span>"
     local text_widget = self:get_children_by_id("text")[1]
-    text_widget:set_markup(markup)
+    text_widget:set_markup(pango.span { foreground = style.foreground, text, })
 
     local icon_path = beautiful.dir .. "/icons/" .. icon .. ".svg"
     local icon_stylesheet = "path { fill: " .. style.foreground .. "; }"

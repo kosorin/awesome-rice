@@ -19,6 +19,7 @@ local gtable = require("gears.table")
 local widget_helper = require("helpers.widget")
 local tcolor = require("theme.color")
 local mouse_helper = require("helpers.mouse")
+local pango = require("utils.pango")
 
 
 local redshift_widget = { mt = {} }
@@ -27,7 +28,7 @@ local min_temperature = 1000
 local max_temperature = 10000
 local default_temperature = 6500
 local temperature_step = 100
-local text_format = "%.1f<span size='xx-small'> </span>K"
+local text_format = "%.1f" .. pango.thin_space .. "K"
 local style = beautiful.capsule.styles.normal
 
 local function clamp(temperature)

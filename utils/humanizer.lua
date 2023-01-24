@@ -2,10 +2,10 @@ local floor = math.floor
 local max = math.max
 local format = string.format
 local concat = table.concat
+local pango = require("utils.pango")
 
-local humanizer = {
-    thin_space = "<span size='xx-small'> </span>",
-}
+
+local humanizer = {}
 
 local function round(value) return floor(value + 0.5) end
 
@@ -30,8 +30,7 @@ end
 local function humanize_units(units, value, precision, from_unit)
     if not value then
         if not unknown_cache.io_speed then
-            unknown_cache.io_speed = format("%s%s%s", units.unknown, humanizer.thin_space,
-                units[1].text)
+            unknown_cache.io_speed = format("%s%s%s", units.unknown, pango.thin_space, units[1].text)
         end
         return unknown_cache.io_speed
     end
@@ -41,7 +40,7 @@ local function humanize_units(units, value, precision, from_unit)
         if i >= from_unit and value < unit.value then
             return format("%." .. tostring(precision or unit.precision) .. "f%s%s",
                 value / (unit.value / units.size),
-                humanizer.thin_space,
+                pango.thin_space,
                 unit.text)
         end
     end

@@ -4,6 +4,7 @@ local wibox = require("wibox")
 local beautiful = require("beautiful")
 local dpi = dpi
 local capsule = require("widget.capsule")
+local pango = require("utils.pango")
 
 
 local tag_layout_menu_template = { mt = {} }
@@ -30,9 +31,11 @@ local info_menu_item_template = {
         local text_widget = self:get_children_by_id("#text")[1]
         if text_widget then
             local text = item.text
-            text_widget:set_markup("<span foreground='"
-                .. style.foreground .. "' weight='bold'><i>"
-                .. text .. "</i></span>")
+            text_widget:set_markup(pango.span {
+                foreground = style.foreground,
+                weight = "bold",
+                pango.i(text),
+            })
         end
     end,
 }
@@ -89,9 +92,11 @@ local menu_item_template = {
         local text_widget = self:get_children_by_id("#text")[1]
         if text_widget then
             local text = item.text
-            text_widget:set_markup("<span foreground='"
-                .. style.foreground .. "' weight='bold'>"
-                .. text .. "</span>")
+            text_widget:set_markup(pango.span {
+                foreground = style.foreground,
+                weight = "bold",
+                text,
+            })
         end
     end,
 }

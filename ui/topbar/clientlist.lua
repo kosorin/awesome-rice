@@ -14,6 +14,7 @@ local mebox = require("widget.mebox")
 local client_menu_template = require("ui.menu.templates.client")
 local aplacement = require("awful.placement")
 local widget_helper = require("helpers.widget")
+local pango = require("utils.pango")
 
 
 local clientlist = { mt = {} }
@@ -107,7 +108,7 @@ function clientlist.new(wibar)
 
                 if item.text then
                     if not item.text:set_markup_silently(text) then
-                        item.text:set_markup("<i>&lt;Invalid text&gt;</i>")
+                        item.text:set_markup(pango.i("&lt;Invalid text&gt;"))
                     end
                 end
 

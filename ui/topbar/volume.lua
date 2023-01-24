@@ -21,6 +21,7 @@ local aplacement = require("awful.placement")
 local widget_helper = require("helpers.widget")
 local mebox = require("widget.mebox")
 local mouse_helper = require("helpers.mouse")
+local pango = require("utils.pango")
 
 
 local volume_widget = { mt = {} }
@@ -30,8 +31,8 @@ local styles = {
     boosted = beautiful.capsule.styles.palette.yellow,
     muted = beautiful.capsule.styles.disabled,
 }
-local text_format = "%2d<span size='xx-small'> </span>%%"
-local error_text = "--<span size='xx-small'> </span>%"
+local text_format = "%2d" .. pango.thin_space .. "%%"
+local error_text = "--" .. pango.thin_space .. "%"
 
 function volume_widget:refresh()
     local data = self._private.data
@@ -45,9 +46,8 @@ function volume_widget:refresh()
     local volume_color = style.foreground
     local volume_background_color = beautiful.get_progressbar_background_color(style.foreground)
 
-    local text_markup = "<span foreground='" .. volume_color .. "'>" .. volume_text .. "</span>"
     local text_widget = self:get_children_by_id("text")[1]
-    text_widget:set_markup(text_markup)
+    text_widget:set_markup(pango.span { foreground = volume_color, volume_text, })
 
     local wave1_fill = (not data.muted and data.volume <= 0) and volume_background_color or volume_color
     local wave2_fill = (not data.muted and data.volume <= 30) and volume_background_color or volume_color
