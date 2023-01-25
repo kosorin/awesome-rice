@@ -84,8 +84,11 @@ local function on_raw_data(stdout, stderr, exitreason, exitcode)
 end
 
 function weather_service.update()
-    local command = "curl --silent --fail '" .. weather_service.config.data_url .. "'"
-    awful.spawn.easy_async_with_shell(command, on_raw_data)
+    local data_url = weather_service.config.data_url
+    if data_url then
+        local command = "curl --silent --fail '" .. data_url .. "'"
+        awful.spawn.easy_async_with_shell(command, on_raw_data)
+    end
 end
 
 function weather_service.watch()
