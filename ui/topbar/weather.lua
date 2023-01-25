@@ -1,3 +1,8 @@
+local config = require("config")
+if not config.features.weather_widget then
+    return
+end
+
 local capi = {
     awesome = awesome,
     mouse = mouse,
@@ -5,7 +10,6 @@ local capi = {
 local table = table
 local awful = require("awful")
 local wibox = require("wibox")
-local config = require("config")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
@@ -13,7 +17,6 @@ local beautiful = require("beautiful")
 local weather_service = require("services.weather")
 local weather_popup = require("ui.popup.weather")
 local dpi = dpi
-local config = require("config")
 local capsule = require("widget.capsule")
 local mebox = require("widget.mebox")
 local gtable = require("gears.table")

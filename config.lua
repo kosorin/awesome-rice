@@ -9,6 +9,7 @@ local config = {}
 config.features = {
     screenshot_tools = true,
     torrent_widget = true,
+    weather_widget = true,
 }
 
 config.places = {}

@@ -94,6 +94,8 @@ capi.screen.connect_signal("request::desktop_decoration", function(screen)
         right:add(volume_widget.new(wibar))
         if not DEBUG then
             right:add(redshift_widget.new(wibar))
+        end
+        if config.features.weather_widget then
             right:add(weather_widget.new(wibar))
         end
         right:add(datetime_widget.new(wibar))
