@@ -1,3 +1,5 @@
+local config = require("config")
+
 return {
     applications = require("ui.menu.templates.applications"),
     client = require("ui.menu.templates.client"),

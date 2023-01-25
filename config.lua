@@ -6,6 +6,9 @@ local filesystem = require("gears.filesystem")
 
 local config = {}
 
+config.features = {
+}
+
 config.places = {}
 config.places.home = os.getenv("HOME")
 config.places.config = os.getenv("XDG_CONFIG_HOME") or (config.places.home .. "/.config")

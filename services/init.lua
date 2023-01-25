@@ -1,3 +1,5 @@
+local config = require("config")
+
 local services = {
     screenshot = require("services.screenshot"),
     volume = require("services.volume"),
@@ -7,9 +9,10 @@ local services = {
     wallpaper = require("services.wallpaper"),
 }
 
-services.torrent.watch()
-services.network.watch()
-services.volume.watch()
-services.weather.watch()
+for _, service in pairs(services) do
+    if type(service.watch) == "function" then
+        service.watch()
+    end
+end
 
 return services
