@@ -437,57 +437,62 @@ binding.add_global_range {
         on_press = function() awful.spawn("playerctl -a stop") end,
     },
 
-
-    binding.new {
-        modifiers = {},
-        triggers = "Print",
-        path = { "screenshot", "save to file" },
-        description = "interactive selection",
-        on_press = function() services.screenshot.take { mode = "selection" } end,
-    },
-
-    binding.new {
-        modifiers = { mod.alt, },
-        triggers = "Print",
-        path = { "screenshot", "save to file" },
-        description = "current window",
-        on_press = function() services.screenshot.take { mode = "window" } end,
-    },
-
-    binding.new {
-        modifiers = { mod.control, },
-        triggers = "Print",
-        path = { "screenshot", "save to file" },
-        description = "full screen",
-        on_press = function() services.screenshot.take { mode = nil } end,
-    },
-
-
-    binding.new {
-        modifiers = { mod.super, },
-        triggers = "Print",
-        path = { "screenshot", "copy to clipboard" },
-        description = "interactive selection",
-        on_press = function() services.screenshot.take { mode = "selection", output = "clipboard" } end,
-    },
-
-    binding.new {
-        modifiers = { mod.alt, mod.super, },
-        triggers = "Print",
-        path = { "screenshot", "copy to clipboard" },
-        description = "current window",
-        on_press = function() services.screenshot.take { mode = "window", output = "clipboard" } end,
-    },
-
-    binding.new {
-        modifiers = { mod.control, mod.super, },
-        triggers = "Print",
-        path = { "screenshot", "copy to clipboard" },
-        description = "full screen",
-        on_press = function() services.screenshot.take { mode = nil, output = "clipboard" } end,
-    },
-
 }
+
+if config.features.screenshot_tools then
+    binding.add_global_range {
+
+        binding.new {
+            modifiers = {},
+            triggers = "Print",
+            path = { "screenshot", "save to file" },
+            description = "interactive selection",
+            on_press = function() services.screenshot.take { mode = "selection" } end,
+        },
+
+        binding.new {
+            modifiers = { mod.alt, },
+            triggers = "Print",
+            path = { "screenshot", "save to file" },
+            description = "current window",
+            on_press = function() services.screenshot.take { mode = "window" } end,
+        },
+
+        binding.new {
+            modifiers = { mod.control, },
+            triggers = "Print",
+            path = { "screenshot", "save to file" },
+            description = "full screen",
+            on_press = function() services.screenshot.take { mode = nil } end,
+        },
+
+
+        binding.new {
+            modifiers = { mod.super, },
+            triggers = "Print",
+            path = { "screenshot", "copy to clipboard" },
+            description = "interactive selection",
+            on_press = function() services.screenshot.take { mode = "selection", output = "clipboard" } end,
+        },
+
+        binding.new {
+            modifiers = { mod.alt, mod.super, },
+            triggers = "Print",
+            path = { "screenshot", "copy to clipboard" },
+            description = "current window",
+            on_press = function() services.screenshot.take { mode = "window", output = "clipboard" } end,
+        },
+
+        binding.new {
+            modifiers = { mod.control, mod.super, },
+            triggers = "Print",
+            path = { "screenshot", "copy to clipboard" },
+            description = "full screen",
+            on_press = function() services.screenshot.take { mode = nil, output = "clipboard" } end,
+        },
+
+    }
+end
 
 binding.add_client_range {
 

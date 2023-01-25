@@ -7,6 +7,7 @@ local filesystem = require("gears.filesystem")
 local config = {}
 
 config.features = {
+    screenshot_tools = true,
 }
 
 config.places = {}

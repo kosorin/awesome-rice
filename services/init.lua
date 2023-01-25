@@ -1,7 +1,7 @@
 local config = require("config")
 
 local services = {
-    screenshot = require("services.screenshot"),
+    screenshot = config.features.screenshot_tool and require("services.screenshot") or nil,
     volume = require("services.volume"),
     weather = require("services.weather"),
     network = require("services.network"),

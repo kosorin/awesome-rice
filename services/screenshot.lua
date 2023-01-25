@@ -1,9 +1,13 @@
 -- DEPENDENCIES: maim, xdotool, xclip, date
 
+local config = require("config")
+if not config.features.screenshot_tools then
+    return
+end
+
 local table = table
 local string = string
 local awful = require("awful")
-local config = require("config")
 local beautiful = require("beautiful")
 local gtable = require("gears.table")
 local gcolor = require("gears.color")
