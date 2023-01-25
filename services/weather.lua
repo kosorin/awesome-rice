@@ -3,6 +3,7 @@
 local capi = {
     awesome = awesome,
 }
+local format = string.format
 local gears = require("gears")
 local awful = require("awful")
 local json = require("dkjson")
@@ -87,8 +88,8 @@ function weather_service.update()
     -- TODO: Needs rework
     local data_url = weather_service.config.data_url
     if data_url then
-        local command = "curl --silent --fail '" .. data_url .. "'"
-        awful.spawn.easy_async_with_shell(command, on_raw_data)
+        local command = format([[curl --silent --fail "%s"]], data_url)
+        awful.spawn.easy_async(command, on_raw_data)
     end
 end
 
