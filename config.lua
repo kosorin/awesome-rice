@@ -11,6 +11,7 @@ config.features = {
     torrent_widget = true,
     weather_widget = true,
     redshift_widget = true,
+    wallpaper_menu = true,
 }
 
 config.places = {}

@@ -1,7 +1,11 @@
+local config = require("config")
+if not config.features.wallpaper_menu then
+    return
+end
+
 local insert = table.insert
 local awful = require("awful")
 local beautiful = require("beautiful")
-local config = require("config")
 local mebox = require("widget.mebox")
 local dpi = dpi
 local wallpaper_service = require("services.wallpaper")

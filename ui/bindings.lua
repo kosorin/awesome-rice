@@ -131,14 +131,6 @@ binding.add_global_range {
     },
 
     binding.new {
-        modifiers = { mod.shift, mod.super, mod.control, },
-        triggers = "w",
-        path = "awesome",
-        description = "restore wallpaper",
-        on_press = function() services.wallpaper.restore() end,
-    },
-
-    binding.new {
         modifiers = { mod.super, mod.control, },
         triggers = "r",
         path = "awesome",
@@ -489,6 +481,20 @@ if config.features.screenshot_tools then
             path = { "screenshot", "copy to clipboard" },
             description = "full screen",
             on_press = function() services.screenshot.take { mode = nil, output = "clipboard" } end,
+        },
+
+    }
+end
+
+if config.features.wallpaper_menu then
+    binding.add_global_range {
+
+        binding.new {
+            modifiers = { mod.shift, mod.super, mod.control, },
+            triggers = "w",
+            path = "awesome",
+            description = "restore wallpaper",
+            on_press = function() services.wallpaper.restore() end,
         },
 
     }

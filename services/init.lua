@@ -6,7 +6,7 @@ local services = {
     weather = config.features.weather_widget and require("services.weather") or nil,
     network = require("services.network"),
     torrent = config.features.torrent_widget and require("services.torrent") or nil,
-    wallpaper = require("services.wallpaper"),
+    wallpaper = config.features.wallpaper_menu and require("services.wallpaper") or nil,
 }
 
 for _, service in pairs(services) do
