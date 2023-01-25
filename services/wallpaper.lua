@@ -5,6 +5,7 @@ local match = string.match
 local format = string.format
 local insert = table.insert
 local awful = require("awful")
+local gfilesystem = require("gears.filesystem")
 local config = require("config")
 
 
@@ -40,7 +41,9 @@ function wallpaper_service.set_collection(collection)
 end
 
 function wallpaper_service.restore()
-    awful.spawn(feh_script)
+    if gfilesystem.file_executable(feh_script) then
+        awful.spawn(feh_script)
+    end
 end
 
 return wallpaper_service
