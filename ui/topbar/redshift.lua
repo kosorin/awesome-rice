@@ -138,6 +138,8 @@ function redshift_widget.new(wibar)
         end,
     }
 
+    -- TODO: this resets the value, but it should just read the value and update the widget
+    -- (currently it's "not" possible)
     self:update()
 
     return self
