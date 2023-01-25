@@ -1,4 +1,4 @@
--- DEPENDENCIES: feh, cp, ls
+-- DEPENDENCIES (feature flag "wallpaper_menu"): feh, cp, ls
 
 local config = require("config")
 if not config.features.wallpaper_menu then

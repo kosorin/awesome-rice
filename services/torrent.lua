@@ -1,4 +1,4 @@
--- DEPENDENCIES: transmission-status, lua-dkjson
+-- DEPENDENCIES (feature flag "torrent_widget"): transmission-status, lua-dkjson
 
 local config = require("config")
 if not config.features.torrent_widget then

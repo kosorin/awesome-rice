@@ -1,4 +1,4 @@
--- DEPENDENCIES: sct
+-- DEPENDENCIES (feature flag "redshift_widget"): sct
 
 local config = require("config")
 if not config.features.redshift_widget then

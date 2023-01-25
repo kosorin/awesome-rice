@@ -1,4 +1,4 @@
--- DEPENDENCIES: curl, lua-dkjson
+-- DEPENDENCIES (feature flag "weather_widget"): curl, lua-dkjson
 
 local config = require("config")
 if not config.features.weather_widget then

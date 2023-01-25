@@ -1,4 +1,4 @@
--- DEPENDENCIES: maim, xdotool, xclip, date
+-- DEPENDENCIES (feature flag "screenshot_tools"): maim, xdotool, xclip, date
 
 local config = require("config")
 if not config.features.screenshot_tools then
