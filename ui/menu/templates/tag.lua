@@ -8,6 +8,7 @@ local dpi = dpi
 local mebox = require("widget.mebox")
 local screen_helper = require("helpers.screen")
 local tag_layout_menu_template = require("ui.menu.templates.tag_layout")
+local config = require("config")
 
 
 local tag_menu_template = { mt = {} }
@@ -53,7 +54,7 @@ function tag_menu_template.new()
             insert(items, mebox.header("client"))
             insert(items, {
                 text = "move here",
-                icon = beautiful.dir .. "/icons/arrow-down-right-bold.svg",
+                icon = config.places.theme .. "/icons/arrow-down-right-bold.svg",
                 icon_color = beautiful.palette.gray,
                 callback = function()
                     local client = capi.client.focus
@@ -64,7 +65,7 @@ function tag_menu_template.new()
             })
             insert(items, {
                 text = "move all here",
-                icon = beautiful.dir .. "/icons/arrow-down-right-bold.svg",
+                icon = config.places.theme .. "/icons/arrow-down-right-bold.svg",
                 icon_color = beautiful.palette.gray,
                 callback = function() screen_helper.clients_to_tag(tag.screen, tag) end,
             })
@@ -74,14 +75,14 @@ function tag_menu_template.new()
             if taglist then
                 insert(items, {
                     text = "rename",
-                    icon = beautiful.dir .. "/icons/rename.svg",
+                    icon = config.places.theme .. "/icons/rename.svg",
                     icon_color = beautiful.palette.green,
                     callback = function() taglist:rename_tag_inline(tag) end,
                 })
             end
             insert(items, {
                 text = "layout",
-                icon = beautiful.dir .. "/icons/view-grid.svg",
+                icon = config.places.theme .. "/icons/view-grid.svg",
                 icon_color = beautiful.palette.blue,
                 submenu = tag_layout_menu_template.new(),
             })
@@ -99,7 +100,7 @@ function tag_menu_template.new()
             insert(items, {
                 urgent = true,
                 text = "delete",
-                icon = beautiful.dir .. "/icons/delete-forever.svg",
+                icon = config.places.theme .. "/icons/delete-forever.svg",
                 icon_color = beautiful.palette.red,
                 callback = function()
                     if not tag:delete() then

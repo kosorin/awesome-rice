@@ -9,6 +9,7 @@ local awful = require("awful")
 local beautiful = require("beautiful")
 local dpi = dpi
 local mebox = require("widget.mebox")
+local config = require("config")
 
 
 local power_menu_template = { mt = {} }
@@ -51,16 +52,16 @@ function power_menu_template.new()
         mebox.header("power"),
         {
             text = "shut down",
-            icon = beautiful.dir .. "/icons/power.svg",
+            icon = config.places.theme .. "/icons/power.svg",
             icon_color = beautiful.palette.red,
-            submenu_icon = beautiful.dir .. "/icons/_blank.svg",
+            submenu_icon = config.places.theme .. "/icons/_blank.svg",
             submenu = {
                 item_width = item_width,
                 border_color = confirmation_border_color,
                 placement = confirmation_placement,
                 {
                     text = "yes, shut down",
-                    icon = beautiful.dir .. "/icons/power.svg",
+                    icon = config.places.theme .. "/icons/power.svg",
                     icon_color = beautiful.palette.red,
                     callback = function()
                         local command = "systemctl poweroff"
@@ -70,13 +71,13 @@ function power_menu_template.new()
                 {
                     enabled = false,
                     text = "schedule",
-                    icon = beautiful.dir .. "/icons/timer-sand.svg",
+                    icon = config.places.theme .. "/icons/timer-sand.svg",
                     icon_color = beautiful.palette.orange,
                     submenu = {
                         item_width = dpi(300),
                         {
                             text = "schedule",
-                            icon = beautiful.dir .. "/icons/timer-sand.svg",
+                            icon = config.places.theme .. "/icons/timer-sand.svg",
                             icon_color = beautiful.palette.orange,
                         },
                     }
@@ -86,16 +87,16 @@ function power_menu_template.new()
         },
         {
             text = "reboot",
-            icon = beautiful.dir .. "/icons/restart.svg",
+            icon = config.places.theme .. "/icons/restart.svg",
             icon_color = beautiful.palette.yellow,
-            submenu_icon = beautiful.dir .. "/icons/_blank.svg",
+            submenu_icon = config.places.theme .. "/icons/_blank.svg",
             submenu = {
                 item_width = item_width,
                 border_color = confirmation_border_color,
                 placement = confirmation_placement,
                 {
                     text = "yes, reboot",
-                    icon = beautiful.dir .. "/icons/restart.svg",
+                    icon = config.places.theme .. "/icons/restart.svg",
                     icon_color = beautiful.palette.yellow,
                     callback = function()
                         local command = "systemctl reboot"
@@ -107,16 +108,16 @@ function power_menu_template.new()
         },
         {
             text = "suspend",
-            icon = beautiful.dir .. "/icons/sleep.svg",
+            icon = config.places.theme .. "/icons/sleep.svg",
             icon_color = beautiful.palette.magenta,
-            submenu_icon = beautiful.dir .. "/icons/_blank.svg",
+            submenu_icon = config.places.theme .. "/icons/_blank.svg",
             submenu = {
                 item_width = item_width,
                 border_color = confirmation_border_color,
                 placement = confirmation_placement,
                 {
                     text = "yes, suspend",
-                    icon = beautiful.dir .. "/icons/sleep.svg",
+                    icon = config.places.theme .. "/icons/sleep.svg",
                     icon_color = beautiful.palette.magenta,
                     callback = function()
                         local command = "systemctl suspend"
@@ -130,16 +131,16 @@ function power_menu_template.new()
         mebox.header("session"),
         {
             text = "log out",
-            icon = beautiful.dir .. "/icons/exit-run.svg",
+            icon = config.places.theme .. "/icons/exit-run.svg",
             icon_color = beautiful.palette.green,
-            submenu_icon = beautiful.dir .. "/icons/_blank.svg",
+            submenu_icon = config.places.theme .. "/icons/_blank.svg",
             submenu = {
                 item_width = item_width,
                 border_color = confirmation_border_color,
                 placement = confirmation_placement,
                 {
                     text = "yes, log out",
-                    icon = beautiful.dir .. "/icons/exit-run.svg",
+                    icon = config.places.theme .. "/icons/exit-run.svg",
                     icon_color = beautiful.palette.green,
                     callback = function()
                         local command = "loginctl kill-session ${XDG_SESSION_ID-}"
@@ -151,7 +152,7 @@ function power_menu_template.new()
         },
         {
             text = "lock session",
-            icon = beautiful.dir .. "/icons/lock.svg",
+            icon = config.places.theme .. "/icons/lock.svg",
             icon_color = beautiful.palette.gray,
             callback = function()
                 local command = "loginctl lock-session ${XDG_SESSION_ID-}"
@@ -161,7 +162,7 @@ function power_menu_template.new()
         mebox.separator,
         {
             text = "awesome",
-            icon = beautiful.dir .. "/icons/awesomewm.svg",
+            icon = config.places.theme .. "/icons/awesomewm.svg",
             icon_color = beautiful.palette.blue,
             mouse_move_show_submenu = true,
             submenu = {
@@ -169,13 +170,13 @@ function power_menu_template.new()
                 border_color = confirmation_border_color,
                 {
                     text = "restart",
-                    icon = beautiful.dir .. "/icons/restart.svg",
+                    icon = config.places.theme .. "/icons/restart.svg",
                     icon_color = beautiful.palette.orange,
                     callback = function() capi.awesome.restart() end,
                 },
                 {
                     text = "quit",
-                    icon = beautiful.dir .. "/icons/exit-run.svg",
+                    icon = config.places.theme .. "/icons/exit-run.svg",
                     icon_color = beautiful.palette.red,
                     callback = function() capi.awesome.quit() end,
                 },

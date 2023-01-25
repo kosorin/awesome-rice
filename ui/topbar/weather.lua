@@ -5,6 +5,7 @@ local capi = {
 local table = table
 local awful = require("awful")
 local wibox = require("wibox")
+local config = require("config")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
@@ -94,7 +95,7 @@ function weather_widget.new(wibar)
                 id = "icon",
                 widget = wibox.widget.imagebox,
                 resize = true,
-                image = beautiful.dir .. "/icons/thermometer.svg",
+                image = config.places.theme .. "/icons/thermometer.svg",
             },
             {
                 id = "text",
@@ -108,7 +109,7 @@ function weather_widget.new(wibar)
                 id = "icon",
                 widget = wibox.widget.imagebox,
                 resize = true,
-                image = beautiful.dir .. "/icons/weather-pouring.svg",
+                image = config.places.theme .. "/icons/weather-pouring.svg",
             },
             {
                 id = "text",
@@ -130,7 +131,7 @@ function weather_widget.new(wibar)
                 id = "icon",
                 widget = wibox.widget.imagebox,
                 resize = true,
-                image = beautiful.dir .. "/icons/thermometer.svg",
+                image = config.places.theme .. "/icons/thermometer.svg",
             },
             {
                 id = "text",
@@ -152,7 +153,7 @@ function weather_widget.new(wibar)
                 id = "icon",
                 widget = wibox.widget.imagebox,
                 resize = true,
-                image = beautiful.dir .. "/icons/home-thermometer.svg",
+                image = config.places.theme .. "/icons/home-thermometer.svg",
             },
             {
                 id = "text",
@@ -188,7 +189,7 @@ function weather_widget.new(wibar)
         end,
         {
             text = "open dashboard",
-            icon = beautiful.dir .. "/icons/open-in-new.svg",
+            icon = config.places.theme .. "/icons/open-in-new.svg",
             icon_color = beautiful.palette.gray,
             callback = function()
                 awful.spawn.spawn(config.commands.open(weather_service.config.dashboard_url))
@@ -197,7 +198,7 @@ function weather_widget.new(wibar)
         mebox.separator,
         {
             text = "refresh",
-            icon = beautiful.dir .. "/icons/refresh.svg",
+            icon = config.places.theme .. "/icons/refresh.svg",
             icon_color = beautiful.palette.gray,
             callback = function()
                 weather_service.update()

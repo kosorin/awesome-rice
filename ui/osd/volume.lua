@@ -16,6 +16,7 @@ local gshape = require("gears.shape")
 local gtable = require("gears.table")
 local capsule = require("widget.capsule")
 local pango = require("utils.pango")
+local config = require("config")
 
 
 local volume_osd = { mt = {} }
@@ -147,7 +148,7 @@ function volume_osd.new()
                         id = "icon",
                         widget = wibox.widget.imagebox,
                         resize = true,
-                        image = beautiful.dir .. "/icons/volume.svg",
+                        image = config.places.theme .. "/icons/volume.svg",
                     },
                     {
                         id = "text",

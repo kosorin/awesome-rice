@@ -9,6 +9,7 @@ local string = string
 local awful = require("awful")
 local wibox = require("wibox")
 local binding = require("io.binding")
+local config = require("config")
 local mod = binding.modifier
 local btn = binding.button
 local beautiful = require("beautiful")
@@ -81,7 +82,7 @@ function redshift_widget.new(wibar)
                 id = "icon",
                 widget = wibox.widget.imagebox,
                 resize = true,
-                image = beautiful.dir .. "/icons/lightbulb-on.svg",
+                image = config.places.theme .. "/icons/lightbulb-on.svg",
                 stylesheet = "path { fill: " .. style.foreground .. "; }",
             },
             {

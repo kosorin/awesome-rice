@@ -9,6 +9,7 @@ local mod = binding.modifier
 local btn = binding.button
 local gtable = require("gears.table")
 local pango = require("utils.pango")
+local config = require("config")
 
 
 local client_menu_template = { mt = {} }
@@ -54,7 +55,7 @@ function client_menu_template.new()
         on_hide = on_hide,
         {
             text = "tags",
-            icon = beautiful.dir .. "/icons/tag-multiple.svg",
+            icon = config.places.theme .. "/icons/tag-multiple.svg",
             icon_color = beautiful.palette.green,
             submenu = {
                 item_width = dpi(150),
@@ -94,7 +95,7 @@ function client_menu_template.new()
         mebox.separator,
         {
             text = "opacity",
-            icon = beautiful.dir .. "/icons/circle-opacity.svg",
+            icon = config.places.theme .. "/icons/circle-opacity.svg",
             icon_color = beautiful.palette.cyan,
             submenu = function()
                 local value_widget
@@ -143,7 +144,7 @@ function client_menu_template.new()
                     separator_template = beautiful.mebox.vertical_separator_template,
                     border_color = beautiful.common.secondary,
                     {
-                        icon = beautiful.dir .. "/icons/minus.svg",
+                        icon = config.places.theme .. "/icons/minus.svg",
                         icon_color = beautiful.palette.white,
                         callback = function(_, _, menu)
                             change_opacity(menu, -step)
@@ -170,7 +171,7 @@ function client_menu_template.new()
                         },
                     },
                     {
-                        icon = beautiful.dir .. "/icons/plus.svg",
+                        icon = config.places.theme .. "/icons/plus.svg",
                         icon_color = beautiful.palette.white,
                         callback = function(_, _, menu)
                             change_opacity(menu, step)
@@ -181,7 +182,7 @@ function client_menu_template.new()
                     {
                         width = dpi(100),
                         text = "reset",
-                        icon = beautiful.dir .. "/icons/arrow-u-left-top.svg",
+                        icon = config.places.theme .. "/icons/arrow-u-left-top.svg",
                         icon_color = beautiful.palette.gray,
                         callback = function(_, _, menu)
                             set_opacity(menu, 1)
@@ -194,7 +195,7 @@ function client_menu_template.new()
         mebox.separator,
         {
             text = "more",
-            icon = beautiful.dir .. "/icons/cogs.svg",
+            icon = config.places.theme .. "/icons/cogs.svg",
             icon_color = beautiful.palette.blue,
             submenu = {
                 item_width = dpi(200),
@@ -223,7 +224,7 @@ function client_menu_template.new()
                 mebox.separator,
                 {
                     text = "hide",
-                    icon = beautiful.dir .. "/icons/eye-off.svg",
+                    icon = config.places.theme .. "/icons/eye-off.svg",
                     icon_color = beautiful.palette.gray,
                     callback = function(_, _, menu) menu.client.hidden = true end,
                 },
@@ -233,7 +234,7 @@ function client_menu_template.new()
         {
             urgent = true,
             text = "quit",
-            icon = beautiful.dir .. "/icons/close.svg",
+            icon = config.places.theme .. "/icons/close.svg",
             icon_color = beautiful.palette.red,
             callback = function(_, _, menu) menu.client:kill() end,
         },

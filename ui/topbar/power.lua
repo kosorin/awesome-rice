@@ -6,6 +6,7 @@ local setmetatable = setmetatable
 local awful = require("awful")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
+local config = require("config")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
@@ -44,7 +45,7 @@ function power_widget.new(wibar)
             {
                 id = "icon",
                 widget = wibox.widget.imagebox,
-                image = beautiful.dir .. "/icons/power.svg",
+                image = config.places.theme .. "/icons/power.svg",
             },
         }
     }

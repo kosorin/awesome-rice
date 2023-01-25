@@ -11,6 +11,7 @@ local base = require("wibox.widget.base")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
 local tcolor = require("theme.color")
+local config = require("config")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
@@ -228,7 +229,7 @@ function taglist.new(wibar)
                     {
                         id = "#icon",
                         widget = wibox.widget.imagebox,
-                        image = beautiful.dir .. "/icons/plus.svg",
+                        image = config.places.theme .. "/icons/plus.svg",
                         resize = true,
                     },
                 },

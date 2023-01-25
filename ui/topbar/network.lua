@@ -3,6 +3,7 @@ local capi = {
 }
 local wibox = require("wibox")
 local beautiful = require("beautiful")
+local config = require("config")
 local network_service = require("services.network")
 local dpi = dpi
 local humanizer = require("utils.humanizer")
@@ -44,7 +45,7 @@ local function refresh_info(container_widget, style, text, icon)
     local icon_widget = container_widget:get_children_by_id("icon")[1]
     icon = style.icon or icon
     if icon then
-        icon_widget:set_image(beautiful.dir .. "/icons/" .. icon .. ".svg")
+        icon_widget:set_image(config.places.theme .. "/icons/" .. icon .. ".svg")
     end
     icon_widget:set_stylesheet(colorize_path(style.foreground))
 end
@@ -91,7 +92,7 @@ function network_widget.new(wibar)
                     id = "icon",
                     widget = wibox.widget.imagebox,
                     resize = true,
-                    image = beautiful.dir .. "/icons/download.svg",
+                    image = config.places.theme .. "/icons/download.svg",
                 },
                 {
                     id = "text",
@@ -105,7 +106,7 @@ function network_widget.new(wibar)
                     id = "icon",
                     widget = wibox.widget.imagebox,
                     resize = true,
-                    image = beautiful.dir .. "/icons/upload.svg",
+                    image = config.places.theme .. "/icons/upload.svg",
                 },
                 {
                     id = "text",

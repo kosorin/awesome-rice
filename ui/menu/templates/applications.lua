@@ -7,6 +7,7 @@ local gtable = require("gears.table")
 local gfilesystem = require("gears.filesystem")
 local desktop_utils = require("utils.desktop")
 local mebox = require("widget.mebox")
+local config = require("config")
 local dpi = dpi
 
 
@@ -95,7 +96,7 @@ local function generate_menu(result)
     table.insert(root_menu.items_source, mebox.separator)
     table.insert(root_menu.items_source, {
         text = "reload",
-        icon = beautiful.dir .. "/icons/refresh.svg",
+        icon = config.places.theme .. "/icons/refresh.svg",
         icon_color = beautiful.palette.gray,
         callback = function() generate_all() end,
     })

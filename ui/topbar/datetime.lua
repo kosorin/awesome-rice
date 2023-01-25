@@ -76,7 +76,7 @@ function datetime_widget.new(wibar)
             {
                 widget = wibox.widget.imagebox,
                 resize = true,
-                image = beautiful.dir .. "/icons/calendar-month.svg",
+                image = config.places.theme .. "/icons/calendar-month.svg",
                 stylesheet = "path { fill: " .. style.foreground .. "; }",
             },
             {
@@ -129,19 +129,19 @@ function datetime_widget.new(wibar)
         end,
         {
             text = "copy date &amp; time",
-            icon = beautiful.dir .. "/icons/content-copy.svg",
+            icon = config.places.theme .. "/icons/content-copy.svg",
             icon_color = beautiful.palette.gray,
             callback = function() self:to_clipboard() end,
         },
         {
             text = "copy date",
-            icon = beautiful.dir .. "/icons/content-copy.svg",
+            icon = config.places.theme .. "/icons/content-copy.svg",
             icon_color = beautiful.palette.gray,
             callback = function() self:to_clipboard("date") end,
         },
         {
             text = "copy time",
-            icon = beautiful.dir .. "/icons/content-copy.svg",
+            icon = config.places.theme .. "/icons/content-copy.svg",
             icon_color = beautiful.palette.gray,
             callback = function() self:to_clipboard("time") end,
         },

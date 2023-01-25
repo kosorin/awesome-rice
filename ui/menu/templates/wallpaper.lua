@@ -16,7 +16,7 @@ function wallpaper_menu_template.new()
                 {
                     flex = true,
                     text = "restore",
-                    icon = beautiful.dir .. "/icons/shuffle-variant.svg",
+                    icon = config.places.theme .. "/icons/shuffle-variant.svg",
                     icon_color = beautiful.palette.gray,
                     callback = function()
                         wallpaper_service.restore()
@@ -45,7 +45,7 @@ function wallpaper_menu_template.new()
             insert(items, {
                 flex = true,
                 text = "open directory",
-                icon = beautiful.dir .. "/icons/folder-image.svg",
+                icon = config.places.theme .. "/icons/folder-image.svg",
                 icon_color = beautiful.palette.blue,
                 callback = function()
                     awful.spawn(config.commands.open(config.places.wallpapers))

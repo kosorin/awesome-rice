@@ -9,7 +9,7 @@ local config = require("config")
 awful.util.shell = config.apps.shell
 desktop_utils.terminal = config.apps.terminal
 
-beautiful.init(config.places.awesome .. "/theme/theme.lua")
+beautiful.init(config.places.theme .. "/theme.lua")
 
 require("core")
 require("services")

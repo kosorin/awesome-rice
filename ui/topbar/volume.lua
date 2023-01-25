@@ -6,6 +6,7 @@ local capi = {
 local math = math
 local awful = require("awful")
 local wibox = require("wibox")
+local config = require("config")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
@@ -135,7 +136,7 @@ function volume_widget.new(wibar)
                 id = "icon",
                 widget = wibox.widget.imagebox,
                 resize = true,
-                image = beautiful.dir .. "/icons/volume.svg",
+                image = config.places.theme .. "/icons/volume.svg",
             },
             {
                 id = "text",
@@ -191,13 +192,13 @@ function volume_widget.new(wibar)
         end,
         {
             text = "open mixer",
-            icon = beautiful.dir .. "/icons/tune.svg",
+            icon = config.places.theme .. "/icons/tune.svg",
             icon_color = beautiful.palette.orange,
             callback = function() self:show_tools(config.apps.mixer) end,
         },
         {
             text = "open bluetooth",
-            icon = beautiful.dir .. "/icons/bluetooth-settings.svg",
+            icon = config.places.theme .. "/icons/bluetooth-settings.svg",
             icon_color = beautiful.palette.blue,
             callback = function() self:show_tools(config.apps.bluetooth_control) end,
         },

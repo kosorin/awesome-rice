@@ -9,6 +9,7 @@ local max = math.max
 local format = string.format
 local awful = require("awful")
 local wibox = require("wibox")
+local config = require("config")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
@@ -96,7 +97,7 @@ function torrent_widget:refresh()
     local text_widget = self:get_children_by_id("text")[1]
     text_widget:set_markup(pango.span { foreground = style.foreground, text, })
 
-    local icon_path = beautiful.dir .. "/icons/" .. icon .. ".svg"
+    local icon_path = config.places.theme .. "/icons/" .. icon .. ".svg"
     local icon_stylesheet = "path { fill: " .. style.foreground .. "; }"
     local icon_widget = self:get_children_by_id("icon")[1]
     icon_widget:set_stylesheet(icon_stylesheet)
@@ -139,32 +140,32 @@ function torrent_widget.new(wibar)
         end,
         {
             text = "open transmission",
-            icon = beautiful.dir .. "/icons/open-in-new.svg",
+            icon = config.places.theme .. "/icons/open-in-new.svg",
             icon_color = beautiful.palette.gray,
             callback = function() awful.spawn.spawn(config.commands.open("http://localhost:9091/transmission/web/")) end,
         },
         {
             text = "open sonarr",
-            icon = beautiful.dir .. "/icons/open-in-new.svg",
+            icon = config.places.theme .. "/icons/open-in-new.svg",
             icon_color = beautiful.palette.gray,
             callback = function() awful.spawn.spawn(config.commands.open("http://localhost:8989/")) end,
         },
         {
             text = "open radarr",
-            icon = beautiful.dir .. "/icons/open-in-new.svg",
+            icon = config.places.theme .. "/icons/open-in-new.svg",
             icon_color = beautiful.palette.gray,
             callback = function() awful.spawn.spawn(config.commands.open("http://localhost:7878/")) end,
         },
         mebox.separator,
         {
             text = "start all",
-            icon = beautiful.dir .. "/icons/play.svg",
+            icon = config.places.theme .. "/icons/play.svg",
             icon_color = beautiful.palette.green,
             callback = function() torrent_service.start() end,
         },
         {
             text = "pause all",
-            icon = beautiful.dir .. "/icons/pause.svg",
+            icon = config.places.theme .. "/icons/pause.svg",
             icon_color = beautiful.palette.blue,
             callback = function() torrent_service.stop() end,
         },
@@ -176,7 +177,7 @@ function torrent_widget.new(wibar)
         mebox.separator,
         {
             text = "refresh",
-            icon = beautiful.dir .. "/icons/refresh.svg",
+            icon = config.places.theme .. "/icons/refresh.svg",
             icon_color = beautiful.palette.gray,
             callback = function() torrent_service.update() end,
         },

@@ -10,17 +10,16 @@ local dpi = dpi
 local tcolor = require("theme.color")
 local capsule = require("widget.capsule")
 local pango = require("utils.pango")
+local config = require("config")
 
 
 ---------------------------------------------------------------------------------------------------
 
 local theme = {}
 
-theme.dir = gfilesystem.get_configuration_dir() .. "theme"
-
 theme.icon_theme = "Archdroid-Amber"
 
-theme.wallpaper = theme.dir .. "/background.png"
+theme.wallpaper = config.places.theme .. "/background.png"
 
 theme.useless_gap = dpi(6)
 
@@ -364,31 +363,31 @@ theme.mebox = {
     },
     checkbox = {
         [false] = {
-            icon = theme.dir .. "/icons/checkbox-blank-outline.svg",
+            icon = config.places.theme .. "/icons/checkbox-blank-outline.svg",
             color = theme.palette.gray,
         },
         [true] = {
-            icon = theme.dir .. "/icons/checkbox-marked.svg",
+            icon = config.places.theme .. "/icons/checkbox-marked.svg",
             color = theme.palette.gray_bright,
         },
     },
     radiobox = {
         [false] = {
-            icon = theme.dir .. "/icons/radiobox-blank.svg",
+            icon = config.places.theme .. "/icons/radiobox-blank.svg",
             color = theme.palette.gray,
         },
         [true] = {
-            icon = theme.dir .. "/icons/radiobox-marked.svg",
+            icon = config.places.theme .. "/icons/radiobox-marked.svg",
             color = theme.palette.gray_bright,
         },
     },
     toggle_switch = {
         [false] = {
-            icon = theme.dir .. "/icons/toggle-switch-off-outline.svg",
+            icon = config.places.theme .. "/icons/toggle-switch-off-outline.svg",
             color = theme.palette.gray,
         },
         [true] = {
-            icon = theme.dir .. "/icons/toggle-switch.svg",
+            icon = config.places.theme .. "/icons/toggle-switch.svg",
             color = theme.palette.gray_bright,
         },
     },
@@ -522,7 +521,7 @@ theme.mebox.default_style = {
             if submenu_icon_widget then
                 submenu_icon_widget.visible = not not item.submenu
                 if submenu_icon_widget.visible then
-                    local icon = item.submenu_icon or theme.dir .. "/icons/menu-right.svg"
+                    local icon = item.submenu_icon or config.places.theme .. "/icons/menu-right.svg"
                     local color = style.foreground
                     local stylesheet = "path { fill: " .. color .. "; }"
                     submenu_icon_widget:set_stylesheet(stylesheet)
@@ -693,9 +692,9 @@ function theme.build_layout_stylesheet(color)
 end
 
 theme.layout_icons = {
-    floating = theme.dir .. "/layouts/floating.svg",
-    tilted_right = theme.dir .. "/layouts/tilted_right.svg",
-    tilted_center = theme.dir .. "/layouts/tilted_center.svg",
+    floating = config.places.theme .. "/layouts/floating.svg",
+    tilted_right = config.places.theme .. "/layouts/tilted_right.svg",
+    tilted_center = config.places.theme .. "/layouts/tilted_center.svg",
 }
 
 
