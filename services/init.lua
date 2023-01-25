@@ -5,7 +5,7 @@ local services = {
     volume = require("services.volume"),
     weather = require("services.weather"),
     network = require("services.network"),
-    torrent = require("services.torrent"),
+    torrent = config.features.torrent_widget and require("services.torrent") or nil,
     wallpaper = require("services.wallpaper"),
 }
 

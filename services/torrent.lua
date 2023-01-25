@@ -1,5 +1,10 @@
 -- DEPENDENCIES: transmission-status, lua-dkjson
 
+local config = require("config")
+if not config.features.torrent_widget then
+    return
+end
+
 local capi = {
     awesome = awesome,
 }

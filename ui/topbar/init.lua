@@ -87,7 +87,9 @@ capi.screen.connect_signal("request::desktop_decoration", function(screen)
     local right = wibar:get_children_by_id("#right")
     if right then
         right = right[1]
-        right:add(torrent_widget.new(wibar))
+        if config.features.torrent_widget then
+            right:add(torrent_widget.new(wibar))
+        end
         right:add(network_widget.new(wibar))
         right:add(volume_widget.new(wibar))
         if not DEBUG then
