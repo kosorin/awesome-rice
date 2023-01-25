@@ -19,8 +19,6 @@ local theme = {}
 
 theme.icon_theme = "Archdroid-Amber"
 
-theme.wallpaper = config.places.theme .. "/background.png"
-
 theme.useless_gap = dpi(6)
 
 
