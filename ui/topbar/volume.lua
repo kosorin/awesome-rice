@@ -12,9 +12,7 @@ local mod = binding.modifier
 local btn = binding.button
 local beautiful = require("beautiful")
 local volume_service = require("services.volume")
-local tcolor = require("theme.color")
 local dpi = dpi
-local config = require("config")
 local gshape = require("gears.shape")
 local gtable = require("gears.table")
 local capsule = require("widget.capsule")
@@ -89,34 +87,19 @@ function volume_widget:update(data)
 end
 
 function volume_widget:show_tools(command)
-    local args = self._private.mixer
     awful.spawn.single_instance(config.apps.terminal .. " -e " .. command, {
         titlebars_enabled = true,
-        titlebars_factory = function(client)
-            awful.titlebar(client, {
-                size = args.arrow_size,
-                bg = args.bg,
-            })
-        end,
-        skip_taskbar = true,
         floating = true,
         ontop = true,
         sticky = true,
-        border_width = args.border_width,
-        border_color = args.border_color,
     }, nil, nil, function(client)
-        local parent_geometry = widget_helper.find_geometry(
-            self,
-            self._private.wibar)
-        awful.placement.infobubble(client, {
-            geometry = parent_geometry,
-            position = args.position,
-            anchor = args.anchor,
+        awful.placement.wibar(client, {
+            geometry = widget_helper.find_geometry(self, self._private.wibar),
+            position = "bottom",
+            anchor = "middle",
             honor_workarea = true,
             honor_padding = true,
-            margins = beautiful.useless_gap, -- mixer.margins,
-            corner_radius = args.corner_radius,
-            arrow_size = args.arrow_size,
+            margins = beautiful.wibar_popup_margin,
         })
     end)
 end
@@ -159,19 +142,6 @@ function volume_widget.new(wibar)
     self._private.data = {}
 
     self._private.wibar = wibar
-
-    self._private.mixer = {
-        -- TODO: mixer style
-        corner_radius = dpi(0),
-        arrow_size = dpi(12),
-        position = "bottom",
-        anchor = "middle",
-        bg = tcolor.change(beautiful.common.background, { alpha = beautiful.popup_bg_alpha }),
-        opacity = 1,
-        border_width = beautiful.border_width,
-        border_color = beautiful.common.primary_66,
-        padding = 16,
-    }
 
     self._private.menu = mebox {
         item_width = dpi(180),
