@@ -7,11 +7,11 @@ local filesystem = require("gears.filesystem")
 local config = {}
 
 config.features = {
-    screenshot_tools = true,
-    torrent_widget = true,
-    weather_widget = true,
-    redshift_widget = true,
-    wallpaper_menu = true,
+    screenshot_tools = false,
+    torrent_widget = false,
+    weather_widget = false,
+    redshift_widget = false,
+    wallpaper_menu = false,
 }
 
 config.places = {}
