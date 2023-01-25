@@ -1,3 +1,8 @@
+local config = require("config")
+if not config.features.torrent_widget then
+    return
+end
+
 local capi = {
     awesome = awesome,
     mouse = mouse,
@@ -9,14 +14,12 @@ local max = math.max
 local format = string.format
 local awful = require("awful")
 local wibox = require("wibox")
-local config = require("config")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
 local beautiful = require("beautiful")
 local torrent_service = require("services.torrent")
 local dpi = dpi
-local config = require("config")
 local humanizer = require("utils.humanizer")
 local gtable = require("gears.table")
 local capsule = require("widget.capsule")

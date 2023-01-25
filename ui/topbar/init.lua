@@ -7,6 +7,7 @@ local awful = require("awful")
 local beautiful = require("beautiful")
 local wibox = require("wibox")
 local dpi = dpi
+local config = require("config")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
@@ -86,11 +87,15 @@ capi.screen.connect_signal("request::desktop_decoration", function(screen)
     local right = wibar:get_children_by_id("#right")
     if right then
         right = right[1]
-        right:add(torrent_widget.new(wibar))
+        if config.features.torrent_widget then
+            right:add(torrent_widget.new(wibar))
+        end
         right:add(network_widget.new(wibar))
         right:add(volume_widget.new(wibar))
-        if not DEBUG then
+        if config.features.redshift_widget then
             right:add(redshift_widget.new(wibar))
+        end
+        if config.features.weather_widget then
             right:add(weather_widget.new(wibar))
         end
         right:add(datetime_widget.new(wibar))

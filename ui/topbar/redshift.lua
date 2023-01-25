@@ -1,4 +1,9 @@
--- DEPENDENCIES: sct
+-- DEPENDENCIES (feature flag "redshift_widget"): sct
+
+local config = require("config")
+if not config.features.redshift_widget then
+    return
+end
 
 local capi = {
     awesome = awesome,
@@ -9,7 +14,6 @@ local string = string
 local awful = require("awful")
 local wibox = require("wibox")
 local binding = require("io.binding")
-local config = require("config")
 local mod = binding.modifier
 local btn = binding.button
 local beautiful = require("beautiful")

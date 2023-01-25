@@ -6,6 +6,14 @@ local filesystem = require("gears.filesystem")
 
 local config = {}
 
+config.features = {
+    screenshot_tools = false,
+    torrent_widget = false,
+    weather_widget = false,
+    redshift_widget = false,
+    wallpaper_menu = false,
+}
+
 config.places = {}
 config.places.home = os.getenv("HOME")
 config.places.config = os.getenv("XDG_CONFIG_HOME") or (config.places.home .. "/.config")

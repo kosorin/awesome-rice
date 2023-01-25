@@ -1,4 +1,9 @@
--- DEPENDENCIES: feh, cp, ls
+-- DEPENDENCIES (feature flag "wallpaper_menu"): feh, cp, ls
+
+local config = require("config")
+if not config.features.wallpaper_menu then
+    return
+end
 
 local popen = io.popen
 local match = string.match
@@ -6,7 +11,6 @@ local format = string.format
 local insert = table.insert
 local awful = require("awful")
 local gfilesystem = require("gears.filesystem")
-local config = require("config")
 
 
 local feh_prefix = ".fehbg"
