@@ -84,6 +84,7 @@ local function on_raw_data(stdout, stderr, exitreason, exitcode)
 end
 
 function weather_service.update()
+    -- TODO: Needs rework
     local data_url = weather_service.config.data_url
     if data_url then
         local command = "curl --silent --fail '" .. data_url .. "'"

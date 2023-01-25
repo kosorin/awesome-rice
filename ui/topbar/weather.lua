@@ -192,6 +192,7 @@ function weather_widget.new(wibar)
             icon = config.places.theme .. "/icons/open-in-new.svg",
             icon_color = beautiful.palette.gray,
             callback = function()
+                -- TODO: Needs rework
                 local dashboard_url = weather_service.config.dashboard_url
                 if dashboard_url then
                     awful.spawn.spawn(config.commands.open(dashboard_url))
