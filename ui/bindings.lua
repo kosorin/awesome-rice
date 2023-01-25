@@ -169,7 +169,7 @@ binding.add_global_range {
         triggers = "d",
         path = "launcher",
         description = "file manager",
-        on_press = function() awful.spawn(config.commands.terminal_execute { config.apps.file_manager }) end,
+        on_press = function() awful.spawn(config.apps.terminal .. " -e " .. config.apps.file_manager) end,
     },
 
     binding.new {

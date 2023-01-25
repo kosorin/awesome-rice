@@ -90,12 +90,7 @@ end
 
 function volume_widget:show_tools(command)
     local args = self._private.mixer
-    local command = config.commands.terminal_execute({ command }, {
-        "--option window.padding.x=" .. tostring(args.padding),
-        "--option window.padding.y=" .. tostring(args.padding),
-        "--option colors.primary.background=\\\"" .. tcolor.change(args.bg, { alpha = 1, }) .. "\\\"",
-    })
-    awful.spawn.single_instance(command, {
+    awful.spawn.single_instance(config.apps.terminal .. " -e " .. command, {
         titlebars_enabled = true,
         titlebars_factory = function(client)
             awful.titlebar(client, {

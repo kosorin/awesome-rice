@@ -1,6 +1,5 @@
 -- DEPENDENCIES (see below)
 
-local table = table
 local filesystem = require("gears.filesystem")
 
 
@@ -42,12 +41,6 @@ config.actions = {
 }
 
 config.commands = {}
-
-function config.commands.terminal_execute(args, options)
-    return config.apps.terminal
-        .. " " .. table.concat(options or {}, " ")
-        .. " -e " .. table.concat(args, " ")
-end
 
 function config.commands.open(path)
     return "xdg-open \"" .. path .. "\""
