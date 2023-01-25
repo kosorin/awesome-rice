@@ -690,9 +690,9 @@ function theme.build_layout_stylesheet(color)
 end
 
 theme.layout_icons = {
-    floating = config.places.theme .. "/layouts/floating.svg",
     tilted_right = config.places.theme .. "/layouts/tilted_right.svg",
     tilted_center = config.places.theme .. "/layouts/tilted_center.svg",
+    floating = config.places.theme .. "/layouts/floating.svg",
 }
 
 
