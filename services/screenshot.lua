@@ -1,6 +1,7 @@
 -- DEPENDENCIES: maim, xdotool, xclip, date
 
 local table = table
+local string = string
 local awful = require("awful")
 local config = require("config")
 local beautiful = require("beautiful")
@@ -10,42 +11,42 @@ local gcolor = require("gears.color")
 
 local screenshot = {}
 
+local function parse_color(color)
+    local channels = table.pack(gcolor.parse_color(color))
+    return table.concat(gtable.map(
+        function(channel)
+            return string.sub(tostring(channel), 1, 5)
+        end, channels), ",")
+end
+
 function screenshot.take(args)
     args = args or {}
 
-    local format = "png"
+    args.format = args.format or "png"
 
-    local command = "maim --quiet --hidecursor --format " .. format .. " "
+    local command = "maim --quiet --hidecursor --format " .. args.format
 
     if args.delay then
-        command = command .. "--delay \"" .. tostring(args.delay) .. "\" "
+        command = string.format("%s --delay %.0f", command, args.delay)
     end
 
     if args.mode == "selection" then
-        local channels = table.pack(gcolor.parse_color(beautiful.screenshot_area_color))
-        command = command
-            .. "-s --highlight --bordersize 2 --color "
-            .. table.concat(gtable.map(
-                function(channel)
-                    return string.sub(tostring(channel), 1, 5)
-                end, channels), ",")
-            .. " "
+        command = string.format("%s --select --highlight --bordersize %.0f --color %s", command,
+            beautiful.screenshot_area_border_width,
+            parse_color(beautiful.screenshot_area_color))
     elseif args.mode == "window" then
-        command = command .. "--window \""
-            .. (args.window and tostring(args.window) or "$(xdotool getactivewindow)")
-            .. "\" "
-    else
-        if args.display then
-            command = command .. "--xdisplay \"" .. args.display .. "\" "
-        end
+        command = string.format("%s --window %s", command, args.window or "$(xdotool getactivewindow)")
+    elseif args.display then
+        command = string.format("%s --xdisplay %s", command, args.display)
     end
 
     if args.output == "clipboard" then
-        command = command .. "| xclip -selection clipboard -t image/" .. format
+        command = string.format("%s | xclip -selection clipboard -t image/%s", command, args.format)
+    elseif args.output then
+        command = string.format("%s \"%s\"", command, args.output)
     else
-        command = command .. "\""
-            .. (args.output or (config.places.screenshots .. "/$(date '+%y%m%d-%H%M-%S')." .. format))
-            .. "\""
+        local file_name = "$(date '+%y%m%d-%H%M-%S')"
+        command = string.format("%s \"%s/%s.%s\"", command, config.places.screenshots, file_name, args.format)
     end
 
     awful.spawn.with_shell(command)

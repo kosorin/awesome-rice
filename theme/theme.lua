@@ -188,6 +188,7 @@ end
 
 ---------------------------------------------------------------------------------------------------
 
+theme.screenshot_area_border_width = theme.border_width
 theme.screenshot_area_color = tcolor.change(theme.common.primary, { alpha = theme.highlight_bg_alpha })
 
 
