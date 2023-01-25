@@ -11,5 +11,7 @@ capi.tag.connect_signal("request::default_layouts", function()
         tilted.right,
         tilted.center,
         suit.floating,
+        suit.max,
+        suit.max.fullscreen,
     }
 end)

@@ -1,0 +1,8 @@
+<svg viewBox="0 0 96 64" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <path class="primary" d="
+    M 4 4 h 22 v 8 h -14 v 14 h -8 z
+    M 4 60 h 22 v -8 h -14 v -14 h -8 z
+    M 92 4 h -22 v 8 h 14 v 14 h 8 z
+    M 92 60 h -22 v -8 h 14 v -14 h 8 z
+    " />
+</svg>

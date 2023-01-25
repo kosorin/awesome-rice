@@ -693,6 +693,8 @@ theme.layout_icons = {
     tilted_right = config.places.theme .. "/layouts/tilted_right.svg",
     tilted_center = config.places.theme .. "/layouts/tilted_center.svg",
     floating = config.places.theme .. "/layouts/floating.svg",
+    max = config.places.theme .. "/layouts/max.svg",
+    fullscreen = config.places.theme .. "/layouts/fullscreen.svg",
 }
 
 
