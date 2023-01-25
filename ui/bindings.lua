@@ -44,6 +44,7 @@ main_bindbox:add_groups {
             { name = "layer" },
         }
     },
+    { name = "action" },
     { name = "volume" },
     { name = "media" },
     { name = "screenshot",
@@ -203,14 +204,6 @@ binding.add_global_range {
         on_press = function() awful.spawn(config.actions.show_emoji_picker) end,
     },
 
-    binding.new {
-        modifiers = { mod.super, },
-        triggers = "q",
-        path = "launcher",
-        description = "generate QR code from clipboard",
-        on_press = function() awful.spawn(config.actions.qr_code_clipboard) end,
-    },
-
 
     binding.new {
         modifiers = { mod.super, mod.control, },
@@ -341,6 +334,15 @@ binding.add_global_range {
                 client:activate { context = "key.unminimize" }
             end
         end,
+    },
+
+
+    binding.new {
+        modifiers = { mod.super, },
+        triggers = "q",
+        path = "action",
+        description = "generate QR code from clipboard",
+        on_press = function() awful.spawn(config.actions.qr_code_clipboard) end,
     },
 
 
@@ -492,7 +494,7 @@ if config.features.wallpaper_menu then
         binding.new {
             modifiers = { mod.shift, mod.super, mod.control, },
             triggers = "w",
-            path = "awesome",
+            path = "action",
             description = "restore wallpaper",
             on_press = function() services.wallpaper.restore() end,
         },
