@@ -281,59 +281,133 @@ function tilted.object:resize(screen, tag, client, corner)
     end, cursor)
 end
 
-local min_fit_context = {
-    must_resize = function(item) return item.size < item.min_size end,
-    get_bounding_size = function(item) return item.min_size end,
-    get_default_factor = function(item) return item.factor end,
-}
-local max_fit_context = {
-    must_resize = function(item) return item.size > item.max_size end,
-    get_bounding_size = function(item) return item.max_size end,
-    get_default_factor = function(item, total_size) return item.size / total_size end,
-}
-local function fit_core(context, items, total_size)
+local function sign(value)
+    return value < 0 and -1 or (value == 0 and 0 or 1)
+end
+
+local function fit_min(items, total_size)
     assert(total_size > 0)
     local count = #items
-    local any_adjusted
-    local adjusted = {}
+    local any_resized
+    local resized = {}
     local factors = {}
     local available_size = total_size
     repeat
-        any_adjusted = false
+        any_resized = false
         local total_factor = 0
         for i = 1, count do
-            local item = items[i]
-            if not adjusted[i] then
-                if context.must_resize(item) then
-                    available_size = available_size - context.get_bounding_size(item)
+            if not resized[i] then
+                local item = items[i]
+                local min_size = item.size_increment and item.base_size or item.min_size
+                if item.size < min_size then
+                    item.size = min_size
+                    available_size = available_size - item.size
+                    resized[i] = true
+                    any_resized = true
                 else
                     if not factors[i] then
-                        factors[i] = context.get_default_factor(item, total_size)
+                        factors[i] = item.factor
                     end
                     total_factor = total_factor + factors[i]
                 end
             end
         end
         for i = 1, count do
-            local item = items[i]
-            if not adjusted[i] then
-                if context.must_resize(item) then
-                    item.size = context.get_bounding_size(item)
-                    adjusted[i] = true
-                    any_adjusted = true
+            if not resized[i] then
+                local item = items[i]
+                factors[i] = total_factor > 0 and (factors[i] / total_factor) or 0
+                item.size = available_size * factors[i]
+            end
+        end
+    until not (any_resized and #resized < count)
+end
+
+local function fit_max(items, total_size)
+    assert(total_size > 0)
+    local count = #items
+    local any_resized
+    local resized = {}
+    local factors = {}
+    local available_size = total_size
+    repeat
+        any_resized = false
+        local total_factor = 0
+        for i = 1, count do
+            if not resized[i] then
+                local item = items[i]
+                if item.size > item.max_size then
+                    item.size = item.max_size
+                    available_size = available_size - item.size
+                    resized[i] = true
+                    any_resized = true
                 else
-                    factors[i] = total_factor > 0 and (factors[i] / total_factor) or 0
-                    item.size = available_size * factors[i]
+                    if not factors[i] then
+                        factors[i] = item.size / total_size
+                    end
+                    total_factor = total_factor + factors[i]
                 end
             end
         end
-    until not (any_adjusted and #adjusted < count)
+        for i = 1, count do
+            if not resized[i] then
+                local item = items[i]
+                factors[i] = total_factor > 0 and (factors[i] / total_factor) or 0
+                item.size = available_size * factors[i]
+            end
+        end
+    until not (any_resized and #resized < count)
+end
+
+local function align_size_down(size, item)
+    local diff = ((size - item.base_size) % item.size_increment)
+    return size - diff, diff
+end
+
+local function fit_increment(items, total_size)
+    assert(total_size > 0)
+    local count = #items
+    local any_resized
+    local bonus_size = 0
+    print("_____")
+    repeat
+        any_resized = false
+        for i = 1, count do
+            local item = items[i]
+
+            assert(item.size <= item.max_size)
+
+            local old_size = item.size
+            local new_size
+
+            if item.size + bonus_size > item.max_size then
+                new_size = item.max_size
+                bonus_size = item.max_size - item.size
+            else
+                new_size = item.size + bonus_size
+                bonus_size = 0
+            end
+
+            if item.size_increment then
+                local diff
+                new_size, diff = align_size_down(new_size, item)
+                bonus_size = bonus_size + diff
+            end
+
+            if new_size ~= old_size then
+                print("> from", old_size, " to ", new_size)
+                item.size = new_size
+                any_resized = true
+            else
+                print("! same", old_size)
+            end
+        end
+    until not (any_resized and bonus_size > 0)
 end
 
 local function fit(items, total_size)
-    fit_core(min_fit_context, items, total_size)
+    fit_min(items, total_size)
     if items.any_max_size then
-        fit_core(max_fit_context, items, total_size)
+        fit_max(items, total_size)
     end
 end
 
@@ -350,36 +424,48 @@ local function resize_fit(items, start, direction, new_size, apply)
         return
     end
 
-    local min_size = resize_item.min_size
-    if new_size < min_size then
-        new_size = min_size
+    if new_size < resize_item.min_size then
+        new_size = resize_item.min_size
     end
-    local max_size = resize_item.max_size
-    if new_size > max_size then
-        new_size = max_size
+    if new_size > resize_item.max_size then
+        new_size = resize_item.max_size
+    end
+    if resize_item.size_increment then
+        new_size = align_size_down(new_size, resize_item)
     end
 
-    local full_factor = resize_item.factor
-    local full_size = resize_item.size
+    local new_resize_item
+    local full_factor = 0
+    local full_size = 0
     local total_size = 0
     local total_min_size = 0
     local total_max_size = 0
     local new_items = {}
-    for i = start + direction, stop, direction do
+    for i = start, stop, direction do
         local item = items[i]
-        full_factor = full_factor + item.factor
-        full_size = full_size + item.size
-        total_size = total_size + item.size
-        total_min_size = total_min_size + item.min_size
-        total_max_size = total_max_size + item.max_size
-        new_items[#new_items + 1] = {
+        local new_item = {
             original_item = item,
             size = item.size,
             min_size = item.min_size,
             max_size = item.max_size,
+            base_size = item.base_size,
+            size_increment = item.size_increment,
         }
-        if item.max_size < infinity then
-            new_items.any_max_size = true
+        full_factor = full_factor + item.factor
+        full_size = full_size + item.size
+        if i == start then
+            new_resize_item = new_item
+        else
+            total_size = total_size + item.size
+            total_min_size = total_min_size + item.min_size
+            total_max_size = total_max_size + item.max_size
+            if new_item.max_size < infinity then
+                new_items.any_max_size = true
+            end
+            if new_item.size_increment then
+                new_items.any_size_increment = true
+            end
+            new_items[#new_items + 1] = new_item
         end
     end
     assert(full_size > 0)
@@ -411,11 +497,14 @@ local function resize_fit(items, start, direction, new_size, apply)
 
     fit(new_items, new_total_size)
 
-    new_items[0] = {
-        original_item = resize_item,
-        size = new_size,
-    }
-    for i = 0, #new_items do
+    if resize_item.size_increment or items.any_size_increment then
+        fit_increment(new_items, full_size)
+    end
+
+    new_resize_item.size = new_size
+    new_items[#new_items + 1] = new_resize_item
+
+    for i = 1, #new_items do
         local new_item = new_items[i]
         new_item.original_item.factor = full_factor * (new_item.size / full_size)
         new_item.original_item.size = new_item.size
@@ -471,15 +560,11 @@ function tilted.object:arrange(parameters)
         local column_data = {
             descriptor = column_descriptor,
             factor = column_descriptor.factor,
+            total_size = width,
             size = column_descriptor.factor * width,
             min_size = 0,
             max_size = max_size_behavior and infinity or 0,
         }
-
-        if column_descriptor.size == 0 then
-            column_data.min_size = 1
-            column_data.max_size = infinity
-        end
 
         for item_display_index = 1, column_descriptor.size do
             local item_index = item_display_index
@@ -488,6 +573,7 @@ function tilted.object:arrange(parameters)
             local decoration_size = get_decoration_size(client, useless_gap)
 
             local min_width, min_height, max_width, max_height
+            local base_width, base_height, width_increment, height_increment
             if client.size_hints_honor then
                 local size_hints = client.size_hints
                 min_width = decoration_size[oi.width]
@@ -498,6 +584,17 @@ function tilted.object:arrange(parameters)
                     + (size_hints["max_" .. oi.width] or infinity)
                 max_height = decoration_size[oi.height]
                     + (size_hints["max_" .. oi.height] or infinity)
+
+                height_increment = size_hints[oi.height .. "_inc"]
+                if height_increment and height_increment > 0 then
+                    base_height = decoration_size[oi.height]
+                        + (size_hints["base_" .. oi.height] or size_hints["min_" .. oi.height] or 0)
+                    while base_height < min_height do
+                        base_height = base_height + height_increment
+                    end
+                else
+                    height_increment = nil
+                end
             else
                 min_width = decoration_size[oi.width] + 1
                 min_height = decoration_size[oi.height] + 1
@@ -508,13 +605,19 @@ function tilted.object:arrange(parameters)
             local item_data = {
                 descriptor = item_descriptor,
                 factor = item_descriptor.factor,
+                total_size = height,
                 size = item_descriptor.factor * height,
                 min_size = min_height,
                 max_size = max_height,
+                base_size = base_height,
+                size_increment = height_increment,
             }
 
             if item_data.max_size < infinity then
                 column_data.any_max_size = true
+            end
+            if item_data.size_increment then
+                column_data.any_size_increment = true
             end
             column_data[item_display_index] = item_data
 
