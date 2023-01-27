@@ -72,7 +72,7 @@ function layout_descriptor.new(tag)
     }, { __index = layout_descriptor.object })
 end
 
-function layout_descriptor.update(tag, clients)
+function layout_descriptor.update(tag, clients, layout)
     local is_new = false
     local self = tag.tilted_layout_descriptor
 
@@ -113,8 +113,10 @@ function layout_descriptor.update(tag, clients)
 
     local total_count = #clients
     local primary_count = total_count <= tag.master_count and total_count or tag.master_count
+    local primary_column_count = primary_count > 0 and 1 or 0
     local secondary_count = total_count - primary_count
-    local secondary_column_count = secondary_count <= tag.column_count and secondary_count or tag.column_count
+    local secondary_column_count = math.max(layout.minimum_column_count - primary_column_count, tag.column_count)
+    secondary_column_count = secondary_count <= secondary_column_count and secondary_count or secondary_column_count
 
     if primary_count > 0 then
         update_next_column_descriptor(primary_count, true)
@@ -131,6 +133,10 @@ function layout_descriptor.update(tag, clients)
             end
             update_next_column_descriptor(size)
         until client_index > total_count
+    end
+
+    for _ = column_index, layout.minimum_column_count do
+        update_next_column_descriptor(0)
     end
 
     local size = column_index - 1

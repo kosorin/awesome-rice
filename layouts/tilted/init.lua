@@ -436,7 +436,7 @@ function tilted.object:arrange(parameters)
     end
 
     local clients = parameters.clients
-    local layout_descriptor = tilted.layout_descriptor.update(tag, clients)
+    local layout_descriptor = tilted.layout_descriptor.update(tag, clients, self)
 
     local oi = self.orientation_info
     local full_workarea = parameters.workarea
@@ -600,6 +600,10 @@ function tilted.new(name, args)
         is_horizontal = args.is_horizontal or args.is_horizontal == nil,
         is_reversed = args.is_reversed,
         column_strategy = column_strategy,
+        minimum_column_count = args.minimum_column_count or 3,
+        mirror_padding = args.mirror_padding or args.mirror_padding == nil,
+        resize_only_adjacent = args.resize_only_adjacent,
+        resize_jump_to_corner = args.resize_jump_to_corner or args.resize_jump_to_corner == nil,
     }
 
     local oi = {}
