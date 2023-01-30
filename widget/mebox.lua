@@ -202,6 +202,25 @@ local function fix_selected_item(menu, keep_selected_index)
     menu._private.selected_index = actual_selected_index
 end
 
+local control = { current = setmetatable({ instance = nil }, { __mode = "v" }) }
+
+function control.hide(menu)
+    local cm = control.current
+    if cm.instance == menu then
+        cm.instance = nil
+    end
+end
+
+function control.show(menu)
+    local cm = control.current
+    if cm.instance then
+        return cm.instance == menu:get_root_menu()
+    else
+        cm.instance = menu
+        return true
+    end
+end
+
 local function attach_active_submenu(menu, submenu, submenu_index)
     assert(not menu._private.active_submenu)
     menu._private.active_submenu = {
@@ -268,6 +287,8 @@ function mebox:hide(context)
     self._private.layout:reset()
     self._private.items = nil
     self._private.selected_index = nil
+
+    control.hide(self)
 end
 
 function mebox:show_submenu(index, context)
@@ -311,6 +332,10 @@ end
 
 function mebox:show(args, context)
     if self.visible then
+        return
+    end
+
+    if not control.show(self) then
         return
     end
 
