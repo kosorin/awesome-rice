@@ -51,9 +51,11 @@ theme.palette_color_names = {
 }
 
 theme.common_color_names = {
-    primary   = "yellow",
-    secondary = "blue",
-    urgent    = "red",
+    background = "black",
+    foreground = "white",
+    primary    = "yellow",
+    secondary  = "blue",
+    urgent     = "red",
 }
 
 -- Tomorrow Night
@@ -82,14 +84,14 @@ theme.palette = {
 }
 
 theme.common = {
-    background = theme.palette.black,
-    foreground = theme.palette.white,
+    background = theme.palette[theme.common_color_names.background],
+    foreground = theme.palette[theme.common_color_names.foreground],
     primary    = theme.palette[theme.common_color_names.primary],
     secondary  = theme.palette[theme.common_color_names.secondary],
     urgent     = theme.palette[theme.common_color_names.urgent],
 
-    background_bright = theme.palette.black_bright,
-    foreground_bright = theme.palette.white_bright,
+    background_bright = theme.palette[theme.common_color_names.background .. "_bright"],
+    foreground_bright = theme.palette[theme.common_color_names.foreground .. "_bright"],
     primary_bright    = theme.palette[theme.common_color_names.primary .. "_bright"],
     secondary_bright  = theme.palette[theme.common_color_names.secondary .. "_bright"],
     urgent_bright     = theme.palette[theme.common_color_names.urgent .. "_bright"],
@@ -98,35 +100,37 @@ theme.common = {
 
 ---------------------------------------------------------------------------------------------------
 
-local print_new_colors = false
-local unknown_color = "#FFFF00" -- Something bright, easy to spot
+do
+    local print_generated_colors = false
+    local unknown_color = "#FFFF00" -- Something bright, easy to spot
 
-local colors_mt = {}
+    local colors_mt = {}
 
-function colors_mt.__index(t, k)
-    local name, value = string.match(k, "^([_%a]+)_(%d+)$")
-    if not name then
-        gdebug.print_warning("Unknown color '" .. k .. "'")
-        rawset(t, k, unknown_color)
-        return unknown_color
+    function colors_mt.__index(t, k)
+        local name, value = string.match(k, "^([_%a]+)_(%d+)$")
+        if not name then
+            gdebug.print_warning("Unknown color '" .. k .. "'")
+            rawset(t, k, unknown_color)
+            return unknown_color
+        end
+        value = (tonumber(value) - 100) / 100
+        local source_color = t[name]
+        local new_color = tcolor.change(source_color, { lighten = value })
+        if print_generated_colors then
+            print("Generate color: ", string.format("%24s %s <- %s %s", k, new_color, source_color, name))
+        end
+        rawset(t, k, new_color)
+        return new_color
     end
-    value = (tonumber(value) - 100) / 100
-    local source_color = t[name]
-    local new_color = tcolor.change(source_color, { lighten = value })
-    if print_new_colors then
-        print("Generate color: ", string.format("%24s %s <- %s %s", k, new_color, source_color, name))
-    end
-    rawset(t, k, new_color)
-    return new_color
-end
 
-setmetatable(theme.palette, colors_mt)
-setmetatable(theme.common, colors_mt)
+    setmetatable(theme.palette, colors_mt)
+    setmetatable(theme.common, colors_mt)
 
-if print_new_colors then
-    for k, v in pairs(theme.palette) do
-        if not string.find(k, "_") then
-            local _ = theme.palette[k .. "_66"]
+    if print_generated_colors then
+        for k, _ in pairs(theme.palette) do
+            if not string.find(k, "_") then
+                local _ = theme.palette[k .. "_66"]
+            end
         end
     end
 end
@@ -263,18 +267,20 @@ theme.capsule.styles = {
     },
 }
 
-local function generate_capsule_color_style(color)
-    return {
-        background = theme.palette[color .. "_33"],
-        foreground = theme.palette[color .. "_bright"],
-        border_color = theme.palette[color .. "_66"],
-        border_width = dpi(1),
-    }
-end
-
 theme.capsule.styles.palette = {}
-for _, color in pairs(theme.palette_color_names) do
-    theme.capsule.styles.palette[color] = generate_capsule_color_style(color)
+do
+    local function generate_capsule_color_style(color)
+        return {
+            background = theme.palette[color .. "_33"],
+            foreground = theme.palette[color .. "_bright"],
+            border_color = theme.palette[color .. "_66"],
+            border_width = dpi(1),
+        }
+    end
+
+    for _, color in pairs(theme.palette_color_names) do
+        theme.capsule.styles.palette[color] = generate_capsule_color_style(color)
+    end
 end
 
 theme.capsule.styles.mebox = {

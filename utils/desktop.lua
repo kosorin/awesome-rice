@@ -440,16 +440,16 @@ do
     end
 
     --- Parse a directory with .desktop files recursively.
-    -- @tparam string dir_path The directory path.
+    -- @tparam string directory The directory path.
     -- @tparam function callback Will be fired when all the files were parsed
     -- with the resulting list of menu entries as argument.
     -- @tparam table callback.programs Paths of found .desktop files.
-    -- @staticfct menubar.utils.parse_dir
+    -- @staticfct menubar.utils.parse_directory
     -- @noreturn
-    function desktop_utils.parse_dir(dir_path, callback)
+    function desktop_utils.parse_directory(directory, callback)
         gio.Async.start(do_protected_call)(function()
             local result = {}
-            parser(gio.File.new_for_path(dir_path), result)
+            parser(gio.File.new_for_path(directory), result)
             call_callback(callback, result)
         end)
     end

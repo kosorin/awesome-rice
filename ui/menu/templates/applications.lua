@@ -111,7 +111,7 @@ function generate_all()
 
     local all_directories = get_xdg_directories()
     for _, directory in ipairs(all_directories) do
-        desktop_utils.parse_dir(directory, function(entries)
+        desktop_utils.parse_directory(directory, function(entries)
             entries = entries or {}
             for _, entry in ipairs(entries) do
                 if entry.show and entry.Name and entry.cmdline then

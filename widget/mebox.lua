@@ -246,6 +246,66 @@ local function hide_active_submenu(menu)
     end
 end
 
+local function add_items(self, args, context)
+    local display_index = 1
+    local items = type(self._private.items_source) == "function"
+        and self._private.items_source(self, args, context)
+        or self._private.items_source
+    for index, item in ipairs(items) do
+        if type(item) == "function" then
+            item = item(self, args, context)
+        end
+        self._private.items[index] = item
+
+        item.selected = false
+
+        if type(item.on_show) == "function" then
+            if item.on_show(item, self, args, context) == false then
+                item.visible = false
+            end
+        end
+
+        item.visible = item.visible == nil or item.visible ~= false
+        item.enabled = item.enabled == nil or item.enabled ~= false
+        item.selected = item.selected == nil or item.selected ~= false
+
+        item.index = index
+        item.display_index = item.visible and display_index or nil
+
+        if item.visible then
+            display_index = display_index + 1
+
+            local item_template = get_item_template(item, self)
+            local item_widget = base.make_widget_from_value(item_template)
+
+            local function click_action()
+                self:execute(index, { source = "mouse" })
+            end
+
+            item_widget.buttons = item.buttons_builder
+                and item.buttons_builder(item, self, click_action)
+                or binding.awful_buttons {
+                    binding.awful({}, btn.left,
+                        not item.urgent and click_action,
+                        item.urgent and click_action),
+                }
+
+            item_widget:connect_signal("mouse::enter", function()
+                if get_property_value("mouse_move_select", item, self) then
+                    self:select(index)
+                end
+                if get_property_value("mouse_move_show_submenu", item, self) then
+                    self:show_submenu(index)
+                else
+                    hide_active_submenu(self)
+                end
+            end)
+
+            self._private.layout:add(item_widget)
+        end
+    end
+end
+
 function mebox:hide_all()
     local root_menu = self:get_root_menu()
     if root_menu then
@@ -351,63 +411,7 @@ function mebox:show(args, context)
     self._private.layout:reset()
     self._private.items = {}
 
-    local display_index = 1
-    local items = type(self._private.items_source) == "function"
-        and self._private.items_source(self, args, context)
-        or self._private.items_source
-    for index, item in ipairs(items) do
-        if type(item) == "function" then
-            item = item(self, args, context)
-        end
-        self._private.items[index] = item
-
-        item.selected = false
-
-        if type(item.on_show) == "function" then
-            if item.on_show(item, self, args, context) == false then
-                item.visible = false
-            end
-        end
-
-        item.visible = item.visible == nil or item.visible ~= false
-        item.enabled = item.enabled == nil or item.enabled ~= false
-        item.selected = item.selected == nil or item.selected ~= false
-
-        item.index = index
-        item.display_index = item.visible and display_index or nil
-
-        if item.visible then
-            display_index = display_index + 1
-
-            local item_template = get_item_template(item, self)
-            local item_widget = base.make_widget_from_value(item_template)
-
-            local function click_action()
-                self:execute(index, { source = "mouse" })
-            end
-
-            item_widget.buttons = item.buttons_builder
-                and item.buttons_builder(item, self, click_action)
-                or binding.awful_buttons {
-                    binding.awful({}, btn.left,
-                        not item.urgent and click_action,
-                        item.urgent and click_action),
-                }
-
-            item_widget:connect_signal("mouse::enter", function()
-                if get_property_value("mouse_move_select", item, self) then
-                    self:select(index)
-                end
-                if get_property_value("mouse_move_show_submenu", item, self) then
-                    self:show_submenu(index)
-                else
-                    hide_active_submenu(self)
-                end
-            end)
-
-            self._private.layout:add(item_widget)
-        end
-    end
+    add_items(self, args, context)
 
     if self._private.keygrabber_auto and self._private.keygrabber then
         self._private.keygrabber:start()
