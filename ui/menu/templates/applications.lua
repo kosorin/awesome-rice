@@ -57,7 +57,7 @@ local function generate_menu(result)
         categories[index] = category_item
     end
 
-    for _, application in ipairs(result) do
+    for _, application in pairs(result) do
         local category = categories[categoriy_keys[application.category_key]]
         table.insert((category or fallback_category).submenu, {
             flex = true,
@@ -102,46 +102,64 @@ local function generate_menu(result)
     })
 end
 
+local function get_desktop_file_id(directory, path)
+    return string.gsub(string.sub(path, #directory + 1), "/", "-")
+end
+
 function generate_all()
     lookup_category_icons()
 
-    local result = {}
-    local unique_entries = {}
+    local all_entries = {}
     local parsed_directories = 0
 
     local all_directories = get_xdg_directories()
-    for _, directory in ipairs(all_directories) do
+    local directory_count = #all_directories
+    for priority, directory in ipairs(all_directories) do
         desktop_utils.parse_directory(directory, function(entries)
             entries = entries or {}
             for _, entry in ipairs(entries) do
+                local id = get_desktop_file_id(directory, entry.file)
+                if not all_entries[id] then
+                    all_entries[id] = {}
+                end
                 if entry.show and entry.Name and entry.cmdline then
-                    local unique_key = entry.Name .. '\0' .. entry.cmdline
-                    if not unique_entries[unique_key] then
-                        local target_category_key = nil
-                        if entry.categories then
-                            for _, category in pairs(entry.categories) do
-                                local category_key = get_category_name_and_usage_by_type(category)
-                                if category_key then
-                                    target_category_key = category_key
-                                    break
-                                end
+                    local target_category_key = nil
+                    if entry.categories then
+                        for _, category in pairs(entry.categories) do
+                            local category_key = get_category_name_and_usage_by_type(category)
+                            if category_key then
+                                target_category_key = category_key
+                                break
                             end
                         end
-                        local name = desktop_utils.rtrim(entry.Name) or ""
-                        local cmdline = desktop_utils.rtrim(entry.cmdline) or ""
-                        local icon = entry.icon_path or nil
-                        table.insert(result, {
-                            name = name,
-                            cmdline = cmdline,
-                            icon = icon,
-                            category_key = target_category_key,
-                        })
-                        unique_entries[unique_key] = true
                     end
+                    local name = desktop_utils.rtrim(entry.Name) or ""
+                    local cmdline = desktop_utils.rtrim(entry.cmdline) or ""
+                    local icon = entry.icon_path or nil
+                    all_entries[id][priority] = {
+                        name = name,
+                        cmdline = cmdline,
+                        icon = icon,
+                        category_key = target_category_key,
+                    }
+                else
+                    all_entries[id][priority] = true
                 end
             end
             parsed_directories = parsed_directories + 1
-            if parsed_directories == #all_directories then
+            if parsed_directories == directory_count then
+                local result = {}
+                for id, file_entries in pairs(all_entries) do
+                    for p = 1, directory_count do
+                        local entry = file_entries[p]
+                        if entry then
+                            if type(entry) == "table" then
+                                result[id] = entry
+                            end
+                            break
+                        end
+                    end
+                end
                 generate_menu(result)
             end
         end)
