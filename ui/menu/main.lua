@@ -24,6 +24,7 @@ table.insert(menu_items, {
     text = "applications",
     icon = config.places.theme .. "/icons/apps.svg",
     icon_color = beautiful.palette.orange,
+    cache_submenu = false,
     submenu = menu_templates.applications.shared,
 })
 

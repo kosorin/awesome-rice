@@ -19,6 +19,8 @@ local widget_helper = require("helpers.widget")
 local noice = require("widget.noice")
 
 
+local do_not_cache = "<do-not-cache>"
+
 local function get_screen(screen)
     return screen and capi.screen[screen]
 end
@@ -232,8 +234,19 @@ local function attach_active_submenu(menu, submenu, submenu_index)
 end
 
 local function detach_active_submenu(menu)
-    if menu._private.active_submenu and not menu._private.submenu_cache then
-        menu._private.active_submenu.menu._private.parent = nil
+    if menu._private.active_submenu then
+        local clear_parent = true
+        local submenu = menu._private.active_submenu.menu
+        if menu._private.submenu_cache then
+            local cached_submenu = menu._private.submenu_cache[menu._private.active_submenu.index]
+            if cached_submenu ~= do_not_cache then
+                assert(submenu == cached_submenu)
+                clear_parent = false
+            end
+        end
+        if clear_parent then
+            submenu._private.parent = nil
+        end
     end
     menu._private.active_submenu = nil
     menu.opacity = menu.active_opacity or 1
@@ -370,14 +383,16 @@ function mebox:show_submenu(index, context)
     end
 
     local submenu = self._private.submenu_cache and self._private.submenu_cache[index]
-    if not submenu then
+    if not submenu or submenu == do_not_cache then
         local submenu_args = type(item.submenu) == "function"
             and item.submenu(self)
             or item.submenu
         submenu = mebox.new(submenu_args, true)
         submenu._private.parent = self
         if self._private.submenu_cache then
-            self._private.submenu_cache[index] = submenu
+            self._private.submenu_cache[index] = item.cache_submenu == false
+                and do_not_cache
+                or submenu
         end
     end
 
@@ -629,6 +644,7 @@ item:
 - selected : boolean
 - mouse_move_select : boolean | nil
 - mouse_move_show_submenu : boolean | nil
+- cache_submenu : boolean | nil
 - submenu : ctor_args | nil
 - callback : function(item_widget, item, menu, execute_context) | nil
 - on_show : function(item, menu, show_args, show_context) | nil
