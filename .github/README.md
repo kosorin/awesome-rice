@@ -5,6 +5,8 @@
 
 # Dependencies
 
+The following package names are from the Arch repositories or AUR.
+
 ## Required
 
 - `awesome-git` - window manager (latest git version, **not** stable v4.3)
