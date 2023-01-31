@@ -152,7 +152,7 @@ theme.fg_disabled = theme.common.foreground_50
 
 ---------------------------------------------------------------------------------------------------
 
-theme.border_width = dpi(2)
+theme.border_width = dpi(3)
 theme.border_color_normal = theme.common.background
 theme.border_color_active = theme.common.primary
 theme.border_color_urgent = theme.common.urgent_bright
@@ -410,7 +410,7 @@ theme.mebox.default_style = {
     bg = tcolor.change(theme.common.background, { alpha = theme.popup_bg_alpha }),
     fg = theme.common.foreground,
     border_color = theme.common.background_bright,
-    border_width = dpi(2),
+    border_width = theme.border_width,
     shape = function(cr, width, height)
         gshape.rounded_rect(cr, width, height, dpi(16))
     end,
@@ -553,7 +553,7 @@ theme.bindbox.default_style = {
     bg = tcolor.change(theme.common.background, { alpha = theme.popup_bg_alpha }),
     fg = theme.common.foreground,
     border_color = theme.common.background_bright,
-    border_width = dpi(2),
+    border_width = theme.border_width,
     shape = function(cr, width, height)
         gshape.rounded_rect(cr, width, height, dpi(16))
     end,
@@ -793,7 +793,7 @@ theme.layout_icons = {
 theme.notification_width = dpi(400)
 theme.notification_spacing = dpi(16)
 theme.notification_margin = dpi(8)
-theme.notification_border_width = dpi(2)
+theme.notification_border_width = theme.border_width
 theme.notification_shape = function(cr, width, height)
     gshape.rounded_rect(cr, width, height, dpi(8))
 end
