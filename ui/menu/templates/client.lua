@@ -1,5 +1,7 @@
 local ipairs = ipairs
 local floor = math.floor
+local min = math.min
+local max = math.max
 local wibox = require("wibox")
 local beautiful = require("beautiful")
 local dpi = dpi
@@ -100,6 +102,8 @@ function client_menu_template.new()
             submenu = function()
                 local value_widget
                 local step = 0.05
+                local min_opacity = 0.01
+                local max_opacity = 1
 
                 local function update_opacity_text(menu)
                     if not value_widget then
@@ -113,12 +117,12 @@ function client_menu_template.new()
                 end
 
                 local function change_opacity(menu, value)
-                    menu.client.opacity = menu.client.opacity + value
+                    menu.client.opacity = min(max(menu.client.opacity + value, min_opacity), max_opacity)
                     update_opacity_text(menu)
                 end
 
                 local function set_opacity(menu, value)
-                    menu.client.opacity = value or 1
+                    menu.client.opacity = value or max_opacity
                     update_opacity_text(menu)
                 end
 
@@ -185,7 +189,7 @@ function client_menu_template.new()
                         icon = config.places.theme .. "/icons/arrow-u-left-top.svg",
                         icon_color = beautiful.palette.gray,
                         callback = function(_, _, menu)
-                            set_opacity(menu, 1)
+                            set_opacity(menu, max_opacity)
                             return false
                         end,
                     },
