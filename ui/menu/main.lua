@@ -21,6 +21,42 @@ table.insert(menu_items, {
     callback = function() awful.spawn(config.apps.terminal) end,
 })
 table.insert(menu_items, {
+    text = "file manager",
+    icon = config.places.theme .. "/icons/folder.svg",
+    icon_color = beautiful.palette.yellow,
+    callback = function() awful.spawn(config.apps.file_manager) end,
+})
+table.insert(menu_items, {
+    text = "text editor",
+    icon = config.places.theme .. "/icons/file-document-edit.svg",
+    icon_color = beautiful.palette.white,
+    callback = function() awful.spawn(config.apps.editor) end,
+})
+table.insert(menu_items, {
+    text = "web browser",
+    icon = config.places.theme .. "/icons/web.svg",
+    icon_color = beautiful.palette.blue,
+    callback = function() awful.spawn(config.apps.browser) end,
+})
+table.insert(menu_items, {
+    text = "calculator",
+    icon = config.places.theme .. "/icons/calculator.svg",
+    icon_color = beautiful.palette.magenta,
+    callback = function() awful.spawn(config.apps.calculator) end,
+})
+table.insert(menu_items, {
+    text = "music streaming",
+    icon = config.places.theme .. "/icons/music.svg",
+    icon_color = beautiful.palette.green,
+    callback = function() awful.spawn(config.apps.music_streaming) end,
+})
+table.insert(menu_items, {
+    text = "video streaming",
+    icon = config.places.theme .. "/icons/video.svg",
+    icon_color = beautiful.palette.red,
+    callback = function() awful.spawn(config.apps.video_streaming) end,
+})
+table.insert(menu_items, {
     text = "applications",
     icon = config.places.theme .. "/icons/apps.svg",
     icon_color = beautiful.palette.orange,
@@ -54,7 +90,7 @@ table.insert(menu_items, {
 })
 
 main_menu = mebox {
-    item_width = dpi(192),
+    item_width = dpi(200),
     items_source = menu_items,
 }
 
