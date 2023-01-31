@@ -59,6 +59,7 @@ return mebox {
     item_template = {
         id = "#container",
         widget = capsule,
+        enabled = false,
         hover_overlay = tcolor.transparent,
         press_overlay = tcolor.transparent,
         margins = {
