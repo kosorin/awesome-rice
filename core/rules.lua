@@ -151,6 +151,7 @@ ruled.client.connect_signal("request::rules", function()
         properties = {
             floating = true,
             ontop = true,
+            titlebars_enabled = true,
         },
     }
     ruled.client.append_rule {

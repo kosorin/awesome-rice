@@ -153,7 +153,7 @@ theme.fg_disabled = theme.common.foreground_50
 ---------------------------------------------------------------------------------------------------
 
 theme.border_width = dpi(2)
-theme.border_color_normal = theme.common.background_66
+theme.border_color_normal = theme.common.background
 theme.border_color_active = theme.common.primary
 theme.border_color_urgent = theme.common.urgent_bright
 theme.border_color_marked = theme.common.secondary
@@ -685,6 +685,90 @@ theme.tasklist_maximized = " "
 theme.tasklist_maximized_horizontal = " "
 theme.tasklist_maximized_vertical = ""
 theme.tasklist_minimized = " "
+
+
+---------------------------------------------------------------------------------------------------
+
+theme.titlebar_bg_normal = theme.common.background_66
+theme.titlebar_fg_normal = theme.common.foreground
+theme.titlebar_bg_focus = theme.common.background
+theme.titlebar_fg_focus = theme.common.foreground_bright
+theme.titlebar_bg_urgent = theme.common.urgent_bright
+theme.titlebar_fg_urgent = theme.common.foreground_bright
+
+do
+    local button_shape = function(cr, width, height)
+        gshape.rounded_rect(cr, width, height, dpi(3))
+    end
+    local button_paddings = {
+        left = dpi(12),
+        right = dpi(12),
+        top = dpi(4),
+        bottom = dpi(4),
+    }
+    local button_margins = {
+        left = dpi(0),
+        right = dpi(0),
+        top = dpi(4),
+        bottom = dpi(8),
+    }
+    theme.titlebar = {
+        height = dpi(36),
+        paddings = {
+            left = dpi(12),
+            right = dpi(12),
+            top = dpi(0),
+            bottom = dpi(0),
+        },
+        button = {
+            opacity_normal = 0.5,
+            opacity_focus = 1,
+            spacing = dpi(4),
+            styles = {
+                normal = {
+                    hover_overlay = tcolor.white .. "30",
+                    press_overlay = tcolor.white .. "30",
+                    background = tcolor.transparent,
+                    foreground = theme.common.foreground,
+                    border_width = 0,
+                    shape = button_shape,
+                    paddings = button_paddings,
+                    margins = button_margins,
+                },
+                active = {
+                    hover_overlay = tcolor.white .. "20",
+                    press_overlay = tcolor.white .. "20",
+                    background = theme.common.primary_50,
+                    foreground = theme.common.foreground_bright,
+                    border_color = theme.common.primary_75,
+                    border_width = dpi(1),
+                    shape = button_shape,
+                    paddings = button_paddings,
+                    margins = button_margins,
+                },
+                close = {
+                    hover_overlay = theme.common.urgent_bright,
+                    press_overlay = theme.common.white .. "20",
+                    background = tcolor.transparent,
+                    foreground = theme.common.foreground_bright,
+                    border_width = 0,
+                    shape = button_shape,
+                    paddings = button_paddings,
+                    margins = button_margins,
+                },
+            },
+            icons = {
+                menu = config.places.theme .. "/icons/menu.svg",
+                floating = config.places.theme .. "/icons/floating.svg",
+                on_top = config.places.theme .. "/icons/arrow-to-top.svg",
+                sticky = config.places.theme .. "/icons/pin.svg",
+                minimize = config.places.theme .. "/icons/window-minimize.svg",
+                maximize = config.places.theme .. "/icons/window-maximize.svg",
+                close = config.places.theme .. "/icons/window-close.svg",
+            },
+        },
+    }
+end
 
 
 ---------------------------------------------------------------------------------------------------
