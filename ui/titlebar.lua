@@ -94,8 +94,8 @@ end
 
 local client_menu_instances = setmetatable({}, { __mode = "kv" })
 
-local function ensure_client_menu(c)
-    if client_menu_instances[c] then
+local function ensure_client_menu(client)
+    if client_menu_instances[client] then
         return
     end
 
@@ -103,11 +103,34 @@ local function ensure_client_menu(c)
     local old_on_hide = template.on_hide
 
     function template.on_hide(...)
-        client_menu_instances[c] = nil
+        client_menu_instances[client] = nil
         old_on_hide(...)
     end
 
-    client_menu_instances[c] = mebox(template)
+    client_menu_instances[client] = mebox(template)
+end
+
+local function toggle_client_menu(client)
+    if client_menu_instances[client] then
+        client_menu_instances[client]:hide()
+    else
+        ensure_client_menu(client)
+        client_menu_instances[client]:show({
+            client = client,
+            placement = function(menu)
+                aplacement.top_left(menu, {
+                    parent = client,
+                    margins = beautiful.wibar_popup_margin,
+                    offset = { y = beautiful.titlebar.height },
+                })
+                aplacement.no_offscreen(menu, {
+                    honor_workarea = true,
+                    honor_padding = false,
+                    margins = beautiful.wibar_popup_margin,
+                })
+            end,
+        }, { source = "mouse" })
+    end
 end
 
 capi.client.connect_signal("request::titlebars", function(client, _, args)
@@ -115,10 +138,9 @@ capi.client.connect_signal("request::titlebars", function(client, _, args)
         args.properties.titlebars_factory(client, args.properties)
         return
     end
-    local size = beautiful.titlebar.height
     awful.titlebar(client, {
         position = "top",
-        size = size,
+        size = beautiful.titlebar.height,
     }).widget = {
         layout = wibox.container.margin,
         margins = beautiful.titlebar.paddings,
@@ -128,28 +150,8 @@ capi.client.connect_signal("request::titlebars", function(client, _, args)
             {
                 layout = wibox.layout.fixed.horizontal,
                 spacing = beautiful.titlebar.button.spacing,
-                titlebar_button(client, function(c)
-                    if client_menu_instances[c] then
-                        client_menu_instances[c]:hide()
-                    else
-                        ensure_client_menu(c)
-                        client_menu_instances[c]:show({
-                            client = c,
-                            placement = function(menu)
-                                aplacement.top_left(menu, {
-                                    parent = c,
-                                    margins = beautiful.wibar_popup_margin,
-                                    offset = { y = size },
-                                })
-                                aplacement.no_offscreen(menu, {
-                                    honor_workarea = true,
-                                    honor_padding = false,
-                                    margins = beautiful.wibar_popup_margin,
-                                })
-                            end,
-                        }, { source = "mouse" })
-                    end
-                end, { icon = beautiful.titlebar.button.icons.menu, }),
+                titlebar_button(client, toggle_client_menu,
+                    { icon = beautiful.titlebar.button.icons.menu, }),
             },
             {
                 widget = awful.titlebar.widget.titlewidget(client),
