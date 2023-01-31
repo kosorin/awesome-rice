@@ -24,7 +24,7 @@ The following package names are from the Arch repositories or AUR.
 
 ## Recommended
 
-- `rofi` - application launcher
+- `rofi` - application launcher ([here](https://gist.github.com/kosorin/2e613eb2e09f4f619b3f9f6c3c688c6b) is the config to match the style of this rice)
 - `picom` - compositor for a better look
 
 ## Fonts
