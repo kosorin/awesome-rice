@@ -87,7 +87,7 @@ function volume_widget:update(data)
 end
 
 function volume_widget:show_tools(command)
-    awful.spawn.single_instance(config.apps.terminal .. " -e " .. command, {
+    awful.spawn.single_instance(command, {
         titlebars_enabled = true,
         floating = true,
         ontop = true,

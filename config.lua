@@ -21,16 +21,19 @@ config.places.theme = config.places.awesome .. "/theme"
 config.places.screenshots = config.places.home .. "/inbox/screenshots"
 config.places.wallpapers = config.places.home .. "/media/look/wallpapers"
 
+local terminal = "alacritty"
+local terminal_execute = terminal .. " -e "
+
 config.apps = {
     shell = "bash",
-    terminal = "alacritty",
-    editor = "micro",
+    terminal = terminal,
+    editor = terminal_execute .. "micro",
     browser = "librewolf",
     private_browser = "librewolf --private-window",
-    file_manager = "lf",
+    file_manager = terminal_execute .. "lf",
     calculator = "speedcrunch",
-    mixer = "pulsemixer",
-    bluetooth_control = "bluetoothctl",
+    mixer = terminal_execute .. "pulsemixer",
+    bluetooth_control = terminal_execute .. "bluetoothctl",
 }
 
 config.actions = {
