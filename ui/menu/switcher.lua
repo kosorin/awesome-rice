@@ -35,7 +35,8 @@ return mebox {
                 client = client,
                 active = client.active,
                 text = pango.span {
-                    pango.span { fgalpha = "65%", "/", tag and tag.name or "", "/", },
+                    pango.span { fgalpha = "65%", "[", tag and tag.name or "", "]", },
+                    " ",
                     pango.b(client.class or ""),
                     " ",
                     pango.span { fgalpha = "65%", weight = "light", size = "medium", client.name or "", },
