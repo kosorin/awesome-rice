@@ -47,7 +47,7 @@ capi.screen.connect_signal("request::desktop_decoration", function(screen)
                     spacing = beautiful.wibar_spacing,
                 },
             },
-            is_primary and {
+            {
                 layout = wibox.container.margin,
                 right = beautiful.wibar_padding.right,
                 top = beautiful.wibar_padding.top,
@@ -84,21 +84,24 @@ capi.screen.connect_signal("request::desktop_decoration", function(screen)
     local middle = wibar:get_children_by_id("#middle")[1]
     middle:add(screen.topbar.taglist)
 
-    local right = wibar:get_children_by_id("#right")
+    local right = wibar:get_children_by_id("#right")[1]
     if right then
-        right = right[1]
-        if config.features.torrent_widget then
-            right:add(torrent_widget.new(wibar))
+        if is_primary then
+            if config.features.torrent_widget then
+                right:add(torrent_widget.new(wibar))
+            end
+            right:add(network_widget.new(wibar))
+            right:add(volume_widget.new(wibar))
+            if config.features.redshift_widget then
+                right:add(redshift_widget.new(wibar))
+            end
+            if config.features.weather_widget then
+                right:add(weather_widget.new(wibar))
+            end
+            right:add(datetime_widget.new(wibar))
+            right:add(power_widget.new(wibar))
+        else
+            right:add(datetime_widget.new(wibar))
         end
-        right:add(network_widget.new(wibar))
-        right:add(volume_widget.new(wibar))
-        if config.features.redshift_widget then
-            right:add(redshift_widget.new(wibar))
-        end
-        if config.features.weather_widget then
-            right:add(weather_widget.new(wibar))
-        end
-        right:add(datetime_widget.new(wibar))
-        right:add(power_widget.new(wibar))
     end
 end)
