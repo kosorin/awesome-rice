@@ -176,9 +176,6 @@ function volume_widget.new(wibar)
             if self._private.menu.visible then
                 return
             end
-            if widget_helper.is_under_pointer(bar_container) then
-                return
-            end
             volume_service.toggle_mute(true)
         end),
         binding.awful({}, btn.right, function()
