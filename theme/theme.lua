@@ -216,28 +216,29 @@ theme.capsule = {
     item_spacing = dpi(16),
     bar_width = dpi(80),
     bar_height = dpi(12),
-    default_style = {
-        hover_overlay = tcolor.white .. "10",
-        press_overlay = tcolor.white .. "10",
-        background = theme.common.background_110,
-        foreground = theme.common.foreground,
-        border_color = theme.common.background_130,
-        border_width = 0,
-        shape = function(cr, width, height)
-            gshape.rounded_rect(cr, width, height, dpi(8))
-        end,
-        margins = {
-            left = 0,
-            right = 0,
-            top = 0,
-            bottom = 0,
-        },
-        paddings = {
-            left = dpi(14),
-            right = dpi(14),
-            top = dpi(6),
-            bottom = dpi(6),
-        },
+    shape_radius = dpi(8)
+}
+theme.capsule.default_style = {
+    hover_overlay = tcolor.white .. "10",
+    press_overlay = tcolor.white .. "10",
+    background = theme.common.background_110,
+    foreground = theme.common.foreground,
+    border_color = theme.common.background_130,
+    border_width = 0,
+    shape = function(cr, width, height)
+        gshape.rounded_rect(cr, width, height, theme.capsule.shape_radius)
+    end,
+    margins = {
+        left = 0,
+        right = 0,
+        top = 0,
+        bottom = 0,
+    },
+    paddings = {
+        left = dpi(14),
+        right = dpi(14),
+        top = dpi(6),
+        bottom = dpi(6),
     },
 }
 theme.capsule.styles = {
@@ -748,7 +749,7 @@ do
                 },
                 close = {
                     hover_overlay = theme.common.urgent_bright,
-                    press_overlay = theme.common.white .. "20",
+                    press_overlay = theme.palette.white .. "30",
                     background = tcolor.transparent,
                     foreground = theme.common.foreground_bright,
                     border_width = 0,

@@ -1,5 +1,4 @@
 local table = table
-local floor = math.floor
 local awful = require("awful")
 local wibox = require("wibox")
 local config = require("config")
@@ -7,6 +6,7 @@ local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
 local beautiful = require("beautiful")
+local gshape = require("gears.shape")
 local calendar_popup = require("ui.popup.calendar")
 local dpi = dpi
 local gtimer = require("gears.timer")
@@ -38,88 +38,54 @@ end
 
 function datetime_widget:show_seconds(show)
     self._private.seconds = show
-    self._private.widgets.clock.text.format = self._private.seconds and "%-H:%M:%S" or "%-H:%M"
-    self._private.widgets.clock.text.refresh = self._private.seconds and 1 or 60
+    self._private.time_widget.text.format = self._private.seconds and "%-H:%M:%S" or "%-H:%M"
+    self._private.time_widget.text.refresh = self._private.seconds and 1 or 60
 end
 
 function datetime_widget:toggle_seconds()
     self:show_seconds(not self._private.seconds)
 end
 
-function datetime_widget.new(wibar)
-    local self = wibox.widget {
-        widget = capsule,
+local function initialize_date_widget(self, style)
+    self._private.date_widget = wibox.widget {
+        layout = wibox.layout.fixed.horizontal,
+        spacing = beautiful.capsule.item_content_spacing,
         {
-            layout = wibox.layout.fixed.horizontal,
-            spacing = beautiful.capsule.item_spacing,
+            widget = wibox.widget.imagebox,
+            resize = true,
+            image = config.places.theme .. "/icons/calendar-month.svg",
+            stylesheet = "path { fill: " .. style.foreground .. "; }",
+        },
+        {
+            id = "text",
+            widget = wibox.widget.textclock,
+            format = "%a, %b %-e",
+            refresh = 3600,
         },
     }
 
-    gtable.crush(self, datetime_widget, true)
-
-    self._private.wibar = wibar
-
-    local style = beautiful.capsule.styles.normal
-    self:apply_style(style)
-
-    self._private.widgets = {
-        calendar = wibox.widget {
-            layout = wibox.layout.fixed.horizontal,
-            spacing = beautiful.capsule.item_content_spacing,
-            buttons = binding.awful_buttons {
-                binding.awful({}, btn.left, function()
-                    if not self._private.menu.visible then
-                        self._private.popup:toggle()
-                    end
-                end),
-            },
-            {
-                widget = wibox.widget.imagebox,
-                resize = true,
-                image = config.places.theme .. "/icons/calendar-month.svg",
-                stylesheet = "path { fill: " .. style.foreground .. "; }",
-            },
-            {
-                id = "text",
-                widget = wibox.widget.textclock,
-                format = "%a, %b %-e",
-                refresh = 3600,
-            },
-        },
-        clock = wibox.widget {
-            layout = wibox.layout.fixed.horizontal,
-            spacing = beautiful.capsule.item_content_spacing,
-            buttons = binding.awful_buttons {
-                binding.awful({}, btn.middle, function()
-                    if self._private.menu.visible then
-                        return
-                    end
-                    self:toggle_seconds()
-                end),
-            },
-            {
-                id = "icon",
-                widget = wibox.widget.imagebox,
-                resize = true,
-                stylesheet = clock_icon.generate_style(style.foreground),
-            },
-            {
-                id = "text",
-                widget = wibox.widget.textclock,
-            },
-        },
+    local date_container = self["#date"]
+    date_container:apply_style(style)
+    date_container.paddings = gtable.crush(gtable.clone(date_container.paddings), {
+        right = beautiful.capsule.item_spacing / 2
+    })
+    date_container.widget = self._private.date_widget
+    date_container.buttons = binding.awful_buttons {
+        binding.awful({}, btn.right, function()
+            self._private.date_menu:toggle()
+        end),
+        binding.awful({}, btn.left, function()
+            if not self._private.date_menu.visible then
+                self._private.calendar_popup:toggle()
+            end
+        end),
     }
 
-    self.widget:add(self._private.widgets.calendar)
-    self.widget:add(self._private.widgets.clock)
-
-    self:show_seconds(false)
-
-    self._private.menu = mebox {
-        item_width = dpi(200),
+    self._private.date_menu = mebox {
+        item_width = dpi(192),
         placement = function(menu)
             aplacement.wibar(menu, {
-                geometry = widget_helper.find_geometry(self, self._private.wibar),
+                geometry = widget_helper.find_geometry(date_container, self._private.wibar),
                 position = "bottom",
                 anchor = "middle",
                 honor_workarea = true,
@@ -128,22 +94,88 @@ function datetime_widget.new(wibar)
             })
         end,
         {
-            text = "copy date &amp; time",
-            icon = config.places.theme .. "/icons/content-copy.svg",
-            icon_color = beautiful.palette.gray,
-            callback = function() self:to_clipboard() end,
-        },
-        {
             text = "copy date",
             icon = config.places.theme .. "/icons/content-copy.svg",
             icon_color = beautiful.palette.gray,
             callback = function() self:to_clipboard("date") end,
         },
         {
+            text = "copy date &amp; time",
+            icon = config.places.theme .. "/icons/content-copy.svg",
+            icon_color = beautiful.palette.gray,
+            callback = function() self:to_clipboard() end,
+        },
+    }
+
+    self._private.calendar_popup = calendar_popup.new {
+        wibar = self._private.wibar,
+        widget = date_container,
+    }
+
+    self._private.date_widget.text._timer:connect_signal("timeout", function()
+        self._private.calendar_popup:refresh()
+    end)
+end
+
+local function initialize_time_widget(self, style)
+    self._private.time_widget = wibox.widget {
+        layout = wibox.layout.fixed.horizontal,
+        spacing = beautiful.capsule.item_content_spacing,
+        {
+            id = "icon",
+            widget = wibox.widget.imagebox,
+            resize = true,
+            stylesheet = clock_icon.generate_style(style.foreground),
+        },
+        {
+            id = "text",
+            widget = wibox.widget.textclock,
+        },
+    }
+
+    local time_container = self["#time"]
+    time_container:apply_style(style)
+    time_container.paddings = gtable.crush(gtable.clone(time_container.paddings), {
+        left = beautiful.capsule.item_spacing / 2
+    })
+    time_container.widget = self._private.time_widget
+    time_container.buttons = binding.awful_buttons {
+        binding.awful({}, btn.right, function()
+            self._private.time_menu:toggle()
+        end),
+        binding.awful({}, btn.middle, function()
+            if self._private.time_menu.visible then
+                return
+            end
+            self:toggle_seconds()
+        end),
+    }
+
+    self:show_seconds(false)
+
+    self._private.time_menu = mebox {
+        item_width = dpi(192),
+        placement = function(menu)
+            aplacement.wibar(menu, {
+                geometry = widget_helper.find_geometry(time_container, self._private.wibar),
+                position = "bottom",
+                anchor = "middle",
+                honor_workarea = true,
+                honor_padding = false,
+                margins = beautiful.wibar_popup_margin,
+            })
+        end,
+        {
             text = "copy time",
             icon = config.places.theme .. "/icons/content-copy.svg",
             icon_color = beautiful.palette.gray,
             callback = function() self:to_clipboard("time") end,
+        },
+        {
+            text = "copy date &amp; time",
+            icon = config.places.theme .. "/icons/content-copy.svg",
+            icon_color = beautiful.palette.gray,
+            callback = function() self:to_clipboard() end,
         },
         mebox.separator,
         {
@@ -153,29 +185,43 @@ function datetime_widget.new(wibar)
         },
     }
 
-    self.buttons = binding.awful_buttons {
-        binding.awful({}, btn.right, function()
-            self._private.menu:toggle()
-        end),
-    }
-
-    self._private.popup = calendar_popup.new {
-        wibar = wibar,
-        widget = self._private.widgets.calendar,
-    }
-
-    self._private.widgets.calendar.text._timer:connect_signal("timeout", function()
-        self._private.popup:refresh()
-    end)
-
     gtimer {
         timeout = 60,
         autostart = true,
         call_now = true,
         callback = function()
-            self._private.widgets.clock.icon:set_image(clock_icon.generate_svg())
+            self._private.time_widget.icon:set_image(clock_icon.generate_svg())
         end,
     }
+end
+
+function datetime_widget.new(wibar)
+    local self = wibox.widget {
+        layout = wibox.layout.fixed.horizontal,
+        {
+            id = "#date",
+            widget = capsule,
+            shape = function(cr, width, height)
+                gshape.partially_rounded_rect(cr, width, height, true, false, false, true, beautiful.capsule.shape_radius)
+            end,
+        },
+        {
+            id = "#time",
+            widget = capsule,
+            shape = function(cr, width, height)
+                gshape.partially_rounded_rect(cr, width, height, false, true, true, false, beautiful.capsule.shape_radius)
+            end,
+        }
+    }
+
+    gtable.crush(self, datetime_widget, true)
+
+    self._private.wibar = wibar
+
+    local style = beautiful.capsule.styles.normal
+
+    initialize_date_widget(self, style)
+    initialize_time_widget(self, style)
 
     return self
 end
