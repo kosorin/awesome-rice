@@ -33,7 +33,6 @@ end
 function power_widget.new(wibar)
     local self = wibox.widget {
         widget = capsule,
-        hover_overlay = beautiful.common.urgent_bright .. "40",
         paddings = {
             left = dpi(10),
             right = dpi(10),
