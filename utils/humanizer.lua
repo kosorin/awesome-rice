@@ -15,8 +15,6 @@ local function clamp(value, min, max)
     return value
 end
 
-local unknown_cache = {}
-
 local function initialize_units(units)
     units.size = units.size or 1000
     local value = units.size
@@ -29,10 +27,10 @@ end
 
 local function humanize_units(units, value, precision, from_unit)
     if not value then
-        if not unknown_cache.io_speed then
-            unknown_cache.io_speed = format("%s%s%s", units.unknown, pango.thin_space, units[1].text)
+        if not units.unknown_formatted then
+            units.unknown_formatted = format("%s%s%s", units.unknown, pango.thin_space, units[1].text)
         end
-        return unknown_cache.io_speed
+        return units.unknown_formatted
     end
     from_unit = from_unit or 1
     for i = 1, #units do
