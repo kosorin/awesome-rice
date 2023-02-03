@@ -156,8 +156,10 @@ local function highlight_text(self, text, args)
         return true
     end
 
+    local total_found = 0
     local lower_text = string.lower(text)
     for _, st in ipairs(args.find_terms) do
+        local found = false
         local from = 1
         local to
         while true do
@@ -167,12 +169,16 @@ local function highlight_text(self, text, args)
             end
             if is_available(from, to) then
                 table.insert(substitutions, { matched = true, from = from, to = to })
+                if not found then
+                    found = true
+                    total_found = total_found + 1
+                end
             end
             from = to + 1
         end
     end
 
-    if #substitutions == 0 then
+    if total_found ~= #args.find_terms then
         return pango.span {
             fgcolor = self.find_dim_foreground,
             bgcolor = self.find_dim_background,
