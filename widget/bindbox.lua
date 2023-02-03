@@ -969,8 +969,8 @@ function bindbox.new(args)
     end
 
     set_binding_hint("#binding_hide", "Escape", "close")
-    set_binding_hint("#binding_next_page", { "Down", "Next" }, "next page")
-    set_binding_hint("#binding_previous_page", { "Up", "Prior" }, "previous page")
+    set_binding_hint("#binding_next_page", { btn.wheel_down, "Down", "Next" }, "next page")
+    set_binding_hint("#binding_previous_page", { btn.wheel_up, "Up", "Prior" }, "previous page")
 
     return self
 end
