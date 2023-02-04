@@ -93,6 +93,7 @@ function module.new(args)
                 id = "#background",
                 layout = wibox.container.background,
                 {
+                    id = "#background_content",
                     layout = wibox.layout.stack,
                     {
                         id = "#overlay",

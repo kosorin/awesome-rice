@@ -6,13 +6,34 @@ local beautiful = require("beautiful")
 local config = require("config")
 local network_service = require("services.network")
 local dpi = dpi
+local binding = require("io.binding")
+local mod = binding.modifier
+local btn = binding.button
 local humanizer = require("utils.humanizer")
 local gtable = require("gears.table")
 local capsule = require("widget.capsule")
 local pango = require("utils.pango")
+local tcolor = require("theme.color")
 
 
 local network_widget = { mt = {} }
+
+local mb = 1000 * 1000
+local max_download_speed = 1 * mb
+local max_upload_speed = 1 * mb
+local download_factor = 1
+local upload_factor = 1
+
+local units = {
+    { format = "%4.0f%s%s", text = "B/s ", to = 1000 },
+    { format = "%4.2f%s%s", text = "kB/s", to = 1000 * 9.99, next = false },
+    { format = "%4.1f%s%s", text = "kB/s", to = 1000 * 99.9, next = false },
+    { format = "%4.0f%s%s", text = "kB/s", to = 1000 * 1000 },
+    { format = "%4.2f%s%s", text = "MB/s", to = 1000 * 1000 * 9.99, next = false },
+    { format = "%4.1f%s%s", text = "MB/s", to = 1000 * 1000 * 99.9, next = false },
+    { format = "%4.0f%s%s", text = "MB/s", to = 1000 * 1000 * 1000 },
+    { format = "%4.1f%s%s", text = "GB/s", to = 1000 * 1000 * 1000 * 1000 },
+}
 
 local styles = {
     connected = gtable.clone(beautiful.capsule.styles.normal),
@@ -57,11 +78,13 @@ function network_widget:refresh()
     if status.success and status.connected then
         local style = styles.connected
 
-        refresh_info(widgets.connected.children[1], style, humanizer.io_speed(status.download))
-        refresh_info(widgets.connected.children[2], style, humanizer.io_speed(status.upload))
+        refresh_info(widgets.connected.children[1], style, humanizer.humanize_units(units, status.download))
+        refresh_info(widgets.connected.children[2], style, humanizer.humanize_units(units, status.upload))
 
         self:apply_style(style)
         self:set_widget(widgets.connected)
+        self._private.graph_widget:add_value(download_factor * status.download, 1)
+        self._private.graph_widget:add_value(-upload_factor * status.upload, 2)
     else
         local style = status.success == nil
             and styles.loading
@@ -71,11 +94,31 @@ function network_widget:refresh()
 
         self:apply_style(style)
         self:set_widget(widgets.disconnected)
+        self._private.graph_widget:add_value(nil, 1)
+        self._private.graph_widget:add_value(nil, 2)
     end
+end
+
+local hover_widget = false
+local show_graph = false
+local dim_opacity = 0.25
+
+local function update_opacity(self)
+    self._private.graph_container.opacity = (show_graph ~= hover_widget) and 1 or dim_opacity
+    for _, w in pairs(self._private.widgets) do
+        w.opacity = (show_graph == hover_widget) and 1 or dim_opacity
+    end
+end
+
+function network_widget:toggle_graph()
+    show_graph = not show_graph
+    update_opacity(self)
 end
 
 function network_widget.new(wibar)
     local self = capsule()
+
+    self.enabled = false
 
     gtable.crush(self, network_widget, true)
 
@@ -127,6 +170,35 @@ function network_widget.new(wibar)
                 widget = wibox.widget.textbox,
             },
         },
+    }
+
+    self._private.graph_widget = wibox.widget {
+        widget = wibox.widget.graph,
+        background_color = tcolor.transparent,
+        group_colors = {
+            beautiful.palette.blue_bright,
+            beautiful.palette.red_bright,
+        },
+        nan_indication = true,
+        nan_color = beautiful.palette.red,
+        step_width = 2,
+        step_spacing = 0,
+        min_value = -max_upload_speed,
+        max_value = max_download_speed,
+        scale = true,
+    }
+    self._private.graph_container = wibox.container.mirror(self._private.graph_widget, { horizontal = true })
+    self._private.layout:get_children_by_id("#background_content")[1]
+        :insert(1, self._private.graph_container)
+
+    self:connect_signal("mouse::enter", function() hover_widget = true; update_opacity(self) end)
+    self:connect_signal("mouse::leave", function() hover_widget = false; update_opacity(self) end)
+    update_opacity(self)
+
+    self.buttons = binding.awful_buttons {
+        binding.awful({}, btn.middle, function()
+            self:toggle_graph()
+        end),
     }
 
     capi.awesome.connect_signal("network::updated", function() self:refresh() end)
