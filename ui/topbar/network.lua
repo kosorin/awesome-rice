@@ -12,8 +12,11 @@ local btn = binding.button
 local humanizer = require("utils.humanizer")
 local gtable = require("gears.table")
 local capsule = require("widget.capsule")
+local mebox = require("widget.mebox")
 local pango = require("utils.pango")
 local tcolor = require("theme.color")
+local aplacement = require("awful.placement")
+local widget_helper = require("helpers.widget")
 
 
 local network_widget = { mt = {} }
@@ -99,20 +102,22 @@ function network_widget:refresh()
     end
 end
 
-local hover_widget = false
-local show_graph = false
 local dim_opacity = 0.25
-
 local function update_opacity(self)
-    self._private.graph_container.opacity = (show_graph ~= hover_widget) and 1 or dim_opacity
+    local show_graph = self._private.show_graph ~= self._private.hover_widget
+    self._private.graph_container.opacity = show_graph and 1 or dim_opacity
     for _, w in pairs(self._private.widgets) do
-        w.opacity = (show_graph == hover_widget) and 1 or dim_opacity
+        w.opacity = not show_graph and 1 or dim_opacity
     end
 end
 
-function network_widget:toggle_graph()
-    show_graph = not show_graph
+function network_widget:show_graph(show)
+    self._private.show_graph = show
     update_opacity(self)
+end
+
+function network_widget:toggle_graph()
+    self:show_graph(not self._private.show_graph)
 end
 
 function network_widget.new(wibar)
@@ -172,6 +177,9 @@ function network_widget.new(wibar)
         },
     }
 
+    self._private.hover_widget = false
+    self._private.show_graph = false
+
     self._private.graph_widget = wibox.widget {
         widget = wibox.widget.graph,
         background_color = tcolor.transparent,
@@ -191,19 +199,43 @@ function network_widget.new(wibar)
     self._private.layout:get_children_by_id("#background_content")[1]
         :insert(1, self._private.graph_container)
 
-    self:connect_signal("mouse::enter", function() hover_widget = true; update_opacity(self) end)
-    self:connect_signal("mouse::leave", function() hover_widget = false; update_opacity(self) end)
+    self:connect_signal("mouse::enter", function() self._private.hover_widget = true; update_opacity(self) end)
+    self:connect_signal("mouse::leave", function() self._private.hover_widget = false; update_opacity(self) end)
     update_opacity(self)
 
     self.buttons = binding.awful_buttons {
         binding.awful({}, btn.middle, function()
-            self:toggle_graph()
+            if not self._private.menu.visible then
+                self:toggle_graph()
+            end
+        end),
+        binding.awful({}, btn.right, function()
+            self._private.menu:toggle()
         end),
     }
 
     capi.awesome.connect_signal("network::updated", function() self:refresh() end)
 
     self:refresh()
+
+    self._private.menu = mebox {
+        item_width = dpi(144),
+        placement = function(menu)
+            aplacement.wibar(menu, {
+                geometry = widget_helper.find_geometry(self, self._private.wibar),
+                position = "bottom",
+                anchor = "middle",
+                honor_workarea = true,
+                honor_padding = false,
+                margins = beautiful.wibar_popup_margin,
+            })
+        end,
+        {
+            text = "show graph",
+            on_show = function(item) item.checked = not not self._private.show_graph end,
+            callback = function(_, item) self:show_graph(not item.checked) end,
+        },
+    }
 
     return self
 end
