@@ -15,62 +15,53 @@ local function clamp(value, min, max)
     return value
 end
 
-local function initialize_units(units)
-    units.size = units.size or 1000
-    local value = units.size
-    for i = 1, #units do
-        units[i].value = value
-        value = value * units.size
-    end
-    return units
-end
-
-local function humanize_units(units, value, precision, from_unit)
+function humanizer.humanize_units(units, value, from_unit)
     if not value then
         if not units.unknown_formatted then
-            units.unknown_formatted = format("%s%s%s", units.unknown, pango.thin_space, units[1].text)
+            units.unknown_formatted = format("%s%s%s", units.unknown or "--", pango.thin_space, units[1].text)
         end
         return units.unknown_formatted
     end
     from_unit = from_unit or 1
+    local previous_to = 1
     for i = 1, #units do
         local unit = units[i]
-        if i >= from_unit and value < unit.value then
-            return format("%." .. tostring(precision or unit.precision) .. "f%s%s",
-                value / (unit.value / units.size),
+        if i >= from_unit and value < unit.to then
+            return format(
+                units.format or unit.format or ("%." .. tostring(units.precision or unit.precision or 0) .. "f%s%s"),
+                value / previous_to,
                 pango.thin_space,
                 unit.text)
         end
+        if unit.next ~= false then
+            previous_to = unit.to
+        end
     end
-    return units.over
+    return units.over or "it's over 9000!"
 end
 
-local io_speed_units = initialize_units {
-    unknown = "-",
-    over = "it's over 9000!",
-    { precision = 0, text = "B/s" },
-    { precision = 0, text = "kB/s" },
-    { precision = 2, text = "MB/s" },
-    { precision = 2, text = "GB/s" },
-    { precision = 2, text = "TB/s" },
+local io_speed_units = {
+    { precision = 0, text = "B/s", to = 1000 },
+    { precision = 0, text = "kB/s", to = 1000 * 1000 },
+    { precision = 2, text = "MB/s", to = 1000 * 1000 * 1000 },
+    { precision = 2, text = "GB/s", to = 1000 * 1000 * 1000 * 1000 },
+    { precision = 2, text = "TB/s", to = 1000 * 1000 * 1000 * 1000 * 1000 },
 }
 
 function humanizer.io_speed(bytes, ...)
-    return humanize_units(io_speed_units, bytes, ...)
+    return humanizer.humanize_units(io_speed_units, bytes, ...)
 end
 
-local file_size_units = initialize_units {
-    unknown = "-",
-    over = "it's over 9000!",
-    { precision = 0, text = "B" },
-    { precision = 1, text = "kB" },
-    { precision = 1, text = "MB" },
-    { precision = 1, text = "GB" },
-    { precision = 1, text = "TB" },
+local file_size_units = {
+    { precision = 0, text = "B", to = 1000 },
+    { precision = 1, text = "kB", to = 1000 * 1000 },
+    { precision = 1, text = "MB", to = 1000 * 1000 * 1000 },
+    { precision = 1, text = "GB", to = 1000 * 1000 * 1000 * 1000 },
+    { precision = 1, text = "TB", to = 1000 * 1000 * 1000 * 1000 * 1000 },
 }
 
 function humanizer.file_size(bytes, ...)
-    return humanize_units(file_size_units, bytes, ...)
+    return humanizer.humanize_units(file_size_units, bytes, ...)
 end
 
 local days_in_year = 365.2425
