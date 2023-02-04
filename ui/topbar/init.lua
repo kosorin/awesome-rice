@@ -102,6 +102,7 @@ capi.screen.connect_signal("request::desktop_decoration", function(screen)
             right:add(power_widget.new(wibar))
         else
             right:add(datetime_widget.new(wibar))
+            right:add(power_widget.new(wibar))
         end
     end
 end)
