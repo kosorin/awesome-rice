@@ -201,6 +201,12 @@ function datetime_widget.new(wibar)
         {
             id = "#date",
             widget = capsule,
+            margins = {
+                left = beautiful.capsule.default_style.margins.left,
+                right = 0,
+                top = beautiful.wibar_padding.top,
+                bottom = beautiful.wibar_padding.bottom,
+            },
             shape = function(cr, width, height)
                 gshape.partially_rounded_rect(cr, width, height, true, false, false, true, beautiful.capsule.shape_radius)
             end,
@@ -208,6 +214,12 @@ function datetime_widget.new(wibar)
         {
             id = "#time",
             widget = capsule,
+            margins = {
+                left = 0,
+                right = beautiful.capsule.default_style.margins.right,
+                top = beautiful.wibar_padding.top,
+                bottom = beautiful.wibar_padding.bottom,
+            },
             shape = function(cr, width, height)
                 gshape.partially_rounded_rect(cr, width, height, false, true, true, false, beautiful.capsule.shape_radius)
             end,

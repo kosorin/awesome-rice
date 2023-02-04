@@ -33,6 +33,12 @@ end
 function power_widget.new(wibar)
     local self = wibox.widget {
         widget = capsule,
+        margins = {
+            left = beautiful.capsule.default_style.margins.left,
+            right = beautiful.wibar_padding.right,
+            top = beautiful.wibar_padding.top,
+            bottom = beautiful.wibar_padding.bottom,
+        },
         paddings = {
             left = dpi(10),
             right = dpi(10),

@@ -121,9 +121,16 @@ function network_widget:toggle_graph()
 end
 
 function network_widget.new(wibar)
-    local self = capsule()
-
-    self.enabled = false
+    local self = wibox.widget {
+        widget = capsule,
+        enabled = false,
+        margins = {
+            left = beautiful.capsule.default_style.margins.left,
+            right = beautiful.capsule.default_style.margins.right,
+            top = beautiful.wibar_padding.top,
+            bottom = beautiful.wibar_padding.bottom,
+        },
+    }
 
     gtable.crush(self, network_widget, true)
 

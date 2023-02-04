@@ -84,7 +84,15 @@ function weather_widget:refresh()
 end
 
 function weather_widget.new(wibar)
-    local self = capsule()
+    local self = wibox.widget {
+        widget = capsule,
+        margins = {
+            left = beautiful.capsule.default_style.margins.left,
+            right = beautiful.capsule.default_style.margins.right,
+            top = beautiful.wibar_padding.top,
+            bottom = beautiful.wibar_padding.bottom,
+        },
+    }
 
     gtable.crush(self, weather_widget, true)
 

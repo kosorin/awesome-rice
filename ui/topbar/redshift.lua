@@ -79,6 +79,12 @@ end
 function redshift_widget.new(wibar)
     local self = wibox.widget {
         widget = capsule,
+        margins = {
+            left = beautiful.capsule.default_style.margins.left,
+            right = beautiful.capsule.default_style.margins.right,
+            top = beautiful.wibar_padding.top,
+            bottom = beautiful.wibar_padding.bottom,
+        },
         {
             layout = wibox.layout.fixed.horizontal,
             spacing = beautiful.capsule.item_content_spacing,
