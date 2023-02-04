@@ -102,8 +102,8 @@ function network_widget:refresh()
     end
 end
 
-local dim_opacity = 0.25
 local function update_opacity(self)
+    local dim_opacity = 0.25
     local show_graph = self._private.show_graph ~= self._private.hover_widget
     self._private.graph_container.opacity = show_graph and 1 or dim_opacity
     for _, w in pairs(self._private.widgets) do
@@ -118,6 +118,26 @@ end
 
 function network_widget:toggle_graph()
     self:show_graph(not self._private.show_graph)
+end
+
+function network_widget:set_graph_offset(offset)
+    offset = offset or 0
+    local total_graph_size = self._private.graph_widget.capacity
+        * (self._private.graph_widget.step_width + self._private.graph_widget.step_spacing)
+    total_graph_size = total_graph_size - (self._private.latest_width or 0)
+    if offset < 0 then
+        offset = 0
+    elseif offset > total_graph_size then
+        offset = total_graph_size
+    end
+    self._private.graph_container.right = -offset
+    self._private.graph_offset = offset
+end
+
+function network_widget:fit(...)
+    local width, height = capsule.fit(self, ...)
+    self._private.latest_width = width
+    return width, height
 end
 
 function network_widget.new(wibar)
@@ -135,6 +155,9 @@ function network_widget.new(wibar)
     gtable.crush(self, network_widget, true)
 
     self._private.wibar = wibar
+    self._private.hover_widget = false
+    self._private.show_graph = false
+    self._private.graph_offset = 0
 
     self._private.widgets = {
         connected = wibox.widget {
@@ -184,46 +207,33 @@ function network_widget.new(wibar)
         },
     }
 
-    self._private.hover_widget = false
-    self._private.show_graph = false
-
-    self._private.graph_widget = wibox.widget {
-        widget = wibox.widget.graph,
-        background_color = tcolor.transparent,
-        group_colors = {
-            beautiful.palette.blue_bright,
-            beautiful.palette.red_bright,
+    self._private.graph_container = wibox.widget {
+        layout = wibox.container.margin,
+        {
+            layout = wibox.container.mirror,
+            reflection = { horizontal = true },
+            {
+                id = "#graph",
+                widget = wibox.widget.graph,
+                capacity = math.floor(900 / network_service.config.interval), -- 900 ~ 15 minuts
+                background_color = tcolor.transparent,
+                group_colors = {
+                    beautiful.palette.blue_bright,
+                    beautiful.palette.red_bright,
+                },
+                nan_indication = true,
+                nan_color = beautiful.palette.red,
+                step_width = 2,
+                step_spacing = 0,
+                min_value = -max_upload_speed,
+                max_value = max_download_speed,
+                scale = true,
+            },
         },
-        nan_indication = true,
-        nan_color = beautiful.palette.red,
-        step_width = 2,
-        step_spacing = 0,
-        min_value = -max_upload_speed,
-        max_value = max_download_speed,
-        scale = true,
     }
-    self._private.graph_container = wibox.container.mirror(self._private.graph_widget, { horizontal = true })
+    self._private.graph_widget = self._private.graph_container:get_children_by_id("#graph")[1]
     self._private.layout:get_children_by_id("#background_content")[1]
         :insert(1, self._private.graph_container)
-
-    self:connect_signal("mouse::enter", function() self._private.hover_widget = true; update_opacity(self) end)
-    self:connect_signal("mouse::leave", function() self._private.hover_widget = false; update_opacity(self) end)
-    update_opacity(self)
-
-    self.buttons = binding.awful_buttons {
-        binding.awful({}, btn.middle, function()
-            if not self._private.menu.visible then
-                self:toggle_graph()
-            end
-        end),
-        binding.awful({}, btn.right, function()
-            self._private.menu:toggle()
-        end),
-    }
-
-    capi.awesome.connect_signal("network::updated", function() self:refresh() end)
-
-    self:refresh()
 
     self._private.menu = mebox {
         item_width = dpi(144),
@@ -243,6 +253,38 @@ function network_widget.new(wibar)
             callback = function(_, item) self:show_graph(not item.checked) end,
         },
     }
+
+    self.buttons = binding.awful_buttons {
+        binding.awful({}, btn.middle, function()
+            if not self._private.menu.visible then
+                self:toggle_graph()
+            end
+        end),
+        binding.awful({}, btn.right, function()
+            self._private.menu:toggle()
+        end),
+        binding.awful({}, binding.group.mouse_wheel, function(trigger)
+            local step_size = math.floor(10 / network_service.config.interval)
+                * (self._private.graph_widget.step_width + self._private.graph_widget.step_spacing)
+            self:set_graph_offset(self._private.graph_offset - (step_size * trigger.y))
+        end),
+    }
+
+    capi.awesome.connect_signal("network::updated", function() self:refresh() end)
+
+    self:connect_signal("mouse::enter", function()
+        self._private.hover_widget = true
+        update_opacity(self)
+    end)
+    self:connect_signal("mouse::leave", function()
+        self._private.hover_widget = false
+        update_opacity(self)
+        self:set_graph_offset(0)
+    end)
+
+    update_opacity(self)
+    self:set_graph_offset(0)
+    self:refresh()
 
     return self
 end
