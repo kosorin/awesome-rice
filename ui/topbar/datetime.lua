@@ -16,6 +16,7 @@ local mebox = require("widget.mebox")
 local clock_icon = require("widget.clock_icon")
 local aplacement = require("awful.placement")
 local widget_helper = require("helpers.widget")
+local htable = require("helpers.table")
 
 
 local datetime_widget = { mt = {} }
@@ -66,8 +67,8 @@ local function initialize_date_widget(self, style)
 
     local date_container = self["#date"]
     date_container:apply_style(style)
-    date_container.paddings = gtable.crush(gtable.clone(date_container.paddings), {
-        right = beautiful.capsule.item_spacing / 2
+    date_container.paddings = htable.crush_clone(date_container.paddings, {
+        right = beautiful.capsule.item_spacing / 2,
     })
     date_container.widget = self._private.date_widget
     date_container.buttons = binding.awful_buttons {
@@ -135,8 +136,8 @@ local function initialize_time_widget(self, style)
 
     local time_container = self["#time"]
     time_container:apply_style(style)
-    time_container.paddings = gtable.crush(gtable.clone(time_container.paddings), {
-        left = beautiful.capsule.item_spacing / 2
+    time_container.paddings = htable.crush_clone(time_container.paddings, {
+        left = beautiful.capsule.item_spacing / 2,
     })
     time_container.widget = self._private.time_widget
     time_container.buttons = binding.awful_buttons {

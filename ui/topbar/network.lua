@@ -17,6 +17,7 @@ local pango = require("utils.pango")
 local tcolor = require("theme.color")
 local aplacement = require("awful.placement")
 local widget_helper = require("helpers.widget")
+local htable = require("helpers.table")
 
 
 local network_widget = { mt = {} }
@@ -40,21 +41,18 @@ local units = {
 
 local styles = {
     connected = gtable.clone(beautiful.capsule.styles.normal),
-    disconnected = gtable.crush(gtable.clone(beautiful.capsule.styles.palette.yellow),
-        {
-            text = "disconnected",
-            icon = "lan-disconnect",
-        }),
-    error = gtable.crush(gtable.clone(beautiful.capsule.styles.palette.red),
-        {
-            text = "error",
-            icon = "lan-disconnect",
-        }),
-    loading = gtable.crush(gtable.clone(beautiful.capsule.styles.disabled),
-        {
-            text = "loading",
-            icon = "lan-pending",
-        }),
+    disconnected = htable.crush_clone(beautiful.capsule.styles.palette.yellow, {
+        text = "disconnected",
+        icon = "lan-disconnect",
+    }),
+    error = htable.crush_clone(beautiful.capsule.styles.palette.red, {
+        text = "error",
+        icon = "lan-disconnect",
+    }),
+    loading = htable.crush_clone(beautiful.capsule.styles.disabled, {
+        text = "loading",
+        icon = "lan-pending",
+    }),
 }
 
 local function colorize_path(color)

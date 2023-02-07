@@ -17,20 +17,15 @@ local gtable = require("gears.table")
 local capsule = require("widget.capsule")
 local pango = require("utils.pango")
 local config = require("config")
+local htable = require("helpers.table")
 
 
 local volume_osd = { mt = {} }
 
-local function copy_style(style)
-    return gtable.crush(gtable.clone(style), {
-        border_width = 0,
-    })
-end
-
 local styles = {
-    normal = copy_style(beautiful.capsule.styles.normal),
-    boosted = copy_style(beautiful.capsule.styles.palette.yellow),
-    muted = copy_style(beautiful.capsule.styles.palette.gray),
+    normal = htable.crush_clone(beautiful.capsule.styles.normal, { border_width = 0 }),
+    boosted = htable.crush_clone(beautiful.capsule.styles.palette.yellow, { border_width = 0 }),
+    muted = htable.crush_clone(beautiful.capsule.styles.palette.gray, { border_width = 0 }),
 }
 local text_format = "%2d" .. pango.thin_space .. "%%"
 local error_text = "--" .. pango.thin_space .. "%"
