@@ -24,7 +24,7 @@ local function set_value(self, property_name, property_descriptor, value)
         if property_descriptor.property then
             local widget = property_descriptor.id
                 and self._style_root:get_children_by_id(property_descriptor.id)[1]
-                or self
+                or self._style_root
             if widget then
                 widget[property_descriptor.property] = value
             end
