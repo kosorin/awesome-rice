@@ -11,6 +11,7 @@ local tcolor = require("theme.color")
 local capsule = require("widget.capsule")
 local pango = require("utils.pango")
 local config = require("config")
+local htable = require("helpers.table")
 
 
 ---------------------------------------------------------------------------------------------------
@@ -161,12 +162,6 @@ theme.border_color_marked = theme.common.secondary
 
 ---------------------------------------------------------------------------------------------------
 
-theme.popup_bg_alpha = 0.85 -- 0xd9
-theme.highlight_bg_alpha = 0.20 -- 0x33
-
-
----------------------------------------------------------------------------------------------------
-
 theme.bg_systray = theme.common.background_110
 theme.systray_icon_spacing = dpi(12)
 
@@ -190,7 +185,7 @@ end
 ---------------------------------------------------------------------------------------------------
 
 theme.screenshot_area_border_width = theme.border_width
-theme.screenshot_area_color = tcolor.change(theme.common.primary, { alpha = theme.highlight_bg_alpha })
+theme.screenshot_area_color = tcolor.change(theme.common.primary, { alpha = 0.20 --[[ 0x33 ]] })
 
 
 ---------------------------------------------------------------------------------------------------
@@ -205,7 +200,6 @@ theme.wibar_padding = {
     top = dpi(8),
     bottom = dpi(8),
 }
-theme.wibar_popup_margin = dpi(6)
 
 
 ---------------------------------------------------------------------------------------------------
@@ -316,6 +310,29 @@ theme.capsule.styles.mebox = {
 
 ---------------------------------------------------------------------------------------------------
 
+theme.popup = {
+    margins = dpi(6),
+}
+theme.popup.default_style = {
+    bg = tcolor.change(theme.common.background, { alpha = 0.85 --[[ 0xd9 ]] }),
+    fg = theme.common.foreground,
+    border_color = theme.common.background_bright,
+    border_width = theme.border_width,
+    shape = function(cr, width, height)
+        gshape.rounded_rect(cr, width, height, dpi(16))
+    end,
+    placement = aplacement.under_mouse,
+    paddings = {
+        left = dpi(16),
+        right = dpi(16),
+        top = dpi(16),
+        bottom = dpi(16),
+    },
+}
+
+
+---------------------------------------------------------------------------------------------------
+
 theme.mebox = {
     horizontal_separator_template = {
         widget = wibox.widget.separator,
@@ -397,24 +414,18 @@ theme.mebox = {
         },
     },
 }
-theme.mebox.default_style = {
+theme.mebox.default_style = htable.crush_clone(theme.popup.default_style, {
     separator_template = theme.mebox.horizontal_separator_template,
     header_template = theme.mebox.header_template,
     placement_bounding_args = {
         honor_workarea = true,
         honor_padding = false,
-        margins = theme.wibar_popup_margin,
+        margins = theme.popup.margins,
     },
+    placement = false,
     submenu_offset = dpi(4),
     active_opacity = 1,
     inactive_opacity = 1,
-    bg = tcolor.change(theme.common.background, { alpha = theme.popup_bg_alpha }),
-    fg = theme.common.foreground,
-    border_color = theme.common.background_bright,
-    border_width = theme.border_width,
-    shape = function(cr, width, height)
-        gshape.rounded_rect(cr, width, height, dpi(16))
-    end,
     spacing = 0,
     paddings = {
         left = dpi(8),
@@ -543,27 +554,14 @@ theme.mebox.default_style = {
             end
         end,
     },
-}
+})
 
 
 ---------------------------------------------------------------------------------------------------
 
 theme.bindbox = {}
-theme.bindbox.default_style = {
+theme.bindbox.default_style = htable.crush_clone(theme.popup.default_style, {
     font = theme.font,
-    bg = tcolor.change(theme.common.background, { alpha = theme.popup_bg_alpha }),
-    fg = theme.common.foreground,
-    border_color = theme.common.background_bright,
-    border_width = theme.border_width,
-    shape = function(cr, width, height)
-        gshape.rounded_rect(cr, width, height, dpi(16))
-    end,
-    paddings = {
-        left = dpi(16),
-        right = dpi(16),
-        top = dpi(16),
-        bottom = dpi(16),
-    },
     placement = function(d)
         aplacement.centered(d, {
             honor_workarea = true,
@@ -620,7 +618,7 @@ theme.bindbox.default_style = {
     find_placeholder_foreground = theme.common.foreground_66,
     find_cursor_background = theme.common.secondary_66,
     find_cursor_foreground = theme.common.foreground_bright,
-}
+})
 
 
 ---------------------------------------------------------------------------------------------------

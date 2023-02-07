@@ -376,7 +376,7 @@ local function new(parent, data_widget_factory, args)
         anchor = args.placement or "middle",
         width = args.width or dpi(320),
         height = args.height or dpi(592),
-        bg = args.bg or tcolor.change(beautiful.common.background, { alpha = beautiful.popup_bg_alpha }),
+        bg = args.bg or beautiful.popup.default_style.bg,
         opacity = args.opacity or 1,
         border_width = args.border_width or beautiful.border_width,
         border_color = args.border_color or beautiful.common.primary_66,

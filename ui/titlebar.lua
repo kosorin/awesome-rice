@@ -120,13 +120,13 @@ local function toggle_client_menu(client)
             placement = function(menu)
                 aplacement.top_left(menu, {
                     parent = client,
-                    margins = beautiful.wibar_popup_margin,
+                    margins = beautiful.popup.margins,
                     offset = { y = beautiful.titlebar.height },
                 })
                 aplacement.no_offscreen(menu, {
                     honor_workarea = true,
                     honor_padding = false,
-                    margins = beautiful.wibar_popup_margin,
+                    margins = beautiful.popup.margins,
                 })
             end,
         }, { source = "mouse" })

@@ -91,7 +91,7 @@ local function initialize_date_widget(self, style)
                 anchor = "middle",
                 honor_workarea = true,
                 honor_padding = false,
-                margins = beautiful.wibar_popup_margin,
+                margins = beautiful.popup.margins,
             })
         end,
         {
@@ -163,7 +163,7 @@ local function initialize_time_widget(self, style)
                 anchor = "middle",
                 honor_workarea = true,
                 honor_padding = false,
-                margins = beautiful.wibar_popup_margin,
+                margins = beautiful.popup.margins,
             })
         end,
         {

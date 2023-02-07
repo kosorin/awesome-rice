@@ -195,7 +195,7 @@ function weather_widget.new(wibar)
                 anchor = "middle",
                 honor_workarea = true,
                 honor_padding = false,
-                margins = beautiful.wibar_popup_margin,
+                margins = beautiful.popup.margins,
             })
         end,
         {

@@ -99,7 +99,7 @@ function volume_widget:show_tools(command)
             anchor = "middle",
             honor_workarea = true,
             honor_padding = true,
-            margins = beautiful.wibar_popup_margin,
+            margins = beautiful.popup.margins,
         })
     end)
 end
@@ -158,7 +158,7 @@ function volume_widget.new(wibar)
                 anchor = "middle",
                 honor_workarea = true,
                 honor_padding = false,
-                margins = beautiful.wibar_popup_margin,
+                margins = beautiful.popup.margins,
             })
         end,
         {
