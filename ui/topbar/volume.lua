@@ -93,14 +93,8 @@ function volume_widget:show_tools(command)
         ontop = true,
         sticky = true,
     }, nil, nil, function(client)
-        awful.placement.wibar(client, {
-            geometry = widget_helper.find_geometry(self, self._private.wibar),
-            position = "bottom",
-            anchor = "middle",
-            honor_workarea = true,
-            honor_padding = true,
-            margins = beautiful.popup.margins,
-        })
+        local placement = beautiful.wibar.build_placement(self, self._private.wibar)
+        placement(client)
     end)
 end
 
@@ -110,8 +104,8 @@ function volume_widget.new(wibar)
         margins = {
             left = beautiful.capsule.default_style.margins.left,
             right = beautiful.capsule.default_style.margins.right,
-            top = beautiful.wibar_padding.top,
-            bottom = beautiful.wibar_padding.bottom,
+            top = beautiful.wibar.padding.top,
+            bottom = beautiful.wibar.padding.bottom,
         },
         {
             layout = wibox.layout.fixed.horizontal,
@@ -151,16 +145,7 @@ function volume_widget.new(wibar)
 
     self._private.menu = mebox {
         item_width = dpi(180),
-        placement = function(menu)
-            aplacement.wibar(menu, {
-                geometry = widget_helper.find_geometry(self, self._private.wibar),
-                position = "bottom",
-                anchor = "middle",
-                honor_workarea = true,
-                honor_padding = false,
-                margins = beautiful.popup.margins,
-            })
-        end,
+        placement = beautiful.wibar.build_placement(self, self._private.wibar),
         {
             text = "open mixer",
             icon = config.places.theme .. "/icons/tune.svg",

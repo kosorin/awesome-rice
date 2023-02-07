@@ -82,16 +82,7 @@ local function initialize_date_widget(self, style)
         end),
     }
 
-    local popup_placement = function(popup)
-        aplacement.wibar(popup, {
-            geometry = widget_helper.find_geometry(date_container, self._private.wibar),
-            position = "bottom",
-            anchor = "middle",
-            honor_workarea = true,
-            honor_padding = false,
-            margins = beautiful.popup.margins,
-        })
-    end
+    local popup_placement = beautiful.wibar.build_placement(date_container, self._private.wibar)
 
     self._private.date_menu = mebox {
         item_width = dpi(192),
@@ -157,16 +148,7 @@ local function initialize_time_widget(self, style)
 
     self._private.time_menu = mebox {
         item_width = dpi(192),
-        placement = function(menu)
-            aplacement.wibar(menu, {
-                geometry = widget_helper.find_geometry(time_container, self._private.wibar),
-                position = "bottom",
-                anchor = "middle",
-                honor_workarea = true,
-                honor_padding = false,
-                margins = beautiful.popup.margins,
-            })
-        end,
+        placement = beautiful.wibar.build_placement(time_container, self._private.wibar),
         {
             text = "copy time",
             icon = config.places.theme .. "/icons/content-copy.svg",
@@ -206,8 +188,8 @@ function datetime_widget.new(wibar)
             margins = {
                 left = beautiful.capsule.default_style.margins.left,
                 right = 0,
-                top = beautiful.wibar_padding.top,
-                bottom = beautiful.wibar_padding.bottom,
+                top = beautiful.wibar.padding.top,
+                bottom = beautiful.wibar.padding.bottom,
             },
             shape = function(cr, width, height)
                 gshape.partially_rounded_rect(cr, width, height, true, false, false, true, beautiful.capsule.shape_radius)
@@ -219,8 +201,8 @@ function datetime_widget.new(wibar)
             margins = {
                 left = 0,
                 right = beautiful.capsule.default_style.margins.right,
-                top = beautiful.wibar_padding.top,
-                bottom = beautiful.wibar_padding.bottom,
+                top = beautiful.wibar.padding.top,
+                bottom = beautiful.wibar.padding.bottom,
             },
             shape = function(cr, width, height)
                 gshape.partially_rounded_rect(cr, width, height, false, true, true, false, beautiful.capsule.shape_radius)

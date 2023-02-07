@@ -89,8 +89,8 @@ function weather_widget.new(wibar)
         margins = {
             left = beautiful.capsule.default_style.margins.left,
             right = beautiful.capsule.default_style.margins.right,
-            top = beautiful.wibar_padding.top,
-            bottom = beautiful.wibar_padding.bottom,
+            top = beautiful.wibar.padding.top,
+            bottom = beautiful.wibar.padding.bottom,
         },
     }
 
@@ -188,16 +188,7 @@ function weather_widget.new(wibar)
 
     self._private.menu = mebox {
         item_width = dpi(180),
-        placement = function(menu)
-            aplacement.wibar(menu, {
-                geometry = widget_helper.find_geometry(self, self._private.wibar),
-                position = "bottom",
-                anchor = "middle",
-                honor_workarea = true,
-                honor_padding = false,
-                margins = beautiful.popup.margins,
-            })
-        end,
+        placement = beautiful.wibar.build_placement(self, self._private.wibar),
         {
             text = "open dashboard",
             icon = config.places.theme .. "/icons/open-in-new.svg",

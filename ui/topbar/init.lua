@@ -35,16 +35,16 @@ capi.screen.connect_signal("request::desktop_decoration", function(screen)
             {
                 id = "#left",
                 layout = wibox.layout.fixed.horizontal,
-                spacing = beautiful.wibar_spacing,
+                spacing = beautiful.wibar.spacing,
             },
             {
                 layout = wibox.container.margin,
-                left = beautiful.wibar_spacing * 2,
-                right = beautiful.wibar_spacing * 2,
+                left = beautiful.wibar.spacing * 2,
+                right = beautiful.wibar.spacing * 2,
                 {
                     id = "#middle",
                     layout = wibox.layout.fixed.horizontal,
-                    spacing = beautiful.wibar_spacing,
+                    spacing = beautiful.wibar.spacing,
                 },
             },
             {
@@ -54,7 +54,7 @@ capi.screen.connect_signal("request::desktop_decoration", function(screen)
                 {
                     id = "#right",
                     layout = wibox.layout.fixed.horizontal,
-                    spacing = beautiful.wibar_spacing,
+                    spacing = beautiful.wibar.spacing,
                     reverse = true,
                 },
             },

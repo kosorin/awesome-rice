@@ -38,10 +38,10 @@ function layoutbox.new(wibar)
     local self = wibox.widget {
         widget = capsule,
         margins = {
-            left = beautiful.wibar_padding.left,
+            left = beautiful.wibar.padding.left,
             right = beautiful.capsule.default_style.margins.right,
-            top = beautiful.wibar_padding.top,
-            bottom = beautiful.wibar_padding.bottom,
+            top = beautiful.wibar.padding.top,
+            bottom = beautiful.wibar.padding.bottom,
         },
         paddings = {
             left = dpi(10),
@@ -73,16 +73,7 @@ function layoutbox.new(wibar)
         binding.awful({}, btn.right, function()
             self._private.menu:toggle({
                 tag = self._private.wibar.screen.selected_tag,
-                placement = function(menu)
-                    aplacement.wibar(menu, {
-                        geometry = widget_helper.find_geometry(self, self._private.wibar),
-                        position = "bottom",
-                        anchor = "middle",
-                        honor_workarea = true,
-                        honor_padding = false,
-                        margins = beautiful.popup.margins,
-                    })
-                end,
+                placement = beautiful.wibar.build_placement(self, self._private.wibar),
             }, { source = "mouse" })
         end),
         binding.awful({}, btn.middle, nil, function()

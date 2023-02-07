@@ -83,16 +83,7 @@ function taglist:show_tag_menu(tag)
             menu:show {
                 taglist = self,
                 tag = tag,
-                placement = function(menu)
-                    aplacement.wibar(menu, {
-                        geometry = widget_helper.find_geometry(container, self._private.wibar),
-                        position = "bottom",
-                        anchor = "middle",
-                        honor_workarea = true,
-                        honor_padding = false,
-                        margins = beautiful.popup.margins,
-                    })
-                end,
+                placement = beautiful.wibar.build_placement(container, self._private.wibar),
             }
         end
     end
@@ -194,8 +185,8 @@ function taglist.new(wibar)
         },
         layout = {
             layout = wibox.container.margin,
-            left = -beautiful.wibar_spacing / 2,
-            right = -beautiful.wibar_spacing / 2,
+            left = -beautiful.wibar.spacing / 2,
+            right = -beautiful.wibar.spacing / 2,
             {
                 layout = wibox.layout.fixed.horizontal,
                 {
@@ -204,10 +195,10 @@ function taglist.new(wibar)
                 {
                     widget = capsule,
                     margins = {
-                        left = beautiful.wibar_spacing / 2,
-                        right = beautiful.wibar_spacing / 2,
-                        top = beautiful.wibar_padding.top,
-                        bottom = beautiful.wibar_padding.bottom,
+                        left = beautiful.wibar.spacing / 2,
+                        right = beautiful.wibar.spacing / 2,
+                        top = beautiful.wibar.padding.top,
+                        bottom = beautiful.wibar.padding.bottom,
                     },
                     paddings = {
                         left = dpi(6),
@@ -239,10 +230,10 @@ function taglist.new(wibar)
             id = "#container",
             widget = capsule,
             margins = {
-                left = beautiful.wibar_spacing / 2,
-                right = beautiful.wibar_spacing / 2,
-                top = beautiful.wibar_padding.top,
-                bottom = beautiful.wibar_padding.bottom,
+                left = beautiful.wibar.spacing / 2,
+                right = beautiful.wibar.spacing / 2,
+                top = beautiful.wibar.padding.top,
+                bottom = beautiful.wibar.padding.bottom,
             },
             {
                 id = "#text",

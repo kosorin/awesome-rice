@@ -145,8 +145,8 @@ function network_widget.new(wibar)
         margins = {
             left = beautiful.capsule.default_style.margins.left,
             right = beautiful.capsule.default_style.margins.right,
-            top = beautiful.wibar_padding.top,
-            bottom = beautiful.wibar_padding.bottom,
+            top = beautiful.wibar.padding.top,
+            bottom = beautiful.wibar.padding.bottom,
         },
     }
 
@@ -235,16 +235,7 @@ function network_widget.new(wibar)
 
     self._private.menu = mebox {
         item_width = dpi(144),
-        placement = function(menu)
-            aplacement.wibar(menu, {
-                geometry = widget_helper.find_geometry(self, self._private.wibar),
-                position = "bottom",
-                anchor = "middle",
-                honor_workarea = true,
-                honor_padding = false,
-                margins = beautiful.popup.margins,
-            })
-        end,
+        placement = beautiful.wibar.build_placement(self, self._private.wibar),
         {
             text = "show graph",
             on_show = function(item) item.checked = not not self._private.show_graph end,

@@ -82,8 +82,8 @@ function redshift_widget.new(wibar)
         margins = {
             left = beautiful.capsule.default_style.margins.left,
             right = beautiful.capsule.default_style.margins.right,
-            top = beautiful.wibar_padding.top,
-            bottom = beautiful.wibar_padding.bottom,
+            top = beautiful.wibar.padding.top,
+            bottom = beautiful.wibar.padding.bottom,
         },
         {
             layout = wibox.layout.fixed.horizontal,

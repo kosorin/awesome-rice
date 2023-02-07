@@ -37,16 +37,7 @@ function clientlist:show_client_menu(client)
         if old_client ~= client then
             menu:show {
                 client = client,
-                placement = function(menu)
-                    aplacement.wibar(menu, {
-                        geometry = widget_helper.find_geometry(container, self._private.wibar),
-                        position = "bottom",
-                        anchor = "middle",
-                        honor_workarea = true,
-                        honor_padding = false,
-                        margins = beautiful.popup.margins,
-                    })
-                end,
+                placement = beautiful.wibar.build_placement(container, self._private.wibar),
             }
         end
     end
@@ -146,8 +137,8 @@ function clientlist.new(wibar)
         },
         layout = {
             layout = wibox.container.margin,
-            left = -beautiful.wibar_spacing / 2,
-            right = -beautiful.wibar_spacing / 2,
+            left = -beautiful.wibar.spacing / 2,
+            right = -beautiful.wibar.spacing / 2,
             {
                 layout = wibox.layout.fixed.horizontal,
             },
@@ -157,10 +148,10 @@ function clientlist.new(wibar)
             widget = capsule,
             forced_width = dpi(220),
             margins = {
-                left = beautiful.wibar_spacing / 2,
-                right = beautiful.wibar_spacing / 2,
-                top = beautiful.wibar_padding.top,
-                bottom = beautiful.wibar_padding.bottom,
+                left = beautiful.wibar.spacing / 2,
+                right = beautiful.wibar.spacing / 2,
+                top = beautiful.wibar.padding.top,
+                bottom = beautiful.wibar.padding.bottom,
             },
             {
                 layout = wibox.layout.fixed.horizontal,

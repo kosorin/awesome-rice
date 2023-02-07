@@ -5,6 +5,7 @@ local aplacement = require("awful.placement")
 local wibox = require("wibox")
 local gdebug = require("gears.debug")
 local gshape = require("gears.shape")
+local gtable = require("gears.table")
 local gfilesystem = require("gears.filesystem")
 local dpi = dpi
 local tcolor = require("theme.color")
@@ -12,6 +13,7 @@ local capsule = require("widget.capsule")
 local pango = require("utils.pango")
 local config = require("config")
 local htable = require("helpers.table")
+local hwidget = require("helpers.widget")
 
 
 ---------------------------------------------------------------------------------------------------
@@ -193,12 +195,26 @@ theme.screenshot_area_color = tcolor.change(theme.common.primary, { alpha = 0.20
 theme.wibar_height = dpi(46) -- 30 + 2*8
 theme.wibar_bg = theme.common.background
 
-theme.wibar_spacing = dpi(12)
-theme.wibar_padding = {
-    left = dpi(16),
-    right = dpi(16),
-    top = dpi(8),
-    bottom = dpi(8),
+theme.wibar = {
+    spacing = dpi(12),
+    padding = {
+        left = dpi(16),
+        right = dpi(16),
+        top = dpi(8),
+        bottom = dpi(8),
+    },
+    build_placement = function(widget, wibar, args)
+        return function(d)
+            aplacement.wibar(d, gtable.crush({
+                geometry = hwidget.find_geometry(widget, wibar),
+                position = "bottom",
+                anchor = "middle",
+                honor_workarea = true,
+                honor_padding = false,
+                margins = theme.popup.margins,
+            }, args or {}))
+        end
+    end
 }
 
 

@@ -35,9 +35,9 @@ function power_widget.new(wibar)
         widget = capsule,
         margins = {
             left = beautiful.capsule.default_style.margins.left,
-            right = beautiful.wibar_padding.right,
-            top = beautiful.wibar_padding.top,
-            bottom = beautiful.wibar_padding.bottom,
+            right = beautiful.wibar.padding.right,
+            top = beautiful.wibar.padding.top,
+            bottom = beautiful.wibar.padding.bottom,
         },
         paddings = {
             left = dpi(10),
@@ -64,16 +64,7 @@ function power_widget.new(wibar)
     self.buttons = binding.awful_buttons {
         binding.awful({}, btn.right, function()
             self._private.menu:toggle {
-                placement = function(menu)
-                    aplacement.wibar(menu, {
-                        geometry = widget_helper.find_geometry(self, self._private.wibar),
-                        position = "bottom",
-                        anchor = "middle",
-                        honor_workarea = true,
-                        honor_padding = false,
-                        margins = beautiful.popup.margins,
-                    })
-                end,
+                placement = beautiful.wibar.build_placement(self, self._private.wibar),
             }
         end),
     }
