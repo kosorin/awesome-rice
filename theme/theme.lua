@@ -1,12 +1,12 @@
 local string = string
 local math = math
 local pairs = pairs
+local table = table
 local aplacement = require("awful.placement")
 local wibox = require("wibox")
 local gdebug = require("gears.debug")
 local gshape = require("gears.shape")
 local gtable = require("gears.table")
-local gfilesystem = require("gears.filesystem")
 local dpi = dpi
 local tcolor = require("theme.color")
 local capsule = require("widget.capsule")
@@ -39,19 +39,6 @@ theme.font = theme.build_font()
 
 
 ---------------------------------------------------------------------------------------------------
-
-theme.palette_color_names = {
-    "black",
-    "white",
-    "red",
-    "orange",
-    "yellow",
-    "green",
-    "cyan",
-    "blue",
-    "magenta",
-    "gray",
-}
 
 theme.common_color_names = {
     background = "black",
@@ -99,6 +86,13 @@ theme.common = {
     secondary_bright  = theme.palette[theme.common_color_names.secondary .. "_bright"],
     urgent_bright     = theme.palette[theme.common_color_names.urgent .. "_bright"],
 }
+
+theme.palette_color_names = {}
+for k in pairs(theme.palette) do
+    if not string.match(k, "_bright$") then
+        table.insert(theme.palette_color_names, k)
+    end
+end
 
 
 ---------------------------------------------------------------------------------------------------
@@ -226,7 +220,7 @@ theme.capsule = {
     item_spacing = dpi(16),
     bar_width = dpi(80),
     bar_height = dpi(12),
-    shape_radius = dpi(8)
+    shape_radius = dpi(8),
 }
 theme.capsule.default_style = {
     hover_overlay = tcolor.white .. "10",

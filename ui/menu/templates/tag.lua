@@ -38,8 +38,6 @@ local function on_show(menu, args)
     end
 end
 
--- TODO:
--- - toggle titlebar
 function tag_menu_template.new()
     return {
         item_width = dpi(180),
