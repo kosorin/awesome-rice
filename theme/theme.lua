@@ -623,6 +623,91 @@ theme.bindbox.default_style = htable.crush_clone(theme.popup.default_style, {
 
 ---------------------------------------------------------------------------------------------------
 
+theme.calendar_popup = {
+    default_style = htable.crush_clone(theme.popup.default_style),
+}
+
+do
+    local styles = {
+        normal = {
+            bg_color = tcolor.change(theme.common.foreground_66, { alpha = 0.25 }),
+        },
+        focus = {
+            bg_color = theme.common.primary_66,
+            fg_color = theme.common.foreground_bright,
+        },
+        normal_other = {
+            markup = function(text)
+                return "<span fgalpha='50%'>" .. text .. "</span>"
+            end,
+        },
+        focus_other = {
+            bg_color = theme.common.primary_50,
+            fg_color = theme.common.foreground,
+        },
+        header = {
+            markup = function(text)
+                return "<b>" .. text .. "</b>"
+            end,
+        },
+        weekday = {
+            markup = function(text)
+                return "<span weight='bold' fgalpha='75%'>" .. text .. "</span>"
+            end,
+        },
+        weeknumber = {
+            markup = function(text)
+                return "<span weight='bold' fgalpha='50%'>" .. text .. "</span>"
+            end,
+        }
+    }
+
+    function theme.calendar_popup.default_style.embed(widget, flag)
+        if flag == "month" then
+            return wibox.widget {
+                widget = wibox.container.place,
+                halign = "center",
+                valign = "top",
+                widget,
+            }
+        end
+
+        if flag == "monthheader" and not styles.monthheader then
+            flag = "header"
+        end
+        if flag == "normal_other" and not styles.normal_other then
+            flag = "normal"
+        end
+        if flag == "focus_other" and not styles.focus_other then
+            flag = "focus"
+        end
+
+        local style = styles[flag] or {}
+
+        if style.markup then
+            widget:set_markup(style.markup(widget:get_text()))
+        end
+
+        return wibox.widget {
+            widget = wibox.container.background,
+            bg = style.bg_color or tcolor.transparent,
+            fg = style.fg_color or theme.common.foreground,
+            {
+                widget = wibox.container.margin,
+                margins = style.padding or dpi(2),
+                {
+                    widget = wibox.container.place,
+                    halign = "center",
+                    widget,
+                },
+            },
+        }
+    end
+end
+
+
+---------------------------------------------------------------------------------------------------
+
 theme.taglist_bg_occupied = theme.capsule.styles.normal.background
 theme.taglist_fg_occupied = theme.capsule.styles.normal.foreground
 theme.taglist_shape_border_color = theme.capsule.styles.normal.border_color

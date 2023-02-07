@@ -82,18 +82,20 @@ local function initialize_date_widget(self, style)
         end),
     }
 
+    local popup_placement = function(popup)
+        aplacement.wibar(popup, {
+            geometry = widget_helper.find_geometry(date_container, self._private.wibar),
+            position = "bottom",
+            anchor = "middle",
+            honor_workarea = true,
+            honor_padding = false,
+            margins = beautiful.popup.margins,
+        })
+    end
+
     self._private.date_menu = mebox {
         item_width = dpi(192),
-        placement = function(menu)
-            aplacement.wibar(menu, {
-                geometry = widget_helper.find_geometry(date_container, self._private.wibar),
-                position = "bottom",
-                anchor = "middle",
-                honor_workarea = true,
-                honor_padding = false,
-                margins = beautiful.popup.margins,
-            })
-        end,
+        placement = popup_placement,
         {
             text = "copy date",
             icon = config.places.theme .. "/icons/content-copy.svg",
@@ -109,8 +111,7 @@ local function initialize_date_widget(self, style)
     }
 
     self._private.calendar_popup = calendar_popup.new {
-        wibar = self._private.wibar,
-        widget = date_container,
+        placement = popup_placement,
     }
 
     self._private.date_widget.text._timer:connect_signal("timeout", function()
