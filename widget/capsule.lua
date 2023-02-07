@@ -48,6 +48,8 @@ function module:set_children(children)
     self:set_widget(children[1])
 end
 
+-- TODO: Rename `enabled` property to something more meaningful
+
 function module:get_enabled()
     return self._private.enabled
 end
