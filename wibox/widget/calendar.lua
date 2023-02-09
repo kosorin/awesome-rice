@@ -276,7 +276,7 @@ local function create_month(props, date, focus_date)
         flag = "normal"
         text = string.format("%2d", cell_date.day)
         -- Focus day
-        if focus_date.day == cell_date.day and focus_date.month == cell_date.month then
+        if focus_date.day == cell_date.day and focus_date.month == cell_date.month and focus_date.year == cell_date.year then
             flag = "focus"
             text = "<b>"..text.."</b>"
         end
