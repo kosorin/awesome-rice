@@ -34,7 +34,6 @@ local function find_geometry_core(widget, drawable, hierarchy)
 end
 
 function widget_helper.find_geometry(widget, wibox)
-    wibox = wibox or capi.mouse.current_wibox
     local drawable = wibox and wibox._drawable
     local hierarchy = drawable and drawable._widget_hierarchy
     if not hierarchy then
