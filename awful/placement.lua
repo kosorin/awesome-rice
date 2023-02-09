@@ -1681,6 +1681,7 @@ function placement.skip_fullscreen(d, args)
     end
 end
 
+--- @deprecated
 function placement.infobubble(d, args)
     local old_args = args or {}
     args = add_context(args, "infobubble")
@@ -1744,54 +1745,102 @@ function placement.infobubble(d, args)
     return new_geometry
 end
 
-function placement.wibar(drawable, args)
-    args = add_context(args, "wibar")
-    args.position = args.position or "bottom"
-    args.anchor = args.anchor or "middle"
+do
+    local function get_region_origin(widget_geometry, position, outside)
+        local wibox = widget_geometry.drawable.get_wibox()
+        local wibox_geometry = wibox:geometry()
+        local wibox_border_width = wibox.border_width
 
-    drawable = drawable or capi.client.focus
+        local data = outside
+            and {
+                parent_x = wibox_geometry.x,
+                parent_y = wibox_geometry.y,
+                parent_border_width = wibox_border_width,
+                parent_width = wibox_geometry.width,
+                parent_height = wibox_geometry.height,
+                x = widget_geometry.x,
+                y = widget_geometry.y,
+            }
+            or {
+                parent_x = wibox_geometry.x + wibox_border_width + widget_geometry.x,
+                parent_y = wibox_geometry.y + wibox_border_width + widget_geometry.y,
+                parent_border_width = 0,
+                parent_width = widget_geometry.width,
+                parent_height = widget_geometry.height,
+                x = 0,
+                y = 0,
+            }
 
-    local mode, geometry
-    if args.geometry then
-        mode, geometry = "geometry", args.geometry
-    else
-        local mouse_widget_geometry = capi.mouse.current_widget_geometry
-        if mouse_widget_geometry then
-            mode, geometry = "cursor", mouse_widget_geometry
-        elseif capi.mouse.current_client then
-            mode, geometry = "cursor", capi.mouse.current_client:geometry()
+        local x, y
+        if position == "left" then
+            x = data.parent_x
+            y = data.parent_y + data.parent_border_width + data.y
+        elseif position == "right" then
+            x = data.parent_x + 2 * data.parent_border_width + data.parent_width
+            y = data.parent_y + data.parent_border_width + data.y
+        elseif position == "top" then
+            x = data.parent_x + data.parent_border_width + data.x
+            y = data.parent_y
+        elseif position == "bottom" then
+            x = data.parent_x + data.parent_border_width + data.x
+            y = data.parent_y + 2 * data.parent_border_width + data.parent_height
         end
+        return x, y
     end
 
-    if not geometry then
-        return
+    local function get_region_geometry(widget_geometry, position, outside)
+        local region_x, region_y = get_region_origin(widget_geometry, position, outside)
+        if not region_x or not region_y then
+            return
+        end
+        return {
+            x = region_x,
+            y = region_y,
+            width = widget_geometry.width,
+            height = widget_geometry.height,
+        }
     end
 
-    local is_absolute = geometry.ontop ~= nil
-    local region = get_relative_regions(geometry, mode, is_absolute)[args.position]
-    if not region then
-        return
+    local function get_outer_geometry(drawable_geometry, region_geometry, position)
+        local new_geometry = outer_positions[position](region_geometry,
+            drawable_geometry.width,
+            drawable_geometry.height)
+        new_geometry.width = drawable_geometry.width
+        new_geometry.height = drawable_geometry.height
+        return new_geometry
     end
 
-    local drawable_geometry = geometry_common(drawable, args)
-    local outer_position = args.position .. "_" .. args.anchor
-    local new_geometry = outer_positions[outer_position](region,
-        drawable_geometry.width,
-        drawable_geometry.height)
-    new_geometry.width = drawable_geometry.width
-    new_geometry.height = drawable_geometry.height
-    if not new_geometry then
-        return
+    function placement.next_to_widget(drawable, args)
+        if not drawable or not args then
+            return
+        end
+
+        if not args.geometry then
+            return
+        end
+
+        args = add_context(args, "next_to_widget")
+        args.position = args.position or "bottom"
+        args.anchor = args.anchor or "middle"
+
+        local region_geometry = get_region_geometry(args.geometry, args.position, args.outside)
+        if not region_geometry then
+            return
+        end
+
+        local drawable_geometry = geometry_common(drawable, args)
+        local outer_position = args.position .. "_" .. args.anchor
+        local new_geometry = get_outer_geometry(drawable_geometry, region_geometry, outer_position)
+        if not new_geometry then
+            return
+        end
+
+        remove_border(drawable, args, new_geometry)
+        geometry_common(drawable, args, new_geometry)
+        fix_new_geometry(new_geometry, args, true)
+
+        return placement.no_offscreen(drawable, args)
     end
-
-    remove_border(drawable, args, new_geometry)
-    geometry_common(drawable, args, new_geometry)
-    fix_new_geometry(new_geometry, args, true)
-
-    new_geometry = placement.no_offscreen(drawable, args) or {}
-
-    attach(drawable, placement.wibar, args)
-    return new_geometry
 end
 
 return placement

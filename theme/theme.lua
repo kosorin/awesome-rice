@@ -199,12 +199,12 @@ theme.wibar = {
     },
     build_placement = function(widget, wibar, args)
         return function(d)
-            aplacement.wibar(d, gtable.crush({
+            aplacement.next_to_widget(d, gtable.crush({
                 geometry = hwidget.find_geometry(widget, wibar),
                 position = "bottom",
                 anchor = "middle",
-                honor_workarea = true,
-                honor_padding = false,
+                outside = true,
+                screen = wibar.screen,
                 margins = theme.popup.margins,
             }, args or {}))
         end
