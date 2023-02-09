@@ -10,6 +10,7 @@ local beautiful = require("beautiful")
 local dpi = dpi
 local capsule = require("widget.capsule")
 local noice = require("widget.noice")
+local config = require("config")
 
 
 local calendar_popup = { mt = {} }
@@ -113,7 +114,14 @@ function calendar_popup.new(args)
                             buttons = binding.awful_buttons {
                                 binding.awful({}, { btn.left }, function() self:move(-1) end),
                             },
-                            wibox.widget.textbox("&lt;"),
+                            {
+                                widget = wibox.widget.imagebox,
+                                forced_width = dpi(18),
+                                forced_height = dpi(18),
+                                resize = true,
+                                image = config.places.theme .. "/icons/chevron-left.svg",
+                                stylesheet = "path { fill: " .. beautiful.capsule.default_style.foreground .. "; }",
+                            },
                         },
                     },
                     {
@@ -125,7 +133,14 @@ function calendar_popup.new(args)
                             buttons = binding.awful_buttons {
                                 binding.awful({}, { btn.left }, function() self:move(1) end),
                             },
-                            wibox.widget.textbox("&gt;"),
+                            {
+                                widget = wibox.widget.imagebox,
+                                forced_width = dpi(18),
+                                forced_height = dpi(18),
+                                resize = true,
+                                image = config.places.theme .. "/icons/chevron-right.svg",
+                                stylesheet = "path { fill: " .. beautiful.capsule.default_style.foreground .. "; }",
+                            },
                         },
                     },
                 },
