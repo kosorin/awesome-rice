@@ -638,80 +638,87 @@ theme.calendar_popup = {
 }
 
 do
-    local styles = {
-        normal = {
-            bg_color = tcolor.change(theme.common.foreground_66, { alpha = 0.25 }),
-        },
-        focus = {
-            bg_color = theme.common.primary_66,
-            fg_color = theme.common.foreground_bright,
-        },
-        normal_other = {
-            markup = function(text)
-                return "<span fgalpha='50%'>" .. text .. "</span>"
-            end,
-        },
-        focus_other = {
-            bg_color = theme.common.primary_50,
-            fg_color = theme.common.foreground,
-        },
-        header = {
-            markup = function(text)
-                return "<b>" .. text .. "</b>"
-            end,
-        },
-        weekday = {
-            markup = function(text)
-                return "<span weight='bold' fgalpha='75%'>" .. text .. "</span>"
-            end,
-        },
-        weeknumber = {
-            markup = function(text)
-                return "<span weight='bold' fgalpha='50%'>" .. text .. "</span>"
-            end,
-        }
-    }
+    local function is_weekend(date)
+        return date.wday == 1 or date.wday == 7
+    end
 
-    function theme.calendar_popup.default_style.embed(widget, flag)
-        if flag == "month" then
+    function theme.calendar_popup.default_style.embed(widget, flag, date)
+        if flag == "normal" then
+            widget.halign = "center"
             return wibox.widget {
-                widget = wibox.container.place,
-                halign = "center",
-                valign = "top",
+                widget = wibox.container.background,
+                bg = is_weekend(date) and theme.common.background_127 or theme.common.background_115,
+                shape = function(cr, width, height)
+                    gshape.rounded_rect(cr, width, height, dpi(3))
+                end,
                 widget,
             }
-        end
-
-        if flag == "monthheader" and not styles.monthheader then
-            flag = "header"
-        end
-        if flag == "normal_other" and not styles.normal_other then
-            flag = "normal"
-        end
-        if flag == "focus_other" and not styles.focus_other then
-            flag = "focus"
-        end
-
-        local style = styles[flag] or {}
-
-        if style.markup then
-            widget:set_markup(style.markup(widget:get_text()))
-        end
-
-        return wibox.widget {
-            widget = wibox.container.background,
-            bg = style.bg_color or tcolor.transparent,
-            fg = style.fg_color or theme.common.foreground,
-            {
+        elseif flag == "focus" then
+            widget.halign = "center"
+            return wibox.widget {
+                widget = wibox.container.background,
+                bg = theme.common.primary_66,
+                fg = theme.common.foreground_bright,
+                shape = function(cr, width, height)
+                    gshape.rounded_rect(cr, width, height, dpi(3))
+                end,
+                widget,
+            }
+        elseif flag == "normal_other" then
+            widget.halign = "center"
+            widget.markup = pango.span { color = theme.common.foreground_50, widget.text }
+            return widget
+        elseif flag == "focus_other" then
+            widget.halign = "center"
+            return wibox.widget {
+                widget = wibox.container.background,
+                bg = theme.common.primary_50,
+                fg = theme.common.foreground,
+                shape = function(cr, width, height)
+                    gshape.rounded_rect(cr, width, height, dpi(3))
+                end,
+                widget,
+            }
+        elseif flag == "weeknumber" then
+            widget.halign = "right"
+            widget.markup = pango.span { color = theme.common.foreground_50, weight = "bold", widget.text }
+            return wibox.widget {
                 widget = wibox.container.margin,
-                margins = style.padding or dpi(2),
-                {
-                    widget = wibox.container.place,
-                    halign = "center",
-                    widget,
+                margins = {
+                    right = dpi(8),
+                    top = dpi(2),
+                    bottom = dpi(2),
                 },
-            },
-        }
+                widget,
+            }
+        elseif flag == "weekday" then
+            widget.halign = "center"
+            return wibox.widget {
+                widget = wibox.container.margin,
+                margins = {
+                    left = dpi(4),
+                    right = dpi(4),
+                    top = dpi(2),
+                    bottom = dpi(2),
+                },
+                widget,
+            }
+        elseif flag == "monthheader" or flag == "header" then
+            widget.halign = "center"
+            widget.markup = pango.b(widget.text)
+            return wibox.widget {
+                widget = wibox.container.margin,
+                margins = {
+                    top = dpi(6),
+                    bottom = dpi(14),
+                },
+                widget,
+            }
+        elseif flag == "month" then
+            return widget
+        else
+            return widget
+        end
     end
 end
 

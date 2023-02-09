@@ -82,7 +82,8 @@ noice.define_style_properties(calendar_popup, {
 function calendar_popup.new(args)
     args = args or {}
 
-    local self = awful.popup {
+    local self
+    self = awful.popup {
         ontop = true,
         visible = false,
         widget = {
@@ -90,15 +91,56 @@ function calendar_popup.new(args)
             widget = capsule,
             background = tcolor.transparent,
             {
-                id = "#calendar",
-                widget = wibox.widget.calendar.month,
-                font = beautiful.font,
-                fill_month = true,
-                week_numbers = true,
-                long_weekdays = true,
-                start_sunday = false,
-                flex_height = false,
-            }
+                layout = wibox.layout.fixed.vertical,
+                spacing = dpi(16),
+                {
+                    layout = wibox.layout.stack,
+                    {
+                        id = "#calendar",
+                        widget = wibox.widget.calendar.month,
+                        font = beautiful.font,
+                        fill_month = true,
+                        week_numbers = true,
+                        long_weekdays = true,
+                        start_sunday = false,
+                    },
+                    {
+                        layout = wibox.container.place,
+                        valign = "top",
+                        halign = "left",
+                        {
+                            widget = capsule,
+                            buttons = binding.awful_buttons {
+                                binding.awful({}, { btn.left }, function() self:move(-1) end),
+                            },
+                            wibox.widget.textbox("&lt;"),
+                        },
+                    },
+                    {
+                        layout = wibox.container.place,
+                        valign = "top",
+                        halign = "right",
+                        {
+                            widget = capsule,
+                            buttons = binding.awful_buttons {
+                                binding.awful({}, { btn.left }, function() self:move(1) end),
+                            },
+                            wibox.widget.textbox("&gt;"),
+                        },
+                    },
+                },
+                {
+                    widget = capsule,
+                    buttons = binding.awful_buttons {
+                        binding.awful({}, { btn.left }, function() self:today() end),
+                    },
+                    {
+                        widget = wibox.widget.textbox,
+                        text = "today",
+                        halign = "center",
+                    },
+                },
+            },
         },
     }
 
@@ -111,8 +153,8 @@ function calendar_popup.new(args)
     self:apply_style(args)
 
     self.buttons = binding.awful_buttons {
-        binding.awful({}, { btn.left }, function() self:hide() end),
-        binding.awful({}, { btn.right }, function() self:today() end),
+        binding.awful({}, { btn.right }, function() self:hide() end),
+        binding.awful({}, { btn.middle }, function() self:today() end),
         binding.awful({}, {
             { trigger = btn.wheel_up, direction = -1 },
             { trigger = btn.wheel_down, direction = 1 },

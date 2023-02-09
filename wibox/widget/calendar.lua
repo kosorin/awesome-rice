@@ -212,10 +212,8 @@ local function create_month(props, date, focus_date)
 
     -- Create grid layout
     local layout = grid()
-    if props.flex_height then
-        layout:set_expand(true)
-    end
-    layout:set_homogeneous(true)
+    layout:set_expand(false)
+    layout:set_homogeneous(false)
     layout:set_spacing(props.spacing)
     layout:set_forced_num_rows(num_rows)
     layout:set_forced_num_cols(num_columns)
