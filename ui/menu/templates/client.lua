@@ -102,7 +102,7 @@ function client_menu_template.new()
             submenu = function()
                 local value_widget
                 local step = 0.05
-                local min_opacity = 0.01
+                local min_opacity = 0
                 local max_opacity = 1
 
                 local function update_opacity_text(menu)
