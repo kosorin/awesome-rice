@@ -33,13 +33,13 @@ function mouse_helper.grab_horizontal(args)
                 return
             end
 
-            local screen = args.wibox and args.wibox.screen or capi.mouse.screen
-            local screen_x = screen.geometry.x
+            local wibox_geometry = args.wibox and args.wibox:geometry()
+            local wibox_x = wibox_geometry and wibox_geometry.x or 0
 
             args.change(calculate_value(x / geometry.width))
 
             capi.mousegrabber.run(function(grab)
-                local value = calculate_value((grab.x - geometry.x - screen_x) / geometry.width)
+                local value = calculate_value((grab.x - geometry.x - wibox_x) / geometry.width)
                 if grab.buttons[button] then
                     args.change(value)
                     return true
