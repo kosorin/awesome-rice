@@ -16,6 +16,7 @@ local aplacement = require("awful.placement")
 local widget_helper = require("helpers.widget")
 local mebox = require("widget.mebox")
 local tag_layout_menu_template = require("ui.menu.templates.tag_layout")
+local main_menu = require("ui.menu.main")
 
 
 local layoutbox = { mt = {} }
@@ -69,6 +70,11 @@ function layoutbox.new(wibar)
     self._private.menu = mebox(tag_layout_menu_template.shared)
 
     self.buttons = binding.awful_buttons {
+        binding.awful({}, btn.left, function()
+            main_menu:toggle({
+                placement = beautiful.wibar.build_placement(self, self._private.wibar),
+            }, { source = "mouse" })
+        end),
         binding.awful({}, btn.right, function()
             self._private.menu:toggle({
                 tag = self._private.wibar.screen.selected_tag,
