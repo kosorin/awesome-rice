@@ -634,6 +634,13 @@ theme.bindbox.default_style = htable.crush_clone(theme.popup.default_style, {
 
 ---------------------------------------------------------------------------------------------------
 
+theme.tools_popup = {
+    default_style = htable.crush_clone(theme.popup.default_style),
+}
+
+
+---------------------------------------------------------------------------------------------------
+
 theme.calendar_popup = {
     default_style = htable.crush_clone(theme.popup.default_style),
 }

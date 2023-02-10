@@ -21,6 +21,7 @@ local volume_widget = require("ui.topbar.volume")
 local weather_widget = require("ui.topbar.weather")
 local datetime_widget = require("ui.topbar.datetime")
 local redshift_widget = require("ui.topbar.redshift")
+local tools_widget = require("ui.topbar.tools")
 local power_widget = require("ui.topbar.power")
 
 
@@ -52,10 +53,15 @@ capi.screen.connect_signal("request::desktop_decoration", function(screen)
                 halign = "right",
                 fill_horizontal = true,
                 {
-                    id = "#right",
+                    id = "#right_container",
                     layout = wibox.layout.fixed.horizontal,
                     spacing = beautiful.wibar.spacing,
-                    reverse = true,
+                    {
+                        id = "#right",
+                        layout = wibox.layout.fixed.horizontal,
+                        spacing = beautiful.wibar.spacing,
+                        reverse = true,
+                    },
                 },
             },
         },
@@ -78,25 +84,28 @@ capi.screen.connect_signal("request::desktop_decoration", function(screen)
     local middle = wibar:get_children_by_id("#middle")[1]
     middle:add(screen.topbar.taglist)
 
+    local right_container = wibar:get_children_by_id("#right_container")[1]
+    if is_primary then
+        right_container:insert(1, tools_widget.new(wibar))
+    end
+
     local right = wibar:get_children_by_id("#right")[1]
-    if right then
-        if is_primary then
-            if config.features.torrent_widget then
-                right:add(torrent_widget.new(wibar))
-            end
-            right:add(network_widget.new(wibar))
-            right:add(volume_widget.new(wibar))
-            if config.features.redshift_widget then
-                right:add(redshift_widget.new(wibar))
-            end
-            if config.features.weather_widget then
-                right:add(weather_widget.new(wibar))
-            end
-            right:add(datetime_widget.new(wibar))
-            right:add(power_widget.new(wibar))
-        else
-            right:add(datetime_widget.new(wibar))
-            right:add(power_widget.new(wibar))
+    if is_primary then
+        if config.features.torrent_widget then
+            right:add(torrent_widget.new(wibar))
         end
+        right:add(network_widget.new(wibar))
+        right:add(volume_widget.new(wibar))
+        if config.features.redshift_widget then
+            right:add(redshift_widget.new(wibar))
+        end
+        if config.features.weather_widget then
+            right:add(weather_widget.new(wibar))
+        end
+        right:add(datetime_widget.new(wibar))
+        right:add(power_widget.new(wibar))
+    else
+        right:add(datetime_widget.new(wibar))
+        right:add(power_widget.new(wibar))
     end
 end)
