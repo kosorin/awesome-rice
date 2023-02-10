@@ -186,11 +186,9 @@ theme.screenshot_area_color = tcolor.change(theme.common.primary, { alpha = 0.20
 
 ---------------------------------------------------------------------------------------------------
 
-theme.wibar_height = dpi(46) -- 30 + 2*8
-theme.wibar_bg = theme.common.background
-
 theme.wibar = {
     spacing = dpi(12),
+    item_height = dpi(30),
     padding = {
         left = dpi(16),
         right = dpi(16),
@@ -210,6 +208,9 @@ theme.wibar = {
         end
     end
 }
+
+theme.wibar_height = theme.wibar.item_height + theme.wibar.padding.top + theme.wibar.padding.bottom
+theme.wibar_bg = theme.common.background
 
 
 ---------------------------------------------------------------------------------------------------
