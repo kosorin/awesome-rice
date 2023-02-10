@@ -76,15 +76,17 @@ function redshift_widget:update(temperature)
     awful.spawn("sct " .. tostring(self._private.data.temperature))
 end
 
-function redshift_widget.new(wibar)
+function redshift_widget.new(wibar, on_dashboard)
     local self = wibox.widget {
         widget = capsule,
-        margins = {
-            left = beautiful.capsule.default_style.margins.left,
-            right = beautiful.capsule.default_style.margins.right,
-            top = beautiful.wibar.padding.top,
-            bottom = beautiful.wibar.padding.bottom,
-        },
+        margins = not on_dashboard
+            and {
+                left = beautiful.capsule.default_style.margins.left,
+                right = beautiful.capsule.default_style.margins.right,
+                top = beautiful.wibar.padding.top,
+                bottom = beautiful.wibar.padding.bottom,
+            }
+            or nil,
         {
             layout = wibox.layout.fixed.horizontal,
             spacing = beautiful.capsule.item_content_spacing,
@@ -109,7 +111,7 @@ function redshift_widget.new(wibar)
                     shape = function(cr, width, height) gshape.rounded_rect(cr, width, height, dpi(4)) end,
                     bar_shape = function(cr, width, height) gshape.rounded_rect(cr, width, height, dpi(3)) end,
                     max_value = 100,
-                    forced_width = beautiful.capsule.bar_width,
+                    forced_width = not on_dashboard and beautiful.capsule.bar_width,
                     forced_height = beautiful.capsule.bar_height,
                     color = style.foreground,
                     background_color = beautiful.get_progressbar_background_color(style.foreground),

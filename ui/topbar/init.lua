@@ -20,7 +20,6 @@ local network_widget = require("ui.topbar.network")
 local volume_widget = require("ui.topbar.volume")
 local weather_widget = require("ui.topbar.weather")
 local datetime_widget = require("ui.topbar.datetime")
-local redshift_widget = require("ui.topbar.redshift")
 local tools_widget = require("ui.topbar.tools")
 local power_widget = require("ui.topbar.power")
 
@@ -96,9 +95,6 @@ capi.screen.connect_signal("request::desktop_decoration", function(screen)
         end
         right:add(network_widget.new(wibar))
         right:add(volume_widget.new(wibar))
-        if config.features.redshift_widget then
-            right:add(redshift_widget.new(wibar))
-        end
         if config.features.weather_widget then
             right:add(weather_widget.new(wibar))
         end

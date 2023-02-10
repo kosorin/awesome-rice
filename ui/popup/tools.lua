@@ -11,6 +11,7 @@ local dpi = dpi
 local capsule = require("widget.capsule")
 local noice = require("widget.noice")
 local config = require("config")
+local redshift_widget = require("ui.topbar.redshift")
 
 
 local tools_popup = { mt = {} }
@@ -72,6 +73,11 @@ function tools_popup.new(args)
     self:apply_style(args)
 
     local container = self.widget:get_children_by_id("#container")[1]
+    if config.features.redshift_widget then
+        container:add(wibox.container.constraint(
+            redshift_widget(self, true),
+            "max", nil, beautiful.wibar.item_height))
+    end
 
     self.buttons = binding.awful_buttons {}
 
