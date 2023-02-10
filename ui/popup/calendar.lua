@@ -49,6 +49,8 @@ local function set_year_month(self, year, month)
 end
 
 function calendar_popup:refresh()
+    local date = self:get_date()
+    set_year_month(self, date.year, date.month)
 end
 
 function calendar_popup:today()
