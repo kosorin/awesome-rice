@@ -15,6 +15,7 @@ The following package names are from the Arch repositories or AUR.
 - `playerctl` - controlling media player
 - `xdg-open` (from `xdg-utils`) - opening files or URLs in the preferred applications
 - `xclip` - copying things to the clipboard
+- `slop` (with [`boxzoom`](https://github.com/naelstrof/slop/tree/master/shaderexamples) shader) - screen zooming
 
 ## Optional
 

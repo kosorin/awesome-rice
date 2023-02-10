@@ -45,7 +45,9 @@ config.actions = {
     show_emoji_picker = config.places.config .. "/rofi/emoji-run.sh",
 }
 
-config.commands = {}
+config.commands = {
+    magnifier = "slop --shader boxzoom --tolerance 0 --bordersize 3 | xclip -selection primary",
+}
 
 function config.commands.open(path)
     return "xdg-open \"" .. path .. "\""

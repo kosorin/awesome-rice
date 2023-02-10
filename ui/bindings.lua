@@ -345,6 +345,14 @@ binding.add_global_range {
         on_press = function() awful.spawn(config.actions.qr_code_clipboard) end,
     },
 
+    binding.new {
+        modifiers = { mod.super },
+        triggers = "z",
+        path = "action",
+        description = "magnifier",
+        on_press = function() awful.spawn.with_shell(config.commands.magnifier) end,
+    },
+
 
     binding.new {
         modifiers = {},
