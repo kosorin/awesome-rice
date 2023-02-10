@@ -11,7 +11,7 @@ local config = require("config")
 local dpi = dpi
 
 
-local application_menu_template = { mt = {} }
+local application_menu_template = { mt = { __index = {} } }
 
 local root_menu
 
@@ -166,7 +166,7 @@ function generate_all()
     end
 end
 
-application_menu_template.shared = function()
+function application_menu_template.mt.__index.shared()
     return root_menu or {}
 end
 

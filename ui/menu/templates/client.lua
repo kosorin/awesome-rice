@@ -14,7 +14,7 @@ local pango = require("utils.pango")
 local config = require("config")
 
 
-local client_menu_template = { mt = {} }
+local client_menu_template = { mt = { __index = {} } }
 
 local function build_simple_toggle(name, property, checkbox_type)
     return {
@@ -245,6 +245,6 @@ function client_menu_template.new()
     }
 end
 
-client_menu_template.shared = client_menu_template.new()
+client_menu_template.mt.__index.shared = client_menu_template.new()
 
 return setmetatable(client_menu_template, client_menu_template.mt)

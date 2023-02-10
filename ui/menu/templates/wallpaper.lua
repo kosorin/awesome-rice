@@ -11,7 +11,7 @@ local dpi = dpi
 local wallpaper_service = require("services.wallpaper")
 
 
-local wallpaper_menu_template = { mt = {} }
+local wallpaper_menu_template = { mt = { __index = {} } }
 
 function wallpaper_menu_template.new()
     return {
@@ -61,6 +61,6 @@ function wallpaper_menu_template.new()
     }
 end
 
-wallpaper_menu_template.shared = wallpaper_menu_template.new()
+wallpaper_menu_template.mt.__index.shared = wallpaper_menu_template.new()
 
 return setmetatable(wallpaper_menu_template, wallpaper_menu_template.mt)

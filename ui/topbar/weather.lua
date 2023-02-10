@@ -20,7 +20,6 @@ local dpi = dpi
 local capsule = require("widget.capsule")
 local mebox = require("widget.mebox")
 local gtable = require("gears.table")
-local setmetatable = setmetatable
 local aplacement = require("awful.placement")
 local widget_helper = require("helpers.widget")
 local pango = require("utils.pango")

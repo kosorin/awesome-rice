@@ -1,4 +1,3 @@
-local setmetatable = setmetatable
 local awful = require("awful")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
@@ -7,7 +6,7 @@ local capsule = require("widget.capsule")
 local pango = require("utils.pango")
 
 
-local tag_layout_menu_template = { mt = {} }
+local tag_layout_menu_template = { mt = { __index = {} } }
 
 local info_menu_item_template = {
     widget = wibox.container.margin,
@@ -171,6 +170,6 @@ function tag_layout_menu_template.new()
     }
 end
 
-tag_layout_menu_template.shared = tag_layout_menu_template.new()
+tag_layout_menu_template.mt.__index.shared = tag_layout_menu_template.new()
 
 return setmetatable(tag_layout_menu_template, tag_layout_menu_template.mt)

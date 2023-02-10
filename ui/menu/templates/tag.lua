@@ -11,7 +11,7 @@ local tag_layout_menu_template = require("ui.menu.templates.tag_layout")
 local config = require("config")
 
 
-local tag_menu_template = { mt = {} }
+local tag_menu_template = { mt = { __index = {} } }
 
 local function build_simple_toggle(name, property, checkbox_type)
     return {
@@ -116,6 +116,6 @@ function tag_menu_template.new()
     }
 end
 
-tag_menu_template.shared = tag_menu_template.new()
+tag_menu_template.mt.__index.shared = tag_menu_template.new()
 
 return setmetatable(tag_menu_template, tag_menu_template.mt)

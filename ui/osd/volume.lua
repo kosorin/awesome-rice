@@ -20,7 +20,7 @@ local config = require("config")
 local htable = require("helpers.table")
 
 
-local volume_osd = { mt = {} }
+local volume_osd = {}
 
 local styles = {
     normal = htable.crush_clone(beautiful.capsule.styles.normal, { border_width = 0 }),
@@ -45,7 +45,7 @@ function volume_osd:refresh()
     local volume_background_color = beautiful.get_progressbar_background_color(style.foreground)
 
     local text_widget = self.widget:get_children_by_id("text")[1]
-    text_widget:set_markup(pango.span { foreground = volume_color, volume_text, })
+    text_widget:set_markup(pango.span { foreground = volume_color, volume_text })
 
     local wave1_fill = (not data.muted and data.volume <= 0) and volume_background_color or volume_color
     local wave2_fill = (not data.muted and data.volume <= 30) and volume_background_color or volume_color
@@ -189,4 +189,4 @@ function volume_osd.new()
     return self
 end
 
-return setmetatable(volume_osd, volume_osd.mt).new()
+return volume_osd.new()

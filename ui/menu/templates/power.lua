@@ -12,7 +12,7 @@ local mebox = require("widget.mebox")
 local config = require("config")
 
 
-local power_menu_template = { mt = {} }
+local power_menu_template = { mt = { __index = {} } }
 
 local confirmation_border_color = beautiful.common.urgent_bright
 
@@ -185,6 +185,6 @@ function power_menu_template.new()
     }
 end
 
-power_menu_template.shared = power_menu_template.new()
+power_menu_template.mt.__index.shared = power_menu_template.new()
 
 return setmetatable(power_menu_template, power_menu_template.mt)

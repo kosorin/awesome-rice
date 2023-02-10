@@ -7,7 +7,6 @@ local capi = {
     awesome = awesome,
     mouse = mouse,
 }
-local setmetatable = setmetatable
 local concat = table.concat
 local insert = table.insert
 local max = math.max

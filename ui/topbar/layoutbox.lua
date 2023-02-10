@@ -2,7 +2,6 @@ local capi = {
     screen = screen,
     tag = tag,
 }
-local setmetatable = setmetatable
 local awful = require("awful")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
