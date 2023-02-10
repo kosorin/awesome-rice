@@ -34,6 +34,10 @@ function screenshot.take(args)
         command = string.format("%s --delay %.0f", command, args.delay)
     end
 
+    if args.shader then
+        command = string.format("%s --shader %s", command, args.shader)
+    end
+
     if args.mode == "selection" then
         command = string.format("%s --select --highlight --bordersize %.0f --color %s", command,
             beautiful.screenshot_area_border_width,

@@ -449,7 +449,7 @@ if config.features.screenshot_tools then
             triggers = "Print",
             path = { "screenshot", "save to file" },
             description = "interactive selection",
-            on_press = function() services.screenshot.take { mode = "selection" } end,
+            on_press = function() services.screenshot.take { mode = "selection", shader = "boxzoom" } end,
         },
 
         binding.new {
@@ -474,7 +474,7 @@ if config.features.screenshot_tools then
             triggers = "Print",
             path = { "screenshot", "copy to clipboard" },
             description = "interactive selection",
-            on_press = function() services.screenshot.take { mode = "selection", output = "clipboard" } end,
+            on_press = function() services.screenshot.take { mode = "selection", shader = "boxzoom", output = "clipboard" } end,
         },
 
         binding.new {
