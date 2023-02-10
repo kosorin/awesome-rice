@@ -47,11 +47,24 @@ function datetime_widget:toggle_seconds()
     self:show_seconds(not self._private.seconds)
 end
 
+function datetime_widget:refresh_date_widget()
+    local date_container = self["#date"]
+    local style = self._private.calendar_popup.visible
+        and beautiful.capsule.styles.selected
+        or beautiful.capsule.styles.normal
+    date_container:apply_style(style)
+
+    local icon_stylesheet = "path { fill: " .. style.foreground .. "; }"
+    local icon_widget = date_container.widget:get_children_by_id("icon")[1]
+    icon_widget:set_stylesheet(icon_stylesheet)
+end
+
 local function initialize_date_widget(self, style)
     self._private.date_widget = wibox.widget {
         layout = wibox.layout.fixed.horizontal,
         spacing = beautiful.capsule.item_content_spacing,
         {
+            id = "icon",
             widget = wibox.widget.imagebox,
             resize = true,
             image = config.places.theme .. "/icons/calendar-month.svg",
@@ -108,6 +121,12 @@ local function initialize_date_widget(self, style)
     self._private.date_widget.text._timer:connect_signal("timeout", function()
         self._private.calendar_popup:refresh()
     end)
+
+    self._private.calendar_popup:connect_signal("property::visible", function()
+        self:refresh_date_widget()
+    end)
+
+    self:refresh_date_widget()
 end
 
 local function initialize_time_widget(self, style)
@@ -207,7 +226,7 @@ function datetime_widget.new(wibar)
             shape = function(cr, width, height)
                 gshape.partially_rounded_rect(cr, width, height, false, true, true, false, beautiful.capsule.shape_radius)
             end,
-        }
+        },
     }
 
     gtable.crush(self, datetime_widget, true)

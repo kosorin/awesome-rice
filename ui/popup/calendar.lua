@@ -170,7 +170,6 @@ function calendar_popup.new(args)
     self:apply_style(args)
 
     self.buttons = binding.awful_buttons {
-        binding.awful({}, { btn.right }, function() self:hide() end),
         binding.awful({}, { btn.middle }, function() self:today() end),
         binding.awful({}, {
             { trigger = btn.wheel_up, direction = -1 },
