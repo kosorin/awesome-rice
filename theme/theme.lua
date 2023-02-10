@@ -645,6 +645,7 @@ do
     function theme.calendar_popup.default_style.embed(widget, flag, date)
         if flag == "normal" then
             widget.halign = "center"
+            widget.valign = "center"
             return wibox.widget {
                 widget = wibox.container.background,
                 bg = is_weekend(date) and theme.common.background_127 or theme.common.background_115,
@@ -655,6 +656,7 @@ do
             }
         elseif flag == "focus" then
             widget.halign = "center"
+            widget.valign = "center"
             return wibox.widget {
                 widget = wibox.container.background,
                 bg = theme.common.primary_66,
@@ -662,14 +664,18 @@ do
                 shape = function(cr, width, height)
                     gshape.rounded_rect(cr, width, height, dpi(3))
                 end,
+                border_color = theme.common.primary,
+                border_width = dpi(1),
                 widget,
             }
         elseif flag == "normal_other" then
             widget.halign = "center"
+            widget.valign = "center"
             widget.markup = pango.span { color = theme.common.foreground_50, widget.text }
             return widget
         elseif flag == "focus_other" then
             widget.halign = "center"
+            widget.valign = "center"
             return wibox.widget {
                 widget = wibox.container.background,
                 bg = theme.common.primary_50,
@@ -677,17 +683,19 @@ do
                 shape = function(cr, width, height)
                     gshape.rounded_rect(cr, width, height, dpi(3))
                 end,
+                border_color = theme.common.primary_75,
+                border_width = dpi(1),
                 widget,
             }
         elseif flag == "weeknumber" then
             widget.halign = "right"
-            widget.markup = pango.span { color = theme.common.foreground_50, weight = "bold", widget.text }
+            widget.valign = "center"
+            widget.markup = pango.span { color = theme.common.foreground_50, weight = "bold", widget.text, " " }
             return wibox.widget {
                 widget = wibox.container.margin,
                 margins = {
-                    right = dpi(8),
-                    top = dpi(2),
-                    bottom = dpi(2),
+                    top = dpi(6),
+                    bottom = dpi(6),
                 },
                 widget,
             }
