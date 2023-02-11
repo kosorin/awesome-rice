@@ -20,6 +20,7 @@ local menu_templates = require("ui.menu.templates")
 local mebox = require("widget.mebox")
 local bindbox = require("widget.bindbox")
 local config = require("config")
+local hclient = require("helpers.client")
 
 
 -- Available keys with `super` modifier: gstpzxcv jlyiok
@@ -608,24 +609,16 @@ binding.add_client_range {
         modifiers = { mod.shift, mod.super, },
         triggers = binding.group.arrows,
         path = "client",
-        description = "swap by direction",
-        on_press = function(trigger, client)
-            local clients = awful.client.visible(client.screen)
-            local geometries = {}
-            for i, c in ipairs(clients) do
-                geometries[i] = c:geometry()
-            end
-            local target_client = grectangle.get_in_direction(trigger.direction, geometries, client:geometry())
-            if target_client then
-                clients[target_client]:swap(client)
-            else
-                local target_screen = client.screen:get_next_in_direction(trigger.direction)
-                if target_screen then
-                    client.screen = target_screen
-                    client:activate { context = "move_to_screen" }
-                end
-            end
-        end,
+        description = "move",
+        on_press = function(trigger, client) hclient.move(client, trigger.direction) end,
+    },
+
+    binding.new {
+        modifiers = { mod.control, mod.shift, mod.super, },
+        triggers = binding.group.arrows,
+        path = "client",
+        description = "resize",
+        on_press = function(trigger, client) hclient.resize(client, trigger.direction) end,
     },
 
 
