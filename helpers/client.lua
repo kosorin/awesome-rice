@@ -148,25 +148,21 @@ local function move_tiled(client, direction)
 end
 
 local function resize_descriptor(descriptor, parent_descriptor, resize_factor)
+    resize_factor = resize_factor * tiled_resize_factor
+    if resize_factor == 0 then
+        return
+    end
     for _, cd in ipairs(parent_descriptor) do
-        local sign = cd == descriptor and 1 or -1
+        local sign = cd ~= descriptor and -1 or 1
         cd.factor = math.min(math.max(cd.factor + sign * resize_factor, 0), 1)
     end
 end
 
 local function resize_tiled(client, direction)
-    if not client then
-        return
-    end
-
-    local screen = client.screen and capi.screen[client.screen]
+    local screen = client and client.screen and capi.screen[client.screen]
     local tag = screen and screen.selected_tag
-    if not tag or not tag.layout or not tag.layout.is_tilted then
-        return
-    end
-
-    local rc = directions[direction]
-    if not rc then
+    local layout = tag and tag.layout
+    if not layout.is_tilted then
         return
     end
 
@@ -175,23 +171,22 @@ local function resize_tiled(client, direction)
         return
     end
 
+    local rc = directions[direction]
+    if not rc then
+        return
+    end
+
     local clients = aclient.tiled(screen)
     local column_descriptor, item_descriptor = layout_descriptor:find_client(client, clients)
 
-    local arrange = false
-
-    if column_descriptor and rc.x ~= 0 then
-        arrange = true
-        resize_descriptor(column_descriptor, layout_descriptor, rc.x * tiled_resize_factor)
+    if column_descriptor then
+        resize_descriptor(column_descriptor, layout_descriptor, layout.is_horizontal and rc.x or -rc.y)
     end
-    if item_descriptor and rc.y ~= 0 then
-        arrange = true
-        resize_descriptor(item_descriptor, column_descriptor, -rc.y * tiled_resize_factor)
+    if item_descriptor then
+        resize_descriptor(item_descriptor, column_descriptor, layout.is_horizontal and -rc.y or rc.x)
     end
 
-    if arrange then
-        alayout.arrange(screen)
-    end
+    tag:emit_signal("property::tilted_layout_descriptor")
 end
 
 function client_helper.move(client, direction)
