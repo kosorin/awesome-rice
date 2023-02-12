@@ -156,8 +156,10 @@ function layout_descriptor.update(tag, clients)
     return self
 end
 
-capi.tag.connect_signal("property::tilted_layout_descriptor", function(t)
-    alayout.arrange(t.screen)
-end)
+local function arrange_tag(tag)
+    alayout.arrange(tag.screen)
+end
+
+capi.tag.connect_signal("property::tilted_layout_descriptor", arrange_tag)
 
 return layout_descriptor

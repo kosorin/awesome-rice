@@ -1,11 +1,12 @@
 local capi = {
     mouse = mouse,
+    screen = screen,
 }
 local ipairs = ipairs
 local math = math
 local sort = table.sort
 local aclient = require("awful.client")
-local lsuit = require("awful.layout.suit")
+local alayout = require("awful.layout")
 local grectangle = require("gears.geometry").rectangle
 local tilted_layout_descriptor = require("layouts.tilted.layout_descriptor")
 
@@ -42,7 +43,7 @@ function client_helper.is_floating(client)
         return nil
     end
 
-    return tag.layout == lsuit.floating
+    return tag.layout == alayout.suit.floating
 end
 
 function client_helper.get_distance(client, coords)
@@ -154,7 +155,13 @@ local function resize_descriptor(descriptor, parent_descriptor, resize_factor)
 end
 
 local function resize_tiled(client, direction)
-    if not client or not client.screen then
+    if not client then
+        return
+    end
+
+    local screen = client.screen and capi.screen[client.screen]
+    local tag = screen and screen.selected_tag
+    if not tag or not tag.layout or not tag.layout.is_tilted then
         return
     end
 
@@ -163,32 +170,27 @@ local function resize_tiled(client, direction)
         return
     end
 
-    local tag = client.screen.selected_tag
-    if not tag or not tag.layout or not tag.layout.is_tilted then
-        return
-    end
-
     local layout_descriptor = tag.tilted_layout_descriptor
     if not layout_descriptor then
         return
     end
 
-    local clients = aclient.tiled(client.screen)
+    local clients = aclient.tiled(screen)
     local column_descriptor, item_descriptor = layout_descriptor:find_client(client, clients)
 
-    local update = false
+    local arrange = false
 
     if column_descriptor and rc.x ~= 0 then
-        update = true
+        arrange = true
         resize_descriptor(column_descriptor, layout_descriptor, rc.x * tiled_resize_factor)
     end
     if item_descriptor and rc.y ~= 0 then
-        update = true
+        arrange = true
         resize_descriptor(item_descriptor, column_descriptor, -rc.y * tiled_resize_factor)
     end
 
-    if update then
-        tilted_layout_descriptor.update(tag, clients)
+    if arrange then
+        alayout.arrange(screen)
     end
 end
 
