@@ -20,9 +20,9 @@ local tilted = {
 --- Cursors for each corner (3x3 matrix).
 -- @field layouts.tilted.cursors
 tilted.cursors = {
-    { "top_left_corner", "top_side", "top_right_corner" },
-    { "left_side", "pirate", "right_side" },
-    { "bottom_left_corner", "bottom_side", "bottom_right_corner" },
+    { "cross", "sb_v_double_arrow", "cross" },
+    { "sb_h_double_arrow", "pirate", "sb_h_double_arrow" },
+    { "cross", "sb_v_double_arrow", "cross" },
 }
 
 local empty_padding = { left = 0, right = 0, top = 0, bottom = 0 }
