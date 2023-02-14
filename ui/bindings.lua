@@ -100,12 +100,7 @@ binding.add_global_range {
         triggers = btn.left,
         path = "awesome",
         description = "resize tiled clients",
-        on_press = function()
-            local client = helper_client.find_closest()
-            if client then
-                amousec.resize(client)
-            end
-        end,
+        on_press = function() helper_client.mouse_resize(true) end,
     },
 
     binding.new {
@@ -540,7 +535,7 @@ binding.add_client_range {
         triggers = btn.left,
         path = "client",
         description = "move",
-        on_press = function(_, client) client:activate { context = "mouse_click" } amousec.move(client) end,
+        on_press = function(_, client) client:activate { context = "mouse_click" } helper_client.mouse_move(client) end,
     },
 
     binding.new {
@@ -548,7 +543,7 @@ binding.add_client_range {
         triggers = btn.right,
         path = "client",
         description = "resize",
-        on_press = function(_, client) client:activate { context = "mouse_click" } amousec.resize(client) end,
+        on_press = function(_, client) client:activate { context = "mouse_click" } helper_client.mouse_resize(client) end,
     },
 
     binding.new {

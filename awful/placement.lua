@@ -1142,11 +1142,11 @@ function placement.resize_to_mouse(d, args)
     -- To support both growing and shrinking the drawable, it is necessary
     -- to decide to use either "north or south" and "east or west" directions.
     -- Otherwise, the result will always be 1x1
-    local _, closest_corner = placement.closest_corner(capi.mouse, {
+    local closest_corner = args.corner or select(2, placement.closest_corner(capi.mouse, {
         parent        = d,
         pretend       = true,
         include_sides = args.include_sides or false,
-    })
+    }))
 
     -- Given "include_sides" wasn't set, it will always return a name
     -- with the 2 axis. If only one axis is needed, adjust the result
@@ -1170,6 +1170,10 @@ function placement.resize_to_mouse(d, args)
     )
 
     remove_border(d, args, ngeo)
+
+    -- TODO: This is not ok
+    ngeo.width = math.max(1, ngeo.width)
+    ngeo.height = math.max(1, ngeo.height)
 
     -- Now, correct the geometry by the given size_hints offset
     if d.apply_size_hints then

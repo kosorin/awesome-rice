@@ -9,6 +9,7 @@ local gshape = require("gears.shape")
 local amousec = require("awful.mouse.client")
 local ruled = require("ruled")
 local binding = require("io.binding")
+local helper_client = require("helpers.client")
 local mod = binding.modifier
 local btn = binding.button
 local dpi = dpi
@@ -181,12 +182,12 @@ ruled.client.connect_signal("request::rules", function()
                 binding.new {
                     modifiers = { mod.super },
                     triggers = btn.left,
-                    on_press = function(_, client) client:activate { context = "mouse_click" } amousec.move(client) end,
+                    on_press = function(_, client) client:activate { context = "mouse_click" } helper_client.mouse_move(client) end,
                 },
                 binding.new {
                     modifiers = { mod.super },
                     triggers = btn.right,
-                    on_press = function(_, client) client:activate { context = "mouse_click" } amousec.resize(client) end,
+                    on_press = function(_, client) client:activate { context = "mouse_click" } helper_client.mouse_resize(client) end,
                 },
             },
         },

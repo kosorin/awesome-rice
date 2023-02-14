@@ -36,7 +36,7 @@ tilted.resize_only_adjacent = false
 
 --- Jump mouse cursor to the client's corner when resizing it.
 -- @field layouts.tilted.resize_jump_to_corner
-tilted.resize_jump_to_corner = true
+tilted.resize_jump_to_corner = false
 
 local function any_button(buttons)
     for i = 1, #buttons do

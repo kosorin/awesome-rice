@@ -17,6 +17,7 @@ local capsule = require("widget.capsule")
 local mebox = require("widget.mebox")
 local client_menu_template = require("ui.menu.templates.client")
 local config = require("config")
+local helper_client = require("helpers.client")
 
 
 awful.titlebar.enable_tooltip = false
@@ -160,11 +161,11 @@ capi.client.connect_signal("request::titlebars", function(client, _, args)
                 buttons = binding.awful_buttons {
                     binding.awful({}, btn.left, function()
                         client:activate { context = "titlebar" }
-                        amousec.move(client)
+                        helper_client.mouse_move(client)
                     end),
                     binding.awful({}, btn.right, function()
                         client:activate { context = "titlebar" }
-                        amousec.resize(client)
+                        helper_client.mouse_resize(client)
                     end),
                     binding.awful({}, btn.middle, function()
                         client:kill()
