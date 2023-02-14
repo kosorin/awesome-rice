@@ -5,7 +5,8 @@ local capi = {
     mouse = mouse,
     screen = screen,
 }
-local awful = require("awful")
+local getenv = os.getenv
+local execute = os.execute
 local beautiful = require("beautiful")
 local dpi = dpi
 local mebox = require("widget.mebox")
@@ -65,7 +66,7 @@ function power_menu_template.new()
                     icon_color = beautiful.palette.red,
                     callback = function()
                         local command = "systemctl poweroff"
-                        awful.spawn.easy_async_with_shell(command)
+                        execute(command)
                     end,
                 },
                 {
@@ -100,7 +101,7 @@ function power_menu_template.new()
                     icon_color = beautiful.palette.yellow,
                     callback = function()
                         local command = "systemctl reboot"
-                        awful.spawn.easy_async_with_shell(command)
+                        execute(command)
                     end,
                 },
                 cancel_item,
@@ -121,7 +122,7 @@ function power_menu_template.new()
                     icon_color = beautiful.palette.magenta,
                     callback = function()
                         local command = "systemctl suspend"
-                        awful.spawn.easy_async_with_shell(command)
+                        execute(command)
                     end,
                 },
                 cancel_item,
@@ -143,8 +144,11 @@ function power_menu_template.new()
                     icon = config.places.theme .. "/icons/exit-run.svg",
                     icon_color = beautiful.palette.green,
                     callback = function()
-                        local command = "loginctl kill-session ${XDG_SESSION_ID-}"
-                        awful.spawn.easy_async_with_shell(command)
+                        local session_id = getenv("XDG_SESSION_ID")
+                        if session_id then
+                            local command = "loginctl kill-session " .. session_id
+                            execute(command)
+                        end
                     end,
                 },
                 cancel_item,
@@ -155,8 +159,11 @@ function power_menu_template.new()
             icon = config.places.theme .. "/icons/lock.svg",
             icon_color = beautiful.palette.gray,
             callback = function()
-                local command = "loginctl lock-session ${XDG_SESSION_ID-}"
-                awful.spawn.easy_async_with_shell(command)
+                local session_id = getenv("XDG_SESSION_ID")
+                if session_id then
+                    local command = "loginctl lock-session " .. session_id
+                    execute(command)
+                end
             end,
         },
         mebox.separator,
