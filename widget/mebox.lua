@@ -570,9 +570,11 @@ local function default_layout_navigator(menu, x, y, context)
     if y ~= 0 then
         menu:select_by_direction(y)
     elseif x < 0 then
-        menu:hide(context)
+        if menu._private.parent then
+            menu:hide(context)
+        end
     elseif x > 0 then
-        menu:execute(nil, context)
+        menu:execute(nil, setmetatable({ action = "submenu" }, { __index = context }))
     end
 end
 
@@ -744,6 +746,10 @@ function mebox.new(args, is_submenu)
                         self:hide({ source = "keyboard" })
                     end),
                     binding.awful({ mod.shift }, "Escape", function()
+                        local active_menu = self:get_active_menu()
+                        active_menu:hide({ source = "keyboard" })
+                    end),
+                    binding.awful({}, "BackSpace", function()
                         local active_menu = self:get_active_menu()
                         active_menu:hide({ source = "keyboard" })
                     end),

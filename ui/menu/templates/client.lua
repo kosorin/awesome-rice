@@ -137,10 +137,14 @@ function client_menu_template.new()
                             return
                         end
 
-                        if x < 0 and menu._private.selected_index == 1 then
-                            menu:hide(context)
-                        elseif x > 0 and menu._private.selected_index == #menu._private.items then
-                            return
+                        local index = menu._private.selected_index
+                        local count = #menu._private.items
+                        if x < 0 and index == 1 then
+                            if menu._private.parent then
+                                menu:hide(context)
+                            end
+                        elseif x > 0 and index == count then
+                            -- pass
                         elseif x ~= 0 then
                             menu:select_by_direction(x)
                         end
