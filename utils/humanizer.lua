@@ -1,6 +1,6 @@
+local ipairs = ipairs
 local floor = math.floor
 local max = math.max
-local format = string.format
 local concat = table.concat
 local pango = require("utils.pango")
 
@@ -18,7 +18,7 @@ end
 function humanizer.humanize_units(units, value, from_unit)
     if not value then
         if not units.unknown_formatted then
-            units.unknown_formatted = format("%s%s%s", units.unknown or "--", pango.thin_space, units[1].text)
+            units.unknown_formatted = string.format("%s%s%s", units.unknown or "--", pango.thin_space, units[1].text)
         end
         return units.unknown_formatted
     end
@@ -27,7 +27,7 @@ function humanizer.humanize_units(units, value, from_unit)
     for i = 1, #units do
         local unit = units[i]
         if i >= from_unit and value < unit.to then
-            return format(
+            return string.format(
                 units.format or unit.format or ("%." .. tostring(units.precision or unit.precision or 0) .. "f%s%s"),
                 value / previous_to,
                 pango.thin_space,
@@ -64,86 +64,139 @@ function humanizer.file_size(bytes, ...)
     return humanizer.humanize_units(file_size_units, bytes, ...)
 end
 
-local days_in_year = 365.2425
-local days_in_month = days_in_year / 12
-local weeks_in_month = days_in_month / 7
-local time_data = {
-    { text = "year", count = nil, div = 60 * 60 * 24 * days_in_month * 12 },
-    { text = "month", count = 12, div = 60 * 60 * 24 * days_in_month },
-    { text = "week", count = weeks_in_month, div = 60 * 60 * 24 * 7, is_week = true },
-    { text = "day", count = days_in_month, div = 60 * 60 * 24 },
-    { text = "hour", count = 24, div = 60 * 60 },
-    { text = "minute", count = 60, div = 60 },
-    { text = "second", count = 60, div = 1 },
-}
+do
+    local days_in_year = 365.2425
+    local days_in_month = days_in_year / 12
+    local weeks_in_month = days_in_month / 7
+    local time_parts = {
+        { id = "year", count = nil, div = 60 * 60 * 24 * days_in_month * 12 },
+        { id = "month", count = 12, div = 60 * 60 * 24 * days_in_month },
+        { id = "week", count = weeks_in_month, div = 60 * 60 * 24 * 7, is_week = true },
+        { id = "day", count = days_in_month, div = 60 * 60 * 24 },
+        { id = "hour", count = 24, div = 60 * 60 },
+        { id = "minute", count = 60, div = 60 },
+        { id = "second", count = 60, div = 1 },
+    }
 
-local function get_time_part(value, unit)
-    return tostring(value) .. " "
-        .. (value == 1 and unit.text or (unit.text .. "s"))
-end
+    humanizer.long_time_formats = {
+        year = { text = "year", plural = "years" },
+        month = { text = "month", plural = "months" },
+        week = { text = "week", plural = "weeks" },
+        day = { text = "day", plural = "days" },
+        hour = { text = "hour", plural = "hours" },
+        minute = { text = "minute", plural = "minutes" },
+        second = { text = "second", plural = "seconds" },
+    }
 
-function humanizer.relative_time(seconds, args)
-    seconds = round(max(0, seconds))
-    args = args or {}
+    humanizer.short_time_formats = {
+        year = { text = "yr" },
+        month = { text = "mo" },
+        week = { text = "wk" },
+        day = { text = "d" },
+        hour = { text = "h" },
+        minute = { text = "min" },
+        second = { text = "s" },
+    }
 
-    local available_part_count = #time_data
-    local separator = args.separator or " "
-    local from_unit = clamp(args.from_unit or 1, 1, available_part_count)
-    local part_count = args.part_count or 1
-    local skip_week = args.skip_week
-    local include_leading_zero = args.skip_leading_zero
-    local include_zero = args.include_zero
-    local stop_on_zero = args.stop_on_zero == nil and true or args.stop_on_zero
-    local single_format = args.single_format
+    local function format_time_part(value, format, unit_separator)
+        local value_text = format.format
+            and string.format(format.format, value)
+            or tostring(value)
+        local unit_text = (value ~= 1 and format.plural)
+            and format.plural
+            or format.text
+        return value_text .. (unit_separator or " ") .. unit_text
+    end
 
-    local parts = {}
-    local rest = seconds
-    for i = from_unit, available_part_count do
-        local unit = time_data[i]
-        if not skip_week or not unit.is_week then
+    function humanizer.relative_time(seconds, args)
+        seconds = round(max(0, seconds))
+        args = args or {}
 
-            local value = rest / unit.div
-            if single_format then
-                parts[#parts + 1] = get_time_part(format(single_format, value), unit)
-                break
-            end
+        local all_part_count = #time_parts
+        local formats = args.formats or humanizer.short_time_formats
+        local unit_separator = args.unit_separator or " "
+        local part_separator = args.part_separator or " "
+        local skip_week = args.skip_week
+        local include_leading_zero = args.include_leading_zero
+        local include_zero = args.include_zero ~= false
+        local stop_on_zero = args.stop_on_zero ~= false
 
-            value = floor(value)
-            if value >= 1 then
-                rest = rest - (value * unit.div)
-                parts[#parts + 1] = get_time_part(value, unit)
-            elseif rest == seconds then
-                if include_leading_zero then
-                    parts[#parts + 1] = get_time_part(0, unit)
+        local from_part
+        local part_count
+        if args.from_part then
+            if type(args.from_part) == "string" then
+                for i, v in ipairs(time_parts) do
+                    if v.id == args.from_part then
+                        from_part = i
+                        break
+                    end
                 end
-            else
-                if include_zero then
-                    parts[#parts + 1] = get_time_part(0, unit)
-                elseif stop_on_zero then
+            elseif type(args.from_part) == "number" then
+                from_part = args.from_part
+            end
+        else
+            for i, v in ipairs(time_parts) do
+                if formats[v.id] then
+                    from_part = i
                     break
                 end
             end
+        end
+        if args.part_count then
+            part_count = args.part_count
+        else
+            part_count = #formats
+        end
+        from_part = clamp(from_part or 1, 1, all_part_count)
+        part_count = clamp(part_count or 1, from_part, all_part_count)
 
-            if part_count > 0 and part_count == #parts then
-                break
+        local parts = {}
+        local rest = seconds
+        for i = from_part, all_part_count do
+            local time_part = time_parts[i]
+            if not skip_week or not time_part.is_week then
+                local value = rest / time_part.div
+                local format = formats[time_part.id]
+
+                value = floor(value)
+                if value >= 1 then
+                    rest = rest - (value * time_part.div)
+                    parts[#parts + 1] = format_time_part(value, format, unit_separator)
+                elseif rest == seconds then
+                    if include_leading_zero then
+                        parts[#parts + 1] = format_time_part(0, format, unit_separator)
+                    end
+                else
+                    if include_zero then
+                        parts[#parts + 1] = format_time_part(0, format, unit_separator)
+                    elseif stop_on_zero then
+                        break
+                    end
+                end
+
+                if part_count > 0 and part_count == #parts then
+                    break
+                end
             end
         end
-    end
 
-    if #parts == 0 then
-        parts[1] = get_time_part(0, time_data[clamp(from_unit + max(1, part_count), 1, available_part_count)])
-    end
+        if #parts == 0 then
+            local time_part = time_parts[clamp(from_part + max(1, part_count), 1, all_part_count)]
+            local format = formats[time_part.id]
+            parts[1] = format_time_part(0, format, unit_separator)
+        end
 
-    local text = concat(parts, separator)
+        local text = concat(parts, part_separator)
 
-    if args.prefix then
-        text = args.prefix .. text
-    end
-    if args.suffix then
-        text = text .. args.suffix
-    end
+        if args.prefix then
+            text = args.prefix .. text
+        end
+        if args.suffix then
+            text = text .. args.suffix
+        end
 
-    return text
+        return text
+    end
 end
 
 return humanizer

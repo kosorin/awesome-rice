@@ -201,6 +201,7 @@ local function create_temperature_data_widget()
             local now = os.time()
             local seconds = os.difftime(now, time)
             return humanizer.relative_time(seconds, {
+                formats = humanizer.long_time_formats,
                 part_count = 2,
                 suffix = " ago"
             })
@@ -270,6 +271,7 @@ local function create_indoor_data_widget()
             local now = os.time()
             local seconds = os.difftime(now, time)
             return humanizer.relative_time(seconds, {
+                formats = humanizer.long_time_formats,
                 part_count = 2,
                 suffix = " ago"
             })
