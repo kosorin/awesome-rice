@@ -148,7 +148,7 @@ do
             part_count = #formats
         end
         from_part = clamp(from_part or 1, 1, all_part_count)
-        part_count = clamp(part_count or 1, from_part, all_part_count)
+        part_count = clamp(part_count or 1, 1, all_part_count - from_part + 1)
 
         local parts = {}
         local rest = seconds
