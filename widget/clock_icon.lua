@@ -1,6 +1,6 @@
 local math = math
 local string = string
-local gcolor = require("gears.color")
+local css = require("utils.css")
 
 
 local clock_icon = {}
@@ -46,7 +46,7 @@ function clock_icon.generate_svg(hours, minutes)
 end
 
 function clock_icon.generate_style(color)
-    return "circle { fill: " .. gcolor.ensure_pango_color(color) .. "; }"
+    return css.style { circle = { fill = color } }
 end
 
 return clock_icon

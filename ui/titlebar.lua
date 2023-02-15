@@ -18,6 +18,7 @@ local mebox = require("widget.mebox")
 local client_menu_template = require("ui.menu.templates.client")
 local config = require("config")
 local helper_client = require("helpers.client")
+local css = require("utils.css")
 
 
 awful.titlebar.enable_tooltip = false
@@ -69,7 +70,9 @@ local function titlebar_button(client, action, normal_args, toggle_args)
 
         local icon_widget = button.widget
         icon_widget:set_image(args.icon)
-        icon_widget:set_stylesheet("path, .fill { fill: " .. args.style.foreground .. "; }")
+        icon_widget:set_stylesheet(css.style {
+            ["path, .fill"] = { fill = args.style.foreground },
+        })
     end
 
     button.buttons = binding.awful_buttons {

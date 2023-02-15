@@ -11,6 +11,7 @@ local dpi = dpi
 local tcolor = require("theme.color")
 local capsule = require("widget.capsule")
 local pango = require("utils.pango")
+local css = require("utils.css")
 local config = require("config")
 local htable = require("helpers.table")
 local hwidget = require("helpers.widget")
@@ -529,7 +530,7 @@ theme.mebox.default_style = htable.crush_clone(theme.popup.default_style, {
                     if not color or item.active or item.selected then
                         color = style.foreground
                     end
-                    local stylesheet = "path { fill: " .. color .. "; }"
+                    local stylesheet = css.style { path = { fill = color } }
                     icon_widget:set_stylesheet(stylesheet)
                 else
                     icon_widget:set_stylesheet(nil)
@@ -550,7 +551,7 @@ theme.mebox.default_style = htable.crush_clone(theme.popup.default_style, {
                 if submenu_icon_widget.visible then
                     local icon = item.submenu_icon or config.places.theme .. "/icons/menu-right.svg"
                     local color = style.foreground
-                    local stylesheet = "path { fill: " .. color .. "; }"
+                    local stylesheet = css.style { path = { fill = color } }
                     submenu_icon_widget:set_stylesheet(stylesheet)
                     submenu_icon_widget:set_image(icon)
                 end
@@ -892,8 +893,15 @@ end
 
 function theme.build_layout_stylesheet(color)
     color = color or theme.common.foreground
-    return ".primary { fill: " .. color .. "; } "
-        .. ".secondary { fill: " .. color .. "; opacity: 0.6; } "
+    return css.style {
+        [".primary"] = {
+            fill = color,
+        },
+        [".secondary"] = {
+            fill = color,
+            opacity = 0.6,
+        },
+    }
 end
 
 theme.layout_icons = {

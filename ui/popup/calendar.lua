@@ -11,6 +11,7 @@ local dpi = dpi
 local capsule = require("widget.capsule")
 local noice = require("widget.noice")
 local config = require("config")
+local css = require("utils.css")
 
 
 local calendar_popup = { mt = {} }
@@ -122,7 +123,7 @@ function calendar_popup.new(args)
                                 forced_height = dpi(18),
                                 resize = true,
                                 image = config.places.theme .. "/icons/chevron-left.svg",
-                                stylesheet = "path { fill: " .. beautiful.capsule.default_style.foreground .. "; }",
+                                stylesheet = css.style { path = { fill = beautiful.capsule.default_style.foreground } },
                             },
                         },
                     },
@@ -141,7 +142,7 @@ function calendar_popup.new(args)
                                 forced_height = dpi(18),
                                 resize = true,
                                 image = config.places.theme .. "/icons/chevron-right.svg",
-                                stylesheet = "path { fill: " .. beautiful.capsule.default_style.foreground .. "; }",
+                                stylesheet = css.style { path = { fill = beautiful.capsule.default_style.foreground } },
                             },
                         },
                     },

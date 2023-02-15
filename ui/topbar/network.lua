@@ -14,6 +14,7 @@ local gtable = require("gears.table")
 local capsule = require("widget.capsule")
 local mebox = require("widget.mebox")
 local pango = require("utils.pango")
+local css = require("utils.css")
 local tcolor = require("theme.color")
 local aplacement = require("awful.placement")
 local widget_helper = require("helpers.widget")
@@ -55,10 +56,6 @@ local styles = {
     }),
 }
 
-local function colorize_path(color)
-    return "path { fill: " .. color .. "; }"
-end
-
 local function refresh_info(container_widget, style, text, icon)
     local text_widget = container_widget:get_children_by_id("text")[1]
     text = style.text or text or ""
@@ -69,7 +66,7 @@ local function refresh_info(container_widget, style, text, icon)
     if icon then
         icon_widget:set_image(config.places.theme .. "/icons/" .. icon .. ".svg")
     end
-    icon_widget:set_stylesheet(colorize_path(style.foreground))
+    icon_widget:set_stylesheet(css.style { path = { fill = style.foreground } })
 end
 
 function network_widget:refresh()

@@ -17,6 +17,7 @@ local clock_icon = require("widget.clock_icon")
 local aplacement = require("awful.placement")
 local widget_helper = require("helpers.widget")
 local htable = require("helpers.table")
+local css = require("utils.css")
 
 
 local datetime_widget = { mt = {} }
@@ -54,7 +55,7 @@ function datetime_widget:refresh_date_widget()
         or beautiful.capsule.styles.normal
     date_container:apply_style(style)
 
-    local icon_stylesheet = "path { fill: " .. style.foreground .. "; }"
+    local icon_stylesheet = css.style { path = { fill = style.foreground } }
     local icon_widget = date_container.widget:get_children_by_id("icon")[1]
     icon_widget:set_stylesheet(icon_stylesheet)
 end
@@ -68,7 +69,7 @@ local function initialize_date_widget(self, style)
             widget = wibox.widget.imagebox,
             resize = true,
             image = config.places.theme .. "/icons/calendar-month.svg",
-            stylesheet = "path { fill: " .. style.foreground .. "; }",
+            stylesheet = css.style { path = { fill = style.foreground } },
         },
         {
             id = "text",

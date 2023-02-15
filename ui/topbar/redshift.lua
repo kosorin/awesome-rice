@@ -25,6 +25,7 @@ local widget_helper = require("helpers.widget")
 local tcolor = require("theme.color")
 local mouse_helper = require("helpers.mouse")
 local pango = require("utils.pango")
+local css = require("utils.css")
 
 
 local redshift_widget = { mt = {} }
@@ -95,7 +96,7 @@ function redshift_widget.new(wibar, on_dashboard)
                 widget = wibox.widget.imagebox,
                 resize = true,
                 image = config.places.theme .. "/icons/lightbulb-on.svg",
-                stylesheet = "path { fill: " .. style.foreground .. "; }",
+                stylesheet = css.style { path = { fill = style.foreground } },
             },
             {
                 id = "text",

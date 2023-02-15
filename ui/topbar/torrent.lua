@@ -26,6 +26,7 @@ local aplacement = require("awful.placement")
 local widget_helper = require("helpers.widget")
 local mebox = require("widget.mebox")
 local pango = require("utils.pango")
+local css = require("utils.css")
 
 
 local torrent_widget = { mt = {} }
@@ -104,7 +105,7 @@ function torrent_widget:refresh()
     text_widget:set_markup(pango.span { foreground = style.foreground, text, })
 
     local icon_path = config.places.theme .. "/icons/" .. icon .. ".svg"
-    local icon_stylesheet = "path { fill: " .. style.foreground .. "; }"
+    local icon_stylesheet = css.style { path = { fill = style.foreground } }
     local icon_widget = self:get_children_by_id("icon")[1]
     icon_widget:set_stylesheet(icon_stylesheet)
     icon_widget:set_image(icon_path)

@@ -15,6 +15,7 @@ local capsule = require("widget.capsule")
 local gtable = require("gears.table")
 local mebox = require("widget.mebox")
 local tools_popup = require("ui.popup.tools")
+local css = require("utils.css")
 
 
 local power_widget = { mt = {} }
@@ -25,7 +26,7 @@ function power_widget:refresh()
         or beautiful.capsule.styles.normal
     self:apply_style(style)
 
-    local icon_stylesheet = "path { fill: " .. style.foreground .. "; }"
+    local icon_stylesheet = css.style { path = { fill = style.foreground } }
     local icon_widget = self:get_children_by_id("#icon")[1]
     icon_widget:set_stylesheet(icon_stylesheet)
 end

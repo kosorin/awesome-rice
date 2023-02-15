@@ -16,6 +16,7 @@ local gshape = require("gears.shape")
 local gtable = require("gears.table")
 local capsule = require("widget.capsule")
 local pango = require("utils.pango")
+local css = require("utils.css")
 local config = require("config")
 local htable = require("helpers.table")
 
@@ -50,14 +51,17 @@ function volume_osd:refresh()
     local wave1_fill = (not data.muted and data.volume <= 0) and volume_background_color or volume_color
     local wave2_fill = (not data.muted and data.volume <= 30) and volume_background_color or volume_color
     local wave3_fill = (not data.muted and data.volume <= 70) and volume_background_color or volume_color
-    local icon_stylesheet = ""
-        .. ".repro { fill: " .. volume_color .. "; } "
-        .. "#wave1 { fill: " .. wave1_fill .. "; } "
-        .. "#wave2 { fill: " .. wave2_fill .. "; } "
-        .. "#wave3 { fill: " .. wave3_fill .. "; } "
-        .. ".wave { visibility: " .. (not data.muted and "visible" or "collapse") .. "; } "
-        .. ".cross { visibility: " .. (data.muted and "visible" or "collapse")
-        .. "; stroke: " .. volume_color .. "; } "
+    local icon_stylesheet = css.style {
+        [".repro"] = { fill = volume_color },
+        ["#wave1"] = { fill = wave1_fill },
+        ["#wave2"] = { fill = wave2_fill },
+        ["#wave3"] = { fill = wave3_fill },
+        [".wave"] = { visibility = not data.muted and "visible" or "collapse" },
+        [".cross"] = {
+            visibility = data.muted and "visible" or "collapse",
+            stroke = volume_color,
+        },
+    }
     local icon_widget = self.widget:get_children_by_id("icon")[1]
     icon_widget:set_stylesheet(icon_stylesheet)
 

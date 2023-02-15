@@ -7,6 +7,7 @@ local wibox = require("wibox")
 local beautiful = require("beautiful")
 local config = require("config")
 local binding = require("io.binding")
+local css = require("utils.css")
 local mod = binding.modifier
 local btn = binding.button
 local dpi = dpi
@@ -24,7 +25,7 @@ function power_widget:refresh()
     local style = beautiful.capsule.styles.normal
     self:apply_style(style)
 
-    local icon_stylesheet = "path { fill: " .. style.foreground .. "; }"
+    local icon_stylesheet = css.style { path = { fill = style.foreground } }
     local icon_widget = self:get_children_by_id("icon")[1]
     icon_widget:set_stylesheet(icon_stylesheet)
 end

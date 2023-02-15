@@ -25,6 +25,7 @@ local aplacement = require("awful.placement")
 local widget_helper = require("helpers.widget")
 local screen_helper = require("helpers.screen")
 local pango = require("utils.pango")
+local css = require("utils.css")
 
 
 local taglist = { mt = {} }
@@ -107,8 +108,7 @@ function taglist.new(wibar)
 
                 local plus_button = layout.widget.children[2]
                 local plus_button_icon = layout:get_children_by_id("#icon")[1]
-                plus_button_icon:set_stylesheet(
-                    "path { fill: " .. plus_button.foreground .. "; }")
+                plus_button_icon:set_stylesheet(css.style { path = { fill = plus_button.foreground } })
             end
 
             root_container:reset()

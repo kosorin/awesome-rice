@@ -23,6 +23,7 @@ local gtable = require("gears.table")
 local aplacement = require("awful.placement")
 local widget_helper = require("helpers.widget")
 local pango = require("utils.pango")
+local css = require("utils.css")
 
 
 local function set_text(widget, id, index, text, color)
@@ -35,7 +36,7 @@ local function set_icon(widget, id, index, icon, color)
         icon_widget:set_image(icon)
     end
     if color then
-        icon_widget:set_stylesheet("path { fill: " .. color .. "; }")
+        icon_widget:set_stylesheet(css.style { path = { fill = color } })
     end
 end
 
