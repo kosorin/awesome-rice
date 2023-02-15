@@ -438,7 +438,6 @@ theme.mebox.default_style = htable.crush_clone(theme.popup.default_style, {
     submenu_offset = dpi(4),
     active_opacity = 1,
     inactive_opacity = 1,
-    spacing = 0,
     paddings = {
         left = dpi(8),
         right = dpi(8),

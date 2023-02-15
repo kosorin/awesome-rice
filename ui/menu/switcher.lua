@@ -125,10 +125,10 @@ return mebox {
     keygrabber_builder = function(self)
         local mod_key = mod.alt
         local tab_key = binding.awful({ mod_key }, "Tab", function()
-            self:select_by_direction(1)
+            self:select_next(1)
         end)
         local shift_tab_key = binding.awful({ mod_key, mod.shift }, "Tab", function()
-            self:select_by_direction(-1)
+            self:select_next(-1)
         end)
         return awful.keygrabber {
             root_keybindings = binding.awful_keys {
@@ -143,10 +143,10 @@ return mebox {
                     { trigger = "k", direction = -1 },
                     { trigger = "Down", direction = 1 },
                     { trigger = "j", direction = 1 },
-                    { trigger = "Home", direction = 1, seek_origin = "begin" },
-                    { trigger = "End", direction = -1, seek_origin = "end" },
+                    { trigger = "Home", direction = "begin" },
+                    { trigger = "End", direction = "end" },
                 }, function(trigger)
-                    self:select_by_direction(trigger.direction, trigger.seek_origin)
+                    self:select_next(trigger.direction)
                 end),
             },
             stop_key = mod_key,
@@ -154,7 +154,7 @@ return mebox {
             start_callback = function()
                 self:show()
                 if capi.client.focus then
-                    self:select_by_direction(1)
+                    self:select_next(1)
                 end
             end,
             stop_callback = function()

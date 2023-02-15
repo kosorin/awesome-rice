@@ -65,20 +65,6 @@ function power_menu_template.new()
                     icon_color = beautiful.palette.red,
                     callback = power_service.shutdown,
                 },
-                {
-                    enabled = false,
-                    text = "schedule",
-                    icon = config.places.theme .. "/icons/timer-sand.svg",
-                    icon_color = beautiful.palette.orange,
-                    submenu = {
-                        item_width = dpi(300),
-                        {
-                            text = "schedule",
-                            icon = config.places.theme .. "/icons/timer-sand.svg",
-                            icon_color = beautiful.palette.orange,
-                        },
-                    }
-                },
                 cancel_item,
             },
         },
@@ -118,7 +104,6 @@ function power_menu_template.new()
                 cancel_item,
             },
         },
-        mebox.separator,
         mebox.header("session"),
         {
             text = "log out",

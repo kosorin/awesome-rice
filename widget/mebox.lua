@@ -10,6 +10,7 @@ local math = math
 local awful = require("awful")
 local beautiful = require("beautiful")
 local gtable = require("gears.table")
+local grectangle = require("gears.geometry").rectangle
 local wibox = require("wibox")
 local base = require("wibox.widget.base")
 local binding = require("io.binding")
@@ -20,6 +21,14 @@ local noice = require("widget.noice")
 
 
 local do_not_cache = "<do-not-cache>"
+
+local function sign(value)
+    value = tonumber(value)
+    if not value or value == 0 then
+        return 0
+    end
+    return value > 0 and 1 or -1
+end
 
 local function get_screen(screen)
     return screen and capi.screen[screen]
@@ -85,17 +94,16 @@ local function place(menu, args)
     local bounds = screen:get_bounding_geometry(menu.placement_bounding_args)
 
     local border_width = menu.border_width
-    local paddings = menu.paddings
-    local max_width = bounds.width - 2 * border_width - paddings.left - paddings.right
-    local max_height = bounds.height - 2 * border_width - paddings.top - paddings.bottom
-    local width, height = menu._private.layout:fit({
+    local max_width = bounds.width - 2 * border_width
+    local max_height = bounds.height - 2 * border_width
+    local width, height = menu._private.layout_container:fit({
         screen = screen,
         dpi = screen.dpi,
         drawable = menu._drawable,
     }, max_width, max_height)
 
-    menu.width = math.max(1, width + paddings.left + paddings.right)
-    menu.height = math.max(1, height + paddings.top + paddings.bottom)
+    menu.width = math.max(1, width)
+    menu.height = math.max(1, height)
 
     local parent = menu._private.parent
     local placement_args = {
@@ -111,48 +119,6 @@ local function place(menu, args)
     placement(menu, placement_args)
 end
 
-function mebox:get_active_menu()
-    local active = self
-    while active._private.active_submenu do
-        active = active._private.active_submenu.menu
-    end
-    return active
-end
-
-function mebox:get_root_menu()
-    local root = self
-    while root._private.parent do
-        root = root._private.parent
-    end
-    return root
-end
-
-function mebox:get_item(index)
-    local item = index and self._private.items[index]
-    local item_widget = item
-        and item.index == index
-        and item.display_index
-        and self._private.layout.children[item.display_index]
-    return item, item_widget
-end
-
-function mebox:get_item_geometry(index)
-    local border_width = self.border_width
-    local geometry = self:geometry()
-    local _, item_widget = self:get_item(index)
-    local item_geometry = item_widget and widget_helper.find_geometry(item_widget, self)
-    return item_geometry and {
-        x = geometry.x + item_geometry.x + border_width,
-        y = geometry.y + item_geometry.y + border_width,
-        width = item_geometry.width,
-        height = item_geometry.height,
-    }
-end
-
-local function item_is_active(item)
-    return item and item.visible and item.enabled
-end
-
 local function get_property_value(property, item, menu)
     if item[property] ~= nil then
         return item[property]
@@ -162,24 +128,14 @@ local function get_property_value(property, item, menu)
 end
 
 local function get_item_template(item, menu)
-    return item and item.template or menu.item_template
-end
-
-local function update_item(item_widget, item, menu)
-    if not item or not item_widget then
-        return
-    end
-    local template = get_item_template(item, menu)
-    if type(template.update_callback) == "function" then
-        template.update_callback(item_widget, item, menu)
-    end
+    return (item and item.template) or (menu and menu.item_template)
 end
 
 local function fix_selected_item(menu, keep_selected_index)
     local actual_selected_index
 
     for index = 1, #menu._private.items do
-        local item, item_widget = menu:get_item(index)
+        local item = menu._private.items[index]
 
         if keep_selected_index then
             item.selected = index == menu._private.selected_index
@@ -196,12 +152,43 @@ local function fix_selected_item(menu, keep_selected_index)
             end
         end
 
+        local item_widget = menu._private.item_widgets[index]
         if item_widget then
-            update_item(item_widget, item, menu)
+            menu:update_item(index)
         end
     end
 
     menu._private.selected_index = actual_selected_index
+end
+
+function mebox:get_item_geometry(index)
+    local border_width = self.border_width
+    local geometry = self:geometry()
+    local item_widget = self._private.item_widgets[index]
+    local item_geometry = item_widget and widget_helper.find_geometry(item_widget, self)
+    return item_geometry and {
+        x = geometry.x + item_geometry.x + border_width,
+        y = geometry.y + item_geometry.y + border_width,
+        width = item_geometry.width,
+        height = item_geometry.height,
+    }
+end
+
+function mebox:is_item_active(index)
+    local item = self._private.items[index]
+    return item and item.visible and item.enabled
+end
+
+function mebox:update_item(index)
+    local item = self._private.items[index]
+    local item_widget = self._private.item_widgets[index]
+    if not item or not item_widget then
+        return
+    end
+    local template = get_item_template(item, self)
+    if type(template.update_callback) == "function" then
+        template.update_callback(item_widget, item, self)
+    end
 end
 
 local control = { current = setmetatable({ instance = nil }, { __mode = "v" }) }
@@ -259,109 +246,20 @@ local function hide_active_submenu(menu)
     end
 end
 
-local function add_items(self, args, context)
-    local display_index = 1
-    local items = type(self._private.items_source) == "function"
-        and self._private.items_source(self, args, context)
-        or self._private.items_source
-    for index, item in ipairs(items) do
-        if type(item) == "function" then
-            item = item(self, args, context)
-        end
-        self._private.items[index] = item
-
-        item.selected = false
-
-        if type(item.on_show) == "function" then
-            if item.on_show(item, self, args, context) == false then
-                item.visible = false
-            end
-        end
-
-        item.visible = item.visible == nil or item.visible ~= false
-        item.enabled = item.enabled == nil or item.enabled ~= false
-        item.selected = item.selected == nil or item.selected ~= false
-
-        item.index = index
-        item.display_index = item.visible and display_index or nil
-
-        if item.visible then
-            display_index = display_index + 1
-
-            local item_template = get_item_template(item, self)
-            local item_widget = base.make_widget_from_value(item_template)
-
-            local function click_action()
-                self:execute(index, { source = "mouse" })
-            end
-
-            item_widget.buttons = item.buttons_builder
-                and item.buttons_builder(item, self, click_action)
-                or binding.awful_buttons {
-                    binding.awful({}, btn.left,
-                        not item.urgent and click_action,
-                        item.urgent and click_action),
-                }
-
-            item_widget:connect_signal("mouse::enter", function()
-                if get_property_value("mouse_move_select", item, self) then
-                    self:select(index)
-                end
-                if get_property_value("mouse_move_show_submenu", item, self) then
-                    self:show_submenu(index)
-                else
-                    hide_active_submenu(self)
-                end
-            end)
-
-            self._private.layout:add(item_widget)
-        end
+function mebox:get_active_menu()
+    local active = self
+    while active._private.active_submenu do
+        active = active._private.active_submenu.menu
     end
+    return active
 end
 
-function mebox:hide_all()
-    local root_menu = self:get_root_menu()
-    if root_menu then
-        root_menu:hide()
+function mebox:get_root_menu()
+    local root = self
+    while root._private.parent do
+        root = root._private.parent
     end
-end
-
-function mebox:hide(context)
-    context = context or {}
-
-    hide_active_submenu(self)
-
-    local parent = self._private.parent
-    if parent and parent._private.active_submenu then
-        if context.source == "keyboard" or context.select_parent then
-            parent:select(parent._private.active_submenu.index)
-        end
-        detach_active_submenu(parent)
-    end
-
-    if self.visible then
-        for _, item in ipairs(self._private.items) do
-            if type(item.on_hide) == "function" then
-                item.on_hide(item, self)
-            end
-        end
-
-        if type(self._private.on_hide) == "function" then
-            self._private.on_hide(self)
-        end
-    end
-
-    if self._private.keygrabber_auto and self._private.keygrabber then
-        self._private.keygrabber:stop()
-    end
-
-    self.visible = false
-
-    self._private.layout:reset()
-    self._private.items = nil
-    self._private.selected_index = nil
-
-    control.hide(self)
+    return root
 end
 
 function mebox:show_submenu(index, context)
@@ -377,8 +275,12 @@ function mebox:show_submenu(index, context)
     hide_active_submenu(self)
 
     index = index or self._private.selected_index
-    local item = self:get_item(index)
-    if not item_is_active(item) or not item.submenu then
+    if not self:is_item_active(index) then
+        return
+    end
+
+    local item = self._private.items[index]
+    if not item.submenu then
         return
     end
 
@@ -405,6 +307,117 @@ function mebox:show_submenu(index, context)
     submenu:show(nil, context)
 end
 
+function mebox:hide_all()
+    local root_menu = self:get_root_menu()
+    if root_menu then
+        root_menu:hide()
+    end
+end
+
+function mebox:hide(context)
+    if not self.visible then
+        return
+    end
+    context = context or {}
+
+    hide_active_submenu(self)
+
+    local parent = self._private.parent
+    if parent and parent._private.active_submenu then
+        if context.source == "keyboard" or context.select_parent then
+            parent:select(parent._private.active_submenu.index)
+        end
+        detach_active_submenu(parent)
+    end
+
+    for _, item in ipairs(self._private.items) do
+        if type(item.on_hide) == "function" then
+            item.on_hide(item, self)
+        end
+    end
+
+    if type(self._private.on_hide) == "function" then
+        self._private.on_hide(self)
+    end
+
+    if self._private.keygrabber_auto and self._private.keygrabber then
+        self._private.keygrabber:stop()
+    end
+
+    self.visible = false
+
+    self._private.layout = nil
+    self._private.layout_container:set_widget(nil)
+    self._private.items = nil
+    self._private.item_widgets = nil
+    self._private.selected_index = nil
+
+    control.hide(self)
+end
+
+local function add_items(self, args, context)
+    local items = type(self._private.items_source) == "function"
+        and self._private.items_source(self, args, context)
+        or self._private.items_source
+    for index, item in ipairs(items) do
+        if type(item) == "function" then
+            item = item(self, args, context)
+        end
+        self._private.items[index] = item
+
+        item.index = index
+        item.selected = false
+
+        if type(item.on_show) == "function" then
+            if item.on_show(item, self, args, context) == false then
+                item.visible = false
+            end
+        end
+
+        item.visible = item.visible == nil or item.visible ~= false
+        item.enabled = item.enabled == nil or item.enabled ~= false
+        item.selected = item.selected == nil or item.selected ~= false
+
+        if item.visible then
+            local item_template = get_item_template(item, self)
+            local item_widget = base.make_widget_from_value(item_template)
+
+            local function click_action()
+                self:execute(index, { source = "mouse" })
+            end
+
+            item_widget.buttons = item.buttons_builder
+                and item.buttons_builder(item, self, click_action)
+                or binding.awful_buttons {
+                    binding.awful({}, btn.left,
+                        not item.urgent and click_action,
+                        item.urgent and click_action),
+                }
+
+            item_widget:connect_signal("mouse::enter", function()
+                if get_property_value("mouse_move_select", item, self) then
+                    self:select(index)
+                end
+                if get_property_value("mouse_move_show_submenu", item, self) then
+                    self:show_submenu(index)
+                else
+                    hide_active_submenu(self)
+                end
+            end)
+
+            local layout = item.layout_id
+                and self._private.layout:get_children_by_id(item.layout_id)[1]
+                or self._private.layout
+            local layout_add = item.layout_add or layout.add
+            layout_add(layout, item_widget)
+
+            self._private.item_widgets[index] = item_widget
+        else
+            self._private.item_widgets[index] = false
+        end
+    end
+end
+
 function mebox:show(args, context)
     if self.visible then
         return
@@ -423,21 +436,30 @@ function mebox:show(args, context)
         end
     end
 
-    self._private.layout:reset()
+    self._private.layout = base.make_widget_from_value(self._private.layout_template)
+    self._private.layout_container:set_widget(self._private.layout)
     self._private.items = {}
+    self._private.item_widgets = {}
+    self._private.selected_index = nil
 
     add_items(self, args, context)
+
+    for index, item in ipairs(self._private.items) do
+        if type(item.on_ready) == "function" then
+            local item_widget = self._private.item_widgets[index]
+            item.on_ready(item_widget, item, self)
+        end
+    end
 
     if self._private.keygrabber_auto and self._private.keygrabber then
         self._private.keygrabber:start()
     end
 
     self._private.selected_index = args.selected_index
-
     fix_selected_item(self, true)
 
     if self._private.selected_index == nil and context.source == "keyboard" then
-        self:select_by_direction(1)
+        self:select_next("begin")
     end
 
     place(self, args)
@@ -460,19 +482,16 @@ function mebox:unselect()
 
     self._private.selected_index = nil
 
-    local item, item_widget = self:get_item(index)
-    if not item then
-        return
+    local item = self._private.items[index]
+    if item then
+        item.selected = false
     end
 
-    item.selected = false
-
-    update_item(item_widget, item, self)
+    self:update_item(index)
 end
 
 function mebox:select(index)
-    local item, item_widget = self:get_item(index)
-    if not item_is_active(item) then
+    if not self:is_item_active(index) then
         return false
     end
 
@@ -480,22 +499,24 @@ function mebox:select(index)
 
     self._private.selected_index = index
 
-    item.selected = true
+    local item = self._private.items[index]
+    if item then
+        item.selected = true
+    end
 
-    update_item(item_widget, item, self)
-
+    self:update_item(index)
     return true
 end
 
 function mebox:execute(index, context)
     index = index or self._private.selected_index
-    local item, item_widget = self:get_item(index)
-    if not item_is_active(item) then
+    if not self:is_item_active(index) then
         return
     end
 
     context = context or {}
 
+    local item = self._private.items[index]
     local done
 
     local function can_process(action)
@@ -510,6 +531,7 @@ function mebox:execute(index, context)
     end
 
     if can_process("callback") then
+        local item_widget = self._private.item_widgets[index]
         done = item.callback(item_widget, item, self, context) ~= false
     end
 
@@ -518,23 +540,18 @@ function mebox:execute(index, context)
     end
 end
 
-function mebox:update_item(index)
-    local item, item_widget = self:get_item(index)
-    update_item(item_widget, item, self)
-end
-
-local function sign(value)
-    value = tonumber(value)
-    if not value or value == 0 then
-        return 0
-    end
-    return value > 0 and 1 or -1
-end
-
-function mebox:select_by_direction(direction, seek_origin)
+function mebox:select_next(direction, seek_origin)
     local count = #self._private.items
     if count < 1 then
         return
+    end
+
+    if direction == "begin" then
+        seek_origin = direction
+        direction = 1
+    elseif direction == "end" then
+        seek_origin = direction
+        direction = -1
     end
 
     local index
@@ -566,24 +583,103 @@ function mebox:select_by_direction(direction, seek_origin)
     end
 end
 
-local function default_layout_navigator(menu, x, y, context)
-    if y ~= 0 then
-        menu:select_by_direction(y)
-    elseif x < 0 then
-        if menu._private.parent then
-            menu:hide(context)
+mebox.layout_navigators = {}
+
+function mebox.layout_navigators.direction(menu, x, y, direction, context)
+    local current_region_index
+    local current_region
+    local boundary = {}
+    local regions = {}
+    local region_map = {}
+    local i = 0
+    for index, item_widget in ipairs(menu._private.item_widgets) do
+        if menu._private.items[index].visible then
+            local region = widget_helper.find_geometry(item_widget, menu)
+            if region then
+                i = i + 1
+                regions[i] = region
+                region_map[i] = index
+                if index == menu._private.selected_index then
+                    current_region_index = i
+                    current_region = region
+                end
+
+                if not boundary.left or boundary.left > region.x then
+                    boundary.left = region.x
+                end
+                if not boundary.top or boundary.top > region.y then
+                    boundary.top = region.y
+                end
+                if not boundary.right or boundary.right < region.x + region.width then
+                    boundary.right = region.x + region.width
+                end
+                if not boundary.bottom or boundary.bottom < region.y + region.height then
+                    boundary.bottom = region.y + region.height
+                end
+            end
         end
-    elseif x > 0 then
-        menu:execute(nil, setmetatable({ action = "submenu" }, { __index = context }))
     end
+
+    if not current_region then
+        if direction == "down" or direction == "right" then
+            menu:select_next("begin")
+        elseif direction == "up" or direction == "left" then
+            menu:select_next("end")
+        end
+        return
+    end
+
+    -- TODO: Swap left/right if submenu on other side
+    if direction == "left" then
+        regions[#regions + 1] = {
+            x = boundary.left - 2,
+            y = boundary.top,
+            width = 1,
+            height = boundary.bottom - boundary.top,
+        }
+    elseif direction == "right" then
+        regions[#regions + 1] = {
+            x = boundary.right + 1,
+            y = boundary.top,
+            width = 1,
+            height = boundary.bottom - boundary.top,
+        }
+    end
+
+    local found = false
+    repeat
+        local target_region_index = grectangle.get_in_direction(direction, regions, current_region)
+        if not target_region_index or target_region_index == current_region_index then
+            break
+        end
+
+        local index = region_map[target_region_index]
+        if index then
+            found = menu:select(index)
+            if not found then
+                current_region_index = target_region_index
+                current_region = regions[current_region_index]
+            end
+        elseif target_region_index > #region_map then
+            if direction == "left" then
+                if menu._private.parent then
+                    menu:hide(context)
+                end
+                found = true
+            elseif direction == "right" then
+                menu:execute(nil, setmetatable({ action = "submenu" }, { __index = context }))
+                found = true
+            end
+        end
+    until found
 end
 
-function mebox:navigate(x, y, context)
+function mebox:navigate(x, y, direction, context)
     context = context or {}
     local layout_navigator = type(self._private.layout_navigator) == "function"
         and self._private.layout_navigator
-        or default_layout_navigator
-    layout_navigator(self, sign(x), sign(y), context)
+        or mebox.layout_navigators.direction
+    layout_navigator(self, sign(x), sign(y), direction, context)
 end
 
 noice.define_style_properties(mebox, {
@@ -592,8 +688,7 @@ noice.define_style_properties(mebox, {
     border_color = { proxy = true },
     border_width = { proxy = true },
     shape = { proxy = true },
-    spacing = { id = "#layout", property = "spacing" },
-    paddings = { id = "#padding", property = "margins" },
+    paddings = { id = "#layout_container", property = "margins" },
     item_width = {},
     item_height = {},
     item_template = {},
@@ -610,7 +705,7 @@ noice.define_style_properties(mebox, {
 
 new_args:
 - (style properties)
-- layout : widget [wibox.layout.fixed.vertical]
+- layout_template : widget | table | function [wibox.layout.fixed.vertical]
 - layout_navigator : function(menu, x, y, navigation_context) [nil]
 - cache_submenus : boolean [true]
 - items_source : table<item> | function(menu, show_args, show_context) [self]
@@ -627,8 +722,9 @@ menu._private:
 - active_submenu : table | nil
 - submenu_cache : table<menu> | nil
 - items : table<item> | nil
+- item_widgets : table<widget> | nil
 - selected_index : number | nil
-- layout : widget
+- layout_template : widget | table | function
 - layout_navigator : function(menu, x, y, navigation_context) | nil
 - items_source : table<item> | function(menu, show_args, show_context)
 - on_show : function(menu, show_args, show_context) | nil
@@ -640,7 +736,6 @@ menu._private:
 
 item:
 - index : number
-- display_index : number
 - visible : boolean
 - enabled : boolean
 - selected : boolean
@@ -651,6 +746,9 @@ item:
 - callback : function(item_widget, item, menu, execute_context) | nil
 - on_show : function(item, menu, show_args, show_context) | nil
 - on_hide : function(item, menu) | nil
+- on_ready : function(item_widget, item, menu) | nil
+- layout : string | nil
+- layout_add : function(layout, item_widget) | nil
 - buttons_builder : function(item, menu, default_click_action) [nil]
 
 active_submenu:
@@ -667,12 +765,8 @@ function mebox.new(args, is_submenu)
         ontop = true,
         visible = false,
         widget = {
-            id = "#padding",
+            id = "#layout_container",
             layout = wibox.container.margin,
-            {
-                id = "#layout",
-                layout = args.layout or wibox.layout.fixed.vertical,
-            },
         },
     }
 
@@ -684,9 +778,9 @@ function mebox.new(args, is_submenu)
     self._private.on_hide = args.on_hide
     self._private.mouse_move_select = args.mouse_move_select == true
     self._private.mouse_move_show_submenu = args.mouse_move_show_submenu ~= false
-
-    self._private.layout = self:get_children_by_id("#layout")[1]
     self._private.layout_navigator = args.layout_navigator
+    self._private.layout_template = args.layout_template or wibox.layout.fixed.vertical
+    self._private.layout_container = self:get_children_by_id("#layout_container")[1]
 
     noice.initialize_style(self, self.widget, beautiful.mebox.default_style)
 
@@ -707,32 +801,32 @@ function mebox.new(args, is_submenu)
             or awful.keygrabber {
                 keybindings = binding.awful_keys {
                     binding.awful({}, {
-                        { trigger = "Left", x = -1 },
-                        { trigger = "h", x = -1 },
-                        { trigger = "Right", x = 1 },
-                        { trigger = "l", x = 1 },
-                        { trigger = "Up", y = -1 },
-                        { trigger = "k", y = -1 },
-                        { trigger = "Down", y = 1 },
-                        { trigger = "j", y = 1 },
+                        { trigger = "Left", x = -1, direction = "left" },
+                        { trigger = "h", x = -1, direction = "left" },
+                        { trigger = "Right", x = 1, direction = "right" },
+                        { trigger = "l", x = 1, direction = "right" },
+                        { trigger = "Up", y = -1, direction = "up" },
+                        { trigger = "k", y = -1, direction = "up" },
+                        { trigger = "Down", y = 1, direction = "down" },
+                        { trigger = "j", y = 1, direction = "down" },
                     }, function(trigger)
                         local active_menu = self:get_active_menu()
-                        active_menu:navigate(trigger.x, trigger.y, { source = "keyboard" })
+                        active_menu:navigate(trigger.x, trigger.y, trigger.direction, { source = "keyboard" })
                     end),
                     binding.awful({}, {
-                        { trigger = "Home", direction = 1, seek_origin = "begin" },
-                        { trigger = "End", direction = -1, seek_origin = "end" },
+                        { trigger = "Home", direction = "begin" },
+                        { trigger = "End", direction = "end" },
                     }, function(trigger)
                         local active_menu = self:get_active_menu()
-                        active_menu:select_by_direction(trigger.direction, trigger.seek_origin)
+                        active_menu:select_next(trigger.direction)
                     end),
                     binding.awful({}, "Tab", function()
                         local active_menu = self:get_active_menu()
-                        active_menu:select_by_direction(1)
+                        active_menu:select_next(1)
                     end),
                     binding.awful({ mod.shift }, "Tab", function()
                         local active_menu = self:get_active_menu()
-                        active_menu:select_by_direction(-1)
+                        active_menu:select_next(-1)
                     end),
                     binding.awful({}, "Return", function()
                         local active_menu = self:get_active_menu()
@@ -746,10 +840,6 @@ function mebox.new(args, is_submenu)
                         self:hide({ source = "keyboard" })
                     end),
                     binding.awful({ mod.shift }, "Escape", function()
-                        local active_menu = self:get_active_menu()
-                        active_menu:hide({ source = "keyboard" })
-                    end),
-                    binding.awful({}, "BackSpace", function()
                         local active_menu = self:get_active_menu()
                         active_menu:hide({ source = "keyboard" })
                     end),

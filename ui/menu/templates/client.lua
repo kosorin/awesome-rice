@@ -14,17 +14,6 @@ local pango = require("utils.pango")
 local config = require("config")
 
 
-local client_menu_template = { mt = { __index = {} } }
-
-local function build_simple_toggle(name, property, checkbox_type)
-    return {
-        text = name,
-        checkbox_type = checkbox_type,
-        on_show = function(item, menu) item.checked = not not menu.client[property] end,
-        callback = function(_, item, menu) menu.client[property] = not item.checked end,
-    }
-end
-
 local function on_hide(menu)
     menu.client = nil
 end
@@ -46,6 +35,114 @@ local function on_show(menu, args)
     end
 
     client:connect_signal("request::unmanage", unmanage)
+end
+
+local opacity_menu_template = { mt = { __index = {} } }
+
+function opacity_menu_template.new()
+    local value_widget
+    local step = 0.05
+    local min_opacity = 0
+    local max_opacity = 1
+
+    local function update_opacity_text(opacity)
+        if not value_widget then
+            return
+        end
+        local opacity = tonumber(opacity)
+        local text = opacity
+            and tostring(floor((opacity * 100) + 0.5))
+            or "--"
+        value_widget:set_markup(text .. pango.thin_space .. "%")
+    end
+
+    local function change_opacity(menu, value)
+        menu.client.opacity = min(max(menu.client.opacity + value, min_opacity), max_opacity)
+        update_opacity_text(menu.client.opacity)
+    end
+
+    local function set_opacity(menu, value)
+        menu.client.opacity = value or max_opacity
+        update_opacity_text(menu.client.opacity)
+    end
+
+    return {
+        item_width = beautiful.mebox.default_style.item_height,
+        on_show = on_show,
+        on_hide = on_hide,
+        layout_template = wibox.layout.fixed.horizontal,
+        layout_navigator = function(menu, x, y, direction, context)
+            if y ~= 0 then
+                change_opacity(menu, -y * step)
+                return
+            end
+            mebox.layout_navigators.direction(menu, x, y, direction, context)
+        end,
+        separator_template = beautiful.mebox.vertical_separator_template,
+        {
+            icon = config.places.theme .. "/icons/minus.svg",
+            icon_color = beautiful.palette.white,
+            callback = function(_, _, menu)
+                change_opacity(menu, -step)
+                return false
+            end,
+        },
+        {
+            enabled = false,
+            buttons_builder = function(_, menu)
+                return binding.awful_buttons {
+                    binding.awful({}, binding.group.mouse_wheel, function(trigger)
+                        change_opacity(menu, trigger.y * step)
+                    end),
+                }
+            end,
+            template = {
+                widget = wibox.widget.textbox,
+                forced_width = dpi(64),
+                halign = "center",
+                update_callback = function(_, _, menu)
+                    update_opacity_text(menu.client.opacity)
+                end,
+            },
+            on_ready = function(item_widget)
+                value_widget = item_widget
+            end,
+        },
+        {
+            icon = config.places.theme .. "/icons/plus.svg",
+            icon_color = beautiful.palette.white,
+            callback = function(_, _, menu)
+                change_opacity(menu, step)
+                return false
+            end,
+        },
+        mebox.separator,
+        {
+            width = dpi(100),
+            text = "reset",
+            icon = config.places.theme .. "/icons/arrow-u-left-top.svg",
+            icon_color = beautiful.palette.gray,
+            callback = function(_, _, menu)
+                set_opacity(menu, max_opacity)
+            end,
+        },
+    }
+end
+
+opacity_menu_template.mt.__index.shared = opacity_menu_template.new()
+
+setmetatable(opacity_menu_template, opacity_menu_template.mt)
+
+
+local client_menu_template = { mt = { __index = {} } }
+
+local function build_simple_toggle(name, property, checkbox_type)
+    return {
+        text = name,
+        checkbox_type = checkbox_type,
+        on_show = function(item, menu) item.checked = not not menu.client[property] end,
+        callback = function(_, item, menu) menu.client[property] = not item.checked end,
+    }
 end
 
 -- TODO:
@@ -99,106 +196,7 @@ function client_menu_template.new()
             text = "opacity",
             icon = config.places.theme .. "/icons/circle-opacity.svg",
             icon_color = beautiful.palette.cyan,
-            submenu = function()
-                local value_widget
-                local step = 0.05
-                local min_opacity = 0
-                local max_opacity = 1
-
-                local function update_opacity_text(menu)
-                    if not value_widget then
-                        return
-                    end
-                    local opacity = tonumber(menu.client.opacity)
-                    local text = opacity
-                        and tostring(floor((opacity * 100) + 0.5))
-                        or "--"
-                    value_widget:set_markup(text .. pango.thin_space .. "%")
-                end
-
-                local function change_opacity(menu, value)
-                    menu.client.opacity = min(max(menu.client.opacity + value, min_opacity), max_opacity)
-                    update_opacity_text(menu)
-                end
-
-                local function set_opacity(menu, value)
-                    menu.client.opacity = value or max_opacity
-                    update_opacity_text(menu)
-                end
-
-                return {
-                    item_width = beautiful.mebox.default_style.item_height,
-                    on_show = on_show,
-                    on_hide = on_hide,
-                    layout = wibox.layout.fixed.horizontal,
-                    layout_navigator = function(menu, x, y, context)
-                        if y ~= 0 then
-                            change_opacity(menu, -y * step)
-                            return
-                        end
-
-                        local index = menu._private.selected_index
-                        local count = #menu._private.items
-                        if x < 0 and index == 1 then
-                            if menu._private.parent then
-                                menu:hide(context)
-                            end
-                        elseif x > 0 and index == count then
-                            -- pass
-                        elseif x ~= 0 then
-                            menu:select_by_direction(x)
-                        end
-                    end,
-                    separator_template = beautiful.mebox.vertical_separator_template,
-                    border_color = beautiful.common.secondary,
-                    {
-                        icon = config.places.theme .. "/icons/minus.svg",
-                        icon_color = beautiful.palette.white,
-                        callback = function(_, _, menu)
-                            change_opacity(menu, -step)
-                            return false
-                        end,
-                    },
-                    {
-                        enabled = false,
-                        buttons_builder = function(_, menu)
-                            return binding.awful_buttons {
-                                binding.awful({}, binding.group.mouse_wheel, function(trigger)
-                                    change_opacity(menu, trigger.y * step)
-                                end),
-                            }
-                        end,
-                        template = {
-                            widget = wibox.widget.textbox,
-                            forced_width = dpi(64),
-                            halign = "center",
-                            update_callback = function(item_widget, item, menu)
-                                value_widget = item_widget
-                                update_opacity_text(menu)
-                            end,
-                        },
-                    },
-                    {
-                        icon = config.places.theme .. "/icons/plus.svg",
-                        icon_color = beautiful.palette.white,
-                        callback = function(_, _, menu)
-                            change_opacity(menu, step)
-                            return false
-                        end,
-                    },
-                    mebox.separator,
-                    {
-                        width = dpi(100),
-                        text = "reset",
-                        icon = config.places.theme .. "/icons/arrow-u-left-top.svg",
-                        icon_color = beautiful.palette.gray,
-                        callback = function(_, _, menu)
-                            set_opacity(menu, max_opacity)
-                            return false
-                        end,
-                    },
-                }
-            end,
+            submenu = opacity_menu_template.shared,
         },
         mebox.separator,
         {
