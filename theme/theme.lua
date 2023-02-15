@@ -365,7 +365,7 @@ theme.mebox = {
         thickness = dpi(1),
         span_ratio = 1,
         update_callback = function(self, item, menu)
-            self.forced_height = item.width or menu.item_height
+            self.forced_height = item.height or menu.item_height
         end,
     },
     header_template = {
