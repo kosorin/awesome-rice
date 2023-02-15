@@ -38,9 +38,17 @@ config.apps = {
     video_streaming = "freetube",
 }
 
+config.power = {
+    shutdown = "systemctl poweroff",
+    reboot = "systemctl reboot",
+    suspend = "systemctl suspend",
+    kill_session = "loginctl kill-session",
+    lock_session = "loginctl lock-session",
+    lock_screen = "light-locker-command --lock",
+}
+
 config.actions = {
     qr_code_clipboard = "qrclip",
-    lock_screen = "light-locker-command --lock",
     show_launcher = "rofi -show",
     show_emoji_picker = config.places.config .. "/rofi/emoji-run.sh",
 }

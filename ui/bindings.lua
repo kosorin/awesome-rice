@@ -21,6 +21,7 @@ local mebox = require("widget.mebox")
 local bindbox = require("widget.bindbox")
 local config = require("config")
 local hclient = require("helpers.client")
+local power_service = require("services.power")
 
 
 -- Available keys with `super` modifier: gstpzxcv jlyiok
@@ -91,7 +92,7 @@ binding.add_global_range {
         triggers = "l",
         path = "system",
         description = "lock session",
-        on_press = function() awful.spawn(config.actions.lock_screen) end,
+        on_press = function() power_service.lock_screen() end,
     },
 
 

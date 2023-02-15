@@ -10,7 +10,6 @@ The following package names are from the Arch repositories or AUR.
 ## Required
 
 - `awesome-git` - window manager (latest git version, **not** stable v4.3)
-- `systemctl` and `loginctl` (from `systemd`) - power menu
 - `pulsemixer` - controlling the system volume
 - `playerctl` - controlling media player
 - `xdg-open` (from `xdg-utils`) - opening files or URLs in the preferred applications

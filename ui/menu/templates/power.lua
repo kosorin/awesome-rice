@@ -5,11 +5,10 @@ local capi = {
     mouse = mouse,
     screen = screen,
 }
-local getenv = os.getenv
-local execute = os.execute
 local beautiful = require("beautiful")
 local dpi = dpi
 local mebox = require("widget.mebox")
+local power_service = require("services.power")
 local config = require("config")
 
 
@@ -64,10 +63,7 @@ function power_menu_template.new()
                     text = "yes, shut down",
                     icon = config.places.theme .. "/icons/power.svg",
                     icon_color = beautiful.palette.red,
-                    callback = function()
-                        local command = "systemctl poweroff"
-                        execute(command)
-                    end,
+                    callback = power_service.shutdown,
                 },
                 {
                     enabled = false,
@@ -99,10 +95,7 @@ function power_menu_template.new()
                     text = "yes, reboot",
                     icon = config.places.theme .. "/icons/restart.svg",
                     icon_color = beautiful.palette.yellow,
-                    callback = function()
-                        local command = "systemctl reboot"
-                        execute(command)
-                    end,
+                    callback = power_service.reboot,
                 },
                 cancel_item,
             },
@@ -120,10 +113,7 @@ function power_menu_template.new()
                     text = "yes, suspend",
                     icon = config.places.theme .. "/icons/sleep.svg",
                     icon_color = beautiful.palette.magenta,
-                    callback = function()
-                        local command = "systemctl suspend"
-                        execute(command)
-                    end,
+                    callback = power_service.suspend,
                 },
                 cancel_item,
             },
@@ -143,13 +133,7 @@ function power_menu_template.new()
                     text = "yes, log out",
                     icon = config.places.theme .. "/icons/exit-run.svg",
                     icon_color = beautiful.palette.green,
-                    callback = function()
-                        local session_id = getenv("XDG_SESSION_ID")
-                        if session_id then
-                            local command = "loginctl kill-session " .. session_id
-                            execute(command)
-                        end
-                    end,
+                    callback = power_service.kill_session,
                 },
                 cancel_item,
             },
@@ -158,13 +142,7 @@ function power_menu_template.new()
             text = "lock session",
             icon = config.places.theme .. "/icons/lock.svg",
             icon_color = beautiful.palette.gray,
-            callback = function()
-                local session_id = getenv("XDG_SESSION_ID")
-                if session_id then
-                    local command = "loginctl lock-session " .. session_id
-                    execute(command)
-                end
-            end,
+            callback = power_service.lock_session,
         },
         mebox.separator,
         {
