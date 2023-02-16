@@ -125,7 +125,7 @@ binding.add_global_range {
         triggers = "h",
         path = "awesome",
         description = "keyboard shortcuts",
-        on_press = function() print("fooo") main_bindbox:show() end,
+        on_press = function() main_bindbox:show() end,
     },
 
     binding.new {
