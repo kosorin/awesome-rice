@@ -17,6 +17,7 @@ local capsule = require("widget.capsule")
 local gtable = require("gears.table")
 local mebox = require("widget.mebox")
 local power_menu_template = require("ui.menu.templates.power")
+local power_service = require("services.power")
 local humanizer = require("utils.humanizer")
 
 
@@ -99,6 +100,9 @@ function power_widget.new(wibar)
             self._private.menu:toggle {
                 placement = beautiful.wibar.build_placement(self, self._private.wibar),
             }
+        end),
+        binding.awful({}, btn.middle, function()
+            power_service.stop_timer()
         end),
     }
 
