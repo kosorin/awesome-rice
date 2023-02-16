@@ -402,8 +402,9 @@ function power_menu_template.new()
                             text = "..."
                         else
                             text = humanizer.relative_time(status, {
-                                part_count = 2,
                                 formats = humanizer.short_time_formats,
+                                part_count = 2,
+                                unit_separator = pango.thin_space,
                             })
                         end
                         item.text = text

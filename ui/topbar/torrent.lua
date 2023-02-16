@@ -31,8 +31,18 @@ local css = require("utils.css")
 
 local torrent_widget = { mt = {} }
 
-local time_formats = {
+local time_args = {
+    formats = {
+        year = { text = "yr" },
+        month = { text = "mo" },
+        week = { text = "wk" },
+        day = { text = "d" },
+        hour = { text = "h" },
+        minute = { text = "min" },
+        second = { text = "s", format = "%2d" },
+    },
     part_count = 2,
+    unit_separator = pango.thin_space,
 }
 
 local styles = {
@@ -64,7 +74,7 @@ function torrent_widget:refresh()
             local eta = data.eta or -1
             style = data.any_unknown_eta and styles.leeching_missing or styles.leeching
             text = eta >= 0
-                and humanizer.relative_time(eta, time_formats)
+                and humanizer.relative_time(eta, time_args)
                 or "missing"
         elseif data.status == torrent_service.status_codes.idle then
             style = incomplete and styles.incomplete or styles.idle

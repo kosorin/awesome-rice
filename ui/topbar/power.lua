@@ -23,7 +23,7 @@ local humanizer = require("utils.humanizer")
 
 local power_widget = { mt = {} }
 
-local time_formats = {
+local time_args = {
     formats = {
         day = { text = "d" },
         hour = { text = "h" },
@@ -53,7 +53,7 @@ function power_widget:refresh(status)
         if status == true then
             text = "..."
         else
-            text = humanizer.relative_time(status, time_formats)
+            text = humanizer.relative_time(status, time_args)
         end
         text_widget:set_markup(text)
         text_widget.visible = true
