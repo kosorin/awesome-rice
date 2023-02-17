@@ -88,6 +88,7 @@ function calendar_popup.new(args)
 
     local self
     self = awful.popup {
+        type = "utility",
         ontop = true,
         visible = false,
         widget = {

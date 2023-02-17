@@ -873,7 +873,7 @@ function bindbox.new(args)
     args = args or {}
 
     local self = awful.popup {
-        type = "popup_menu",
+        type = "utility",
         ontop = true,
         visible = false,
         widget = {
