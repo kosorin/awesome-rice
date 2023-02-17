@@ -116,6 +116,14 @@ local function on_show(menu, args)
     end
 end
 
+local function info_menu_item(text)
+    return {
+        enabled = false,
+        text = text,
+        template = info_menu_item_template,
+    }
+end
+
 function tag_layout_menu_template.new()
     return {
         item_width = dpi(200),
@@ -125,28 +133,16 @@ function tag_layout_menu_template.new()
         items_source = function(menu)
             local tag = menu.tag
             if not tag then
-                return { {
-                    enabled = false,
-                    text = "No tag selected",
-                    template = info_menu_item_template,
-                } }
+                return { info_menu_item("No tag selected") }
             end
             local screen = tag.screen
             if not screen then
-                return { {
-                    enabled = false,
-                    text = "Unknown screen",
-                    template = info_menu_item_template,
-                } }
+                return { info_menu_item("Unknown screen") }
             end
             local layouts = tag.layouts
             local count = layouts and #layouts or awful.layout.layouts
             if count == 0 then
-                return { {
-                    enabled = false,
-                    text = "No layout available",
-                    template = info_menu_item_template,
-                } }
+                return { info_menu_item("No layout available") }
             end
 
             local items = {}

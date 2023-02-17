@@ -528,7 +528,10 @@ binding.add_client_range {
         triggers = btn.left,
         path = "client",
         description = "move",
-        on_press = function(_, client) client:activate { context = "mouse_click" } helper_client.mouse_move(client) end,
+        on_press = function(_, client)
+            client:activate { context = "mouse_click" }
+            helper_client.mouse_move(client)
+        end,
     },
 
     binding.new {
@@ -536,7 +539,10 @@ binding.add_client_range {
         triggers = btn.right,
         path = "client",
         description = "resize",
-        on_press = function(_, client) client:activate { context = "mouse_click" } helper_client.mouse_resize(client) end,
+        on_press = function(_, client)
+            client:activate { context = "mouse_click" }
+            helper_client.mouse_resize(client)
+        end,
     },
 
     binding.new {

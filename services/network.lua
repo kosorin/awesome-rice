@@ -37,14 +37,11 @@ local function read_file(path, type)
 end
 
 local function read_data()
-    local connected = read_file(
-        format("/sys/class/net/%s/operstate", network_service.config.interface), "l") == "up"
+    local connected = read_file(format("/sys/class/net/%s/operstate", network_service.config.interface), "l") == "up"
     local download, upload
     if connected then
-        download = read_file(
-            format("/sys/class/net/%s/statistics/rx_bytes", network_service.config.interface), "n") or 0
-        upload = read_file(
-            format("/sys/class/net/%s/statistics/tx_bytes", network_service.config.interface), "n") or 0
+        download = read_file(format("/sys/class/net/%s/statistics/rx_bytes", network_service.config.interface), "n") or 0
+        upload = read_file(format("/sys/class/net/%s/statistics/tx_bytes", network_service.config.interface), "n") or 0
     end
     return connected, download, upload
 end

@@ -70,8 +70,7 @@ local function process_command_output(stdout, stderr, exitreason, exitcode)
     if exitreason == "exit" and exitcode == 0 then
         data = parse_raw_data(stdout)
     else
-        gears.debug.print_error("Volume fetch error: " ..
-            exitreason .. " code " .. tostring(exitcode) .. " => " .. stderr)
+        gears.debug.print_error("Volume fetch error: " .. exitreason .. " code " .. tostring(exitcode) .. " => " .. stderr)
     end
     return data or {}
 end

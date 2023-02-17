@@ -67,9 +67,8 @@ ruled.client.add_rule_source("fix_dialog", function(client, properties)
             end
         end
 
-        (awful.placement.centered + awful.placement.no_offscreen)(client, {
-            parent = parent,
-        })
+        local placement = awful.placement.centered + awful.placement.no_offscreen
+        placement(client, { parent = parent })
     end
 end, { "awful.spawn", "awful.rules" }, {})
 
