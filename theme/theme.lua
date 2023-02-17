@@ -151,7 +151,7 @@ theme.fg_disabled = theme.common.foreground_50
 ---------------------------------------------------------------------------------------------------
 
 theme.border_width = dpi(3)
-theme.border_color_normal = theme.common.background
+theme.border_color_normal = theme.common.background_140
 theme.border_color_active = theme.common.primary
 theme.border_color_urgent = theme.common.urgent_bright
 theme.border_color_marked = theme.common.secondary
