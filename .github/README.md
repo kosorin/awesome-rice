@@ -14,12 +14,12 @@ The following package names are from the Arch repositories or AUR.
 - `playerctl` - controlling media player
 - `xdg-open` (from `xdg-utils`) - opening files or URLs in the preferred applications
 - `xclip` - copying things to the clipboard
-- `slop` (with [`boxzoom`](https://github.com/naelstrof/slop/tree/master/shaderexamples) shader) - screen zooming
 
 ## Optional
 
 - `feh` - setting wallpaper
 - `maim`, `xdotool` - taking a screenshot
+- `slop` - magnifier (required [`boxzoom`](https://github.com/naelstrof/slop/tree/master/shaderexamples) shader), also screen region selection
 - [`sct`](https://flak.tedunangst.com/post/sct-set-color-temperature) - setting the color temperature of the screen
 
 ## Recommended

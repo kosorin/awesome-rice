@@ -1,6 +1,7 @@
 local floor = math.floor
 local format = string.format
 local gcolor = require("gears.color")
+local config = require("config")
 
 
 local color = {
@@ -49,6 +50,13 @@ function color.change(value, args)
         return format("#%02x%02x%02x%02x", r, g, b, a)
     else
         return format("#%02x%02x%02x", r, g, b)
+    end
+end
+
+if config.features.screenshot_tools or config.features.magnifier_tools then
+    function color.format_slop(color)
+        local r, g, b, a = gcolor.parse_color(color)
+        return string.format("%.3f,%.3f,%.3f,%.3f", r, g, b, a)
     end
 end
 

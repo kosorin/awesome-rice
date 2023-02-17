@@ -7,6 +7,7 @@ local config = {}
 
 config.features = {
     screenshot_tools = false,
+    magnifier_tools = false,
     torrent_widget = false,
     weather_widget = false,
     redshift_widget = false,
@@ -53,9 +54,7 @@ config.actions = {
     show_emoji_picker = config.places.config .. "/rofi/emoji-run.sh",
 }
 
-config.commands = {
-    magnifier = "slop --shader boxzoom --tolerance 0 --bordersize 3 | xclip -selection primary",
-}
+config.commands = {}
 
 function config.commands.open(path)
     return "xdg-open \"" .. path .. "\""

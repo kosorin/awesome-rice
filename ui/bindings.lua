@@ -347,7 +347,7 @@ binding.add_global_range {
         triggers = "z",
         path = "action",
         description = "magnifier",
-        on_press = function() awful.spawn.with_shell(config.commands.magnifier) end,
+        on_press = function() services.magnifier.run() end,
     },
 
 

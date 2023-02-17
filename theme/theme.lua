@@ -181,8 +181,8 @@ end
 
 ---------------------------------------------------------------------------------------------------
 
-theme.screenshot_area_border_width = theme.border_width
-theme.screenshot_area_color = tcolor.change(theme.common.primary, { alpha = 0.20 --[[ 0x33 ]] })
+theme.screen_selection_border_width = dpi(1)
+theme.screen_selection_color = tcolor.change(theme.common.primary, { alpha = 0.20 --[[ 0x33 ]] })
 
 
 ---------------------------------------------------------------------------------------------------
