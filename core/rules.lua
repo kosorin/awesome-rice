@@ -94,30 +94,15 @@ ruled.client.connect_signal("request::rules", function()
     ruled.client.append_rule {
         id = "floating",
         rule_any = {
-            instance = {
-                "copyq",
-                "pinentry",
-            },
             class = {
                 "1Password",
                 "Arandr",
-                "Blueman-manager",
-                "Gpick",
-                "Kruler",
-                "Sxiv",
-                "Tor Browser",
-                "Wpa_gui",
-                "veromix",
-                "xtightvncviewer",
             },
             name = {
-                "Event Tester", -- xev
-                -- "Welcome to JetBrains Rider",
+                "Event Tester",
             },
             role = {
-                "AlarmWindow", -- Thunderbird's calendar.
-                "ConfigManager", -- Thunderbird's about:config.
-                "pop-up", -- e.g. Google Chrome's (detached) Developer Tools.
+                "pop-up",
             },
         },
         properties = {
@@ -147,7 +132,6 @@ ruled.client.connect_signal("request::rules", function()
     ruled.client.append_rule {
         rule = {
             class = "SpeedCrunch",
-            name = "^SpeedCrunch$",
         },
         properties = {
             floating = true,
