@@ -887,6 +887,72 @@ do
     }
 end
 
+do
+    local toolbox_button_shape = function(cr, width, height)
+        gshape.rounded_rect(cr, width, height, dpi(2))
+    end
+    local toolbox_button_paddings = {
+        left = dpi(4),
+        right = dpi(4),
+        top = dpi(4),
+        bottom = dpi(4),
+    }
+    local toolbox_button_margins = {
+        left = dpi(0),
+        right = dpi(0),
+        top = dpi(0),
+        bottom = dpi(0),
+    }
+    theme.toolbox_titlebar = {
+        height = dpi(24),
+        paddings = {
+            left = dpi(2),
+            right = dpi(2),
+            top = dpi(2),
+            bottom = dpi(2),
+        },
+        button = {
+            opacity_normal = theme.titlebar.button.opacity_normal,
+            opacity_focus = theme.titlebar.button.opacity_focus,
+            spacing = dpi(2),
+            styles = {
+                normal = {
+                    hover_overlay = theme.titlebar.button.styles.normal.hover_overlay,
+                    press_overlay = theme.titlebar.button.styles.normal.press_overlay,
+                    background = theme.titlebar.button.styles.normal.background,
+                    foreground = theme.titlebar.button.styles.normal.foreground,
+                    border_width = theme.titlebar.button.styles.normal.border_width,
+                    shape = toolbox_button_shape,
+                    paddings = toolbox_button_paddings,
+                    margins = toolbox_button_margins,
+                },
+                active = {
+                    hover_overlay = theme.titlebar.button.styles.active.hover_overlay,
+                    press_overlay = theme.titlebar.button.styles.active.press_overlay,
+                    background = theme.titlebar.button.styles.active.background,
+                    foreground = theme.titlebar.button.styles.active.foreground,
+                    border_color = theme.titlebar.button.styles.active.border_width,
+                    border_width = dpi(1),
+                    shape = toolbox_button_shape,
+                    paddings = toolbox_button_paddings,
+                    margins = toolbox_button_margins,
+                },
+                close = {
+                    hover_overlay = theme.titlebar.button.styles.close.hover_overlay,
+                    press_overlay = theme.titlebar.button.styles.close.press_overlay,
+                    background = theme.titlebar.button.styles.close.background,
+                    foreground = theme.titlebar.button.styles.close.foreground,
+                    border_width = theme.titlebar.button.styles.close.border_width,
+                    shape = toolbox_button_shape,
+                    paddings = toolbox_button_paddings,
+                    margins = toolbox_button_margins,
+                },
+            },
+            icons = theme.titlebar.button.icons,
+        },
+    }
+end
+
 
 ---------------------------------------------------------------------------------------------------
 
