@@ -136,14 +136,6 @@ binding.add_global_range {
         on_press = function() capi.awesome.restart() end,
     },
 
-    binding.new {
-        modifiers = { mod.super, mod.control, },
-        triggers = "q",
-        path = "awesome",
-        description = "quit awesome",
-        on_press = function() capi.awesome.quit() end,
-    },
-
 
     binding.new {
         modifiers = { mod.super, },
