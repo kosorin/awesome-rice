@@ -124,7 +124,7 @@ function volume_osd.new()
             gshape.rounded_rect(cr, width, height, dpi(16))
         end,
         bg = tcolor.transparent,
-        border_width = dpi(2),
+        border_width = beautiful.border_width,
         widget = {
             layout = wibox.container.constraint,
             strategy = "exact",

@@ -109,7 +109,7 @@ function timer_menu_template.new(minutes)
                     left = 0,
                     right = 0,
                     top = dpi(8),
-                    bottom = dpi(4),
+                    bottom = dpi(8),
                 },
                 paddings = {
                     left = dpi(4),

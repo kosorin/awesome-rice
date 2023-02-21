@@ -314,9 +314,9 @@ theme.capsule.styles.mebox = {
         border_color = theme.capsule.default_style.border_color,
         border_width = 0,
     },
-    normal_selected = theme.capsule.styles.palette[theme.common_color_names.primary],
-    active_selected = theme.capsule.styles.palette[theme.common_color_names.secondary],
-    urgent_selected = theme.capsule.styles.palette.red,
+    normal_selected = htable.crush_clone(theme.capsule.styles.palette[theme.common_color_names.primary], { border_width = 0 }),
+    active_selected = htable.crush_clone(theme.capsule.styles.palette[theme.common_color_names.secondary], { border_width = 0 }),
+    urgent_selected = htable.crush_clone(theme.capsule.styles.palette.red, { border_width = 0 }),
 }
 
 
@@ -650,6 +650,10 @@ do
         return date.wday == 1 or date.wday == 7
     end
 
+    local function calendar_item_shape(cr, width, height)
+        gshape.rounded_rect(cr, width, height, dpi(3))
+    end
+
     function theme.calendar_popup.default_style.embed(widget, flag, date)
         if flag == "normal" then
             widget.halign = "center"
@@ -657,9 +661,7 @@ do
             return wibox.widget {
                 widget = wibox.container.background,
                 bg = is_weekend(date) and theme.common.background_127 or theme.common.background_115,
-                shape = function(cr, width, height)
-                    gshape.rounded_rect(cr, width, height, dpi(3))
-                end,
+                shape = calendar_item_shape,
                 widget,
             }
         elseif flag == "focus" then
@@ -669,11 +671,7 @@ do
                 widget = wibox.container.background,
                 bg = theme.common.primary_66,
                 fg = theme.common.foreground_bright,
-                shape = function(cr, width, height)
-                    gshape.rounded_rect(cr, width, height, dpi(3))
-                end,
-                border_color = theme.common.primary,
-                border_width = dpi(1),
+                shape = calendar_item_shape,
                 widget,
             }
         elseif flag == "normal_other" then
@@ -688,11 +686,7 @@ do
                 widget = wibox.container.background,
                 bg = theme.common.primary_50,
                 fg = theme.common.foreground,
-                shape = function(cr, width, height)
-                    gshape.rounded_rect(cr, width, height, dpi(3))
-                end,
-                border_color = theme.common.primary_75,
-                border_width = dpi(1),
+                shape = calendar_item_shape,
                 widget,
             }
         elseif flag == "weeknumber" then
