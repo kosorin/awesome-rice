@@ -444,10 +444,13 @@ function mebox:show(args, context)
 
     add_items(self, args, context)
 
+    if type(self._private.on_ready) == "function" then
+        self._private.on_ready(self, args, context)
+    end
     for index, item in ipairs(self._private.items) do
         if type(item.on_ready) == "function" then
             local item_widget = self._private.item_widgets[index]
-            item.on_ready(item_widget, item, self)
+            item.on_ready(item_widget, item, self, args, context)
         end
     end
 
@@ -711,6 +714,7 @@ new_args:
 - items_source : table<item> | function(menu, show_args, show_context) [self]
 - on_show : function(menu, show_args, show_context) [nil]
 - on_hide : function(menu) [nil]
+- on_ready : function(menu, show_args, show_context) [nil]
 - mouse_move_select : boolean [false]
 - mouse_move_show_submenu : boolean [true]
 - keygrabber_auto : boolean [true]
@@ -729,6 +733,7 @@ menu._private:
 - items_source : table<item> | function(menu, show_args, show_context)
 - on_show : function(menu, show_args, show_context) | nil
 - on_hide : function(menu) | nil
+- on_ready : function(menu, show_args, show_context) | nil
 - mouse_move_select : boolean
 - mouse_move_show_submenu : boolean
 - keygrabber_auto : boolean
@@ -746,7 +751,7 @@ item:
 - callback : function(item_widget, item, menu, execute_context) | nil
 - on_show : function(item, menu, show_args, show_context) | nil
 - on_hide : function(item, menu) | nil
-- on_ready : function(item_widget, item, menu) | nil
+- on_ready : function(item_widget, item, menu, show_args, show_context) | nil
 - layout : string | nil
 - layout_add : function(layout, item_widget) | nil
 - buttons_builder : function(item, menu, default_click_action) [nil]
@@ -776,6 +781,7 @@ function mebox.new(args, is_submenu)
     self._private.items_source = args.items_source or args
     self._private.on_show = args.on_show
     self._private.on_hide = args.on_hide
+    self._private.on_ready = args.on_ready
     self._private.mouse_move_select = args.mouse_move_select == true
     self._private.mouse_move_show_submenu = args.mouse_move_show_submenu ~= false
     self._private.layout_navigator = args.layout_navigator
