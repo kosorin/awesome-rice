@@ -29,7 +29,7 @@ transmission.default_data = {
 function transmission:fetch_data()
     local data = gtable.clone(transmission.default_data)
 
-    local session_response = self._private.rpc:request {
+    local session_response = self._private.rpc {
         method = "session-get",
         arguments = {
             fields = {
@@ -41,7 +41,7 @@ function transmission:fetch_data()
     data.alternative_speed_enabled = session_response.arguments["alt-speed-enabled"]
 
 
-    local torrents_response = self._private.rpc:request {
+    local torrents_response = self._private.rpc {
         method = "torrent-get",
         arguments = {
             fields = {
@@ -91,17 +91,17 @@ function transmission:fetch_data()
 end
 
 function transmission:start()
-    self._private.rpc:request { method = "torrent-start" }
+    self._private.rpc { method = "torrent-start" }
     return self:fetch_data()
 end
 
 function transmission:stop()
-    self._private.rpc:request { method = "torrent-stop" }
+    self._private.rpc { method = "torrent-stop" }
     return self:fetch_data()
 end
 
 function transmission:alternative_speed(enable)
-    self._private.rpc:request {
+    self._private.rpc {
         method = "session-set",
         arguments = {
             ["alt-speed-enabled"] = not not enable,
@@ -116,7 +116,7 @@ function transmission.new(args)
     local self = gtable.crush(gobject {}, transmission, true)
     self._private = {}
 
-    self._private.rpc = transmission_rpc.new(args.base_address)
+    self._private.rpc = transmission_rpc.new(args)
 
     return self
 end
