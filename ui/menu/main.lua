@@ -90,7 +90,7 @@ table.insert(menu_items, {
 })
 
 main_menu = mebox {
-    item_width = dpi(200),
+    item_width = dpi(216),
     items_source = menu_items,
 }
 

@@ -326,19 +326,19 @@ theme.popup = {
     margins = dpi(6),
 }
 theme.popup.default_style = {
-    bg = tcolor.change(theme.common.background, { alpha = 0.85 --[[ 0xd9 ]] }),
+    bg = theme.common.background,
     fg = theme.common.foreground,
     border_color = theme.common.background_bright,
-    border_width = theme.border_width,
+    border_width = dpi(1),
     shape = function(cr, width, height)
         gshape.rounded_rect(cr, width, height, dpi(16))
     end,
     placement = aplacement.under_mouse,
     paddings = {
-        left = dpi(16),
-        right = dpi(16),
-        top = dpi(16),
-        bottom = dpi(16),
+        left = dpi(20),
+        right = dpi(20),
+        top = dpi(20),
+        bottom = dpi(20),
     },
 }
 
@@ -541,14 +541,14 @@ theme.mebox.default_style = htable.crush_clone(theme.popup.default_style, {
             local text_widget = self:get_children_by_id("#text")[1]
             if text_widget then
                 local text = item.text or ""
-                text_widget:set_markup(pango.span { foreground = style.foreground, weight = "bold", text, })
+                text_widget:set_markup(pango.span { foreground = style.foreground, text, })
             end
 
             local submenu_icon_widget = self:get_children_by_id("#submenu_icon")[1]
             if submenu_icon_widget then
                 submenu_icon_widget.visible = not not item.submenu
                 if submenu_icon_widget.visible then
-                    local icon = item.submenu_icon or config.places.theme .. "/icons/menu-right.svg"
+                    local icon = item.submenu_icon or config.places.theme .. "/icons/chevron-right.svg"
                     local color = style.foreground
                     local stylesheet = css.style { path = { fill = color } }
                     submenu_icon_widget:set_stylesheet(stylesheet)
@@ -572,6 +572,7 @@ theme.mebox.default_style = htable.crush_clone(theme.popup.default_style, {
 
 theme.bindbox = {}
 theme.bindbox.default_style = htable.crush_clone(theme.popup.default_style, {
+    bg = tcolor.change(theme.common.background, { alpha = 0.85 }),
     font = theme.font,
     placement = function(d)
         aplacement.centered(d, {
