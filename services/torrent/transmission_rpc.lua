@@ -1,4 +1,4 @@
--- https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md
+-- Transmission's RPC specification: https://github.com/transmission/transmission/blob/main/docs/rpc-spec.md
 
 -- DEPENDENCIES: lua-socket
 -- https://w3.impa.br/~diego/software/luasocket/http.html
@@ -17,12 +17,8 @@ local error = error
 
 local transmission_rpc = {}
 
-function transmission_rpc:handle_session_id_response(response_status_code, response_headers)
-    if response_headers and response_status_code == 409 or response_status_code == 200 then
-        self.session_id = response_headers["x-transmission-session-id"]
-    else
-        error(response_status_code)
-    end
+local function built_error_message(title, value)
+    return title .. ": " .. (tostring(value) or "???")
 end
 
 function transmission_rpc:request(request)
@@ -46,38 +42,28 @@ function transmission_rpc:request(request)
     if response_status_code == 200 then
         local body = table.concat(response_body_chunks)
         local response, _, json_error = json.decode(body, 1, nil)
-        if json_error or response.result ~= "success" then
-            error(json_error)
-        end
-        return response
-    elseif response_status_code == 409 then
-        self:handle_session_id_response(response_status_code, response_headers)
-        if resend_for_session_id then
-            error("Could not get session id")
+        if json_error then
+            error(built_error_message("transmission_response_json", response.json_error))
+        elseif response.result ~= "success" then
+            error(built_error_message("transmission_response_result", response.result))
         else
+            return response
+        end
+    elseif response_status_code == 409 then
+        self.session_id = response_headers and response_headers["x-transmission-session-id"]
+        if not resend_for_session_id then
             resend_for_session_id = true
             goto again
         end
-    else
-        error(response_status_code)
+        error("Could not get session id")
     end
-end
-
-local function fetch_session_id(self)
-    self:handle_session_id_response(select(2, http.request {
-        url = self.base_address,
-        method = "POST",
-    }))
+    error(built_error_message("response_status_code", response_status_code))
 end
 
 function transmission_rpc.new(base_address)
-    local self = setmetatable({
+    return setmetatable({
         base_address = base_address or "http://localhost:9091/transmission/rpc",
     }, { __index = transmission_rpc })
-
-    fetch_session_id(self)
-
-    return self
 end
 
 return transmission_rpc

@@ -1,5 +1,3 @@
--- DEPENDENCIES (feature flag "torrent_widget"): transmission-status, lua-dkjson
-
 local config = require("config")
 if not config.features.torrent_widget then
     return
@@ -8,47 +6,40 @@ end
 local capi = {
     awesome = awesome,
 }
-local table = table
-local json = require("dkjson")
-local gears = require("gears")
-local awful = require("awful")
+local type = type
+local pcall = pcall
+local tostring = tostring
+local time = os.time
+local gdebug = require("gears.debug")
+local gtable = require("gears.table")
+local gtimer = require("gears.timer")
+local transmission = require("services.torrent.transmission")
 
 
 local torrent_service = {
-    status_codes = {
-        idle = 0,
-        seeding = 1,
-        verifying = 2,
-        leeching = 3,
-    },
+    instance = transmission.new(),
+    status_codes = transmission.status_codes,
     config = {
         interval = 5,
         error_interval = 300,
     },
     last_response = {
         success = nil,
-        data = {
-            alternative_speed_enabled = false,
-            status = 0,
-            eta = nil,
-            any_unknown_eta = false,
-            downloaded_size = 0,
-            total_size = 0,
-        },
+        data = gtable.clone(transmission.default_data),
     },
     timer = nil,
 }
 
 local function update_response(data)
     local response = torrent_service.last_response
-    response.time = os.time()
+    response.time = time()
     if data then
         if response.success ~= true then
             torrent_service.timer.timeout = torrent_service.config.interval
             torrent_service.timer:again()
         end
         response.success = true
-        gears.table.crush(response.data, data)
+        gtable.crush(response.data, data)
     else
         if response.success ~= false then
             torrent_service.timer.timeout = torrent_service.config.error_interval
@@ -71,63 +62,58 @@ local function validate_data(data)
     end
 end
 
-local function on_raw_data(stdout, stderr, exitreason, exitcode)
-    local unknown_error, data, error
+local function call(callback, ...)
+    local success, data = pcall(callback, torrent_service.instance, ...)
 
-    if exitreason == "exit" and exitcode == 0 then
-        unknown_error, data, _, error = pcall(json.decode, stdout)
-        if not unknown_error and not error then
-            error = "Torrent status error: Unknown error"
-        end
+    local error_message
+    if success then
+        error_message = validate_data(data)
     else
-        error = "Torrent status error: " .. tostring(exitcode) .. ", " .. exitreason .. " => " .. stderr
+        error_message = tostring(data)
     end
 
-    error = error or validate_data(data)
-
-    if error then
-        gears.debug.print_error(error)
+    if error_message then
+        gdebug.print_error(error_message)
+        data = nil
     end
 
     update_response(data)
 end
 
-local function update(reset_timer, options)
+local function reset_timer()
     if reset_timer then
         torrent_service.timer:again()
     end
-    local command = "transmission-status"
-    if options and #options > 0 then
-        command = command .. " " .. table.concat(options, " ")
-    end
-    awful.spawn.easy_async(command, on_raw_data)
 end
 
 function torrent_service.update()
-    update(true)
+    reset_timer()
+    call(transmission.fetch_data)
 end
 
 function torrent_service.start()
-    update(true, { "--start" })
+    reset_timer()
+    call(transmission.start)
 end
 
 function torrent_service.stop()
-    update(true, { "--stop" })
+    reset_timer()
+    call(transmission.stop)
 end
 
 function torrent_service.alternative_speed(enable)
+    reset_timer()
     if enable == nil then
         enable = not torrent_service.last_response.data.alternative_speed_enabled
     end
-    update(true, { "-a", enable and 1 or 0 })
+    call(transmission.alternative_speed, enable)
 end
 
 function torrent_service.watch()
-    torrent_service.timer = torrent_service.timer or gears.timer {
-        timeout = torrent_service.config.interval,
-        call_now = true,
-        callback = function() update(false) end,
-    }
+    torrent_service.timer = torrent_service.timer or gtimer {
+            timeout = torrent_service.config.interval,
+            callback = function() call(transmission.fetch_data) end,
+        }
     torrent_service.timer:again()
 end
 

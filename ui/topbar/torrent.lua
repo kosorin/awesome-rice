@@ -112,7 +112,7 @@ function torrent_widget:refresh()
     self:apply_style(style)
 
     local text_widget = self:get_children_by_id("text")[1]
-    text_widget:set_markup(pango.span { foreground = style.foreground, text, })
+    text_widget:set_markup(pango.span { foreground = style.foreground, text })
 
     local icon_path = config.places.theme .. "/icons/" .. icon .. ".svg"
     local icon_stylesheet = css.style { path = { fill = style.foreground } }
