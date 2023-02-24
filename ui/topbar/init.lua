@@ -48,20 +48,10 @@ capi.screen.connect_signal("request::desktop_decoration", function(screen)
                 },
             },
             {
-                layout = wibox.container.place,
-                halign = "right",
-                fill_horizontal = true,
-                {
-                    id = "#right_container",
-                    layout = wibox.layout.fixed.horizontal,
-                    spacing = beautiful.wibar.spacing,
-                    {
-                        id = "#right",
-                        layout = wibox.layout.fixed.horizontal,
-                        spacing = beautiful.wibar.spacing,
-                        reverse = true,
-                    },
-                },
+                id = "#right",
+                layout = wibox.layout.fixed.horizontal,
+                spacing = beautiful.wibar.spacing,
+                reverse = true,
             },
         },
     }
@@ -83,11 +73,6 @@ capi.screen.connect_signal("request::desktop_decoration", function(screen)
     local middle = wibar:get_children_by_id("#middle")[1]
     middle:add(screen.topbar.taglist)
 
-    local right_container = wibar:get_children_by_id("#right_container")[1]
-    if is_primary then
-        right_container:insert(1, tools_widget.new(wibar))
-    end
-
     local right = wibar:get_children_by_id("#right")[1]
     if is_primary then
         if config.features.torrent_widget then
@@ -98,10 +83,8 @@ capi.screen.connect_signal("request::desktop_decoration", function(screen)
         if config.features.weather_widget then
             right:add(weather_widget.new(wibar))
         end
-        right:add(datetime_widget.new(wibar))
-        right:add(power_widget.new(wibar))
-    else
-        right:add(datetime_widget.new(wibar))
-        right:add(power_widget.new(wibar))
+        right:add(tools_widget.new(wibar))
     end
+    right:add(datetime_widget.new(wibar))
+    right:add(power_widget.new(wibar))
 end)
