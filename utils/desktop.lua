@@ -13,7 +13,7 @@ local lgi = require("lgi")
 local gio = lgi.Gio
 local glib = lgi.GLib
 local gdebug = require("gears.debug")
-local protected_call = require("gears.protected_call")
+local gpcall = require("gears.protected_call").call
 
 
 local desktop_utils = {}
@@ -31,7 +31,8 @@ desktop_utils.terminal = "xterm"
 
 --- The default icon for applications that don't provide any icon in
 -- their .desktop files.
-local default_icon = nil
+-- @param[opt] string
+desktop_utils.default_icon = nil
 
 --- Name of the WM for the OnlyShowIn entry in the .desktop file.
 -- @param[opt="awesome"] string
@@ -92,32 +93,8 @@ do
     setmetatable(keys_getters, {
         __index = function(self, key)
             return rawget(self, key) or get_string
-        end
+        end,
     })
-end
-
--- Private section
-
-local do_protected_call, call_callback
-do
-    -- Lua 5.1 cannot yield across a protected call. Instead of hardcoding a
-    -- check, we check for this problem: The following coroutine yields true on
-    -- success (so resume() returns true, true). On failure, pcall returns
-    -- false and a message, so resume() returns true, false, message.
-    local _, has_yieldable_pcall = coroutine.resume(coroutine.create(function()
-        return pcall(coroutine.yield, true)
-    end))
-    if has_yieldable_pcall then
-        do_protected_call = protected_call.call
-        call_callback = function(callback, ...)
-            return callback(...)
-        end
-    else
-        do_protected_call = function(f, ...)
-            return f(...)
-        end
-        call_callback = protected_call.call
-    end
 end
 
 local all_icon_sizes = {
@@ -189,7 +166,7 @@ function desktop_utils.get_icon_lookup_paths_uncached()
     local paths = add_with_dir({}, glib.get_home_dir(), ".icons")
     add_with_dir(paths, {
         glib.get_user_data_dir(), -- $XDG_DATA_HOME, typically $HOME/.local/share
-        table.unpack(glib.get_system_data_dirs()) -- $XDG_DATA_DIRS, typically /usr/{,local/}share
+        table.unpack(glib.get_system_data_dirs()), -- $XDG_DATA_DIRS, typically /usr/{,local/}share
     }, "icons")
     add_with_dir(paths, glib.get_system_data_dirs(), "pixmaps")
 
@@ -275,14 +252,14 @@ local lookup_icon_cache = {}
 -- @param icon Short or full name of the icon.
 -- @return full name of the icon.
 -- @staticfct menubar.utils.lookup_icon
-function desktop_utils.lookup_icon(icon)
+function desktop_utils.lookup_icon(icon, default_icon)
     if not icon then
-        return nil
+        return default_icon or desktop_utils.default_icon
     end
     if not lookup_icon_cache[icon] and lookup_icon_cache[icon] ~= false then
         lookup_icon_cache[icon] = desktop_utils.lookup_icon_uncached(icon)
     end
-    return lookup_icon_cache[icon] or default_icon
+    return lookup_icon_cache[icon] or default_icon or desktop_utils.default_icon
 end
 
 --- Parse a .desktop file.
@@ -447,10 +424,10 @@ do
     -- @staticfct menubar.utils.parse_directory
     -- @noreturn
     function desktop_utils.parse_directory(directory, callback)
-        gio.Async.start(do_protected_call)(function()
+        gio.Async.start(gpcall)(function()
             local result = {}
             parser(gio.File.new_for_path(directory), result)
-            call_callback(callback, result)
+            callback(result)
         end)
     end
 end
