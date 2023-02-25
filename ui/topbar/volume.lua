@@ -187,11 +187,14 @@ function volume_widget.new(wibar)
         end),
     }
 
-    mouse_helper.grab_horizontal {
+    mouse_helper.start_grabbing {
         wibox = self._private.wibar,
         widget = bar_container,
         minimum = 0,
         maximum = 100,
+        fix_value = function(volume)
+            return math.floor(volume)
+        end,
         start = function()
             if self._private.menu.visible or self._private.is_dragging then
                 return false
@@ -199,15 +202,13 @@ function volume_widget.new(wibar)
             self._private.is_dragging = true
             return true
         end,
-        change = function(volume, finish)
-            volume = math.floor(volume)
-            if finish then
-                self._private.is_dragging = false
-                volume_service.set_volume(volume, true)
-            else
-                self._private.data.volume = volume
-                self:refresh()
-            end
+        update = function(volume)
+            self._private.data.volume = volume
+            self:refresh()
+        end,
+        finish = function(volume)
+            self._private.is_dragging = false
+            volume_service.set_volume(volume, true)
         end,
     }
 

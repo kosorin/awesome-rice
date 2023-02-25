@@ -137,17 +137,16 @@ function redshift_widget.new(wibar, on_dashboard)
         end),
     }
 
-    mouse_helper.grab_horizontal {
+    mouse_helper.start_grabbing {
         wibox = self._private.wibar,
         widget = self:get_children_by_id("bar_container")[1],
         minimum = min_temperature,
         maximum = max_temperature,
-        change = function(temperature, finish)
-            if finish then
-                self:update(temperature)
-            else
-                self:update_local_only(temperature)
-            end
+        update = function(temperature)
+            self:update_local_only(temperature)
+        end,
+        finish = function(temperature)
+            self:update(temperature)
         end,
     }
 
