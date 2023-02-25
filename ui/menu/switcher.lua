@@ -19,7 +19,7 @@ local pango = require("utils.pango")
 
 return mebox {
     item_width = dpi(1000),
-    item_height = dpi(48),
+    bg = tcolor.change(beautiful.common.background, { alpha = 0.85 }),
     placement = awful.placement.centered,
     paddings = {
         left = dpi(16),
@@ -35,10 +35,11 @@ return mebox {
                 client = client,
                 active = client.active,
                 text = pango.span {
-                    pango.span { fgalpha = "65%", weight = "light", size = "medium", "[", tag and tag.name or "", "] ", },
+                    pango.span { fgalpha = "65%", weight = "light", "[", tag and tag.name or "", "]" },
+                    " ",
                     pango.b(client.class or ""),
                     " ",
-                    pango.span { fgalpha = "65%", weight = "light", size = "medium", client.name or "", },
+                    pango.span { fgalpha = "65%", weight = "light", size = "small", client.name or "" },
                 },
                 on_hide = function(item)
                     if not item.selected then
@@ -57,31 +58,18 @@ return mebox {
         return items
     end,
     item_template = {
-        id = "#container",
         widget = capsule,
         enabled = false,
         hover_overlay = tcolor.transparent,
         press_overlay = tcolor.transparent,
-        margins = {
-            left = 0,
-            right = 0,
-            top = dpi(2),
-            bottom = dpi(2),
-        },
-        paddings = {
-            left = dpi(16),
-            right = dpi(16),
-            top = dpi(6),
-            bottom = dpi(6),
-        },
         {
             layout = wibox.layout.fixed.horizontal,
             spacing = dpi(12),
             {
                 widget = wibox.container.margin,
-                forced_width = dpi(24),
-                top = dpi(4),
-                bottom = dpi(4),
+                forced_width = dpi(20),
+                top = dpi(2),
+                bottom = dpi(2),
                 {
                     id = "#icon",
                     widget = awful.widget.clienticon,
@@ -113,7 +101,6 @@ return mebox {
             local text_widget = self:get_children_by_id("#text")[1]
             if text_widget then
                 text_widget:set_markup(pango.span {
-                    size = "larger",
                     foreground = style.foreground,
                     item.text or "",
                 })
