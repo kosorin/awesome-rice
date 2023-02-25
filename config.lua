@@ -35,8 +35,8 @@ config.apps = {
     calculator = "speedcrunch",
     mixer = terminal_execute .. "pulsemixer",
     bluetooth_control = terminal_execute .. "bluetoothctl",
-    music_streaming = "spotify",
-    video_streaming = "freetube",
+    music_player = "spotify",
+    video_player = "freetube",
 }
 
 config.power = {

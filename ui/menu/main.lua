@@ -45,16 +45,16 @@ table.insert(menu_items, {
     callback = function() awful.spawn(config.apps.calculator) end,
 })
 table.insert(menu_items, {
-    text = "music streaming",
+    text = "music player",
     icon = config.places.theme .. "/icons/music.svg",
     icon_color = beautiful.palette.green,
-    callback = function() awful.spawn(config.apps.music_streaming) end,
+    callback = function() awful.spawn(config.apps.music_player) end,
 })
 table.insert(menu_items, {
-    text = "video streaming",
+    text = "video player",
     icon = config.places.theme .. "/icons/video.svg",
     icon_color = beautiful.palette.red,
-    callback = function() awful.spawn(config.apps.video_streaming) end,
+    callback = function() awful.spawn(config.apps.video_player) end,
 })
 table.insert(menu_items, {
     text = "applications",
@@ -90,7 +90,7 @@ table.insert(menu_items, {
 })
 
 main_menu = mebox {
-    item_width = dpi(216),
+    item_width = dpi(192),
     items_source = menu_items,
 }
 
