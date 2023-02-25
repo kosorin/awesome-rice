@@ -90,39 +90,36 @@ function module.new(args)
         id = "#margin",
         layout = wibox.container.margin,
         {
-            layout = wibox.layout.stack,
+            id = "#background",
+            layout = wibox.container.background,
             {
-                id = "#background",
-                layout = wibox.container.background,
+                id = "#background_content",
+                layout = wibox.layout.stack,
                 {
-                    id = "#background_content",
-                    layout = wibox.layout.stack,
+                    id = "#overlay",
+                    layout = wibox.container.background,
+                    visible = false,
                     {
-                        id = "#overlay",
-                        layout = wibox.container.background,
-                        visible = false,
+                        layout = wibox.layout.stack,
                         {
-                            layout = wibox.layout.stack,
-                            {
-                                id = "#hover_overlay",
-                                layout = wibox.container.background,
-                                visible = false,
-                            },
-                            {
-                                id = "#press_overlay",
-                                layout = wibox.container.background,
-                                visible = false,
-                            },
-                        }
-                    },
-                    {
-                        id = "#padding",
-                        layout = wibox.container.margin,
-                        {
-                            id = "#content_container",
-                            layout = wibox.container.constraint,
-                            args.widget,
+                            id = "#hover_overlay",
+                            layout = wibox.container.background,
+                            visible = false,
                         },
+                        {
+                            id = "#press_overlay",
+                            layout = wibox.container.background,
+                            visible = false,
+                        },
+                    },
+                },
+                {
+                    id = "#padding",
+                    layout = wibox.container.margin,
+                    {
+                        id = "#content_container",
+                        layout = wibox.container.constraint,
+                        args.widget,
                     },
                 },
             },
