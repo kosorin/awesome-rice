@@ -258,6 +258,7 @@ function media_player_widget.new(wibar)
     local self = wibox.widget {
         widget = wibox.container.constraint,
         strategy = "max",
+        width = dpi(500),
         {
             layout = wibox.layout.fixed.horizontal,
             reverse = true,
