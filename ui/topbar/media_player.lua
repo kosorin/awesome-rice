@@ -192,9 +192,9 @@ local function initialize_playback_bar(self)
                 self._private.is_dragging = false
                 self._private.drag_interrupted = false
 
-                if interrupted then
-                    refresh_timer(self, media_player:get_primary_player())
-                else
+                refresh_timer(self, media_player:get_primary_player())
+
+                if not interrupted then
                     self._private.is_dragging = false
                     media_player:set_position(ratio * length)
                 end
