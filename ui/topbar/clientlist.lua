@@ -15,6 +15,7 @@ local client_menu_template = require("ui.menu.templates.client")
 local aplacement = require("awful.placement")
 local widget_helper = require("helpers.widget")
 local pango = require("utils.pango")
+local desktop = require("utils.desktop")
 
 
 local clientlist = { mt = {} }
@@ -97,19 +98,24 @@ function clientlist.new(wibar)
                     item.container.border_color = item_args.shape_border_color
                 end
 
+                icon = icon or (client.desktop_file and client.desktop_file.icon_path)
+                if not icon then
+                    local icon_path = (client.class or ""):lower():gsub("%s", "-")
+                    print("find icon", icon_path)
+                    icon = desktop.lookup_icon(icon_path)
+                end
+                if item.icon then
+                    item.icon:set_image(icon)
+                    item.icon.forced_height = item_args.icon_size
+                    item.icon.forced_width = item_args.icon_size
+                    item.icon.opacity = client.minimized and 0.5 or 1
+                end
+
+                text = not icon and text or nil
                 if item.text then
                     if not item.text:set_markup_silently(text) then
                         item.text:set_markup(pango.i("&lt;Invalid text&gt;"))
                     end
-                end
-
-                icon = icon or (client.desktop_file and client.desktop_file.icon_path)
-                if item.icon then
-                    if icon then
-                        item.icon:set_image(icon)
-                    end
-                    item.icon.forced_height = item_args.icon_size
-                    item.icon.forced_width = item_args.icon_size
                 end
 
                 layout.widget:add(item.root)
@@ -144,26 +150,30 @@ function clientlist.new(wibar)
             },
         },
         widget_template = {
-            id = "#container",
-            widget = capsule,
-            forced_width = dpi(220),
-            margins = {
-                left = beautiful.wibar.spacing / 2,
-                right = beautiful.wibar.spacing / 2,
-                top = beautiful.wibar.padding.top,
-                bottom = beautiful.wibar.padding.bottom,
-            },
+            widget = wibox.container.constraint,
+            strategy = "max",
+            width = dpi(250),
             {
-                layout = wibox.layout.fixed.horizontal,
-                spacing = beautiful.capsule.item_content_spacing,
-                {
-                    id = "#icon",
-                    widget = wibox.widget.imagebox,
-                    resize = true,
+                id = "#container",
+                widget = capsule,
+                margins = {
+                    left = beautiful.wibar.spacing / 2,
+                    right = beautiful.wibar.spacing / 2,
+                    top = beautiful.wibar.padding.top,
+                    bottom = beautiful.wibar.padding.bottom,
                 },
                 {
-                    id = "#text",
-                    widget = wibox.widget.textbox,
+                    layout = wibox.layout.fixed.horizontal,
+                    spacing = beautiful.capsule.item_content_spacing,
+                    {
+                        id = "#icon",
+                        widget = wibox.widget.imagebox,
+                        resize = true,
+                    },
+                    {
+                        id = "#text",
+                        widget = wibox.widget.textbox,
+                    },
                 },
             },
         },

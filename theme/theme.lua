@@ -1044,70 +1044,70 @@ end
 
 ---------------------------------------------------------------------------------------------------
 
-theme.application_categories = {
+theme.application_menu_categories = {
     utility = {
-        app_type = "Utility",
+        id = "Utility",
         name = "accessories",
         icon_name = "applications-accessories",
         icon_color = theme.palette.green,
     },
     development = {
-        app_type = "Development",
+        id = "Development",
         name = "development",
         icon_name = "applications-development",
         icon_color = theme.palette.cyan,
     },
     education = {
-        app_type = "Education",
+        id = "Education",
         name = "education",
         icon_name = "applications-science",
         icon_color = theme.palette.gray,
     },
     games = {
-        app_type = "Game",
+        id = "Game",
         name = "games",
         icon_name = "applications-games",
         icon_color = theme.palette.red,
     },
     graphics = {
-        app_type = "Graphics",
+        id = "Graphics",
         name = "graphics",
         icon_name = "applications-graphics",
         icon_color = theme.palette.yellow,
     },
     internet = {
-        app_type = "Network",
+        id = "Network",
         name = "internet",
         icon_name = "applications-internet",
         icon_color = theme.palette.blue,
     },
     multimedia = {
-        app_type = "AudioVideo",
+        id = "AudioVideo",
         name = "multimedia",
         icon_name = "applications-multimedia",
         icon_color = theme.palette.cyan,
     },
     office = {
-        app_type = "Office",
+        id = "Office",
         name = "office",
         icon_name = "applications-office",
         icon_color = theme.palette.white,
     },
     science = {
-        app_type = "Science",
+        id = "Science",
         name = "science",
         icon_name = "applications-science",
         icon_color = theme.palette.magenta,
     },
     settings = {
-        app_type = "Settings",
+        id = "Settings",
         name = "settings",
         icon_name = "applications-utilities",
         icon_color = theme.palette.orange,
     },
     tools = {
-        app_type = "System",
-        name = "system Tools",
+        id = "System",
+        name = "system tools",
         icon_name = "applications-system",
         icon_color = theme.palette.gray,
     },
