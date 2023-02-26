@@ -9,6 +9,7 @@ local services = {
     torrent = config.features.torrent_widget and require("services.torrent") or nil,
     wallpaper = config.features.wallpaper_menu and require("services.wallpaper") or nil,
     power = require("services.power"),
+    media = require("services.media"),
 }
 
 for _, service in pairs(services) do

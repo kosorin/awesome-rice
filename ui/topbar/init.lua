@@ -22,6 +22,7 @@ local weather_widget = require("ui.topbar.weather")
 local datetime_widget = require("ui.topbar.datetime")
 local tools_widget = require("ui.topbar.tools")
 local power_widget = require("ui.topbar.power")
+local media_player_widget = require("ui.topbar.media_player")
 
 
 capi.screen.connect_signal("request::desktop_decoration", function(screen)
@@ -68,6 +69,9 @@ capi.screen.connect_signal("request::desktop_decoration", function(screen)
     left:add(screen.topbar.clientlist)
     if is_primary then
         left:add(systray_widget.new(wibar))
+    end
+    if is_primary then
+        left:add(media_player_widget.new(wibar))
     end
 
     local middle = wibar:get_children_by_id("#middle")[1]

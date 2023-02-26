@@ -635,6 +635,23 @@ theme.bindbox.default_style = htable.crush_clone(theme.popup.default_style, {
 
 ---------------------------------------------------------------------------------------------------
 
+theme.media_player = {}
+theme.media_player.capsule = {
+    normal = {
+        background = theme.common.background_105,
+        foreground = theme.common.foreground,
+        border_width = 0,
+    },
+    disabled = {
+        background = theme.common.background_105,
+        foreground = theme.common.foreground_50,
+        border_width = 0,
+    },
+}
+
+
+---------------------------------------------------------------------------------------------------
+
 theme.tools_popup = {
     default_style = htable.crush_clone(theme.popup.default_style),
 }

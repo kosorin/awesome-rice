@@ -1,5 +1,3 @@
--- DEPENDENCIES: playerctl
-
 local capi = {
     awesome = awesome,
     client = client,
@@ -368,7 +366,7 @@ binding.add_global_range {
         triggers = "XF86AudioPlay",
         path = "media",
         description = "play/pause",
-        on_press = function() awful.spawn("playerctl play-pause") end,
+        on_press = function() services.media.player:play_pause() end,
     },
 
     binding.new {
@@ -376,40 +374,40 @@ binding.add_global_range {
         triggers = "XF86AudioStop",
         path = "media",
         description = "stop",
-        on_press = function() awful.spawn("playerctl stop") end,
+        on_press = function() services.media.player:stop() end,
     },
 
     binding.new {
         modifiers = {},
         triggers = {
-            { trigger = "XF86AudioPrev", action = "previous" },
-            { trigger = "XF86AudioNext", action = "next" },
+            { trigger = "XF86AudioPrev", offset = -1 },
+            { trigger = "XF86AudioNext", offset = 1 },
         },
         path = "media",
         description = "previous/next track",
-        on_press = function(trigger) awful.spawn("playerctl " .. trigger.action) end,
+        on_press = function(trigger) services.media.player:skip(trigger.offset) end,
     },
 
     binding.new {
         modifiers = {},
         triggers = {
-            { trigger = "XF86AudioRewind", direction = "-" },
-            { trigger = "XF86AudioForward", direction = "+" },
+            { trigger = "XF86AudioRewind", offset = -5 * 1000000 },
+            { trigger = "XF86AudioForward", offset = 5 * 1000000 },
         },
         path = "media",
         description = "rewind/fast forward (5s)",
-        on_press = function(trigger) awful.spawn("playerctl position 5" .. trigger.direction) end,
+        on_press = function(trigger) services.media.player:seek(trigger.offset) end,
     },
 
     binding.new {
         modifiers = { mod.super, },
         triggers = {
-            { trigger = "XF86AudioRewind", direction = "-" },
-            { trigger = "XF86AudioForward", direction = "+" },
+            { trigger = "XF86AudioRewind", offset = -30 * 1000000 },
+            { trigger = "XF86AudioForward", offset = 30 * 1000000 },
         },
         path = "media",
         description = "rewind/fast forward (30s)",
-        on_press = function(trigger) awful.spawn("playerctl position 30" .. trigger.direction) end,
+        on_press = function(trigger) services.media.player:seek(trigger.offset) end,
     },
 
     binding.new {
@@ -417,7 +415,7 @@ binding.add_global_range {
         triggers = "XF86AudioPlay",
         path = "media",
         description = "pause all",
-        on_press = function() awful.spawn("playerctl -a pause") end,
+        on_press = function() services.media.player:pause(true) end,
     },
 
     binding.new {
@@ -425,7 +423,7 @@ binding.add_global_range {
         triggers = "XF86AudioStop",
         path = "media",
         description = "stop all",
-        on_press = function() awful.spawn("playerctl -a stop") end,
+        on_press = function() services.media.player:stop(true) end,
     },
 
 }
