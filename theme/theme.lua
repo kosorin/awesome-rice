@@ -652,6 +652,47 @@ theme.media_player.capsule = {
 
 ---------------------------------------------------------------------------------------------------
 
+theme.volume_osd = {
+    default_style = htable.crush_clone(theme.popup.default_style, {
+        bg = theme.common.background,
+        fg = theme.common.foreground,
+        border_color = theme.common.background_bright,
+        border_width = dpi(1),
+        placement = function(d)
+            aplacement.top(d, {
+                honor_workarea = true,
+                margins = dpi(32),
+            })
+        end,
+        paddings = {
+            left = dpi(32),
+            right = dpi(32),
+            top = dpi(16),
+            bottom = dpi(16),
+        },
+    }),
+}
+theme.volume_osd.styles = {
+    normal = {
+        bg = theme.volume_osd.default_style.bg,
+        fg = theme.volume_osd.default_style.fg,
+        border_color = theme.volume_osd.default_style.border_color,
+    },
+    boosted = {
+        bg = theme.capsule.styles.palette.yellow.background,
+        fg = theme.capsule.styles.palette.yellow.foreground,
+        border_color = theme.capsule.styles.palette.yellow.border_color,
+    },
+    muted = {
+        bg = theme.volume_osd.default_style.bg,
+        fg = theme.common.foreground_50,
+        border_color = theme.volume_osd.default_style.border_color,
+    },
+}
+
+
+---------------------------------------------------------------------------------------------------
+
 theme.tools_popup = {
     default_style = htable.crush_clone(theme.popup.default_style),
 }
