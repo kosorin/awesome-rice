@@ -314,35 +314,6 @@ do
     end
 end
 
-theme.capsule.styles.mebox = {
-    normal = {
-        hover_overlay = tcolor.white .. "20",
-        press_overlay = tcolor.white .. "20",
-        background = tcolor.transparent,
-        foreground = theme.common.foreground,
-        border_color = theme.capsule.default_style.border_color,
-        border_width = 0,
-    },
-    active = {
-        hover_overlay = tcolor.white .. "20",
-        press_overlay = tcolor.white .. "20",
-        background = tcolor.transparent,
-        foreground = theme.common.secondary_bright,
-        border_color = theme.capsule.default_style.border_color,
-        border_width = 0,
-    },
-    urgent = {
-        hover_overlay = theme.common.urgent_bright .. "40",
-        background = tcolor.transparent,
-        foreground = theme.common.foreground,
-        border_color = theme.capsule.default_style.border_color,
-        border_width = 0,
-    },
-    normal_selected = htable.crush_clone(theme.capsule.styles.palette[theme.common_color_names.primary], { border_width = 0 }),
-    active_selected = htable.crush_clone(theme.capsule.styles.palette[theme.common_color_names.secondary], { border_width = 0 }),
-    urgent_selected = htable.crush_clone(theme.capsule.styles.palette.red, { border_width = 0 }),
-}
-
 
 ---------------------------------------------------------------------------------------------------
 
@@ -449,6 +420,38 @@ theme.mebox = {
             color = theme.palette.gray_bright,
         },
     },
+    item_styles = {
+        normal = {
+            normal = {
+		        hover_overlay = tcolor.white .. "20",
+		        press_overlay = tcolor.white .. "20",
+		        background = tcolor.transparent,
+		        foreground = theme.common.foreground,
+		        border_color = theme.capsule.default_style.border_color,
+		        border_width = 0,
+            },
+            active = {
+		        hover_overlay = tcolor.white .. "20",
+		        press_overlay = tcolor.white .. "20",
+		        background = tcolor.transparent,
+		        foreground = theme.common.secondary_bright,
+		        border_color = theme.capsule.default_style.border_color,
+		        border_width = 0,
+            },
+            urgent = {
+		        hover_overlay = theme.common.urgent_bright .. "40",
+		        background = tcolor.transparent,
+		        foreground = theme.common.foreground,
+		        border_color = theme.capsule.default_style.border_color,
+		        border_width = 0,
+            },
+        },
+        selected = {
+            normal = htable.crush_clone(theme.capsule.styles.palette[theme.common_color_names.primary], { border_width = 0 }),
+            active = htable.crush_clone(theme.capsule.styles.palette[theme.common_color_names.secondary], { border_width = 0 }),
+            urgent = htable.crush_clone(theme.capsule.styles.palette.red, { border_width = 0 }),
+        },
+    },
 }
 theme.mebox.default_style = htable.crush_clone(theme.popup.default_style, {
     separator_template = theme.mebox.horizontal_separator_template,
@@ -520,17 +523,14 @@ theme.mebox.default_style = htable.crush_clone(theme.popup.default_style, {
             self.enabled = item.enabled
             self.opacity = item.enabled and 1 or 0.5
 
-            local style = item.active
-                and (item.selected
-                    and theme.capsule.styles.mebox.active_selected
-                    or theme.capsule.styles.mebox.active)
-                or (item.urgent
-                    and (item.selected
-                        and theme.capsule.styles.mebox.urgent_selected
-                        or theme.capsule.styles.mebox.urgent)
-                    or (item.selected
-                        and theme.capsule.styles.mebox.normal_selected
-                        or theme.capsule.styles.mebox.normal))
+            local styles = item.selected
+                and theme.mebox.item_styles.selected
+                or theme.mebox.item_styles.normal
+            local style = item.urgent
+                and styles.urgent
+                or (item.active
+                    and styles.active
+                    or styles.normal)
             self:apply_style(style)
 
             local icon_widget = self:get_children_by_id("#icon")[1]
