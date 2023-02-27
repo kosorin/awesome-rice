@@ -28,15 +28,39 @@ theme.useless_gap = dpi(6)
 
 ---------------------------------------------------------------------------------------------------
 
-theme.font_name = "JetBrainsMono Nerd Font"
-theme.font_size = 11
+do
+    theme.font_name = "JetBrainsMono Nerd Font"
+    theme.font_size = 11
 
-function theme.build_font(size_factor, style, name)
-    return (name or theme.font_name) ..
-        ", " .. (style and (style .. " ") or "") .. tostring(math.floor((size_factor or 1) * theme.font_size))
+    local default_font = theme.font_name .. " " .. theme.font_size
+
+    function theme.build_font(args)
+        if not args then
+            return default_font
+        end
+
+        args.name = args.name or theme.font_name
+        args.size = args.size or theme.font_size
+        args.size_factor = args.size_factor or 1
+
+        local style = ""
+        if args.style then
+            if type(args.style) == "table" then
+                style = table.concat(args.style, " ")
+            elseif type(args.style) == "string" then
+                style = args.style
+            end
+        end
+
+        return string.format("%s %s %.0f",
+            args.name,
+            style,
+            args.size * args.size_factor
+        )
+    end
+
+    theme.font = theme.build_font()
 end
-
-theme.font = theme.build_font()
 
 
 ---------------------------------------------------------------------------------------------------
