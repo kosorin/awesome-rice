@@ -138,7 +138,7 @@ function volume_osd.new()
                     {
                         id = "#text",
                         widget = wibox.widget.textbox,
-                        font = beautiful.build_font(1.6),
+                        font = beautiful.build_font { size_factor = 1.6 },
                     },
                     {
                         layout = wibox.container.place,
