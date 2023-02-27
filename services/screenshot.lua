@@ -8,7 +8,7 @@ end
 local format = string.format
 local awful = require("awful")
 local beautiful = require("beautiful")
-local tcolor = require("theme.color")
+local tcolor = require("helpers.color")
 
 
 local screenshot = {}
