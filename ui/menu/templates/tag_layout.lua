@@ -26,7 +26,7 @@ local info_menu_item_template = {
         },
     },
     update_callback = function(self, item)
-        local style = beautiful.capsule.styles.mebox.normal
+        local style = beautiful.mebox.item_styles.normal.normal
         local text_widget = self:get_children_by_id("#text")[1]
         if text_widget then
             local text = item.text
@@ -71,13 +71,14 @@ local menu_item_template = {
         self.forced_width = item.width or menu.item_width
         self.forced_height = item.height or menu.item_height
 
-        local style = item.active
-            and (item.selected
-                and beautiful.capsule.styles.mebox.active_selected
-                or beautiful.capsule.styles.mebox.active)
-            or (item.selected
-                and beautiful.capsule.styles.mebox.normal_selected
-                or beautiful.capsule.styles.mebox.normal)
+        local styles = item.selected
+            and beautiful.mebox.item_styles.selected
+            or beautiful.mebox.item_styles.normal
+        local style = item.urgent
+            and styles.urgent
+            or (item.active
+                and styles.active
+                or styles.normal)
         self:apply_style(style)
 
         local icon_widget = self:get_children_by_id("#icon")[1]
