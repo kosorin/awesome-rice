@@ -70,7 +70,7 @@ function opacity_menu_template.new()
         item_width = beautiful.mebox.default_style.item_height,
         on_show = on_show,
         on_hide = on_hide,
-        layout_template = wibox.layout.fixed.horizontal,
+        orientation = "horizontal",
         layout_navigator = function(menu, x, y, direction, context)
             if y ~= 0 then
                 change_opacity(menu, -y * step)
@@ -78,7 +78,6 @@ function opacity_menu_template.new()
             end
             mebox.layout_navigators.direction(menu, x, y, direction, context)
         end,
-        separator_template = beautiful.mebox.vertical_separator_template,
         {
             icon = config.places.theme .. "/icons/minus.svg",
             icon_color = beautiful.palette.white,
