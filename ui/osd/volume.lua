@@ -19,7 +19,7 @@ local pango = require("utils.pango")
 local css = require("utils.css")
 local config = require("config")
 local htable = require("helpers.table")
-local noice = require("widget.noice")
+local noice = require("theme.style")
 
 
 local volume_osd = {}

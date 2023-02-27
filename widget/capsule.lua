@@ -3,7 +3,7 @@ local beautiful = require("beautiful")
 local gtable = require("gears.table")
 local wibox = require("wibox")
 local base = require("wibox.widget.base")
-local noice = require("widget.noice")
+local noice = require("theme.style")
 
 
 local module = { mt = {} }

@@ -9,7 +9,7 @@ local btn = binding.button
 local beautiful = require("beautiful")
 local dpi = dpi
 local capsule = require("widget.capsule")
-local noice = require("widget.noice")
+local noice = require("theme.style")
 local config = require("config")
 local redshift_widget = require("ui.topbar.redshift")
 
