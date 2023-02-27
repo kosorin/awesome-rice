@@ -17,7 +17,7 @@ local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
 local widget_helper = require("helpers.widget")
-local noice = require("widget.noice")
+local noice = require("theme.style")
 
 
 local do_not_cache = "<do-not-cache>"

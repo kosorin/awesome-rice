@@ -20,7 +20,7 @@ local mod = pbinding.modifier
 local btn = pbinding.button
 local tree = require("utils.tree")
 local capsule = require("widget.capsule")
-local noice = require("widget.noice")
+local noice = require("theme.style")
 local pango = require("utils.pango")
 
 
