@@ -341,26 +341,25 @@ theme.popup.default_style = {
 ---------------------------------------------------------------------------------------------------
 
 theme.mebox = {
-    horizontal_separator_template = {
+    separator_template = {
         widget = wibox.widget.separator,
-        orientation = "horizontal",
-        forced_height = dpi(16),
+        orientation = "auto",
         color = theme.common.background_bright,
         thickness = dpi(1),
         span_ratio = 1,
         update_callback = function(self, item, menu)
-            self.forced_width = item.width or menu.item_width
-        end,
-    },
-    vertical_separator_template = {
-        widget = wibox.widget.separator,
-        orientation = "vertical",
-        forced_width = dpi(16),
-        color = theme.common.background_bright,
-        thickness = dpi(1),
-        span_ratio = 1,
-        update_callback = function(self, item, menu)
-            self.forced_height = item.height or menu.item_height
+            -- This orientation is inverted from the actual orientation of the separator
+            local orientation = item.orientation or menu.orientation
+            local size = dpi(16)
+            if orientation == "vertical" then
+                self.forced_width = item.width or menu.item_width
+                self.forced_height = size
+            elseif orientation == "horizontal" then
+                self.forced_width = size
+                self.forced_height = item.height or menu.item_height
+            else
+                error(orientation)
+            end
         end,
     },
     header_template = {
@@ -454,7 +453,7 @@ theme.mebox = {
     },
 }
 theme.mebox.default_style = htable.crush_clone(theme.popup.default_style, {
-    separator_template = theme.mebox.horizontal_separator_template,
+    separator_template = theme.mebox.separator_template,
     header_template = theme.mebox.header_template,
     placement_bounding_args = {
         honor_workarea = true,

@@ -708,6 +708,7 @@ noice.define_style_properties(mebox, {
 
 new_args:
 - (style properties)
+- orientation : string | nil ["vertical"]
 - layout_template : widget | table | function [wibox.layout.fixed.vertical]
 - layout_navigator : function(menu, x, y, navigation_context) [nil]
 - cache_submenus : boolean [true]
@@ -728,6 +729,7 @@ menu._private:
 - items : table<item> | nil
 - item_widgets : table<widget> | nil
 - selected_index : number | nil
+- orientation : string
 - layout_template : widget | table | function
 - layout_navigator : function(menu, x, y, navigation_context) | nil
 - items_source : table<item> | function(menu, show_args, show_context)
@@ -784,8 +786,10 @@ function mebox.new(args, is_submenu)
     self._private.on_ready = args.on_ready
     self._private.mouse_move_select = args.mouse_move_select == true
     self._private.mouse_move_show_submenu = args.mouse_move_show_submenu ~= false
+
+    self._private.orientation = args.orientation or "vertical"
     self._private.layout_navigator = args.layout_navigator
-    self._private.layout_template = args.layout_template or wibox.layout.fixed.vertical
+    self._private.layout_template = args.layout_template or wibox.layout.fixed[self._private.orientation]
     self._private.layout_container = self:get_children_by_id("#layout_container")[1]
 
     noice.initialize_style(self, self.widget, beautiful.mebox.default_style)
