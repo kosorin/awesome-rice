@@ -1,12 +1,8 @@
-local capi = {
-    awesome = awesome,
-    mouse = mouse,
-    screen = screen,
-}
+local capi = Capi
 local awful = require("awful")
 local beautiful = require("beautiful")
 local wibox = require("wibox")
-local dpi = dpi
+local dpi = Dpi
 local config = require("config")
 local binding = require("io.binding")
 local mod = binding.modifier

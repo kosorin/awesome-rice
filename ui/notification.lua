@@ -2,7 +2,7 @@ local awful = require("awful")
 local naughty = require("naughty")
 local ruled = require("ruled")
 local beautiful = require("beautiful")
-local dpi = dpi
+local dpi = Dpi
 
 
 naughty.connect_signal("request::display_error", function(message, startup)

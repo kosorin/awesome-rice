@@ -1,6 +1,4 @@
-local capi = {
-    awesome = awesome,
-}
+local capi = Capi
 local pairs = pairs
 local ipairs = ipairs
 local table = table
@@ -12,7 +10,7 @@ local desktop_utils = require("utils.desktop")
 local mebox = require("widget.mebox")
 local hstring = require("helpers.string")
 local config = require("config")
-local dpi = dpi
+local dpi = Dpi
 
 
 local application_menu_template = { mt = { __index = {} } }

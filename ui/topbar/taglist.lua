@@ -1,8 +1,4 @@
-local capi = {
-    client = client,
-    mousegrabber = mousegrabber,
-    mouse = mouse,
-}
+local capi = Capi
 local ipairs = ipairs
 local format = string.format
 local awful = require("awful")
@@ -15,7 +11,7 @@ local config = require("config")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
-local dpi = dpi
+local dpi = Dpi
 local capsule = require("widget.capsule")
 local gtable = require("gears.table")
 local core_tags = require("core.tags")

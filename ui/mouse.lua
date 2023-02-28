@@ -1,5 +1,5 @@
 local awful = require("awful")
-local dpi = dpi
+local dpi = Dpi
 
 
 local distance = dpi(16)

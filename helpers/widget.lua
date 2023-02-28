@@ -1,6 +1,4 @@
-local capi = {
-    mouse = mouse,
-}
+local capi = Capi
 local ipairs = ipairs
 
 

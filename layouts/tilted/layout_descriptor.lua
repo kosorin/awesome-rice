@@ -1,6 +1,4 @@
-local capi = {
-    tag = tag,
-}
+local capi = Capi
 local math = math
 local setmetatable = setmetatable
 local alayout = require("awful.layout")

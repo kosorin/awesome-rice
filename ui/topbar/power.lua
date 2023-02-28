@@ -1,8 +1,4 @@
-local capi = {
-    awesome = awesome,
-    screen = screen,
-    tag = tag,
-}
+local capi = Capi
 local awful = require("awful")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
@@ -12,7 +8,7 @@ local pango = require("utils.pango")
 local css = require("utils.css")
 local mod = binding.modifier
 local btn = binding.button
-local dpi = dpi
+local dpi = Dpi
 local capsule = require("widget.capsule")
 local gtable = require("gears.table")
 local mebox = require("widget.mebox")

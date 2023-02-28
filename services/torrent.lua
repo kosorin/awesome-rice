@@ -5,9 +5,7 @@ if not config.features.torrent_widget then
     return
 end
 
-local capi = {
-    awesome = awesome,
-}
+local capi = Capi
 local table = table
 local json = require("dkjson")
 local gears = require("gears")

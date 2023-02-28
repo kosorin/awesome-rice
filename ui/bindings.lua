@@ -1,8 +1,4 @@
-local capi = {
-    awesome = awesome,
-    client = client,
-    screen = screen,
-}
+local capi = Capi
 local awful = require("awful")
 local amousec = require("awful.mouse.client")
 local aplacement = require("awful.placement")

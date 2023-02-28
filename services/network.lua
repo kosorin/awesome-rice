@@ -1,6 +1,4 @@
-local capi = {
-    awesome = awesome,
-}
+local capi = Capi
 local time = os.time
 local open = io.open
 local format = string.format

@@ -1,7 +1,4 @@
-local capi = {
-    mouse = mouse,
-    screen = screen,
-}
+local capi = Capi
 local ipairs = ipairs
 local math = math
 local aclient = require("awful.client")

@@ -3,9 +3,7 @@
 -- @copyright 2009, 2011-2012, 2023 Antonio Terceiro, Alexander Yakushev, SkyyySi, me ;)
 ---------------------------------------------------------------------------
 
-local capi = {
-    awesome = awesome,
-}
+local capi = Capi
 local ipairs = ipairs
 local pairs = pairs
 local table = table

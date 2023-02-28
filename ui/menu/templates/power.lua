@@ -1,14 +1,10 @@
 -- DEPENDENCIES: systemctl, loginctl
 
-local capi = {
-    awesome = awesome,
-    mouse = mouse,
-    screen = screen,
-}
+local capi = Capi
 local beautiful = require("beautiful")
 local wibox = require("wibox")
 local gtable = require("gears.table")
-local dpi = dpi
+local dpi = Dpi
 local mebox = require("widget.mebox")
 local binding = require("io.binding")
 local mod = binding.modifier

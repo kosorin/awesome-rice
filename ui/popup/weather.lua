@@ -1,8 +1,4 @@
-local capi = {
-    awesome = awesome,
-    mousegrabber = mousegrabber,
-    screen = screen,
-}
+local capi = Capi
 local awful = require("awful")
 local wibox = require("wibox")
 local gtable = require("gears.table")
@@ -13,7 +9,7 @@ local btn = binding.button
 local beautiful = require("beautiful")
 local weather_service = require("services.weather")
 local widget_helper = require("helpers.widget")
-local dpi = dpi
+local dpi = Dpi
 local humanizer = require("utils.humanizer")
 local glib = require("lgi").GLib
 local DateTime = glib.DateTime

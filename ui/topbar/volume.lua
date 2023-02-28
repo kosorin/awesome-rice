@@ -1,8 +1,4 @@
-local capi = {
-    awesome = awesome,
-    mousegrabber = mousegrabber,
-    mouse = mouse,
-}
+local capi = Capi
 local math = math
 local awful = require("awful")
 local wibox = require("wibox")
@@ -12,7 +8,7 @@ local mod = binding.modifier
 local btn = binding.button
 local beautiful = require("beautiful")
 local volume_service = require("services.volume")
-local dpi = dpi
+local dpi = Dpi
 local gshape = require("gears.shape")
 local gtable = require("gears.table")
 local capsule = require("widget.capsule")

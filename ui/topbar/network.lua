@@ -1,11 +1,9 @@
-local capi = {
-    awesome = awesome,
-}
+local capi = Capi
 local wibox = require("wibox")
 local beautiful = require("beautiful")
 local config = require("config")
 local network_service = require("services.network")
-local dpi = dpi
+local dpi = Dpi
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
