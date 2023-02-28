@@ -1,5 +1,4 @@
--- Global variables, only as shorthands
--- In other files define local variables, for example `local dpi = dpi`
+DEBUG = #(os.getenv("DEBUG") or "") > 0
 
 local gdebug = require("gears.debug")
 local notification = require("naughty.notification")
