@@ -2,9 +2,7 @@ if not DEBUG then
     return
 end
 
-local capi = {
-    screen = screen,
-}
+local capi = Capi
 local awful = require("awful")
 local beautiful = require("beautiful")
 local wibox = require("wibox")

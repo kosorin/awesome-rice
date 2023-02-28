@@ -1,8 +1,6 @@
 -- DEPENDENCIES: pulsemixer
 
-local capi = {
-    awesome = awesome,
-}
+local capi = Capi
 local gears = require("gears")
 local awful = require("awful")
 

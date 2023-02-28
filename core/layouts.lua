@@ -1,6 +1,4 @@
-local capi = {
-    tag = tag,
-}
+local capi = Capi
 local awful = require("awful")
 local suit = require("awful.layout.suit")
 local tilted = require("layouts.tilted")

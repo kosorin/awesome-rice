@@ -1,9 +1,4 @@
-local capi = {
-    awesome = awesome,
-    mousegrabber = mousegrabber,
-    screen = screen,
-    mouse = mouse,
-}
+local capi = Capi
 local setmetatable = setmetatable
 local ipairs = ipairs
 local math = math

@@ -1,9 +1,7 @@
-local capi = {
-    client = client,
-}
+local capi = Capi
 local ipairs = ipairs
 local format = string.format
-local dpi = dpi
+local dpi = Dpi
 local awful = require("awful")
 local wibox = require("wibox")
 local beautiful = require("beautiful")

@@ -1,7 +1,4 @@
-local capi = {
-    screen = screen,
-    client = client,
-}
+local capi = Capi
 local table = table
 local awful = require("awful")
 local beautiful = require("beautiful")
@@ -12,7 +9,7 @@ local binding = require("io.binding")
 local helper_client = require("helpers.client")
 local mod = binding.modifier
 local btn = binding.button
-local dpi = dpi
+local dpi = Dpi
 
 
 local blacklisted_snid = setmetatable({}, { __mode = "v" })

@@ -7,7 +7,7 @@ local insert = table.insert
 local awful = require("awful")
 local beautiful = require("beautiful")
 local mebox = require("widget.mebox")
-local dpi = dpi
+local dpi = Dpi
 local wallpaper_service = require("services.wallpaper")
 
 

@@ -1,13 +1,11 @@
-local capi = {
-    awesome = awesome,
-}
+local capi = Capi
 local table = table
 local awful = require("awful")
 local beautiful = require("beautiful")
 local config = require("config")
 local mebox = require("widget.mebox")
 local menu_templates = require("ui.menu.templates")
-local dpi = dpi
+local dpi = Dpi
 
 
 local main_menu

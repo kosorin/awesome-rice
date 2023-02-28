@@ -1,9 +1,7 @@
-local capi = {
-    awesome = awesome,
-}
+local capi = Capi
 local beautiful = require("beautiful")
 local wibox = require("wibox")
-local dpi = dpi
+local dpi = Dpi
 local capsule = require("widget.capsule")
 local gtable = require("gears.table")
 

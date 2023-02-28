@@ -1,10 +1,4 @@
-local capi = {
-    awesome = awesome,
-    mousegrabber = mousegrabber,
-    screen = screen,
-    mouse = mouse,
-    client = client,
-}
+local capi = Capi
 local setmetatable = setmetatable
 local ipairs = ipairs
 local math = math
@@ -688,7 +682,7 @@ end
 
 local function stop_find(self)
     awful.keygrabber.stop()
-    mousegrabber.stop()
+    capi.mousegrabber.stop()
 end
 
 local function start_find(self, data, restore_find)

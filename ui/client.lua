@@ -1,6 +1,4 @@
-local capi = {
-    client = client,
-}
+local capi = Capi
 
 
 require("awful.autofocus")

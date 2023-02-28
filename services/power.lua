@@ -1,6 +1,4 @@
-local capi = {
-    awesome = awesome,
-}
+local capi = Capi
 local time = os.time
 local execute = os.execute
 local gtimer = require("gears.timer")

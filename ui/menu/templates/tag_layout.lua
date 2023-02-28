@@ -1,7 +1,7 @@
 local awful = require("awful")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
-local dpi = dpi
+local dpi = Dpi
 local capsule = require("widget.capsule")
 local pango = require("utils.pango")
 

@@ -1,8 +1,4 @@
-local capi = {
-    mouse = mouse,
-    mousegrabber = mousegrabber,
-    screen = screen,
-}
+local capi = Capi
 local math = math
 local infinity = math.huge
 local find = string.find

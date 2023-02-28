@@ -1,7 +1,4 @@
-local capi = {
-    mouse = mouse,
-    mousegrabber = mousegrabber,
-}
+local capi = Capi
 local min, max = math.min, math.max
 local binding = require("io.binding")
 local mod = binding.modifier

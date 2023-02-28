@@ -1,6 +1,4 @@
-local capi = {
-    client = client,
-}
+local capi = Capi
 local setmetatable = setmetatable
 local ipairs = ipairs
 local table = table
@@ -10,7 +8,7 @@ local wibox = require("wibox")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
-local dpi = dpi
+local dpi = Dpi
 local aplacement = require("awful.placement")
 local amousec = require("awful.mouse.client")
 local capsule = require("widget.capsule")

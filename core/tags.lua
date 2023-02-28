@@ -1,7 +1,4 @@
-local capi = {
-    screen = screen,
-    tag = tag,
-}
+local capi = Capi
 local ipairs = ipairs
 local awful = require("awful")
 local gtable = require("gears.table")

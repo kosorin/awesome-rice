@@ -3,10 +3,7 @@ if not config.features.torrent_widget then
     return
 end
 
-local capi = {
-    awesome = awesome,
-    mouse = mouse,
-}
+local capi = Capi
 local concat = table.concat
 local insert = table.insert
 local max = math.max
@@ -18,7 +15,7 @@ local mod = binding.modifier
 local btn = binding.button
 local beautiful = require("beautiful")
 local torrent_service = require("services.torrent")
-local dpi = dpi
+local dpi = Dpi
 local humanizer = require("utils.humanizer")
 local gtable = require("gears.table")
 local capsule = require("widget.capsule")

@@ -5,9 +5,7 @@ if not config.features.weather_widget then
     return
 end
 
-local capi = {
-    awesome = awesome,
-}
+local capi = Capi
 local format = string.format
 local gears = require("gears")
 local awful = require("awful")

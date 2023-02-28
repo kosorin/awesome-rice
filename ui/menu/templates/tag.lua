@@ -1,10 +1,8 @@
-local capi = {
-    client = client,
-}
+local capi = Capi
 local insert = table.insert
 local beautiful = require("beautiful")
 local naughty = require("naughty")
-local dpi = dpi
+local dpi = Dpi
 local mebox = require("widget.mebox")
 local screen_helper = require("helpers.screen")
 local tag_layout_menu_template = require("ui.menu.templates.tag_layout")
