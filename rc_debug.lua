@@ -1,3 +1,0 @@
-DEBUG = true
-
-require("rc")
