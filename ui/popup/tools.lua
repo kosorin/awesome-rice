@@ -6,7 +6,7 @@ local tcolor = require("helpers.color")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local dpi = Dpi
 local capsule = require("widget.capsule")
 local noice = require("theme.style")
@@ -54,9 +54,9 @@ function tools_popup.new(args)
         ontop = true,
         visible = false,
         widget = {
-            enabled = false,
             widget = capsule,
-            background = tcolor.transparent,
+            enable_overlay = false,
+            bg = tcolor.transparent,
             {
                 id = "#container",
                 forced_width = dpi(250),

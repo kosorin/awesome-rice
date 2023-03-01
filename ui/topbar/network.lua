@@ -1,6 +1,7 @@
 local capi = Capi
+local setmetatable = setmetatable
 local wibox = require("wibox")
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local config = require("config")
 local network_service = require("services.network")
 local dpi = Dpi
@@ -17,6 +18,7 @@ local tcolor = require("helpers.color")
 local aplacement = require("awful.placement")
 local widget_helper = require("helpers.widget")
 local htable = require("helpers.table")
+local hui = require("helpers.ui")
 
 
 local network_widget = { mt = {} }
@@ -39,32 +41,33 @@ local units = {
 }
 
 local styles = {
-    connected = gtable.clone(beautiful.capsule.styles.normal),
-    disconnected = htable.crush_clone(beautiful.capsule.styles.palette.yellow, {
+    connected = setmetatable({
+    }, { __index = beautiful.capsule.styles.normal }),
+    disconnected = setmetatable({
         text = "disconnected",
         icon = "lan-disconnect",
-    }),
-    error = htable.crush_clone(beautiful.capsule.styles.palette.red, {
+    }, { __index = beautiful.capsule.styles.palette.yellow }),
+    error = setmetatable({
         text = "error",
         icon = "lan-disconnect",
-    }),
-    loading = htable.crush_clone(beautiful.capsule.styles.disabled, {
+    }, { __index = beautiful.capsule.styles.palette.red }),
+    loading = setmetatable({
         text = "loading",
         icon = "lan-pending",
-    }),
+    }, { __index = beautiful.capsule.styles.disabled }),
 }
 
 local function refresh_info(container_widget, style, text, icon)
     local text_widget = container_widget:get_children_by_id("text")[1]
     text = style.text or text or ""
-    text_widget:set_markup(pango.span { foreground = style.foreground, text, })
+    text_widget:set_markup(pango.span { fgcolor = style.fg, text })
 
     local icon_widget = container_widget:get_children_by_id("icon")[1]
     icon = style.icon or icon
     if icon then
         icon_widget:set_image(config.places.theme .. "/icons/" .. icon .. ".svg")
     end
-    icon_widget:set_stylesheet(css.style { path = { fill = style.foreground } })
+    icon_widget:set_stylesheet(css.style { path = { fill = style.fg } })
 end
 
 function network_widget:refresh()
@@ -80,7 +83,7 @@ function network_widget:refresh()
         self:apply_style(style)
         self:set_widget(widgets.connected)
         self._private.graph_widget:add_value(download_factor * status.download, 1)
-        self._private.graph_widget:add_value(-upload_factor * status.upload, 2)
+        self._private.graph_widget:add_value( -upload_factor * status.upload, 2)
     else
         local style = status.success == nil
             and styles.loading
@@ -128,7 +131,7 @@ function network_widget:set_graph_offset(offset)
 end
 
 function network_widget:fit(...)
-    local width, height = capsule.fit(self, ...)
+    local width, height = capsule.object.fit(self, ...)
     self._private.latest_width = width
     return width, height
 end
@@ -136,12 +139,12 @@ end
 function network_widget.new(wibar)
     local self = wibox.widget {
         widget = capsule,
-        enabled = false,
-        margins = {
-            left = beautiful.capsule.default_style.margins.left,
+        enable_overlay = false,
+        margins = hui.thickness {
+            top = beautiful.wibar.paddings.top,
             right = beautiful.capsule.default_style.margins.right,
-            top = beautiful.wibar.padding.top,
-            bottom = beautiful.wibar.padding.bottom,
+            bottom = beautiful.wibar.paddings.bottom,
+            left = beautiful.capsule.default_style.margins.left,
         },
     }
 

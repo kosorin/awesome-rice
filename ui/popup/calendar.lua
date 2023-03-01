@@ -6,7 +6,7 @@ local tcolor = require("helpers.color")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local dpi = Dpi
 local capsule = require("widget.capsule")
 local noice = require("theme.style")
@@ -92,9 +92,9 @@ function calendar_popup.new(args)
         ontop = true,
         visible = false,
         widget = {
-            enabled = false,
             widget = capsule,
-            background = tcolor.transparent,
+            enable_overlay = false,
+            bg = tcolor.transparent,
             {
                 layout = wibox.layout.fixed.vertical,
                 spacing = dpi(16),
@@ -124,7 +124,7 @@ function calendar_popup.new(args)
                                 forced_height = dpi(18),
                                 resize = true,
                                 image = config.places.theme .. "/icons/chevron-left.svg",
-                                stylesheet = css.style { path = { fill = beautiful.capsule.default_style.foreground } },
+                                stylesheet = css.style { path = { fill = beautiful.capsule.default_style.fg } },
                             },
                         },
                     },
@@ -143,7 +143,7 @@ function calendar_popup.new(args)
                                 forced_height = dpi(18),
                                 resize = true,
                                 image = config.places.theme .. "/icons/chevron-right.svg",
-                                stylesheet = css.style { path = { fill = beautiful.capsule.default_style.foreground } },
+                                stylesheet = css.style { path = { fill = beautiful.capsule.default_style.fg } },
                             },
                         },
                     },

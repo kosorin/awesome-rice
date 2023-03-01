@@ -1,3 +1,5 @@
+local pairs = pairs
+local tostring = tostring
 local format = string.format
 
 

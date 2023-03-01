@@ -16,14 +16,14 @@ local directions = {
 }
 
 
-local client_helper = {
+local M = {
     resize_corner_size = 50,
     resize_max_distance = 20,
     floating_move_step = 50,
     tiled_resize_factor = 0.02,
 }
 
-function client_helper.is_floating(client)
+function M.is_floating(client)
     if not client then
         return nil
     end
@@ -60,7 +60,7 @@ local resize_quadrants = {
     },
 }
 
-function client_helper.get_resize_corner(client, coords)
+function M.get_resize_corner(client, coords)
     local g = client:geometry()
     g.width = g.width + 2 * client.border_width
     g.height = g.height + 2 * client.border_width
@@ -68,7 +68,7 @@ function client_helper.get_resize_corner(client, coords)
     local horizontal, vertical
     local dx, dy
 
-    local corner_size = math.min(client_helper.resize_corner_size, math.min(g.width, g.height) / 2)
+    local corner_size = math.min(M.resize_corner_size, math.min(g.width, g.height) / 2)
     if coords.x <= g.x + corner_size then
         horizontal = "left"
     elseif g.x + g.width - corner_size < coords.x then
@@ -113,7 +113,7 @@ function client_helper.get_resize_corner(client, coords)
     return corner
 end
 
-function client_helper.get_distance(client, coords)
+function M.get_distance(client, coords)
     local x, y
 
     local g = client:geometry()
@@ -145,7 +145,7 @@ function client_helper.get_distance(client, coords)
     return distance
 end
 
-function client_helper.find_closest(args)
+function M.find_closest(args)
     args = args or {}
     local clients = args.clients or (capi.mouse.screen and capi.mouse.screen.clients)
     local client_count = clients and #clients or 0
@@ -159,7 +159,7 @@ function client_helper.find_closest(args)
     local closest_distance = math.maxinteger
     for i = 1, client_count do
         local client = clients[i]
-        local distance = client_helper.get_distance(client, coords)
+        local distance = M.get_distance(client, coords)
         if distance == 0 then
             closest_client = client
             closest_distance = distance
@@ -186,8 +186,8 @@ local function move_floating(client, direction)
     end
 
     client:relative_move(
-        client.immobilized_horizontal and 0 or (rc.x * client_helper.floating_move_step),
-        client.immobilized_vertical and 0 or (rc.y * client_helper.floating_move_step),
+        client.immobilized_horizontal and 0 or (rc.x * M.floating_move_step),
+        client.immobilized_vertical and 0 or (rc.y * M.floating_move_step),
         0, 0)
 end
 
@@ -202,8 +202,8 @@ local function resize_floating(client, direction)
     end
 
     client:relative_move(0, 0,
-        client.immobilized_horizontal and 0 or (rc.x * client_helper.floating_move_step),
-        client.immobilized_vertical and 0 or (rc.y * client_helper.floating_move_step))
+        client.immobilized_horizontal and 0 or (rc.x * M.floating_move_step),
+        client.immobilized_vertical and 0 or (rc.y * M.floating_move_step))
 end
 
 local function move_tiled(client, direction)
@@ -229,7 +229,7 @@ local function move_tiled(client, direction)
 end
 
 local function resize_descriptor(descriptor, parent_descriptor, resize_factor)
-    resize_factor = resize_factor * client_helper.tiled_resize_factor
+    resize_factor = resize_factor * M.tiled_resize_factor
     if resize_factor == 0 then
         return
     end
@@ -270,23 +270,23 @@ local function resize_tiled(client, direction)
     tag:emit_signal("property::tilted_layout_descriptor")
 end
 
-function client_helper.move(client, direction)
-    if client_helper.is_floating(client) then
+function M.move(client, direction)
+    if M.is_floating(client) then
         move_floating(client, direction)
     else
         move_tiled(client, direction)
     end
 end
 
-function client_helper.resize(client, direction)
-    if client_helper.is_floating(client) then
+function M.resize(client, direction)
+    if M.is_floating(client) then
         resize_floating(client, direction)
     else
         resize_tiled(client, direction)
     end
 end
 
-function client_helper.mouse_move(client)
+function M.mouse_move(client)
     if not client
         or client.fullscreen
         or client.maximized
@@ -309,31 +309,41 @@ function client_helper.mouse_move(client)
     })
 end
 
-function client_helper.mouse_resize(client)
+function M.mouse_resize(client)
     if client == true then
-        client = client_helper.find_closest {
-            max_distance = client_helper.resize_max_distance,
+        client = M.find_closest {
+            max_distance = M.resize_max_distance,
         }
     end
 
     if not client
         or client.fullscreen
         or client.maximized
+        or (client.immobilized_horizontal and client.immobilized_vertical)
         or client.type == "desktop"
         or client.type == "splash"
         or client.type == "dock" then
         return
     end
 
+    local axis
+    if client.immobilized_horizontal and client.immobilized_vertical then
+        axis = "none"
+    elseif client.immobilized_horizontal then
+        axis = "vertical"
+    elseif client.immobilized_vertical then
+        axis = "horizontal"
+    end
+
     local coords = capi.mouse.coords()
-    local corner = client_helper.get_resize_corner(client, coords)
+    local corner = M.get_resize_corner(client, coords)
 
     mresize(client, "mouse.resize", {
         placement = aplacement.resize_to_mouse,
         corner = corner,
         include_sides = true,
-        -- TODO: `axis` for maximized horizontal/vertical
+        axis = axis,
     })
 end
 
-return client_helper
+return M

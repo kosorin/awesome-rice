@@ -1,21 +1,17 @@
 local awful = require("awful")
 local wibox = require("wibox")
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local dpi = Dpi
 local capsule = require("widget.capsule")
 local pango = require("utils.pango")
+local hui = require("helpers.ui")
 
 
 local tag_layout_menu_template = { mt = { __index = {} } }
 
 local info_menu_item_template = {
     widget = wibox.container.margin,
-    margins = {
-        left = dpi(16),
-        right = dpi(16),
-        top = dpi(12),
-        bottom = dpi(12),
-    },
+    margins = hui.thickness { dpi(12), dpi(16) },
     {
         layout = wibox.container.place,
         halign = "center",
@@ -31,7 +27,7 @@ local info_menu_item_template = {
         if text_widget then
             local text = item.text
             text_widget:set_markup(pango.span {
-                foreground = style.foreground,
+                fgcolor = style.fg,
                 weight = "bold",
                 pango.i(text),
             })
@@ -42,18 +38,8 @@ local info_menu_item_template = {
 local menu_item_template = {
     id = "#container",
     widget = capsule,
-    margins = {
-        left = 0,
-        right = 0,
-        top = dpi(2),
-        bottom = dpi(2),
-    },
-    paddings = {
-        left = dpi(12),
-        right = dpi(12),
-        top = dpi(8),
-        bottom = dpi(8),
-    },
+    margins = hui.thickness { dpi(2), 0 },
+    paddings = hui.thickness { dpi(8), dpi(12) },
     {
         layout = wibox.layout.fixed.horizontal,
         spacing = dpi(12),
@@ -83,7 +69,7 @@ local menu_item_template = {
 
         local icon_widget = self:get_children_by_id("#icon")[1]
         if icon_widget then
-            local color = style.foreground
+            local color = style.fg
             local stylesheet = beautiful.build_layout_stylesheet(color)
             icon_widget:set_stylesheet(stylesheet)
             icon_widget:set_image(item.icon)
@@ -93,7 +79,7 @@ local menu_item_template = {
         if text_widget then
             local text = item.text
             text_widget:set_markup(pango.span {
-                foreground = style.foreground,
+                fgcolor = style.fg,
                 weight = "bold",
                 text,
             })

@@ -10,7 +10,7 @@ local wibox = require("wibox")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local weather_service = require("services.weather")
 local weather_popup = require("ui.popup.weather")
 local dpi = Dpi
@@ -21,10 +21,11 @@ local aplacement = require("awful.placement")
 local widget_helper = require("helpers.widget")
 local pango = require("utils.pango")
 local css = require("utils.css")
+local hui = require("helpers.ui")
 
 
 local function set_text(widget, id, index, text, color)
-    widget:get_children_by_id(id)[index]:set_markup(pango.span { foreground = color, text, })
+    widget:get_children_by_id(id)[index]:set_markup(pango.span { fgcolor = color, text })
 end
 
 local function set_icon(widget, id, index, icon, color)
@@ -54,27 +55,27 @@ function weather_widget:refresh()
 
         if is_rain then
             local precipitation_rate_text = string.format("%.1f" .. pango.thin_space .. "mm/h", data.precipitation_rate)
-            set_text(self._private.widgets.precipitation, "text", 1, precipitation_rate_text, style.foreground)
-            set_icon(self._private.widgets.precipitation, "icon", 1, nil, style.foreground)
+            set_text(self._private.widgets.precipitation, "text", 1, precipitation_rate_text, style.fg)
+            set_icon(self._private.widgets.precipitation, "icon", 1, nil, style.fg)
             list_layout:add(self._private.widgets.precipitation)
         end
 
         local temperature_text = string.format("%.1f" .. pango.thin_space .. "&#176;C", data.temperature)
-        set_text(self._private.widgets.temperature, "text", 1, temperature_text, style.foreground)
-        set_icon(self._private.widgets.temperature, "icon", 1, nil, style.foreground)
+        set_text(self._private.widgets.temperature, "text", 1, temperature_text, style.fg)
+        set_icon(self._private.widgets.temperature, "icon", 1, nil, style.fg)
         list_layout:add(self._private.widgets.temperature)
 
         local indoor_text = string.format("%.1f" .. pango.thin_space .. "&#176;C", data.indoor_temperature)
-        set_text(self._private.widgets.indoor, "text", 1, indoor_text, style.foreground)
-        set_icon(self._private.widgets.indoor, "icon", 1, nil, style.foreground)
+        set_text(self._private.widgets.indoor, "text", 1, indoor_text, style.fg)
+        set_icon(self._private.widgets.indoor, "icon", 1, nil, style.fg)
         list_layout:add(self._private.widgets.indoor)
     else
         local style = beautiful.capsule.styles.disabled
         self:apply_style(style)
 
         local text = response.success == nil and "loading" or "unknown"
-        set_text(self._private.widgets.info, "text", 1, text, style.foreground)
-        set_icon(self._private.widgets.info, "icon", 1, nil, style.foreground)
+        set_text(self._private.widgets.info, "text", 1, text, style.fg)
+        set_icon(self._private.widgets.info, "icon", 1, nil, style.fg)
 
         list_layout:add(self._private.widgets.info)
     end
@@ -83,11 +84,11 @@ end
 function weather_widget.new(wibar)
     local self = wibox.widget {
         widget = capsule,
-        margins = {
-            left = beautiful.capsule.default_style.margins.left,
+        margins = hui.thickness {
+            top = beautiful.wibar.paddings.top,
             right = beautiful.capsule.default_style.margins.right,
-            top = beautiful.wibar.padding.top,
-            bottom = beautiful.wibar.padding.bottom,
+            bottom = beautiful.wibar.paddings.bottom,
+            left = beautiful.capsule.default_style.margins.left,
         },
     }
 

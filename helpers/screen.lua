@@ -1,10 +1,9 @@
 local ipairs = ipairs
 
 
-local screen_helper = {}
+local M = {}
 
---- Move clients from selected tags on the screen to the tag
-function screen_helper.clients_to_tag(screen, tag)
+function M.clients_to_tag(screen, tag)
     if not screen or not tag or not tag.activated then
         return
     end
@@ -18,4 +17,4 @@ function screen_helper.clients_to_tag(screen, tag)
     end
 end
 
-return screen_helper
+return M

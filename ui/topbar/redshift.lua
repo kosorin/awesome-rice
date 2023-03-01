@@ -13,13 +13,14 @@ local wibox = require("wibox")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local dpi = Dpi
 local capsule = require("widget.capsule")
 local gshape = require("gears.shape")
 local gtable = require("gears.table")
 local widget_helper = require("helpers.widget")
 local tcolor = require("helpers.color")
+local hui = require("helpers.ui")
 local mouse_helper = require("helpers.mouse")
 local pango = require("utils.pango")
 local css = require("utils.css")
@@ -78,11 +79,11 @@ function redshift_widget.new(wibar, on_dashboard)
     local self = wibox.widget {
         widget = capsule,
         margins = not on_dashboard
-            and {
-                left = beautiful.capsule.default_style.margins.left,
+            and hui.thickness {
+                top = beautiful.wibar.paddings.top,
                 right = beautiful.capsule.default_style.margins.right,
-                top = beautiful.wibar.padding.top,
-                bottom = beautiful.wibar.padding.bottom,
+                bottom = beautiful.wibar.paddings.bottom,
+                left = beautiful.capsule.default_style.margins.left,
             }
             or nil,
         {
@@ -93,7 +94,7 @@ function redshift_widget.new(wibar, on_dashboard)
                 widget = wibox.widget.imagebox,
                 resize = true,
                 image = config.places.theme .. "/icons/lightbulb-on.svg",
-                stylesheet = css.style { path = { fill = style.foreground } },
+                stylesheet = css.style { path = { fill = style.fg } },
             },
             {
                 id = "text",
@@ -107,12 +108,12 @@ function redshift_widget.new(wibar, on_dashboard)
                     id = "bar",
                     widget = wibox.widget.progressbar,
                     shape = function(cr, width, height) gshape.rounded_rect(cr, width, height, dpi(4)) end,
-                    bar_shape = function(cr, width, height) gshape.rounded_rect(cr, width, height, dpi(3)) end,
+                    bar_shape = function(cr, width, height) gshape.rounded_rect(cr, width, height, dpi(4)) end,
                     max_value = 100,
                     forced_width = not on_dashboard and beautiful.capsule.bar_width,
                     forced_height = beautiful.capsule.bar_height,
-                    color = style.foreground,
-                    background_color = beautiful.get_progressbar_background_color(style.foreground),
+                    color = style.fg,
+                    background_color = beautiful.get_progressbar_bg(style.fg),
                 },
             },
         },
@@ -134,7 +135,7 @@ function redshift_widget.new(wibar, on_dashboard)
         end),
     }
 
-    mouse_helper.start_grabbing {
+    mouse_helper.attach_slider_grabber {
         wibox = self._private.wibar,
         widget = self:get_children_by_id("bar_container")[1],
         minimum = min_temperature,

@@ -1,3 +1,5 @@
+local type = type
+local ipairs = ipairs
 local table = table
 local awful = require("awful")
 local gtable = require("gears.table")
@@ -49,25 +51,25 @@ local binding = {
             { trigger = "#81", number = 9 },
         },
         arrows = {
-            { trigger = "Left", direction = "left", x = -1, y = 0, },
-            { trigger = "Right", direction = "right", x = 1, y = 0, },
-            { trigger = "Up", direction = "up", x = 0, y = 1, },
-            { trigger = "Down", direction = "down", x = 0, y = -1, },
+            { trigger = "Left", direction = "left", x = -1, y = 0 },
+            { trigger = "Right", direction = "right", x = 1, y = 0 },
+            { trigger = "Up", direction = "up", x = 0, y = 1 },
+            { trigger = "Down", direction = "down", x = 0, y = -1 },
         },
         arrows_horizontal = {
-            { trigger = "Left", direction = "left", x = -1, y = 0, },
-            { trigger = "Right", direction = "right", x = 1, y = 0, },
+            { trigger = "Left", direction = "left", x = -1, y = 0 },
+            { trigger = "Right", direction = "right", x = 1, y = 0 },
         },
         arrows_vertical = {
-            { trigger = "Up", direction = "up", x = 0, y = 1, },
-            { trigger = "Down", direction = "down", x = 0, y = -1, },
+            { trigger = "Up", direction = "up", x = 0, y = 1 },
+            { trigger = "Down", direction = "down", x = 0, y = -1 },
         },
     },
 }
 
 binding.group.mouse_wheel = {
-    { trigger = binding.button.wheel_up, direction = "up", y = 1, },
-    { trigger = binding.button.wheel_down, direction = "down", y = -1, },
+    { trigger = binding.button.wheel_up, direction = "up", y = 1 },
+    { trigger = binding.button.wheel_down, direction = "down", y = -1 },
 }
 
 for i = 1, 10 do
@@ -221,7 +223,7 @@ function binding.add_client_range(bindings)
 end
 
 function binding.awful(modifiers, triggers, on_press, on_release, args)
-    if type(on_release) == 'table' then
+    if type(on_release) == "table" then
         args = on_release
         on_release = nil
     end

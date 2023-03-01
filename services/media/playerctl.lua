@@ -108,7 +108,7 @@ function playerctl:seek(offset, player_pattern)
 end
 
 function playerctl:set_loop_status(loop_status, player_pattern)
-    local loop_status = loop_status:upper()
+    loop_status = loop_status:upper()
     for_each_player(self, player_pattern, function(p)
         p:set_loop_status(loop_status)
     end)

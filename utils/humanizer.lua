@@ -1,13 +1,14 @@
 local ipairs = ipairs
-local floor = math.floor
-local max = math.max
-local concat = table.concat
+local tostring = tostring
+local math = math
+local table = table
+local string = string
 local pango = require("utils.pango")
 
 
 local humanizer = {}
 
-local function round(value) return floor(value + 0.5) end
+local function round(value) return math.floor(value + 0.5) end
 
 local function clamp(value, min, max)
     if value < min then return min end
@@ -109,7 +110,7 @@ do
     end
 
     function humanizer.relative_time(seconds, args)
-        seconds = round(max(0, seconds))
+        seconds = round(math.max(0, seconds))
         args = args or {}
 
         local all_part_count = #time_parts
@@ -158,7 +159,7 @@ do
                 local value = rest / time_part.div
                 local format = formats[time_part.id]
 
-                value = floor(value)
+                value = math.floor(value)
                 if value >= 1 then
                     rest = rest - (value * time_part.div)
                     parts[#parts + 1] = format_time_part(value, format, unit_separator)
@@ -181,12 +182,12 @@ do
         end
 
         if #parts == 0 then
-            local time_part = time_parts[clamp(from_part + max(1, part_count), 1, all_part_count)]
+            local time_part = time_parts[clamp(from_part + math.max(1, part_count), 1, all_part_count)]
             local format = formats[time_part.id]
             parts[1] = format_time_part(0, format, unit_separator)
         end
 
-        local text = concat(parts, part_separator)
+        local text = table.concat(parts, part_separator)
 
         if args.prefix then
             text = args.prefix .. text

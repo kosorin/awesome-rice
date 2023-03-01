@@ -1,4 +1,6 @@
 local type = type
+local pairs = pairs
+local ipairs = ipairs
 
 
 local pango = {}

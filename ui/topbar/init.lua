@@ -1,6 +1,6 @@
 local capi = Capi
 local awful = require("awful")
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local wibox = require("wibox")
 local dpi = Dpi
 local config = require("config")

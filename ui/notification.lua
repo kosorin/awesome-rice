@@ -1,7 +1,7 @@
 local awful = require("awful")
 local naughty = require("naughty")
 local ruled = require("ruled")
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local dpi = Dpi
 
 

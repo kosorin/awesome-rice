@@ -2,7 +2,7 @@ local capi = Capi
 local setmetatable = setmetatable
 local awful = require("awful")
 local wibox = require("wibox")
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local config = require("config")
 local binding = require("io.binding")
 local mod = binding.modifier
@@ -13,6 +13,7 @@ local gtable = require("gears.table")
 local mebox = require("widget.mebox")
 local tools_popup = require("ui.popup.tools")
 local css = require("utils.css")
+local hui = require("helpers.ui")
 
 
 local power_widget = { mt = {} }
@@ -23,7 +24,7 @@ function power_widget:refresh()
         or beautiful.capsule.styles.normal
     self:apply_style(style)
 
-    local icon_stylesheet = css.style { path = { fill = style.foreground } }
+    local icon_stylesheet = css.style { path = { fill = style.fg } }
     local icon_widget = self:get_children_by_id("#icon")[1]
     icon_widget:set_stylesheet(icon_stylesheet)
 end
@@ -32,14 +33,13 @@ function power_widget.new(wibar)
     local self = wibox.widget {
         widget = capsule,
         margins = {
-            top = beautiful.wibar.padding.top,
-            bottom = beautiful.wibar.padding.bottom,
+            top = beautiful.wibar.paddings.top,
+            bottom = beautiful.wibar.paddings.bottom,
         },
-        paddings = {
-            left = dpi(10),
-            right = dpi(10),
-            top = beautiful.capsule.default_style.paddings.top,
-            bottom = beautiful.capsule.default_style.paddings.bottom,
+        paddings = hui.thickness {
+            beautiful.capsule.default_style.paddings.top,
+            dpi(10),
+            beautiful.capsule.default_style.paddings.bottom,
         },
         {
             layout = wibox.layout.stack,

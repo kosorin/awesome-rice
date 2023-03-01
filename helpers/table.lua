@@ -1,5 +1,5 @@
-local gtable = require("gears.table")
 local pairs = pairs
+local gtable = require("gears.table")
 
 
 local M = {}

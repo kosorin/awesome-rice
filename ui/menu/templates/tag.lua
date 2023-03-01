@@ -1,6 +1,6 @@
 local capi = Capi
 local insert = table.insert
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local naughty = require("naughty")
 local dpi = Dpi
 local mebox = require("widget.mebox")

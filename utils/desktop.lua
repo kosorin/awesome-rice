@@ -8,14 +8,14 @@ local ipairs = ipairs
 local pairs = pairs
 local table = table
 local string = string
+local gdebug = require("gears.debug")
 local gtable = require("gears.table")
 local gfilesystem = require("gears.filesystem")
-local beautiful = require("beautiful")
+local gpcall = require("gears.protected_call").call
+local beautiful = require("theme.theme")
 local lgi = require("lgi")
 local gio = lgi.Gio
 local glib = lgi.GLib
-local gdebug = require("gears.debug")
-local gpcall = require("gears.protected_call").call
 
 
 local desktop_utils = {}
@@ -170,7 +170,7 @@ function desktop_utils.get_icon_lookup_paths_uncached()
 
     local icon_lookup_path = {}
     local theme_priority = { "hicolor" }
-    if beautiful.icon_theme then table.insert(theme_priority, 1, beautiful.icon_theme) end
+    if beautiful.icon_theme then table.insert(theme_priority, 1, beautiful.icon_theme) end -- TODO: move `icon_theme` somewhere else
 
     local paths = add_with_dir({}, glib.get_home_dir(), ".icons")
     add_with_dir(paths, {
@@ -180,8 +180,8 @@ function desktop_utils.get_icon_lookup_paths_uncached()
     add_with_dir(paths, glib.get_system_data_dirs(), "pixmaps")
 
     local icon_theme_paths = {}
-    for _, theme_dir in ipairs(theme_priority) do
-        add_if_readable(icon_theme_paths, add_with_dir({}, paths, theme_dir))
+    for _, theme_directory in ipairs(theme_priority) do
+        add_if_readable(icon_theme_paths, add_with_dir({}, paths, theme_directory))
     end
 
     local app_in_theme_paths = {}

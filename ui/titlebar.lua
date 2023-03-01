@@ -3,7 +3,7 @@ local setmetatable = setmetatable
 local ipairs = ipairs
 local table = table
 local awful = require("awful")
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local wibox = require("wibox")
 local binding = require("io.binding")
 local mod = binding.modifier
@@ -45,7 +45,7 @@ local function update_on_signal(client, signal, widget)
     table.insert(widgets, widget)
 end
 
-local function titlebar_button(client, action, normal_args, toggle_args, theme)
+local function titlebar_button(client, action, normal_args, toggle_args, button_theme)
     local function get_state()
         return toggle_args and toggle_args.get_state(client)
     end
@@ -63,13 +63,13 @@ local function titlebar_button(client, action, normal_args, toggle_args, theme)
 
         button:apply_style(args.style)
         button.opacity = client.active
-            and theme.opacity_focus
-            or theme.opacity_normal
+            and button_theme.opacity_focus
+            or button_theme.opacity_normal
 
         local icon_widget = button.widget
         icon_widget:set_image(args.icon)
         icon_widget:set_stylesheet(css.style {
-            ["path, .fill"] = { fill = args.style.foreground },
+            ["path, .fill"] = { fill = args.style.fg },
         })
     end
 
@@ -79,9 +79,9 @@ local function titlebar_button(client, action, normal_args, toggle_args, theme)
         end),
     }
 
-    normal_args.style = normal_args.style or theme.styles.normal
+    normal_args.style = normal_args.style or button_theme.styles.normal
     if toggle_args then
-        toggle_args.style = toggle_args.style or theme.styles.active
+        toggle_args.style = toggle_args.style or button_theme.styles.active
         toggle_args.icon = toggle_args.icon or normal_args.icon
         update_on_signal(client, toggle_args.property, button)
     end

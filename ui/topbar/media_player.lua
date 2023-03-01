@@ -7,7 +7,7 @@ local gstring = require("gears.string")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local gshape = require("gears.shape")
 local dpi = Dpi
 local gtable = require("gears.table")
@@ -20,16 +20,17 @@ local tcolor = require("helpers.color")
 local pango = require("utils.pango")
 local desktop = require("utils.desktop")
 local media_player = require("services.media").player
+local hui = require("helpers.ui")
 
 
 local media_player_widget = { mt = {} }
 
 local function left_shape(cr, width, height)
-    gshape.partially_rounded_rect(cr, width, height, true, false, false, true, beautiful.capsule.shape_radius)
+    gshape.partially_rounded_rect(cr, width, height, true, false, false, true, beautiful.capsule.border_radius)
 end
 
 local function right_shape(cr, width, height)
-    gshape.partially_rounded_rect(cr, width, height, false, true, true, false, beautiful.capsule.shape_radius)
+    gshape.partially_rounded_rect(cr, width, height, false, true, true, false, beautiful.capsule.border_radius)
 end
 
 local function set_playback_position_ratio(self, ratio)
@@ -42,9 +43,10 @@ local function update_player(self, player)
     local icon = desktop.lookup_icon(player and player.player_name)
     self._private.icon:set_image(icon)
 
+    self._private.separator:set_visible(not not player)
     self._private.content_container:set_visible(not not player)
-    self._private.content_container:set_shape(player and left_shape)
-    self._private.previous_button:set_shape(not player and left_shape)
+    self._private.content_container:set_shape(player and right_shape)
+    self._private.next_button:set_shape(not player and right_shape)
 
     local button_style = player
         and beautiful.capsule.styles.normal
@@ -68,8 +70,8 @@ local function update_metadata(self, player, metadata)
         any_text = #title > 0 or #artist > 0
 
         title = title
-        artist = #artist > 0 and pango.span { alpha = "65%", artist } or ""
-        separator = #separator > 0 and pango.span { alpha = "65%", separator } or ""
+        artist = #artist > 0 and pango.span { fgalpha = "65%", artist } or ""
+        separator = #separator > 0 and pango.span { fgalpha = "65%", separator } or ""
         text = table.concat({ title, artist }, separator)
     else
         text = ""
@@ -136,6 +138,7 @@ local function refresh_timer(self, player)
 end
 
 local function initialize_content_container(self)
+    self._private.separator = self:get_children_by_id("#separator")[1]
     self._private.content_container = self:get_children_by_id("#content_container")[1]
     self._private.icon = self:get_children_by_id("#icon")[1]
     self._private.text = self:get_children_by_id("#text")[1]
@@ -161,7 +164,7 @@ local function initialize_playback_bar(self)
 
     do
         local length
-        hmouse.start_grabbing {
+        hmouse.attach_slider_grabber {
             wibox = self._private.wibar,
             widget = self._private.playback_bar,
             minimum = 0,
@@ -207,21 +210,21 @@ local function initialize_playback_bar(self)
 end
 
 local function initialize_buttons(self)
-    local function update_icon_foreground(button, foreground)
-        button.widget:set_stylesheet(css.style { path = { fill = foreground } })
+    local function update_icon_color(button, fg)
+        button.widget:set_stylesheet(css.style { path = { fill = fg } })
     end
 
     self._private.previous_button = self:get_children_by_id("#previous")[1]
     self._private.play_pause_button = self:get_children_by_id("#play_pause")[1]
     self._private.next_button = self:get_children_by_id("#next")[1]
 
-    self._private.previous_button.foreground = tcolor.transparent
-    self._private.play_pause_button.foreground = tcolor.transparent
-    self._private.next_button.foreground = tcolor.transparent
+    self._private.previous_button.fg = tcolor.transparent
+    self._private.play_pause_button.fg = tcolor.transparent
+    self._private.next_button.fg = tcolor.transparent
 
-    self._private.previous_button:connect_signal("property::foreground", update_icon_foreground)
-    self._private.play_pause_button:connect_signal("property::foreground", update_icon_foreground)
-    self._private.next_button:connect_signal("property::foreground", update_icon_foreground)
+    self._private.previous_button:connect_signal("property::fg", update_icon_color)
+    self._private.play_pause_button:connect_signal("property::fg", update_icon_color)
+    self._private.next_button:connect_signal("property::fg", update_icon_color)
 end
 
 local function initialize_signals(self)
@@ -261,52 +264,13 @@ function media_player_widget.new(wibar)
         width = dpi(500),
         {
             layout = wibox.layout.fixed.horizontal,
-            reverse = true,
             fill_space = true,
-            {
-                id = "#content_container",
-                enabled = false,
-                widget = capsule,
-                margins = {
-                    left = beautiful.capsule.default_style.margins.left,
-                    right = 0,
-                    top = beautiful.wibar.padding.top,
-                    bottom = beautiful.wibar.padding.bottom,
-                },
-                {
-                    widget = wibox.container.constraint,
-                    strategy = "min",
-                    width = dpi(150),
-                    {
-                        layout = wibox.layout.fixed.horizontal,
-                        spacing = beautiful.capsule.item_content_spacing,
-                        {
-                            id = "#icon",
-                            widget = wibox.widget.imagebox,
-                            resize = true,
-                        },
-                        {
-                            id = "#text",
-                            widget = wibox.widget.textbox,
-                        },
-                    },
-                },
-            },
             {
                 id = "#previous",
                 widget = capsule,
-                margins = {
-                    left = 0,
-                    right = 0,
-                    top = beautiful.wibar.padding.top,
-                    bottom = beautiful.wibar.padding.bottom,
-                },
-                paddings = {
-                    left = beautiful.capsule.default_style.paddings.left,
-                    right = dpi(6),
-                    top = dpi(6),
-                    bottom = dpi(6),
-                },
+                margins = hui.thickness { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
+                paddings = hui.thickness { dpi(6), left = beautiful.capsule.default_style.paddings.left },
+                shape = left_shape,
                 buttons = binding.awful_buttons {
                     binding.awful({}, btn.left, function() media_player:previous() end),
                 },
@@ -319,17 +283,11 @@ function media_player_widget.new(wibar)
             {
                 id = "#play_pause",
                 widget = capsule,
-                margins = {
-                    left = 0,
-                    right = 0,
-                    top = beautiful.wibar.padding.top,
-                    bottom = beautiful.wibar.padding.bottom,
-                },
-                paddings = {
+                margins = hui.thickness { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
+                paddings = hui.thickness {
+                    dpi(6),
                     left = beautiful.capsule.default_style.paddings.left,
                     right = beautiful.capsule.default_style.paddings.right,
-                    top = dpi(6),
-                    bottom = dpi(6),
                 },
                 shape = false,
                 buttons = binding.awful_buttons {
@@ -343,19 +301,9 @@ function media_player_widget.new(wibar)
             {
                 id = "#next",
                 widget = capsule,
-                margins = {
-                    left = 0,
-                    right = beautiful.capsule.default_style.margins.right,
-                    top = beautiful.wibar.padding.top,
-                    bottom = beautiful.wibar.padding.bottom,
-                },
-                paddings = {
-                    left = dpi(6),
-                    right = beautiful.capsule.default_style.paddings.right,
-                    top = dpi(6),
-                    bottom = dpi(6),
-                },
-                shape = right_shape,
+                margins = hui.thickness { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
+                paddings = hui.thickness { dpi(6), right = beautiful.capsule.default_style.paddings.right },
+                shape = false,
                 buttons = binding.awful_buttons {
                     binding.awful({}, btn.left, function() media_player:next() end),
                 },
@@ -363,6 +311,36 @@ function media_player_widget.new(wibar)
                     widget = wibox.widget.imagebox,
                     image = config.places.theme .. "/icons/skip-next.svg",
                     resize = true,
+                },
+            },
+            {
+                id = "#separator",
+                widget = wibox.container.margin,
+                margins = hui.thickness { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
+                {
+                    widget = wibox.container.background,
+                    forced_width = dpi(1),
+                    bg = beautiful.common.bg_120,
+                },
+            },
+            {
+                id = "#content_container",
+                widget = capsule,
+                enable_overlay = false,
+                margins = hui.thickness { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
+                shape = false,
+                {
+                    layout = wibox.layout.fixed.horizontal,
+                    spacing = beautiful.capsule.item_content_spacing,
+                    {
+                        id = "#icon",
+                        widget = wibox.widget.imagebox,
+                        resize = true,
+                    },
+                    {
+                        id = "#text",
+                        widget = wibox.widget.textbox,
+                    },
                 },
             },
         },

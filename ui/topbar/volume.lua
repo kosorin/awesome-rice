@@ -6,7 +6,7 @@ local config = require("config")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local volume_service = require("services.volume")
 local dpi = Dpi
 local gshape = require("gears.shape")
@@ -18,6 +18,7 @@ local mebox = require("widget.mebox")
 local mouse_helper = require("helpers.mouse")
 local pango = require("utils.pango")
 local css = require("utils.css")
+local hui = require("helpers.ui")
 
 
 local volume_widget = { mt = {} }
@@ -39,24 +40,24 @@ function volume_widget:refresh()
     self:apply_style(style)
 
     local volume_text = data.is_set and string.format(text_format, data.volume) or error_text
-    local volume_color = style.foreground
-    local volume_background_color = beautiful.get_progressbar_background_color(style.foreground)
+    local bar_fg = style.fg
+    local bar_bg = beautiful.get_progressbar_bg(style.fg)
 
     local text_widget = self:get_children_by_id("text")[1]
-    text_widget:set_markup(pango.span { foreground = volume_color, volume_text, })
+    text_widget:set_markup(pango.span { fgcolor = bar_fg, volume_text })
 
-    local wave1_fill = (not data.muted and data.volume <= 0) and volume_background_color or volume_color
-    local wave2_fill = (not data.muted and data.volume <= 30) and volume_background_color or volume_color
-    local wave3_fill = (not data.muted and data.volume <= 70) and volume_background_color or volume_color
+    local wave1_fill = (not data.muted and data.volume <= 0) and bar_bg or bar_fg
+    local wave2_fill = (not data.muted and data.volume <= 30) and bar_bg or bar_fg
+    local wave3_fill = (not data.muted and data.volume <= 70) and bar_bg or bar_fg
     local icon_stylesheet = css.style {
-        [".repro"] = { fill = volume_color },
+        [".repro"] = { fill = bar_fg },
         ["#wave1"] = { fill = wave1_fill },
         ["#wave2"] = { fill = wave2_fill },
         ["#wave3"] = { fill = wave3_fill },
         [".wave"] = { visibility = not data.muted and "visible" or "collapse" },
         [".cross"] = {
             visibility = data.muted and "visible" or "collapse",
-            stroke = volume_color,
+            stroke = bar_fg,
         },
     }
     local icon_widget = self:get_children_by_id("icon")[1]
@@ -64,8 +65,8 @@ function volume_widget:refresh()
 
     local bar_widget = self:get_children_by_id("bar")[1]
     bar_widget:set_value(data.volume)
-    bar_widget:set_color(volume_color)
-    bar_widget:set_background_color(volume_background_color)
+    bar_widget:set_color(bar_fg)
+    bar_widget:set_background_color(bar_bg)
 end
 
 function volume_widget:update(data)
@@ -101,11 +102,11 @@ end
 function volume_widget.new(wibar)
     local self = wibox.widget {
         widget = capsule,
-        margins = {
-            left = beautiful.capsule.default_style.margins.left,
+        margins = hui.thickness {
+            top = beautiful.wibar.paddings.top,
             right = beautiful.capsule.default_style.margins.right,
-            top = beautiful.wibar.padding.top,
-            bottom = beautiful.wibar.padding.bottom,
+            bottom = beautiful.wibar.paddings.bottom,
+            left = beautiful.capsule.default_style.margins.left,
         },
         {
             layout = wibox.layout.fixed.horizontal,
@@ -128,7 +129,7 @@ function volume_widget.new(wibar)
                     id = "bar",
                     widget = wibox.widget.progressbar,
                     shape = function(cr, width, height) gshape.rounded_rect(cr, width, height, dpi(4)) end,
-                    bar_shape = function(cr, width, height) gshape.rounded_rect(cr, width, height, dpi(3)) end,
+                    bar_shape = function(cr, width, height) gshape.rounded_rect(cr, width, height, dpi(4)) end,
                     max_value = 100,
                     forced_width = beautiful.capsule.bar_width,
                     forced_height = beautiful.capsule.bar_height,
@@ -183,7 +184,7 @@ function volume_widget.new(wibar)
         end),
     }
 
-    mouse_helper.start_grabbing {
+    mouse_helper.attach_slider_grabber {
         wibox = self._private.wibar,
         widget = bar_container,
         minimum = 0,

@@ -1,3 +1,10 @@
+local setmetatable = setmetatable
+local pairs = pairs
+local ipairs = ipairs
+local coroutine = coroutine
+local table = table
+
+
 local tree = {
     key_separator = "\t",
     root_key = "^", -- Just for debugging, can be an empty string

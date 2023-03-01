@@ -3,7 +3,7 @@ local setmetatable = setmetatable
 local ipairs = ipairs
 local math = math
 local awful = require("awful")
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local gtable = require("gears.table")
 local grectangle = require("gears.geometry").rectangle
 local wibox = require("wibox")
@@ -13,6 +13,7 @@ local mod = binding.modifier
 local btn = binding.button
 local widget_helper = require("helpers.widget")
 local noice = require("theme.style")
+local templates = require("widget.mebox.templates")
 
 
 local do_not_cache = "<do-not-cache>"
@@ -162,11 +163,11 @@ function mebox:get_item_geometry(index)
     local item_widget = self._private.item_widgets[index]
     local item_geometry = item_widget and widget_helper.find_geometry(item_widget, self)
     return item_geometry and {
-        x = geometry.x + item_geometry.x + border_width,
-        y = geometry.y + item_geometry.y + border_width,
-        width = item_geometry.width,
-        height = item_geometry.height,
-    }
+            x = geometry.x + item_geometry.x + border_width,
+            y = geometry.y + item_geometry.y + border_width,
+            width = item_geometry.width,
+            height = item_geometry.height,
+        }
 end
 
 function mebox:is_item_active(index)
@@ -689,20 +690,20 @@ noice.define_style_properties(mebox, {
     paddings = { id = "#layout_container", property = "margins" },
     item_width = {},
     item_height = {},
-    item_template = {},
     placement = {},
     placement_bounding_args = {},
     active_opacity = {},
     inactive_opacity = {},
     submenu_offset = {},
-    separator_template = {},
-    header_template = {},
 })
 
 --[[
 
 new_args:
 - (style properties)
+- item_template : table
+- separator_template : table
+- header_template : table
 - orientation : string | nil ["vertical"]
 - layout_template : widget | table | function [wibox.layout.fixed.vertical]
 - layout_navigator : function(menu, x, y, navigation_context) [nil]
@@ -752,13 +753,13 @@ item:
 - layout : string | nil
 - layout_add : function(layout, item_widget) | nil
 - buttons_builder : function(item, menu, default_click_action) [nil]
+- template : table | nil
 
 active_submenu:
 - index : number
 - menu : menu
 
 ]]
-
 function mebox.new(args, is_submenu)
     args = args or {}
 
@@ -786,6 +787,9 @@ function mebox.new(args, is_submenu)
     self._private.layout_navigator = args.layout_navigator
     self._private.layout_template = args.layout_template or wibox.layout.fixed[self._private.orientation]
     self._private.layout_container = self:get_children_by_id("#layout_container")[1]
+    self._private.item_template = args.item_template or templates.item
+    self._private.separator_template = args.separator_template or templates.separator
+    self._private.header_template = args.header_template or templates.header
 
     noice.initialize_style(self, self.widget, beautiful.mebox.default_style)
 
@@ -831,7 +835,7 @@ function mebox.new(args, is_submenu)
                     end),
                     binding.awful({ mod.shift }, "Tab", function()
                         local active_menu = self:get_active_menu()
-                        active_menu:select_next(-1)
+                        active_menu:select_next( -1)
                     end),
                     binding.awful({}, "Return", function()
                         local active_menu = self:get_active_menu()

@@ -1,32 +1,35 @@
 local setmetatable = setmetatable
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local gtable = require("gears.table")
 local wibox = require("wibox")
 local base = require("wibox.widget.base")
 local noice = require("theme.style")
 
 
-local module = { mt = {} }
+local module = {
+    mt = {},
+    object = {},
+}
 
-function module:layout(_, width, height)
+function module.object:layout(_, width, height)
     if not self._private.layout then
         return
     end
     return { base.place_widget_at(self._private.layout, 0, 0, width, height) }
 end
 
-function module:fit(context, width, height)
+function module.object:fit(context, width, height)
     if not self._private.layout then
         return 0, 0
     end
     return base.fit_widget(self, context, self._private.layout, width, height)
 end
 
-function module:get_widget()
+function module.object:get_widget()
     return self._private.content_container:get_widget()
 end
 
-function module:set_widget(widget)
+function module.object:set_widget(widget)
     if self._private.content_container:get_widget() == widget then
         return
     end
@@ -40,36 +43,34 @@ function module:set_widget(widget)
     self:emit_signal("property::widget")
 end
 
-function module:get_children()
+function module.object:get_children()
     return self._private.content_container:get_children()
 end
 
-function module:set_children(children)
+function module.object:set_children(children)
     self:set_widget(children[1])
 end
 
--- TODO: Rename `enabled` property to something more meaningful
-
-function module:get_enabled()
-    return self._private.enabled
+function module.object:get_enable_overlay()
+    return self._private.enable_overlay
 end
 
-function module:set_enabled(value)
+function module.object:set_enable_overlay(value)
     value = not not value
-    if self._private.enabled == value then
+    if self._private.enable_overlay == value then
         return
     end
-    self._private.enabled = value
+    self._private.enable_overlay = value
 
     local overlay = self._private.layout:get_children_by_id("#overlay")[1]
     if overlay then
-        overlay.visible = self._private.enabled
+        overlay.visible = self._private.enable_overlay
     end
 end
 
-noice.define_style_properties(module, {
-    background = { id = "#background", property = "bg" },
-    foreground = { id = "#background", property = "fg" },
+noice.define_style_properties(module.object, {
+    bg = { id = "#background", property = "bg" },
+    fg = { id = "#background", property = "fg" },
     border_color = { id = "#background", property = "border_color" },
     border_width = { id = "#background", property = "border_width" },
     shape = { id = "#background", property = "shape" },
@@ -84,7 +85,7 @@ function module.new(args)
 
     local self = base.make_widget(nil, nil, { enable_properties = true })
 
-    gtable.crush(self, module, true)
+    gtable.crush(self, module.object, true)
 
     self._private.layout = wibox.widget {
         id = "#margin",
@@ -155,7 +156,7 @@ function module.new(args)
 
     noice.initialize_style(self, self._private.layout, beautiful.capsule.default_style)
 
-    self:set_enabled(args.enabled ~= false)
+    self.enable_overlay = args.enable_overlay ~= false
 
     return self
 end

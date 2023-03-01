@@ -1,7 +1,7 @@
 local capi = Capi
 local awful = require("awful")
 local wibox = require("wibox")
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
@@ -14,6 +14,7 @@ local widget_helper = require("helpers.widget")
 local mebox = require("widget.mebox")
 local tag_layout_menu_template = require("ui.menu.templates.tag_layout")
 local main_menu = require("ui.menu.main")
+local hui = require("helpers.ui")
 
 
 local layoutbox = { mt = {} }
@@ -34,17 +35,16 @@ end
 function layoutbox.new(wibar)
     local self = wibox.widget {
         widget = capsule,
-        margins = {
-            left = beautiful.wibar.padding.left,
+        margins = hui.thickness {
+            top = beautiful.wibar.paddings.top,
             right = beautiful.capsule.default_style.margins.right,
-            top = beautiful.wibar.padding.top,
-            bottom = beautiful.wibar.padding.bottom,
+            bottom = beautiful.wibar.paddings.bottom,
+            left = beautiful.wibar.paddings.left,
         },
-        paddings = {
-            left = dpi(10),
-            right = dpi(10),
-            top = beautiful.capsule.default_style.paddings.top,
-            bottom = beautiful.capsule.default_style.paddings.bottom,
+        paddings = hui.thickness {
+            beautiful.capsule.default_style.paddings.top,
+            dpi(10),
+            beautiful.capsule.default_style.paddings.bottom,
         },
         {
             layout = wibox.layout.stack,
@@ -57,7 +57,7 @@ function layoutbox.new(wibar)
                 widget = wibox.widget.imagebox,
                 stylesheet = beautiful.build_layout_stylesheet(),
             },
-        }
+        },
     }
 
     gtable.crush(self, layoutbox, true)

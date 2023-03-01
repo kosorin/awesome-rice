@@ -6,9 +6,10 @@ local tcolor = require("helpers.color")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local weather_service = require("services.weather")
 local widget_helper = require("helpers.widget")
+local hui = require("helpers.ui")
 local dpi = Dpi
 local humanizer = require("utils.humanizer")
 local glib = require("lgi").GLib
@@ -116,7 +117,7 @@ local function create_temperature_data_widget()
             id = "temperature",
             widget = wibox.widget.textbox,
             halign = "center",
-            pattern = "<span weight='bold' size='300%' foreground='"
+            pattern = "<span weight='bold' size='300%' fgcolor='"
                 .. beautiful.common.primary
                 .. "'>{value}</span>",
         },
@@ -219,7 +220,7 @@ local function create_indoor_data_widget()
             id = "indoor_temperature",
             widget = wibox.widget.textbox,
             halign = "center",
-            pattern = "<span weight='bold' size='300%' foreground='"
+            pattern = "<span weight='bold' size='300%' fgcolor='"
                 .. beautiful.common.primary
                 .. "'>{value}</span>",
         },
@@ -376,17 +377,15 @@ local function new(parent, data_widget_factory, args)
         height = args.height or dpi(592),
         bg = args.bg or beautiful.popup.default_style.bg,
         opacity = args.opacity or 1,
-        border_width = args.border_width or beautiful.border_width,
+        border_width = args.border_width or dpi(1),
         border_color = args.border_color or beautiful.common.primary_66,
         padding = args.padding or dpi(24),
     }, { __index = WeatherPopup })
 
-    self.margins = args.margins or {
-        left = beautiful.useless_gap,
-        right = beautiful.useless_gap,
-        top = beautiful.useless_gap - (self.arrow_size / 2) - self.border_width,
-        bottom = beautiful.useless_gap,
-    }
+    self.margins = args.margins or hui.thickness {
+            beautiful.gap,
+            top = beautiful.gap - (self.arrow_size / 2) - self.border_width,
+        }
 
     self.data_widget = data_widget_factory()
 
@@ -397,7 +396,7 @@ local function new(parent, data_widget_factory, args)
         valign = "center",
         {
             widget = wibox.widget.textbox,
-            markup = "<span size='150%' fgcolor='" .. beautiful.common.foreground_66 .. "'>No Data</span>",
+            markup = "<span size='150%' fgcolor='" .. beautiful.common.fg_66 .. "'>No Data</span>",
         },
     }
 

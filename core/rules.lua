@@ -1,9 +1,8 @@
 local capi = Capi
 local table = table
 local awful = require("awful")
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local gshape = require("gears.shape")
-local amousec = require("awful.mouse.client")
 local ruled = require("ruled")
 local binding = require("io.binding")
 local helper_client = require("helpers.client")
@@ -79,9 +78,7 @@ ruled.client.connect_signal("request::rules", function()
             focus = awful.client.focus.filter,
             titlebars_enabled = DEBUG,
             raise = true,
-            shape = function(cr, width, height)
-                gshape.rounded_rect(cr, width, height, dpi(16))
-            end,
+            shape = beautiful.client.shape,
         },
         callback = function(client)
             awful.client.setslave(client)

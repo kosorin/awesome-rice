@@ -3,7 +3,7 @@ local floor = math.floor
 local min = math.min
 local max = math.max
 local wibox = require("wibox")
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local dpi = Dpi
 local mebox = require("widget.mebox")
 local binding = require("io.binding")
@@ -49,7 +49,7 @@ function opacity_menu_template.new()
         if not value_widget then
             return
         end
-        local opacity = tonumber(opacity)
+        opacity = tonumber(opacity)
         local text = opacity
             and tostring(floor((opacity * 100) + 0.5))
             or "--"

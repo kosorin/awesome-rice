@@ -5,14 +5,14 @@ local math = math
 local table = table
 local string = string
 local awful = require("awful")
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local gtable = require("gears.table")
 local gmatcher = require("gears.matcher")
 local wibox = require("wibox")
 local pbinding = require("io.binding")
 local mod = pbinding.modifier
 local btn = pbinding.button
-local tree = require("utils.tree")
+local utree = require("utils.tree")
 local capsule = require("widget.capsule")
 local noice = require("theme.style")
 local pango = require("utils.pango")
@@ -174,8 +174,8 @@ local function highlight_text(self, text, args)
 
     if total_found ~= #args.find_terms then
         return pango.span {
-            fgcolor = self.find_dim_foreground,
-            bgcolor = self.find_dim_background,
+            fgcolor = self.find_dim_fg,
+            bgcolor = self.find_dim_bg,
             text,
         }, false
     end
@@ -207,8 +207,8 @@ local function highlight_text(self, text, args)
         local capture = string.sub(text, part.from, part.to)
         if part.matched then
             return pango.span {
-                fgcolor = self.find_highlight_foreground,
-                bgcolor = self.find_highlight_background,
+                fgcolor = self.find_highlight_fg,
+                bgcolor = self.find_highlight_bg,
                 bgalpha = "100%",
                 capture,
             }
@@ -220,14 +220,14 @@ end
 
 local function get_group_markup(self, node, path)
     local is_ruled = node:find_parent(function(n) return n.state.ruled end, true)
-    local background = select(2, node:find_parent(function(n) return n.state.bg end, true))
-        or (is_ruled and self.group_ruled_background or self.group_background)
-    local foreground = select(2, node:find_parent(function(n) return n.state.fg end, true))
-        or (is_ruled and self.group_ruled_foreground or self.group_foreground)
+    local bg = select(2, node:find_parent(function(n) return n.state.bg end, true))
+        or (is_ruled and self.group_ruled_bg or self.group_bg)
+    local fg = select(2, node:find_parent(function(n) return n.state.fg end, true))
+        or (is_ruled and self.group_ruled_fg or self.group_fg)
     local text = " " .. table.concat(path, self.group_path_separator_markup) .. " "
     return pango.span {
-        fgcolor = foreground,
-        bgcolor = background,
+        fgcolor = fg,
+        bgcolor = bg,
         text,
     }
 end
@@ -236,8 +236,8 @@ local function get_trigger_markup(self, binding)
 
     local function trigger_box(content)
         return pango.span {
-            bgcolor = self.trigger_background,
-            bgalpha = self.trigger_background_alpha,
+            bgcolor = self.trigger_bg,
+            bgalpha = self.trigger_bg_alpha,
             " " .. content .. " ",
         }
     end
@@ -720,8 +720,8 @@ local function start_find(self, data, restore_find)
     awful.prompt.run {
         textbox = find_text_widget,
         text = self._private.find.query,
-        bg_cursor = self.find_cursor_background,
-        fg_cursor = self.find_cursor_foreground,
+        bg_cursor = self.find_cursor_bg,
+        fg_cursor = self.find_cursor_fg,
         ul_cursor = "none",
         changed_callback = function(input)
             find(self, input, data)
@@ -748,8 +748,8 @@ local function prepare_wibox(self, screen)
     self.screen = screen
 
     local workarea = screen.workarea
-    local workarea_width = workarea.width - beautiful.useless_gap * 4
-    local workarea_height = workarea.height - beautiful.useless_gap * 4
+    local workarea_width = workarea.width - beautiful.gap * 4
+    local workarea_height = workarea.height - beautiful.gap * 4
 
     local page_container = self.widget:get_children_by_id("#page_container")[1]
     page_container.width = self.page_width
@@ -836,31 +836,31 @@ noice.define_style_properties(bindbox, {
     group_spacing = {},
     item_spacing = {},
 
-    trigger_background = {},
-    trigger_background_alpha = {},
-    trigger_foreground = {},
+    trigger_bg = {},
+    trigger_bg_alpha = {},
+    trigger_fg = {},
 
-    group_background = {},
-    group_foreground = {},
-    group_ruled_background = {},
-    group_ruled_foreground = {},
+    group_bg = {},
+    group_fg = {},
+    group_ruled_bg = {},
+    group_ruled_fg = {},
 
-    find_dim_background = {},
-    find_dim_foreground = {},
-    find_highlight_background = {},
-    find_highlight_foreground = {},
+    find_dim_bg = {},
+    find_dim_fg = {},
+    find_highlight_bg = {},
+    find_highlight_fg = {},
 
     group_path_separator_markup = {},
     slash_separator_markup = {},
     plus_separator_markup = {},
     range_separator_markup = {},
 
-    status_style = { id = "#status_container", property = "style" },
+    status_style = { id = "#status_container", property = "style" }, -- TODO: Fix me - capsule:set_style() no longer exists
     status_spacing = {},
 
-    find_placeholder_foreground = { id = "#find_placeholder", property = "fg" },
-    find_cursor_background = {},
-    find_cursor_foreground = {},
+    find_placeholder_fg = { id = "#find_placeholder", property = "fg" },
+    find_cursor_bg = {},
+    find_cursor_fg = {},
 })
 
 function bindbox.new(args)
@@ -889,8 +889,7 @@ function bindbox.new(args)
                 {
                     id = "#status_container",
                     widget = capsule,
-                    hover_overlay = false,
-                    press_overlay = false,
+                    enable_overlay = false,
                     {
                         layout = wibox.layout.stack,
                         {
@@ -938,7 +937,7 @@ function bindbox.new(args)
     gtable.crush(self, bindbox, true)
 
     self._private.matcher = gmatcher()
-    self._private.source_binding_tree = tree.new()
+    self._private.source_binding_tree = utree.new()
     self._private.group_sort = args.group_sort or default_group_sort
     self._private.binding_sort = args.binding_sort or default_binding_sort
     self._private.include_awesome_bindings = args.include_awesome_bindings ~= false
