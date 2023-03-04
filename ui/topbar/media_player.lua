@@ -264,7 +264,6 @@ function media_player_widget.new(wibar)
         width = dpi(500),
         {
             layout = wibox.layout.fixed.horizontal,
-            fill_space = true,
             {
                 id = "#previous",
                 widget = capsule,
