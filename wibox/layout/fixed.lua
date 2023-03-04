@@ -26,32 +26,36 @@
 ---------------------------------------------------------------------------
 
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
-local base  = require("wibox.widget.base")
-local table = table
+local base   = require("wibox.widget.base")
+local table  = table
 local ipairs = ipairs
+local select = select
+local min    = math.min
+local max    = math.max
+local abs    = math.abs
 local gtable = require("gears.table")
 
-local fixed = {}
+local fixed  = {}
 
 -- Layout a fixed layout. Each widget gets just the space it asks for.
 -- @param context The context in which we are drawn.
 -- @param width The available width.
 -- @param height The available height.
--- TODO: Negative spacing value
 function fixed:layout(context, width, height)
-    local result = {}
+    local widget_count = #self._private.widgets
     local reverse = self._private.reverse
-    local spacing = self._private.spacing or 0
     local is_y = self._private.dir == "y"
     local is_x = not is_y
-    local abspace = math.abs(spacing)
-    local spoffset = spacing < 0 and 0 or spacing
-    local widget_count = #self._private.widgets
-    local spacing_widget
-    local x, y = 0, 0
-    local is_empty = true
+    local spacing = self._private.spacing or 0
+    local abs_spacing = abs(spacing)
+    local offset_spacing = min(0, spacing)
+    local spacing_widget = spacing ~= 0 and self._private.spacing_widget or nil
+    local spacing_widget_on_top = self._private.spacing_widget_on_top
 
-    spacing_widget = spacing ~= 0 and self._private.spacing_widget or nil
+    local result = {}
+    local x, y = 0, 0
+    local empty = true
+    local last_widget_placement_info
 
     for i = 1, widget_count do
         local widget = self._private.widgets[reverse and (widget_count - i + 1) or i]
@@ -65,57 +69,43 @@ function fixed:layout(context, width, height)
         local zero = false
 
         if is_y then
-            h = is_empty and h or h - spacing
-            if i ~= widget_count or not self._private.fill_space then
+            if not empty and h > 0 then
+                -- If we want to place another widget we also need space for the spacing widget.
+                h = h - spacing
+            end
+
+            if h > 0 then
                 h = select(2, base.fit_widget(self, context, widget, w, h))
             end
-            zero = h <= 0
 
-            -- Never display "random" widgets as soon as a non-zero sized
-            -- one doesn't fit.
-            if y + spacing >= height then
-                -- Expand last widget if can't add another
-                if self._private.fill_space then
-                    local height_left = height - y
-                    local last_info = result[#result]
-                    if height_left > 0 and last_info then
-                        -- TODO: Is this `_height` ok?
-                        last_info._height = last_info._height + height_left
-                    end
-                end
-                break
+            if h <= 0 then
+                h = 0
+                zero = true
             end
         else
-            w = is_empty and w or w - spacing
-            if i ~= widget_count or not self._private.fill_space then
+            if not empty and w > 0 then
+                -- If we want to place another widget we also need space for the spacing widget.
+                w = w - spacing
+            end
+
+            if w > 0 then
                 w = select(1, base.fit_widget(self, context, widget, w, h))
             end
-            zero = w <= 0
 
-            -- Never display "random" widgets as soon as a non-zero sized
-            -- one doesn't fit.
-            if x + spacing >= width then
-                -- Expand last widget if can't add another
-                if self._private.fill_space then
-                    local width_left = width - x
-                    local last_info = result[#result]
-                    if width_left > 0 and last_info then
-                        -- TODO: Is this `_width` ok?
-                        last_info._width = last_info._width + width_left
-                    end
-                end
-                break
+            if w <= 0 then
+                w = 0
+                zero = true
             end
         end
 
-        -- Add the spacing widget (if needed)
-        if i > 1 then
-            local nw = (is_empty or zero) and 0 or (is_x and spoffset or w)
-            local nh = (is_empty or zero) and 0 or (is_y and spoffset or h)
+        -- Add the spacing widget (if needed).
+        if spacing ~= 0 and i > 1 then
+            local nw = (empty or zero) and 0 or (is_x and abs_spacing or w)
+            local nh = (empty or zero) and 0 or (is_y and abs_spacing or h)
 
             if spacing_widget then
-                local nx = x
-                local ny = y
+                local nx = is_x and x + offset_spacing or x
+                local ny = is_y and y + offset_spacing or y
                 if reverse then
                     if is_x then
                         nx = width - nw - nx
@@ -124,31 +114,82 @@ function fixed:layout(context, width, height)
                         ny = height - nh - ny
                     end
                 end
-                table.insert(result, base.place_widget_at(spacing_widget, nx, ny, nw, nh))
+
+                local index
+                if spacing_widget_on_top and reverse then
+                    index = #result == 0 and 1 or #result
+                else
+                    index = #result + 1
+                end
+
+                table.insert(result, index, base.place_widget_at(spacing_widget, nx, ny, nw, nh))
             end
 
-            x = is_x and x + nw or x
-            y = is_y and y + nh or y
+            x = is_x and x + (nw ~= 0 and spacing or 0) or x
+            y = is_y and y + (nh ~= 0 and spacing or 0) or y
         end
 
         -- Place widget, even if it has zero width/height. Otherwise
         -- any layout change for zero-sized widget would become invisible.
         do
-            local nx = x
-            local ny = y
             local nw = w
             local nh = h
-            if reverse then
-                nx = width - nw - nx
-                ny = height - nh - ny
+
+            local widget_placement_info
+            do
+                local nx = x
+                local ny = y
+                if reverse then
+                    nx = width - nw - nx
+                    ny = height - nh - ny
+                end
+
+                local index
+                if spacing_widget_on_top and not reverse then
+                    index = #result == 0 and 1 or #result
+                else
+                    index = #result + 1
+                end
+
+                widget_placement_info = base.place_widget_at(widget, nx, ny, nw, nh)
+                table.insert(result, index, widget_placement_info)
             end
-            table.insert(result, base.place_widget_at(widget, nx, ny, nw, nh))
 
             x = is_x and x + nw or x
             y = is_y and y + nh or y
+
+            if not zero then
+                last_widget_placement_info = widget_placement_info
+            end
         end
 
-        is_empty = is_empty and zero
+        empty = empty and zero
+    end
+
+    if self._private.fill_space and last_widget_placement_info then
+        if is_y then
+            local h = height - y
+            if h > 0 then
+                -- TODO: Is this `_height` and `_matrix` ok?
+                last_widget_placement_info._height = last_widget_placement_info._height + h
+                if reverse then
+                    last_widget_placement_info._matrix = last_widget_placement_info._matrix:translate(0, -h)
+                end
+            end
+        else
+            local w = width - x
+            if w > 0 then
+                -- TODO: Is changing `_width` and `_matrix` ok?
+                last_widget_placement_info._width = last_widget_placement_info._width + w
+                if reverse then
+                    last_widget_placement_info._matrix = last_widget_placement_info._matrix:translate(-w, 0)
+                end
+            end
+        end
+    end
+
+    if reverse then
+        result = gtable.reverse(result)
     end
 
     return result
@@ -162,9 +203,9 @@ end
 -- @interface layout
 function fixed:add(...)
     -- No table.pack in Lua 5.1 :-(
-    local args = { n=select('#', ...), ... }
+    local args = { n = select("#", ...), ... }
     assert(args.n > 0, "need at least one widget to add")
-    for i=1, args.n do
+    for i = 1, args.n do
         local w = base.make_widget_from_value(args[i])
         base.check_widget(w)
         table.insert(self._private.widgets, w)
@@ -213,7 +254,6 @@ function fixed:remove_widgets(...)
         else
             ret = false
         end
-
     end
 
     return #args > (recursive and 1 or 0) and ret
@@ -358,70 +398,105 @@ end
 -- @param orig_width The available width.
 -- @param orig_height The available height.
 function fixed:fit(context, orig_width, orig_height)
-    local width_left, height_left = orig_width, orig_height
-    local reverse = self._private.reverse
-    local spacing = self._private.spacing or 0
     local widget_count = #self._private.widgets
-    local is_y = self._private.dir == "y"
-    local used_max = 0
-    local is_empty = true
 
-    -- when no widgets exist the function can be called with orig_width or
+    -- When no widgets exist the function can be called with orig_width or
     -- orig_height equal to nil. Exit early in this case.
     if widget_count == 0 then
         return 0, 0
     end
 
+    local reverse = self._private.reverse
+    local is_y = self._private.dir == "y"
+    local is_x = not is_y
+    local spacing = self._private.spacing or 0
+    local abs_spacing = abs(spacing)
+    local offset_spacing = min(0, spacing)
+
+    local result = {}
+    local x, y = 0, 0
+    local empty = true
+    local used_max = 0
+
     for i = 1, widget_count do
         local widget = self._private.widgets[reverse and (widget_count - i + 1) or i]
-        local w, h = base.fit_widget(self, context, widget, width_left, height_left)
-        local max
+        local w, h = orig_width - x, orig_height - y
+        local used = 0
 
-        if not is_empty then
-            if is_y then
-                if h > 0 then
-                    height_left = height_left - spacing
-                end
-            else
-                if w > 0 then
-                    width_left = width_left - spacing
-                end
-            end
-        end
+        -- Some widget might be zero sized either because this is their
+        -- minimum space or just because they are really empty. In this case,
+        -- they must still be added to the layout. Otherwise, if their size
+        -- change and this layout is resizable, they are lost "forever" until
+        -- a full relayout is called on this fixed layout object.
+        local zero = false
 
         if is_y then
-            max = w
-            height_left = height_left - h
-            is_empty = is_empty and h == 0
-        else
-            max = h
-            width_left = width_left - w
-            is_empty = is_empty and w == 0
-        end
+            if not empty and h > 0 then
+                -- If we want to place another widget we also need space for the spacing widget.
+                h = h - spacing
+            end
 
-        if max > used_max then
-            used_max = max
-        end
+            if h > 0 then
+                used, h = base.fit_widget(self, context, widget, w, h)
+            end
 
-        -- Stop if there is not enough space for next widget including a space
-        if is_y then
-            if height_left - (is_empty and 0 or spacing) <= 0 then
-                height_left = height_left < 0 and 0 or height_left
-                break
+            if h <= 0 then
+                h = 0
+                zero = true
             end
         else
-            if width_left - (is_empty and 0 or spacing) <= 0 then
-                width_left = width_left < 0 and 0 or width_left
-                break
+            if not empty and w > 0 then
+                -- If we want to place another widget we also need space for the spacing widget.
+                w = w - spacing
+            end
+
+            if w > 0 then
+                w, used = base.fit_widget(self, context, widget, w, h)
+            end
+
+            if w <= 0 then
+                w = 0
+                zero = true
             end
         end
+
+        if used_max < used then
+            used_max = used
+        end
+
+        -- Add the spacing widget (if needed).
+        if spacing ~= 0 and i > 1 then
+            local nw = (empty or zero) and 0 or (is_x and abs_spacing or w)
+            local nh = (empty or zero) and 0 or (is_y and abs_spacing or h)
+            x = is_x and x + (nw ~= 0 and spacing or 0) or x
+            y = is_y and y + (nh ~= 0 and spacing or 0) or y
+        end
+
+        -- Place widget, even if it has zero width/height. Otherwise
+        -- any layout change for zero-sized widget would become invisible.
+        x = is_x and x + w or x
+        y = is_y and y + h or y
+
+        empty = empty and zero
+    end
+
+    if empty then
+        return 0, 0
+    end
+
+    local size
+
+    if self._private.fill_space then
+        size = is_y and orig_height or orig_width
+    else
+        size = is_y and y or x
     end
 
     if is_y then
-        return used_max, orig_height - height_left
+        return used_max, size
+    else
+        return size, used_max
     end
-
-    return orig_width - width_left, used_max
 end
 
 function fixed:reset()
@@ -447,13 +522,14 @@ function fixed:fill_space(val)
 end
 
 local function get_layout(dir, widget1, ...)
-    local ret = base.make_widget(nil, nil, {enable_properties = true})
+    local ret = base.make_widget(nil, nil, { enable_properties = true })
 
     gtable.crush(ret, fixed, true)
 
     ret._private.dir = dir
     ret._private.widgets = {}
     ret:set_spacing(0)
+    ret:set_spacing_widget_on_top(false)
     ret:fill_space(false)
 
     if widget1 then
@@ -503,7 +579,21 @@ function fixed:get_spacing()
     return self._private.spacing or 0
 end
 
+function fixed:set_spacing_widget_on_top(on_top)
+    on_top = not not on_top
+    if self._private.spacing_widget_on_top ~= on_top then
+        self._private.spacing_widget_on_top = on_top
+        self:emit_signal("widget::layout_changed")
+        self:emit_signal("property::spacing_widget_on_top", on_top)
+    end
+end
+
+function fixed:get_spacing_widget_on_top()
+    return self._private.spacing_widget_on_top
+end
+
 function fixed:set_reverse(reverse)
+    reverse = not not reverse
     if self._private.reverse ~= reverse then
         self._private.reverse = reverse
         self:emit_signal("widget::layout_changed")
