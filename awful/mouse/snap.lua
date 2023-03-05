@@ -149,6 +149,8 @@ local function apply_areasnap(c, args)
     return build_placement(current_snap, current_axis)(c,{
         to_percent     = 0.5,
         honor_workarea = true,
+        store_geometry = true,
+        context        = "snap",
         honor_padding  = true,
         margins        = beautiful.snapper_gap
     })
@@ -267,9 +269,11 @@ end
 -- Enable edge snapping
 resize.add_move_callback(function(c, geo, args)
     -- Screen edge snapping (areosnap)
-    if (module.edge_enabled ~= false)
-      and args and (args.snap == nil or args.snap) then
-        detect_areasnap(c, module.aerosnap_distance)
+    if (module.edge_enabled ~= false) then
+        aplace.restore(c, { context = "snap", clear_stored_geometry = true })
+        if args and (args.snap == nil or args.snap) then
+            detect_areasnap(c, module.aerosnap_distance)
+        end
     end
 
     -- Snapping between clients

@@ -1666,6 +1666,10 @@ function placement.restore(d, args)
         height = memento.height,
     }
 
+    if args.clear_stored_geometry then
+        data[d][args.context] = nil
+    end
+
     return true
 end
 
