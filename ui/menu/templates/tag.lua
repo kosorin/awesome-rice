@@ -110,7 +110,7 @@ function tag_menu_template.new()
             })
 
             return items
-        end
+        end,
     }
 end
 

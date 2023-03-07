@@ -7,7 +7,7 @@ local table = table
 
 local tree = {
     key_separator = "\t",
-    root_key = "^", -- Just for debugging, can be an empty string
+    root_key = "^",       -- Just for debugging, can be an empty string
     root_name = "<root>", -- Just for debugging, can be anything
 }
 

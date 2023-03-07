@@ -83,7 +83,7 @@ function network_widget:refresh()
         self:apply_style(style)
         self:set_widget(widgets.connected)
         self._private.graph_widget:add_value(download_factor * status.download, 1)
-        self._private.graph_widget:add_value( -upload_factor * status.upload, 2)
+        self._private.graph_widget:add_value(-upload_factor * status.upload, 2)
     else
         local style = status.success == nil
             and styles.loading

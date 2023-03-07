@@ -174,7 +174,7 @@ function desktop_utils.get_icon_lookup_paths_uncached()
 
     local paths = add_with_dir({}, glib.get_home_dir(), ".icons")
     add_with_dir(paths, {
-        glib.get_user_data_dir(), -- $XDG_DATA_HOME, typically $HOME/.local/share
+        glib.get_user_data_dir(),                  -- $XDG_DATA_HOME, typically $HOME/.local/share
         table.unpack(glib.get_system_data_dirs()), -- $XDG_DATA_DIRS, typically /usr/{,local/}share
     }, "icons")
     add_with_dir(paths, glib.get_system_data_dirs(), "pixmaps")

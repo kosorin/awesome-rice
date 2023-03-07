@@ -49,8 +49,8 @@ ruled.client.add_rule_source("fix_dialog", function(client, properties)
         if not parent and client.pid then
             local screen = properties.screen
                 and (type(properties.screen) == "function"
-                    and capi.screen[properties.screen(client, properties)]
-                    or capi.screen[properties.screen])
+                and capi.screen[properties.screen(client, properties)]
+                or capi.screen[properties.screen])
                 or nil
             if screen then
                 local possible_parents = {}
@@ -159,12 +159,18 @@ ruled.client.connect_signal("request::rules", function()
                 binding.new {
                     modifiers = { mod.super },
                     triggers = btn.left,
-                    on_press = function(_, client) client:activate { context = "mouse_click" } helper_client.mouse_move(client) end,
+                    on_press = function(_, client)
+                        client:activate { context = "mouse_click" }
+                        helper_client.mouse_move(client)
+                    end,
                 },
                 binding.new {
                     modifiers = { mod.super },
                     triggers = btn.right,
-                    on_press = function(_, client) client:activate { context = "mouse_click" } helper_client.mouse_resize(client) end,
+                    on_press = function(_, client)
+                        client:activate { context = "mouse_click" }
+                        helper_client.mouse_resize(client)
+                    end,
                 },
             },
         },

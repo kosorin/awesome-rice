@@ -22,6 +22,6 @@ capi.screen.connect_signal("request::wallpaper", function(screen)
                     { 1, beautiful.palette.yellow_25 },
                 },
             },
-        }
+        },
     }
 end)

@@ -20,76 +20,76 @@ local pango = require("utils.pango")
 
 local bindbox = { mt = {} }
 
-local s25p = pango.span { size = "25%", " ", }
-local s50p = pango.span { size = "50%", " ", }
+local s25p = pango.span { size = "25%", " " }
+local s50p = pango.span { size = "50%", " " }
 local force_ltr = "&#x200E;"
-local mouse_label_icon = "" --    
+local mouse_label_icon = ""
 local labels = {
-    [btn.left]          = mouse_label_icon .. " Left",
-    [btn.middle]        = mouse_label_icon .. " Middle",
-    [btn.right]         = mouse_label_icon .. " Right",
-    [btn.wheel_up]      = mouse_label_icon .. " Wheel Up",
-    [btn.wheel_down]    = mouse_label_icon .. " Wheel Down",
-    [btn.wheel_left]    = mouse_label_icon .. " Wheel Left",
-    [btn.wheel_right]   = mouse_label_icon .. " Wheel Right",
-    [btn.extra_back]    = mouse_label_icon .. " Back",
-    [btn.extra_forward] = mouse_label_icon .. " Forward",
-
-    Control          = "Ctrl",
-    Mod1             = "Alt",
-    ISO_Level3_Shift = "Alt Gr",
-    Mod4             = "Super",
-
-    Insert    = "Ins",
-    Delete    = "Del",
-    Next      = "PgDn",
-    Prior     = "PgUp",
-    Left      = "" .. s25p, -- ←
-    Up        = "" .. s25p, -- ↑
-    Right     = "" .. s25p, -- →
-    Down      = "" .. s25p, -- ↓
-    Escape    = "Esc",
-    Tab       = "Tab",
-    space     = "Space",
-    Return    = "Enter",
-    BackSpace = " ",
-
-    KP_End      = "Num1",
-    KP_Down     = "Num2",
-    KP_Next     = "Num3",
-    KP_Left     = "Num4",
-    KP_Begin    = "Num5",
-    KP_Right    = "Num6",
-    KP_Home     = "Num7",
-    KP_Up       = "Num8",
-    KP_Prior    = "Num9",
-    KP_Insert   = "Num0",
-    KP_Delete   = "Num.",
-    KP_Divide   = "Num/",
-    KP_Multiply = "Num*",
-    KP_Subtract = "Num-",
-    KP_Add      = "Num+",
-    KP_Enter    = "NumEnter",
-
-    dead_acute      = "´",
-    dead_circumflex = "^",
-    dead_grave      = "`",
-
+    [btn.left]            = mouse_label_icon .. " Left",
+    [btn.middle]          = mouse_label_icon .. " Middle",
+    [btn.right]           = mouse_label_icon .. " Right",
+    [btn.wheel_up]        = mouse_label_icon .. " Wheel Up",
+    [btn.wheel_down]      = mouse_label_icon .. " Wheel Down",
+    [btn.wheel_left]      = mouse_label_icon .. " Wheel Left",
+    [btn.wheel_right]     = mouse_label_icon .. " Wheel Right",
+    [btn.extra_back]      = mouse_label_icon .. " Back",
+    [btn.extra_forward]   = mouse_label_icon .. " Forward",
+    --
+    Control               = "Ctrl",
+    Mod1                  = "Alt",
+    ISO_Level3_Shift      = "Alt Gr",
+    Mod4                  = "Super",
+    --
+    Insert                = "Ins",
+    Delete                = "Del",
+    Next                  = "PgDn",
+    Prior                 = "PgUp",
+    Left                  = "" .. s25p,
+    Up                    = "" .. s25p,
+    Right                 = "" .. s25p,
+    Down                  = "" .. s25p,
+    Escape                = "Esc",
+    Tab                   = "Tab",
+    space                 = "Space",
+    Return                = "Enter",
+    BackSpace             = " ",
+    --
+    KP_End                = "Num1",
+    KP_Down               = "Num2",
+    KP_Next               = "Num3",
+    KP_Left               = "Num4",
+    KP_Begin              = "Num5",
+    KP_Right              = "Num6",
+    KP_Home               = "Num7",
+    KP_Up                 = "Num8",
+    KP_Prior              = "Num9",
+    KP_Insert             = "Num0",
+    KP_Delete             = "Num.",
+    KP_Divide             = "Num/",
+    KP_Multiply           = "Num*",
+    KP_Subtract           = "Num-",
+    KP_Add                = "Num+",
+    KP_Enter              = "NumEnter",
+    --
+    dead_acute            = "´",
+    dead_circumflex       = "^",
+    dead_grave            = "`",
+    --
     XF86MonBrightnessUp   = "󰃟 +",
     XF86MonBrightnessDown = "󰃟 -",
-    XF86AudioRaiseVolume  = force_ltr .. "ﱛ", -- ﱛ 
-    XF86AudioLowerVolume  = force_ltr .. "ﱜ", -- ﱜ 
-    XF86AudioMute         = force_ltr .. "ﱝ", -- ﱝ 婢 
-    XF86AudioPlay         = "契", -- 懶
+    XF86AudioRaiseVolume  = force_ltr .. "ﱛ",
+    XF86AudioLowerVolume  = force_ltr .. "ﱜ",
+    XF86AudioMute         = force_ltr .. "ﱝ",
+    XF86AudioPlay         = "契",
     XF86AudioPause        = "",
     XF86AudioStop         = "栗",
-    XF86AudioPrev         = "玲", -- ⏮
-    XF86AudioNext         = "怜", -- ⏭
+    XF86AudioPrev         = "玲",
+    XF86AudioNext         = "怜",
     XF86AudioRewind       = "丹",
     XF86AudioForward      = "",
-
-    Print          = "" .. s50p,
-    XF86Calculator = "" .. s50p,
+    --
+    Print                 = "" .. s50p,
+    XF86Calculator        = "" .. s50p,
 }
 
 local function default_group_sort(a, b)
@@ -233,7 +233,6 @@ local function get_group_markup(self, node, path)
 end
 
 local function get_trigger_markup(self, binding)
-
     local function trigger_box(content)
         return pango.span {
             bgcolor = self.trigger_bg,
@@ -513,7 +512,7 @@ local function build_pages(self, data, width, height, filter_highlighted)
                         y = offset_y,
                         width = item.trigger.size.width,
                         height = item.trigger.size.height,
-                    }
+                    },
                 }
                 item.trigger.widget = trigger_widget
                 local description_widget
@@ -532,8 +531,8 @@ local function build_pages(self, data, width, height, filter_highlighted)
                     }
                     item.description.widget = description_widget
                     description_widget.line_spacing_factor = 1 + (self.item_spacing / item.description.size.height)
-                    description_widget.point.height = description_widget:get_height_for_width(
-                        max_description_width, self.screen) + self.item_spacing
+                    description_widget.point.height = description_widget:get_height_for_width(max_description_width, self.screen)
+                        + self.item_spacing
                     offset_y = offset_y +
                         math.max(trigger_widget.point.height, description_widget.point.height - self.item_spacing)
                 else
@@ -826,38 +825,30 @@ noice.define_style_properties(bindbox, {
     border_width = { proxy = true },
     shape = { proxy = true },
     paddings = { id = "#padding", property = "margins" },
-    placement = { proxy = true, },
-
+    placement = { proxy = true },
     page_paddings = { id = "#page_container_border", property = "margins" },
     page_width = {},
     page_height = {},
     page_columns = {},
-
     group_spacing = {},
     item_spacing = {},
-
     trigger_bg = {},
     trigger_bg_alpha = {},
     trigger_fg = {},
-
     group_bg = {},
     group_fg = {},
     group_ruled_bg = {},
     group_ruled_fg = {},
-
     find_dim_bg = {},
     find_dim_fg = {},
     find_highlight_bg = {},
     find_highlight_fg = {},
-
     group_path_separator_markup = {},
     slash_separator_markup = {},
     plus_separator_markup = {},
     range_separator_markup = {},
-
     status_style = { id = "#status_container", property = "style" }, -- TODO: Fix me - capsule:set_style() no longer exists
     status_spacing = {},
-
     find_placeholder_fg = { id = "#find_placeholder", property = "fg" },
     find_cursor_bg = {},
     find_cursor_fg = {},
@@ -902,7 +893,7 @@ function bindbox.new(args)
                             {
                                 widget = wibox.widget.textbox,
                                 text = "Type to find",
-                            }
+                            },
                         },
                         {
                             layout = wibox.container.place,

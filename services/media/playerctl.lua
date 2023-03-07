@@ -94,7 +94,7 @@ function playerctl:skip(offset, player_pattern)
 end
 
 function playerctl:rewind(offset, player_pattern)
-    self:seek( -offset, player_pattern)
+    self:seek(-offset, player_pattern)
 end
 
 function playerctl:fast_forward(offset, player_pattern)

@@ -163,11 +163,11 @@ function mebox:get_item_geometry(index)
     local item_widget = self._private.item_widgets[index]
     local item_geometry = item_widget and widget_helper.find_geometry(item_widget, self)
     return item_geometry and {
-            x = geometry.x + item_geometry.x + border_width,
-            y = geometry.y + item_geometry.y + border_width,
-            width = item_geometry.width,
-            height = item_geometry.height,
-        }
+        x = geometry.x + item_geometry.x + border_width,
+        y = geometry.y + item_geometry.y + border_width,
+        width = item_geometry.width,
+        height = item_geometry.height,
+    }
 end
 
 function mebox:is_item_active(index)
@@ -835,7 +835,7 @@ function mebox.new(args, is_submenu)
                     end),
                     binding.awful({ mod.shift }, "Tab", function()
                         local active_menu = self:get_active_menu()
-                        active_menu:select_next( -1)
+                        active_menu:select_next(-1)
                     end),
                     binding.awful({}, "Return", function()
                         local active_menu = self:get_active_menu()
