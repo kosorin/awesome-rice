@@ -88,12 +88,12 @@ local function update_playback_status(self, player, playback_status)
     local is_playing = playback_status == "PLAYING"
 
     self._private.content_container:apply_style(is_playing
-    and beautiful.media_player.capsule.normal
-    or beautiful.media_player.capsule.disabled)
+        and beautiful.media_player.content_styles.normal
+        or beautiful.media_player.content_styles.disabled)
 
     self._private.play_pause_button.widget:set_image(is_playing
-    and config.places.theme .. "/icons/pause.svg"
-    or config.places.theme .. "/icons/play.svg")
+        and config.places.theme .. "/icons/pause.svg"
+        or config.places.theme .. "/icons/play.svg")
 
     self._private.playback_bar.opacity = is_playing and 0.5 or 0.2
     self._private.icon.opacity = is_playing and 1 or 0.5

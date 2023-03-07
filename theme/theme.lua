@@ -19,6 +19,7 @@ local config = require("config")
 local noice = require("theme.style")
 
 
+---@class Theme
 local theme = {}
 
 ----------------------------------------------------------------------------------------------------
@@ -371,7 +372,8 @@ theme.bindbox.default_style = setmetatable({
     slash_separator_markup = pango.span { fgalpha = "50%", size = "smaller", " / " },
     plus_separator_markup = pango.span { fgalpha = "50%", "+" },
     range_separator_markup = pango.span { fgalpha = "50%", ".." },
-    status_style = { -- TODO: Fix me - capsule:set_style() no longer exists
+    status_style = {
+        -- TODO: Fix me - capsule:set_style() no longer exists
         bg = theme.palette.black_50,
         fg = theme.common.fg,
         border_color = theme.palette.black_115,
@@ -388,17 +390,17 @@ theme.bindbox.default_style = setmetatable({
 
 theme.media_player = {}
 
-theme.media_player.capsule = {
-    normal = {
+theme.media_player.content_styles = {
+    normal = setmetatable({
         bg = theme.common.bg_105,
         fg = theme.common.fg,
         border_width = 0,
-    },
-    disabled = {
+    }, { __index = theme.capsule.styles.normal }),
+    disabled = setmetatable({
         bg = theme.common.bg_105,
         fg = theme.common.fg_50,
         border_width = 0,
-    },
+    }, { __index = theme.capsule.styles.disabled }),
 }
 
 ----------------------------------------------------------------------------------------------------
@@ -552,6 +554,38 @@ theme.taglist.item = {
         border_color = theme.common.secondary_75,
         border_width = dpi(1),
     }, { __index = theme.capsule.styles.normal }),
+}
+
+----------------------------------------------------------------------------------------------------
+
+theme.clientlist = {
+    rename = {
+        bg = theme.common.secondary_66,
+        fg = theme.common.fg_bright,
+    },
+    enable_glyphs = false,
+    glyphs = {
+        sticky = " ",
+        ontop = " ",
+        above = " ",
+        below = " ",
+        floating = " ",
+        maximized = " ",
+        maximized_horizontal = " ",
+        maximized_vertical = "",
+        minimized = " ",
+    },
+}
+
+theme.clientlist.item = {
+    normal = setmetatable({
+    }, { __index = theme.capsule.styles.normal }),
+    active = setmetatable({
+    }, { __index = theme.capsule.styles.selected }),
+    urgent = setmetatable({
+    }, { __index = theme.capsule.styles.urgent }),
+    minimized = setmetatable({
+    }, { __index = theme.capsule.styles.disabled }),
 }
 
 ----------------------------------------------------------------------------------------------------
@@ -805,7 +839,7 @@ theme.snap = {
     edge = {
         distance = dpi(4),
         bg = "#ff0000",
-        border_width = 6, -- no dpi
+        border_width = 6, -- no dpi required
     },
 }
 

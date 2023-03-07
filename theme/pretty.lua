@@ -2,6 +2,7 @@ local dpi = Dpi
 local gshape = require("gears.shape")
 
 
+---@param theme Theme
 return function(theme)
     local pretty = {}
 
@@ -84,36 +85,36 @@ return function(theme)
 
     ----------------------------------------------------------------------------------------------------
 
-    pretty.tasklist_bg_normal = theme.capsule.styles.normal.bg
-    pretty.tasklist_fg_normal = theme.capsule.styles.normal.fg
-    pretty.tasklist_shape_border_color = theme.capsule.styles.normal.border_color
-    pretty.tasklist_shape_border_width = theme.capsule.styles.normal.border_width
+    pretty.tasklist_bg_normal = theme.clientlist.item.normal.bg
+    pretty.tasklist_fg_normal = theme.clientlist.item.normal.fg
+    pretty.tasklist_shape_border_color = theme.clientlist.item.normal.border_color
+    pretty.tasklist_shape_border_width = theme.clientlist.item.normal.border_width
 
-    pretty.tasklist_bg_focus = theme.capsule.styles.selected.bg
-    pretty.tasklist_fg_focus = theme.capsule.styles.selected.fg
-    pretty.tasklist_shape_border_color_focus = theme.capsule.styles.selected.border_color
-    pretty.tasklist_shape_border_width_focus = theme.capsule.styles.selected.border_width
+    pretty.tasklist_bg_focus = theme.clientlist.item.active.bg
+    pretty.tasklist_fg_focus = theme.clientlist.item.active.fg
+    pretty.tasklist_shape_border_color_focus = theme.clientlist.item.active.border_color
+    pretty.tasklist_shape_border_width_focus = theme.clientlist.item.active.border_width
 
-    pretty.tasklist_bg_urgent = theme.capsule.styles.urgent.bg
-    pretty.tasklist_fg_urgent = theme.capsule.styles.urgent.fg
-    pretty.tasklist_shape_border_color_urgent = theme.capsule.styles.urgent.border_color
-    pretty.tasklist_shape_border_width_urgent = theme.capsule.styles.urgent.border_width
+    pretty.tasklist_bg_urgent = theme.clientlist.item.urgent.bg
+    pretty.tasklist_fg_urgent = theme.clientlist.item.urgent.fg
+    pretty.tasklist_shape_border_color_urgent = theme.clientlist.item.urgent.border_color
+    pretty.tasklist_shape_border_width_urgent = theme.clientlist.item.urgent.border_width
 
-    pretty.tasklist_bg_minimize = theme.capsule.styles.disabled.bg
-    pretty.tasklist_fg_minimize = theme.capsule.styles.disabled.fg
-    pretty.tasklist_shape_border_color_minimized = theme.capsule.styles.disabled.border_color
-    pretty.tasklist_shape_border_width_minimized = theme.capsule.styles.disabled.border_width
+    pretty.tasklist_bg_minimize = theme.clientlist.item.minimized.bg
+    pretty.tasklist_fg_minimize = theme.clientlist.item.minimized.fg
+    pretty.tasklist_shape_border_color_minimized = theme.clientlist.item.minimized.border_color
+    pretty.tasklist_shape_border_width_minimized = theme.clientlist.item.minimized.border_width
 
-    pretty.tasklist_plain_task_name = true
-    pretty.tasklist_sticky = " "
-    pretty.tasklist_ontop = " "
-    pretty.tasklist_above = " "
-    pretty.tasklist_below = " "
-    pretty.tasklist_floating = " "
-    pretty.tasklist_maximized = " "
-    pretty.tasklist_maximized_horizontal = " "
-    pretty.tasklist_maximized_vertical = ""
-    pretty.tasklist_minimized = " "
+    pretty.tasklist_plain_task_name = not theme.clientlist.enable_glyphs
+    pretty.tasklist_sticky = theme.clientlist.glyphs.sticky
+    pretty.tasklist_ontop = theme.clientlist.glyphs.ontop
+    pretty.tasklist_above = theme.clientlist.glyphs.above
+    pretty.tasklist_below = theme.clientlist.glyphs.below
+    pretty.tasklist_floating = theme.clientlist.glyphs.floating
+    pretty.tasklist_maximized = theme.clientlist.glyphs.maximized
+    pretty.tasklist_maximized_horizontal = theme.clientlist.glyphs.maximized_horizontal
+    pretty.tasklist_maximized_vertical = theme.clientlist.glyphs.maximized_vertical
+    pretty.tasklist_minimized = theme.clientlist.glyphs.minimized
 
     ----------------------------------------------------------------------------------------------------
 
