@@ -37,18 +37,18 @@ local function set_playback_position_ratio(self, ratio)
     self._private.playback_bar:set_ratio(1, ratio)
 end
 
-local function update_player(self, player)
+local function update_player(self, player_data)
     self._private.drag_interrupted = true
 
-    local icon = desktop.lookup_icon(player and player.player_name)
+    local icon = desktop.lookup_icon(player_data and player_data.name)
     self._private.icon:set_image(icon)
 
-    self._private.separator:set_visible(not not player)
-    self._private.content_container:set_visible(not not player)
-    self._private.content_container:set_shape(player and right_shape)
-    self._private.next_button:set_shape(not player and right_shape)
+    self._private.separator:set_visible(not not player_data)
+    self._private.content_container:set_visible(not not player_data)
+    self._private.content_container:set_shape(player_data and right_shape)
+    self._private.next_button:set_shape(not player_data and right_shape)
 
-    local button_style = player
+    local button_style = player_data
         and beautiful.capsule.styles.normal
         or beautiful.capsule.styles.disabled
     self._private.previous_button:apply_style(button_style)
@@ -56,16 +56,14 @@ local function update_player(self, player)
     self._private.next_button:apply_style(button_style)
 end
 
-local function update_metadata(self, player, metadata)
+local function update_metadata(self, player_data)
     self._private.drag_interrupted = true
 
-    metadata = metadata or (player and player.metadata)
+    local metadata = player_data and player_data.metadata
     local text, any_text
     if metadata then
-        local md = metadata.value
-
-        local title = gstring.xml_escape(hstring.trim(md["xesam:title"] or ""))
-        local artist = gstring.xml_escape(hstring.trim(table.concat(md["xesam:artist"] or {}, ", ")))
+        local title = gstring.xml_escape(hstring.trim(metadata.title or ""))
+        local artist = gstring.xml_escape(hstring.trim(table.concat(metadata.artist or {}, ", ")))
         local separator = #title > 0 and #artist > 0 and " / " or ""
         any_text = #title > 0 or #artist > 0
 
@@ -81,10 +79,10 @@ local function update_metadata(self, player, metadata)
     self._private.text:set_visible(any_text)
 end
 
-local function update_playback_status(self, player, playback_status)
+local function update_playback_status(self, player_data)
     self._private.drag_interrupted = true
 
-    playback_status = playback_status or (player and player.playback_status)
+    local playback_status = player_data and player_data.playback_status
     local is_playing = playback_status == "PLAYING"
 
     self._private.content_container:apply_style(is_playing
@@ -99,13 +97,13 @@ local function update_playback_status(self, player, playback_status)
     self._private.icon.opacity = is_playing and 1 or 0.5
 end
 
-local function update_playback_position(self, player, position)
+local function update_playback_position(self, player_data)
     self._private.drag_interrupted = true
 
     local ratio
-    if player then
-        position = position or player:get_position() or 0
-        local length = player.metadata.value["mpris:length"] or 0
+    if player_data then
+        local position = player_data.position or 0
+        local length = player_data.metadata.length or 0
         if position <= 0 or length <= 0 then
             ratio = 0
         elseif position >= length then
@@ -120,17 +118,17 @@ local function update_playback_position(self, player, position)
     set_playback_position_ratio(self, ratio)
 end
 
-local function update(self, player)
+local function update(self, player_data)
     self._private.drag_interrupted = true
 
-    update_player(self, player)
-    update_metadata(self, player)
-    update_playback_status(self, player)
-    update_playback_position(self, player)
+    update_player(self, player_data)
+    update_metadata(self, player_data)
+    update_playback_status(self, player_data)
+    update_playback_position(self, player_data)
 end
 
-local function refresh_timer(self, player)
-    if player and player.playback_status == "PLAYING" then
+local function refresh_timer(self, player_data)
+    if player_data and player_data.playback_status == "PLAYING" then
         self._private.playback_position_timer:again()
     else
         self._private.playback_position_timer:stop()
@@ -174,12 +172,12 @@ local function initialize_playback_bar(self)
                     return
                 end
 
-                local player = media_player:get_primary_player()
-                if not player then
+                local player_data = media_player:get_primary_player_data()
+                if not player_data then
                     return
                 end
 
-                length = player.metadata.value["mpris:length"] or 0
+                length = player_data.metadata.length or 0
                 if length <= 0 then
                     return
                 end
@@ -195,7 +193,7 @@ local function initialize_playback_bar(self)
                 self._private.is_dragging = false
                 self._private.drag_interrupted = false
 
-                refresh_timer(self, media_player:get_primary_player())
+                refresh_timer(self, media_player:get_primary_player_data())
 
                 if not interrupted then
                     self._private.is_dragging = false
@@ -228,32 +226,32 @@ local function initialize_buttons(self)
 end
 
 local function initialize_signals(self)
-    media_player:connect_signal("media::player::metadata", function(_, player, metadata)
-        if media_player:is_primary_player(player) then
-            update_metadata(self, player, metadata)
-            update_playback_position(self, player)
-            refresh_timer(self, player)
+    media_player:connect_signal("media::player::metadata", function(_, player_data)
+        if media_player:is_primary_player(player_data) then
+            update_metadata(self, player_data)
+            update_playback_position(self, player_data)
+            refresh_timer(self, player_data)
         end
     end)
 
-    media_player:connect_signal("media::player::playback_status", function(_, player, playback_status)
-        if media_player:is_primary_player(player) then
-            update_playback_status(self, player, playback_status)
-            update_playback_position(self, player)
-            refresh_timer(self, player)
+    media_player:connect_signal("media::player::playback_status", function(_, player_data)
+        if media_player:is_primary_player(player_data) then
+            update_playback_status(self, player_data)
+            update_playback_position(self, player_data)
+            refresh_timer(self, player_data)
         end
     end)
 
-    media_player:connect_signal("media::player::seeked", function(_, player, position)
-        if media_player:is_primary_player(player) then
-            update_playback_position(self, player, position)
-            refresh_timer(self, player)
+    media_player:connect_signal("media::player::position", function(_, player_data)
+        if media_player:is_primary_player(player_data) then
+            update_playback_position(self, player_data)
+            refresh_timer(self, player_data)
         end
     end)
 
-    media_player:connect_signal("media::player::primary", function(_, player)
-        update(self, player)
-        refresh_timer(self, player)
+    media_player:connect_signal("media::player::primary", function(_, player_data)
+        update(self, player_data)
+        refresh_timer(self, player_data)
     end)
 end
 
@@ -360,13 +358,13 @@ function media_player_widget.new(wibar)
             if self._private.is_dragging then
                 return
             end
-            update_playback_position(self, media_player:get_primary_player())
+            update_playback_position(self, media_player:get_primary_player_data())
         end,
     }
 
-    local player = media_player:get_primary_player()
-    update(self, player)
-    refresh_timer(self, player)
+    local player_data = media_player:get_primary_player_data()
+    update(self, player_data)
+    refresh_timer(self, player_data)
 
     return self
 end
