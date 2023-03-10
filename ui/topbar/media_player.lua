@@ -11,7 +11,6 @@ local beautiful = require("theme.theme")
 local gshape = require("gears.shape")
 local dpi = Dpi
 local gtable = require("gears.table")
-local gtimer = require("gears.timer")
 local hstring = require("helpers.string")
 local hmouse = require("helpers.mouse")
 local capsule = require("widget.capsule")
@@ -118,21 +117,13 @@ local function update_playback_position(self, player_data)
     set_playback_position_ratio(self, ratio)
 end
 
-local function update(self, player_data)
+local function update_all(self, player_data)
     self._private.drag_interrupted = true
 
     update_player(self, player_data)
     update_metadata(self, player_data)
     update_playback_status(self, player_data)
     update_playback_position(self, player_data)
-end
-
-local function refresh_timer(self, player_data)
-    if player_data and player_data.playback_status == "PLAYING" then
-        self._private.playback_position_timer:again()
-    else
-        self._private.playback_position_timer:stop()
-    end
 end
 
 local function initialize_content_container(self)
@@ -193,8 +184,6 @@ local function initialize_playback_bar(self)
                 self._private.is_dragging = false
                 self._private.drag_interrupted = false
 
-                refresh_timer(self, media_player:get_primary_player_data())
-
                 if not interrupted then
                     self._private.is_dragging = false
                     media_player:set_position(ratio * length)
@@ -229,29 +218,26 @@ local function initialize_signals(self)
     media_player:connect_signal("media::player::metadata", function(_, player_data)
         if media_player:is_primary_player(player_data) then
             update_metadata(self, player_data)
-            update_playback_position(self, player_data)
-            refresh_timer(self, player_data)
         end
     end)
 
     media_player:connect_signal("media::player::playback_status", function(_, player_data)
         if media_player:is_primary_player(player_data) then
             update_playback_status(self, player_data)
-            update_playback_position(self, player_data)
-            refresh_timer(self, player_data)
         end
     end)
 
-    media_player:connect_signal("media::player::position", function(_, player_data)
+    media_player:connect_signal("media::player::position", function(_, player_data, by_timer)
+        if by_timer and self._private.is_dragging then
+            return
+        end
         if media_player:is_primary_player(player_data) then
             update_playback_position(self, player_data)
-            refresh_timer(self, player_data)
         end
     end)
 
     media_player:connect_signal("media::player::primary", function(_, player_data)
-        update(self, player_data)
-        refresh_timer(self, player_data)
+        update_all(self, player_data)
     end)
 end
 
@@ -352,19 +338,8 @@ function media_player_widget.new(wibar)
     initialize_buttons(self)
     initialize_signals(self)
 
-    self._private.playback_position_timer = gtimer {
-        timeout = 1,
-        callback = function()
-            if self._private.is_dragging then
-                return
-            end
-            update_playback_position(self, media_player:get_primary_player_data())
-        end,
-    }
-
     local player_data = media_player:get_primary_player_data()
-    update(self, player_data)
-    refresh_timer(self, player_data)
+    update_all(self, player_data)
 
     return self
 end

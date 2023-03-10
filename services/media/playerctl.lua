@@ -6,6 +6,7 @@ local pairs = pairs
 local ipairs = ipairs
 local gobject = require("gears.object")
 local gtable = require("gears.table")
+local gtimer = require("gears.timer")
 local lgi_playerctl = require("lgi").Playerctl
 
 
@@ -151,9 +152,9 @@ function playerctl:get_primary_player_data()
     return self._private.primary_player_data
 end
 
-local function update_primary_player(self, candidate)
-    if candidate then
-        self._private.manager:move_player_to_top(candidate)
+local function update_primary_player(self, player_candidate)
+    if player_candidate then
+        self._private.manager:move_player_to_top(player_candidate)
     end
 
     local primary_player = self._private.manager.players[1]
@@ -166,54 +167,50 @@ local function update_primary_player(self, candidate)
     end
 end
 
-local function filter_name(self, player_name)
-    if self._private.excluded_players[player_name] then
-        return false
+local function update_position(self, player_data)
+    assert(player_data)
+
+    local player = find_player(self, player_data.instance)
+    if player then
+        player_data.position = player:get_position()
+        self:emit_signal("media::player::position", player_data)
     end
-    if self._private.player_priorities[any_player] or self._private.player_priorities[player_name] then
-        return true
-    end
-    return false
 end
 
-local function compare_players(self, player_a, player_b)
-    local playing_a = player_a.playback_status == "PLAYING" and 0 or 1
-    local playing_b = player_b.playback_status == "PLAYING" and 0 or 1
-    if playing_a ~= playing_b then
-        return playing_a - playing_b
-    end
+local function update_position_timer(player_data)
+    assert(player_data)
 
-    local priorities = self._private.player_priorities
-    local priority_a = priorities[player_a.player_name] or priorities[any_player] or lowest_priority
-    local priority_b = priorities[player_b.player_name] or priorities[any_player] or lowest_priority
-    return priority_a - priority_b
+    if player_data.playback_status == "PLAYING" then
+        player_data._position_timer:again()
+    else
+        player_data._position_timer:stop()
+    end
 end
 
 local function update_metadata(player_data, metadata, tracked_metadata)
     assert(player_data)
+    assert(player_data.metadata)
 
     metadata = metadata and metadata.value or {}
 
-    local changed = false
-    if not player_data.metadata then
-        player_data.metadata = {}
-        changed = true
+    local changed = {}
+
+    local function mark_changed(name)
+        changed = changed or {}
+        changed[name] = true
     end
 
-    -- Keep only primitive data types in metadata
-    -- So for example convert "as" variant to table
-
-    player_data.metadata = player_data.metadata or {}
+    local target_metadata = player_data.metadata
     for name, mpris_name in pairs(tracked_metadata) do
         local value = metadata[mpris_name]
         local value_type = type(value)
         if value_type == "nil" or value_type == "boolean" or value_type == "number" or value_type == "string" then
-            if player_data.metadata[name] ~= value then
-                player_data.metadata[name] = value
-                changed = true
+            if target_metadata[name] ~= value then
+                target_metadata[name] = value
+                mark_changed(name)
             end
         elseif value_type == "userdata" and value.type == "as" then
-            local old = player_data.metadata[name]
+            local old = target_metadata[name]
             if type(old) ~= "table" then
                 old = {}
             end
@@ -223,19 +220,22 @@ local function update_metadata(player_data, metadata, tracked_metadata)
                 new[#new + 1] = s
             end
 
-            player_data.metadata[name] = new
+            target_metadata[name] = new
 
-            if not changed then
-                if #old ~= #new then
-                    changed = true
-                else
-                    for i = 1, #new do
-                        if old[i] ~= new[i] then
-                            changed = true
-                            break
-                        end
+            if #old ~= #new then
+                mark_changed(name)
+            else
+                for i = 1, #new do
+                    if old[i] ~= new[i] then
+                        mark_changed(name)
+                        break
                     end
                 end
+            end
+        else
+            if target_metadata[name] ~= nil then
+                target_metadata[name] = nil
+                mark_changed(name)
             end
         end
     end
@@ -250,6 +250,9 @@ local function manage_player(self, full_name)
         local player_data = self._private.player_data[p.player_instance]
         if player_data and update_metadata(player_data, metadata, self._private.tracked_metadata) then
             self:emit_signal("media::player::metadata", player_data)
+
+            update_position(self, player_data)
+            update_position_timer(player_data)
         end
     end
 
@@ -260,6 +263,9 @@ local function manage_player(self, full_name)
         if player_data and player_data.playback_status ~= playback_status then
             player_data.playback_status = playback_status
             self:emit_signal("media::player::playback_status", player_data)
+
+            update_position(self, player_data)
+            update_position_timer(player_data)
         end
     end
 
@@ -268,6 +274,8 @@ local function manage_player(self, full_name)
         if player_data and player_data.position ~= position then
             player_data.position = position
             self:emit_signal("media::player::position", player_data)
+
+            update_position_timer(player_data)
         end
     end
 
@@ -300,6 +308,29 @@ local function manage_player(self, full_name)
     return new_player
 end
 
+local function filter_name(self, player_name)
+    if self._private.excluded_players[player_name] then
+        return false
+    end
+    if self._private.player_priorities[any_player] or self._private.player_priorities[player_name] then
+        return true
+    end
+    return false
+end
+
+local function compare_players(self, player_a, player_b)
+    local playing_a = player_a.playback_status == "PLAYING" and 0 or 1
+    local playing_b = player_b.playback_status == "PLAYING" and 0 or 1
+    if playing_a ~= playing_b then
+        return playing_a - playing_b
+    end
+
+    local priorities = self._private.player_priorities
+    local priority_a = priorities[player_a.player_name] or priorities[any_player] or lowest_priority
+    local priority_b = priorities[player_b.player_name] or priorities[any_player] or lowest_priority
+    return priority_a - priority_b
+end
+
 local function initialize_manager(self)
     self._private.player_data = {}
 
@@ -329,8 +360,21 @@ local function initialize_manager(self)
             shuffle = player.shuffle,
             loop_status = player.loop_status,
             volume = player.volume,
+            metadata = {},
         }
         update_metadata(player_data, player.metadata, self._private.tracked_metadata)
+
+        player_data._position_timer = gtimer {
+            timeout = 1,
+            callback = function()
+                local p = find_player(self, player_data.instance)
+                if p then
+                    player_data.position = p:get_position()
+                    self:emit_signal("media::player::position", player_data, true)
+                end
+            end,
+        }
+        update_position_timer(player_data)
 
         self._private.player_data[player_data.instance] = player_data
         self:emit_signal("media::player::appeared", player_data)
@@ -341,7 +385,11 @@ local function initialize_manager(self)
     function self._private.manager.on_player_vanished(_, player)
         update_primary_player(self)
 
-        self:emit_signal("media::player::vanished", assert(self._private.player_data[player.player_instance]))
+        local player_data = assert(self._private.player_data[player.player_instance])
+
+        player_data._position_timer:stop()
+
+        self:emit_signal("media::player::vanished", player_data)
         self._private.player_data[player.player_instance] = nil
     end
 
