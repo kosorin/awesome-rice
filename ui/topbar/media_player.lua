@@ -95,6 +95,7 @@ local function update_playback_status(self, player_data)
 
     self._private.playback_bar.opacity = is_playing and 0.5 or 0.2
     self._private.icon.opacity = is_playing and 1 or 0.5
+    self._private.pin.opacity = is_playing and 1 or 0.5
 end
 
 local function update_playback_position(self, player_data)
@@ -133,11 +134,6 @@ local function initialize_content_container(self)
     self._private.icon = self:get_children_by_id("#icon")[1]
     self._private.text = self:get_children_by_id("#text")[1]
     self._private.pin = self:get_children_by_id("#pin")[1]
-
-    self._private.content_container.fg = tcolor.transparent
-    self._private.content_container:connect_signal("property::fg", function(_, fg)
-        self._private.pin.widget:set_stylesheet(css.style { path = { fill = fg } })
-    end)
 end
 
 local function initialize_playback_bar(self)
@@ -348,6 +344,7 @@ function media_player_widget.new(wibar)
                             widget = wibox.widget.imagebox,
                             image = config.places.theme .. "/icons/pin.svg",
                             resize = true,
+                            stylesheet = css.style { path = { fill = beautiful.common.secondary_bright } },
                         },
                     },
                 },
@@ -359,7 +356,7 @@ function media_player_widget.new(wibar)
         binding.awful({}, btn.middle, function()
             local player_data = media_player:get_primary_player_data()
             local is_pinned = player_data and media_player:is_pinned(player_data)
-            media_player:pin(not is_pinned and player_data)
+            media_player:pin(not is_pinned and player_data or nil)
         end),
     }
 

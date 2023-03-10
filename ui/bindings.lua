@@ -15,7 +15,6 @@ local mebox = require("widget.mebox")
 local bindbox = require("widget.bindbox")
 local config = require("config")
 local hclient = require("helpers.client")
-local power_service = require("services.power")
 
 
 -- Available keys with `super` modifier: gstpzxcv jlyiok
@@ -89,7 +88,7 @@ binding.add_global_range {
         triggers = "l",
         path = "system",
         description = "lock session",
-        on_press = function() power_service.lock_screen() end,
+        on_press = function() services.power.lock_screen() end,
     },
 
 
@@ -414,7 +413,7 @@ binding.add_global_range {
         triggers = "XF86AudioPlay",
         path = "media",
         description = "pause all",
-        on_press = function() services.media.player:pause(true) end,
+        on_press = function() services.media.player:pause("%all") end,
     },
 
     binding.new {
@@ -422,7 +421,7 @@ binding.add_global_range {
         triggers = "XF86AudioStop",
         path = "media",
         description = "stop all",
-        on_press = function() services.media.player:stop(true) end,
+        on_press = function() services.media.player:stop("%all") end,
     },
 
 }
