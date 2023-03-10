@@ -46,6 +46,7 @@ local function update_player(self, player_data)
     self._private.content_container:set_visible(not not player_data)
     self._private.content_container:set_shape(player_data and right_shape)
     self._private.next_button:set_shape(not player_data and right_shape)
+    self._private.pin:set_visible(player_data and media_player:is_pinned(player_data))
 
     local button_style = player_data
         and beautiful.capsule.styles.normal
@@ -131,6 +132,12 @@ local function initialize_content_container(self)
     self._private.content_container = self:get_children_by_id("#content_container")[1]
     self._private.icon = self:get_children_by_id("#icon")[1]
     self._private.text = self:get_children_by_id("#text")[1]
+    self._private.pin = self:get_children_by_id("#pin")[1]
+
+    self._private.content_container.fg = tcolor.transparent
+    self._private.content_container:connect_signal("property::fg", function(_, fg)
+        self._private.pin.widget:set_stylesheet(css.style { path = { fill = fg } })
+    end)
 end
 
 local function initialize_playback_bar(self)
@@ -236,6 +243,10 @@ local function initialize_signals(self)
         end
     end)
 
+    media_player:connect_signal("media::player::pinned", function(_)
+        update_player(self, media_player:get_primary_player_data())
+    end)
+
     media_player:connect_signal("media::player::primary", function(_, player_data)
         update_all(self, player_data)
     end)
@@ -314,19 +325,42 @@ function media_player_widget.new(wibar)
                 shape = false,
                 {
                     layout = wibox.layout.fixed.horizontal,
-                    spacing = beautiful.capsule.item_content_spacing,
+                    reverse = true,
+                    spacing = beautiful.capsule.item_spacing,
                     {
-                        id = "#icon",
-                        widget = wibox.widget.imagebox,
-                        resize = true,
+                        layout = wibox.layout.fixed.horizontal,
+                        spacing = beautiful.capsule.item_content_spacing,
+                        {
+                            id = "#icon",
+                            widget = wibox.widget.imagebox,
+                            resize = true,
+                        },
+                        {
+                            id = "#text",
+                            widget = wibox.widget.textbox,
+                        },
                     },
                     {
-                        id = "#text",
-                        widget = wibox.widget.textbox,
+                        id = "#pin",
+                        widget = wibox.container.margin,
+                        margins = hui.thickness { dpi(2), -dpi(2) },
+                        {
+                            widget = wibox.widget.imagebox,
+                            image = config.places.theme .. "/icons/pin.svg",
+                            resize = true,
+                        },
                     },
                 },
             },
         },
+    }
+
+    self.buttons = binding.awful_buttons {
+        binding.awful({}, btn.middle, function()
+            local player_data = media_player:get_primary_player_data()
+            local is_pinned = player_data and media_player:is_pinned(player_data)
+            media_player:pin(not is_pinned and player_data)
+        end),
     }
 
     gtable.crush(self, media_player_widget, true)

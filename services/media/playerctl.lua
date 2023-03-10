@@ -15,7 +15,7 @@ local any_player = { name = "%any" }
 
 local playerctl = { mt = {} }
 
-local function find_player(self, instance)
+local function find_player_by_instance(self, instance)
     for _, player in ipairs(self._private.manager.players) do
         if player.player_instance == instance then
             return player
@@ -28,10 +28,10 @@ local function for_each_player(self, player_pattern, action)
     if not player_pattern then
         local player_data = self._private.primary_player_data
         if player_data then
-            players = { find_player(self, player_data.instance) }
+            players = { find_player_by_instance(self, player_data.instance) }
         end
     elseif type(player_pattern) == "string" then
-        players = { find_player(self, player_pattern) }
+        players = { find_player_by_instance(self, player_pattern) }
     elseif player_pattern == true then
         players = self._private.manager.players
     end
@@ -152,9 +152,9 @@ function playerctl:get_primary_player_data()
     return self._private.primary_player_data
 end
 
-local function update_primary_player(self, player_candidate)
-    if player_candidate then
-        self._private.manager:move_player_to_top(player_candidate)
+local function update_primary_player(self, player)
+    if player then
+        self._private.manager:move_player_to_top(player)
     end
 
     local primary_player = self._private.manager.players[1]
@@ -167,10 +167,25 @@ local function update_primary_player(self, player_candidate)
     end
 end
 
+function playerctl:is_pinned(player_data)
+    local player_name = player_data and player_data.name or nil
+    return self._private.pinned_player_name == player_name
+end
+
+function playerctl:pin(player_data)
+    local player_name = player_data and player_data.name or nil
+    if self._private.pinned_player_name ~= player_name then
+        self._private.pinned_player_name = player_name
+        self:emit_signal("media::player::pinned", self._private.pinned_player_name)
+
+        update_primary_player(self, player_data and find_player_by_instance(self, player_data.instance) or nil)
+    end
+end
+
 local function update_position(self, player_data)
     assert(player_data)
 
-    local player = find_player(self, player_data.instance)
+    local player = find_player_by_instance(self, player_data.instance)
     if player then
         player_data.position = player:get_position()
         self:emit_signal("media::player::position", player_data)
@@ -319,6 +334,12 @@ local function filter_name(self, player_name)
 end
 
 local function compare_players(self, player_a, player_b)
+    local pinned_a = self._private.pinned_player_name == player_a.player_name and 0 or 1
+    local pinned_b = self._private.pinned_player_name == player_b.player_name and 0 or 1
+    if pinned_a ~= pinned_b then
+        return pinned_a - pinned_b
+    end
+
     local playing_a = player_a.playback_status == "PLAYING" and 0 or 1
     local playing_b = player_b.playback_status == "PLAYING" and 0 or 1
     if playing_a ~= playing_b then
@@ -367,7 +388,7 @@ local function initialize_manager(self)
         player_data._position_timer = gtimer {
             timeout = 1,
             callback = function()
-                local p = find_player(self, player_data.instance)
+                local p = find_player_by_instance(self, player_data.instance)
                 if p then
                     player_data.position = p:get_position()
                     self:emit_signal("media::player::position", player_data, true)
