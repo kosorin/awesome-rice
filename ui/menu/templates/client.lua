@@ -81,7 +81,7 @@ function opacity_menu_template.new()
         {
             icon = config.places.theme .. "/icons/minus.svg",
             icon_color = beautiful.palette.white,
-            callback = function(_, _, menu)
+            callback = function(item, menu)
                 change_opacity(menu, -step)
                 return false
             end,
@@ -110,7 +110,7 @@ function opacity_menu_template.new()
         {
             icon = config.places.theme .. "/icons/plus.svg",
             icon_color = beautiful.palette.white,
-            callback = function(_, _, menu)
+            callback = function(item, menu)
                 change_opacity(menu, step)
                 return false
             end,
@@ -121,7 +121,7 @@ function opacity_menu_template.new()
             text = "reset",
             icon = config.places.theme .. "/icons/arrow-u-left-top.svg",
             icon_color = beautiful.palette.gray,
-            callback = function(_, _, menu)
+            callback = function(item, menu)
                 set_opacity(menu, max_opacity)
             end,
         },
@@ -140,7 +140,7 @@ local function build_simple_toggle(name, property, checkbox_type)
         text = name,
         checkbox_type = checkbox_type,
         on_show = function(item, menu) item.checked = not not menu.client[property] end,
-        callback = function(_, item, menu) menu.client[property] = not item.checked end,
+        callback = function(item, menu) menu.client[property] = not item.checked end,
     }
 end
 
@@ -215,7 +215,7 @@ function client_menu_template.new()
                     on_show = function(item, menu)
                         item.checked = not (menu.client.ontop or menu.client.above or menu.client.below)
                     end,
-                    callback = function(_, _, menu)
+                    callback = function(item, menu)
                         menu.client.ontop = false
                         menu.client.above = false
                         menu.client.below = false
@@ -231,7 +231,7 @@ function client_menu_template.new()
                     text = "hide",
                     icon = config.places.theme .. "/icons/eye-off.svg",
                     icon_color = beautiful.palette.gray,
-                    callback = function(_, _, menu) menu.client.hidden = true end,
+                    callback = function(item, menu) menu.client.hidden = true end,
                 },
             },
         },
@@ -241,7 +241,7 @@ function client_menu_template.new()
             text = "quit",
             icon = config.places.theme .. "/icons/close.svg",
             icon_color = beautiful.palette.red,
-            callback = function(_, _, menu) menu.client:kill() end,
+            callback = function(item, menu) menu.client:kill() end,
         },
     }
 end

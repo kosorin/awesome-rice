@@ -273,7 +273,7 @@ end
 
 local cancel_item = {
     text = "no, cancel",
-    callback = function(_, _, menu, context)
+    callback = function(item, menu, context)
         menu:hide({ select_parent = context.source ~= "mouse" })
         return false
     end,

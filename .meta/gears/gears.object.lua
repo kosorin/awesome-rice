@@ -1,6 +1,7 @@
----@meta
+---@meta gears.object
 
 ---@class gears.object
+---@operator call : gears.object
 local M
 
 ---@param name string
@@ -11,3 +12,5 @@ end
 ---@param name string
 function M:emit_signal(name, ...)
 end
+
+return M

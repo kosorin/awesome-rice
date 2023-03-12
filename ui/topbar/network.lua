@@ -237,7 +237,7 @@ function network_widget.new(wibar)
         {
             text = "show graph",
             on_show = function(item) item.checked = not not self._private.show_graph end,
-            callback = function(_, item) self:show_graph(not item.checked) end,
+            callback = function(item) self:show_graph(not item.checked) end,
         },
     }
 

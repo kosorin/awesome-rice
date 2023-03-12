@@ -184,7 +184,7 @@ function torrent_widget.new(wibar)
         {
             text = "alternative speed limit",
             on_show = function(item) item.checked = not not torrent_service.last_response.data.alternative_speed_enabled end,
-            callback = function(_, item) torrent_service.alternative_speed(not item.checked) end,
+            callback = function(item) torrent_service.alternative_speed(not item.checked) end,
         },
         mebox.separator,
         {

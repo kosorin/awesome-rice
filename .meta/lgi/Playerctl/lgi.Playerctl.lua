@@ -1,4 +1,4 @@
----@meta Fukyu
+---@meta
 
 ---@alias LgiPlayerctlMetadata { value: table<string, any> }
 

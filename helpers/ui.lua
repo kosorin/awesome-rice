@@ -3,8 +3,6 @@ local type = type
 
 local M = {}
 
----@alias thickness { top: number, right: number, bottom: number, left: number }
-
 ---@param value table<integer, number>
 ---@return thickness # Returns the same table instance (i.e. the `value` parameter).
 ---@overload fun(value: number): thickness
@@ -57,8 +55,5 @@ function M.thickness(value)
         return { top = value, right = value, bottom = value, left = value }
     end
 end
-
-M.thickness { 5, top = 6 }
-M.thickness {}
 
 return M

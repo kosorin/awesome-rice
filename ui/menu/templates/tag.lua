@@ -16,7 +16,7 @@ local function build_simple_toggle(name, property, checkbox_type)
         text = name,
         checkbox_type = checkbox_type,
         on_show = function(item, menu) item.checked = not not menu.tag[property] end,
-        callback = function(_, item, menu) menu.tag[property] = not item.checked end,
+        callback = function(item, menu) menu.tag[property] = not item.checked end,
     }
 end
 
@@ -87,9 +87,7 @@ function tag_menu_template.new()
             insert(items, {
                 text = "volatile",
                 on_show = function(item) item.checked = not not tag.volatile end,
-                callback = function(_, item)
-                    tag.volatile = not item.checked
-                end,
+                callback = function(item) tag.volatile = not item.checked end,
             })
             insert(items, mebox.separator)
 

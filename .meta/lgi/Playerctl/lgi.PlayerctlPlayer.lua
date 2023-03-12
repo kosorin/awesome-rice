@@ -24,83 +24,83 @@
 ---@field on_seeked fun(player: LgiPlayerctlPlayer, position: integer)
 ---@field on_shuffle fun(player: LgiPlayerctlPlayer, shuffle: boolean)
 ---@field on_volume fun(player: LgiPlayerctlPlayer, volume: number)
-local LgiPlayerctlPlayer
+local M
 
 ---@param name string
 ---@return LgiPlayerctlPlayer
-function LgiPlayerctlPlayer.new(name)
+function M.new(name)
 end
 
 ---@param name string
 ---@param source LgiPlayerctlSource
 ---@return LgiPlayerctlPlayer
-function LgiPlayerctlPlayer.new_for_source(name, source)
+function M.new_for_source(name, source)
 end
 
 ---@param name LgiPlayerctlPlayerName
 ---@return LgiPlayerctlPlayer
-function LgiPlayerctlPlayer.new_from_name(name)
+function M.new_from_name(name)
 end
 
 ---@param uri string
-function LgiPlayerctlPlayer:open(uri)
+function M:open(uri)
 end
 
-function LgiPlayerctlPlayer:play_pause()
+function M:play_pause()
 end
 
-function LgiPlayerctlPlayer:play()
+function M:play()
 end
 
-function LgiPlayerctlPlayer:stop()
+function M:stop()
 end
 
 ---@param offset integer
-function LgiPlayerctlPlayer:seek(offset)
+function M:seek(offset)
 end
 
-function LgiPlayerctlPlayer:pause()
+function M:pause()
 end
 
-function LgiPlayerctlPlayer:next()
+function M:next()
 end
 
-function LgiPlayerctlPlayer:previous()
+function M:previous()
 end
 
 ---@param property? string
 ---@return string|nil
-function LgiPlayerctlPlayer:get_metadata_prop(property)
+function M:get_metadata_prop(property)
 end
 
 ---@return string|nil
-function LgiPlayerctlPlayer:get_artist()
+function M:get_artist()
 end
 
 ---@return string|nil
-function LgiPlayerctlPlayer:get_title()
+function M:get_title()
 end
 
 ---@return string|nil
-function LgiPlayerctlPlayer:get_album()
+function M:get_album()
 end
 
 ---@param volume number
-function LgiPlayerctlPlayer:set_volume(volume)
+function M:set_volume(volume)
 end
 
 ---@return integer
-function LgiPlayerctlPlayer:get_position()
+function M:get_position()
 end
 
 ---@param position integer
-function LgiPlayerctlPlayer:set_position(position)
+function M:set_position(position)
 end
 
 ---@param loop_status LgiPlayerctlLoopStatus
-function LgiPlayerctlPlayer:set_loop_status(loop_status)
+function M:set_loop_status(loop_status)
 end
 
 ---@param shuffle boolean
-function LgiPlayerctlPlayer:set_shuffle(shuffle)
+function M:set_shuffle(shuffle)
 end

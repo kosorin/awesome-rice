@@ -6,14 +6,13 @@ local ipairs = ipairs
 local gobject = require("gears.object")
 local gtable = require("gears.table")
 local gtimer = require("gears.timer")
-local lgi_playerctl = require("lgi").Playerctl --[[@as LgiPlayerctl]]
+local lgi_playerctl = require("lgi").Playerctl
 
 
 ---@alias player_selector
----| falsey # Select primary player
----| string # Select player by its `instance`
+---|>nil # Select primary player
+---| string # Select player by `instance`
 ---| "%all" # Select all players
-
 
 ---@class PlayerData
 ---@field name string
@@ -34,7 +33,7 @@ local playerctl = {
 }
 
 ---@class Playerctl : gears.object
----@field package primary_player_data PlayerData|nil
+---@field package primary_player_data? PlayerData
 ---@field package player_data table<string, PlayerData>
 ---@field package tracked_metadata string[]
 ---@field package excluded_players table<string, boolean>
@@ -44,7 +43,7 @@ playerctl.object = {}
 
 ---@param self Playerctl
 ---@param instance string
----@return LgiPlayerctlPlayer?
+---@return LgiPlayerctlPlayer|nil
 local function find_player_by_instance(self, instance)
     for _, player in ipairs(self.manager.players) do
         if player.player_instance == instance then
@@ -550,8 +549,7 @@ end
 ---@param args? Playerctl_new_args
 ---@return Playerctl
 function playerctl.new(args)
-    ---@type Playerctl
-    local self = gtable.crush(gobject {}, playerctl.object, true)
+    local self = gtable.crush(gobject {}, playerctl.object, true) --[[@as Playerctl]]
 
     parse_args(self, args)
 

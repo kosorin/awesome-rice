@@ -186,7 +186,7 @@ local function initialize_time_widget(self, style)
         {
             text = "show seconds",
             on_show = function(item) item.checked = not not self._private.seconds end,
-            callback = function(_, item) self:show_seconds(not item.checked) end,
+            callback = function(item) self:show_seconds(not item.checked) end,
         },
     }
 
