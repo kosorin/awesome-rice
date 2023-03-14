@@ -1,7 +1,9 @@
 ---@meta lgi
 
----@class lgi
----@field Playerctl LgiPlayerctl
-local M
+---@class _lgi
+---@field Playerctl _LgiPlayerctl
+---@field Gio _LgiGio
+---@field GLib unknown
+local S
 
-return M
+return S

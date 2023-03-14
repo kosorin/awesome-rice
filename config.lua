@@ -43,7 +43,7 @@ config.power = {
     shutdown = "systemctl poweroff",
     reboot = "systemctl reboot",
     suspend = "systemctl suspend",
-    kill_session = "loginctl kill-session",
+    kill_session = "loginctl kill-session ''",
     lock_session = "loginctl lock-session",
     lock_screen = "light-locker-command --lock",
 }

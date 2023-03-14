@@ -1,14 +1,16 @@
 -- DEPENDENCIES: pulsemixer
 
 local capi = Capi
-local gears = require("gears")
+local tonumber = tonumber
+local string = string
+local gtimer = require("gears.timer")
 local awful = require("awful")
 
 
 local volume_service = {
     config = {
         interval = 3,
-        limit = 120,
+        limit = 150,
         app = "pulsemixer",
     },
     data = nil,
@@ -17,23 +19,25 @@ local volume_service = {
 
 local commands = {}
 
-local function get_step(step)
-    return step and (math.floor(step + 0.5)) or 1
-end
-
+---@return string
 function commands.get_data()
     return " --get-volume --get-mute"
 end
 
+---@param volume number
+---@return string
 function commands.set_volume(volume)
-    return " --set-volume " .. volume .. " --max-volume " .. volume_service.config.limit
+    return " --set-volume " .. string.format("%.0f", volume) .. " --max-volume " .. volume_service.config.limit
 end
 
+---@param step number
+---@return string
 function commands.change_volume(step)
-    return " --change-volume " ..
-        (step > 0 and "+" or "") .. get_step(step) .. " --max-volume " .. volume_service.config.limit
+    step = step or 1
+    return " --change-volume " .. (step > 0 and "+" or "") .. string.format("%.0f", step) .. " --max-volume " .. volume_service.config.limit
 end
 
+---@return string
 function commands.toggle_mute()
     return " --toggle-mute"
 end
@@ -67,10 +71,8 @@ local function process_command_output(stdout, stderr, exitreason, exitcode)
     local data = nil
     if exitreason == "exit" and exitcode == 0 then
         data = parse_raw_data(stdout)
-    else
-        gears.debug.print_error("Volume fetch error: " .. exitreason .. " code " .. tostring(exitcode) .. " => " .. stderr)
     end
-    return data or {}
+    return data
 end
 
 local function update(command, skip_osd)
@@ -94,7 +96,7 @@ function volume_service.toggle_mute(skip_osd)
 end
 
 function volume_service.watch()
-    volume_service.timer = volume_service.timer or gears.timer {
+    volume_service.timer = volume_service.timer or gtimer {
         timeout = volume_service.config.interval,
         call_now = true,
         callback = function()

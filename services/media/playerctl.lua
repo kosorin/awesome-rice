@@ -9,12 +9,12 @@ local gtimer = require("gears.timer")
 local lgi_playerctl = require("lgi").Playerctl
 
 
----@alias player_selector
+---@alias Playerctl.selector
 ---|>nil # Select primary player
 ---| string # Select player by `instance`
 ---| "%all" # Select all players
 
----@class PlayerData
+---@class Playerctl.data
 ---@field name string
 ---@field instance string
 ---@field playback_status LgiPlayerctlPlaybackStatus
@@ -33,8 +33,8 @@ local playerctl = {
 }
 
 ---@class Playerctl : gears.object
----@field package primary_player_data? PlayerData
----@field package player_data table<string, PlayerData>
+---@field package primary_player_data? Playerctl.data
+---@field package player_data table<string, Playerctl.data>
 ---@field package tracked_metadata string[]
 ---@field package excluded_players table<string, boolean>
 ---@field package player_priorities table<string, integer>
@@ -53,7 +53,7 @@ local function find_player_by_instance(self, instance)
 end
 
 ---@param self Playerctl
----@param player_selector player_selector
+---@param player_selector Playerctl.selector
 ---@param action fun(player: LgiPlayerctlPlayer)
 local function for_each_player(self, player_selector, action)
     local players
@@ -75,42 +75,42 @@ local function for_each_player(self, player_selector, action)
     end
 end
 
----@param player_selector player_selector
+---@param player_selector Playerctl.selector
 function playerctl.object:play_pause(player_selector)
     for_each_player(self, player_selector, function(p)
         p:play_pause()
     end)
 end
 
----@param player_selector player_selector
+---@param player_selector Playerctl.selector
 function playerctl.object:play(player_selector)
     for_each_player(self, player_selector, function(p)
         p:play()
     end)
 end
 
----@param player_selector player_selector
+---@param player_selector Playerctl.selector
 function playerctl.object:pause(player_selector)
     for_each_player(self, player_selector, function(p)
         p:pause()
     end)
 end
 
----@param player_selector player_selector
+---@param player_selector Playerctl.selector
 function playerctl.object:stop(player_selector)
     for_each_player(self, player_selector, function(p)
         p:stop()
     end)
 end
 
----@param player_selector player_selector
+---@param player_selector Playerctl.selector
 function playerctl.object:previous(player_selector)
     for_each_player(self, player_selector, function(p)
         p:previous()
     end)
 end
 
----@param player_selector player_selector
+---@param player_selector Playerctl.selector
 function playerctl.object:next(player_selector)
     for_each_player(self, player_selector, function(p)
         p:next()
@@ -118,7 +118,7 @@ function playerctl.object:next(player_selector)
 end
 
 ---@param offset integer
----@param player_selector player_selector
+---@param player_selector Playerctl.selector
 function playerctl.object:skip(offset, player_selector)
     if offset > 0 then
         self:next(player_selector)
@@ -128,19 +128,19 @@ function playerctl.object:skip(offset, player_selector)
 end
 
 ---@param offset integer
----@param player_selector player_selector
+---@param player_selector Playerctl.selector
 function playerctl.object:rewind(offset, player_selector)
     self:seek(-offset, player_selector)
 end
 
 ---@param offset integer
----@param player_selector player_selector
+---@param player_selector Playerctl.selector
 function playerctl.object:fast_forward(offset, player_selector)
     self:seek(offset, player_selector)
 end
 
 ---@param offset integer
----@param player_selector player_selector
+---@param player_selector Playerctl.selector
 function playerctl.object:seek(offset, player_selector)
     for_each_player(self, player_selector, function(p)
         p:seek(offset)
@@ -148,7 +148,7 @@ function playerctl.object:seek(offset, player_selector)
 end
 
 ---@param loop_status LgiPlayerctlLoopStatus
----@param player_selector player_selector
+---@param player_selector Playerctl.selector
 function playerctl.object:set_loop_status(loop_status, player_selector)
     loop_status = loop_status:upper()
     for_each_player(self, player_selector, function(p)
@@ -156,7 +156,7 @@ function playerctl.object:set_loop_status(loop_status, player_selector)
     end)
 end
 
----@param player_selector player_selector
+---@param player_selector Playerctl.selector
 function playerctl.object:cycle_loop_status(player_selector)
     for_each_player(self, player_selector, function(p)
         if p.loop_status == "NONE" then
@@ -170,7 +170,7 @@ function playerctl.object:cycle_loop_status(player_selector)
 end
 
 ---@param position integer
----@param player_selector player_selector
+---@param player_selector Playerctl.selector
 function playerctl.object:set_position(position, player_selector)
     for_each_player(self, player_selector, function(p)
         p:set_position(position)
@@ -178,14 +178,14 @@ function playerctl.object:set_position(position, player_selector)
 end
 
 ---@param shuffle boolean
----@param player_selector player_selector
+---@param player_selector Playerctl.selector
 function playerctl.object:set_shuffle(shuffle, player_selector)
     for_each_player(self, player_selector, function(p)
         p:set_shuffle(shuffle)
     end)
 end
 
----@param player_selector player_selector
+---@param player_selector Playerctl.selector
 function playerctl.object:toggle_shuffle(player_selector)
     for_each_player(self, player_selector, function(p)
         p:set_shuffle(not p.shuffle)
@@ -193,20 +193,20 @@ function playerctl.object:toggle_shuffle(player_selector)
 end
 
 ---@param volume number
----@param player_selector player_selector
+---@param player_selector Playerctl.selector
 function playerctl.object:set_volume(volume, player_selector)
     for_each_player(self, player_selector, function(p)
         p:set_volume(volume)
     end)
 end
 
----@param player_data? PlayerData
+---@param player_data? Playerctl.data
 ---@return boolean
 function playerctl.object:is_primary_player(player_data)
     return self.primary_player_data == player_data
 end
 
----@return PlayerData|nil
+---@return Playerctl.data|nil
 function playerctl.object:get_primary_player_data()
     return self.primary_player_data
 end
@@ -228,14 +228,14 @@ local function update_primary_player(self, player)
     end
 end
 
----@param player_data PlayerData
+---@param player_data Playerctl.data
 ---@return boolean
 function playerctl.object:is_pinned(player_data)
     local player_name = player_data and player_data.name or nil
     return self.pinned_player_name == player_name
 end
 
----@param player_data? PlayerData
+---@param player_data? Playerctl.data
 function playerctl.object:pin(player_data)
     local player_name = player_data and player_data.name or nil
     if self.pinned_player_name ~= player_name then
@@ -253,7 +253,7 @@ function playerctl.object:pin(player_data)
     end
 end
 
----@param player_data PlayerData
+---@param player_data Playerctl.data
 local function refresh_position_timer(player_data)
     if player_data.playback_status == "PLAYING" then
         player_data._position_timer:again()
@@ -263,7 +263,7 @@ local function refresh_position_timer(player_data)
 end
 
 ---@param self Playerctl
----@param player_data PlayerData
+---@param player_data Playerctl.data
 local function update_position(self, player_data)
     local player = find_player_by_instance(self, player_data.instance)
     if player then
@@ -273,7 +273,7 @@ local function update_position(self, player_data)
 end
 
 ---@param self Playerctl
----@param player_data PlayerData
+---@param player_data Playerctl.data
 ---@param metadata LgiPlayerctlMetadata
 ---@return table<string, boolean>
 local function update_metadata(self, player_data, metadata)
@@ -414,7 +414,7 @@ end
 ---@param self Playerctl
 ---@param player_a LgiPlayerctlPlayer
 ---@param player_b LgiPlayerctlPlayer
----@return integer
+---@return sign
 local function compare_players(self, player_a, player_b)
     local pinned_a = self.pinned_player_name == player_a.player_name and 0 or 1
     local pinned_b = self.pinned_player_name == player_b.player_name and 0 or 1
@@ -458,7 +458,7 @@ local function initialize_manager(self)
     end
 
     function self.manager.on_player_appeared(_, player)
-        ---@type PlayerData
+        ---@type Playerctl.data
         local player_data = {
             name = player.player_name,
             instance = player.player_instance,
@@ -508,7 +508,7 @@ local function initialize_manager(self)
 end
 
 ---@param self Playerctl
----@param args? Playerctl_new_args
+---@param args? Playerctl.new.args
 local function parse_args(self, args)
     args = args or {}
 
@@ -541,12 +541,12 @@ local function parse_args(self, args)
     self.player_priorities = player_priorities
 end
 
----@class Playerctl_new_args
+---@class Playerctl.new.args
 ---@field players string[]
 ---@field excluded_players string[]
 ---@field metadata table<string, string>
 
----@param args? Playerctl_new_args
+---@param args? Playerctl.new.args
 ---@return Playerctl
 function playerctl.new(args)
     local self = gtable.crush(gobject {}, playerctl.object, true) --[[@as Playerctl]]

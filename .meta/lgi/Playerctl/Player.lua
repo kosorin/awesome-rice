@@ -1,7 +1,8 @@
 ---@meta
 
+---@alias LgiPlayerctlMetadata { value: table<string, any> }
+
 ---@class LgiPlayerctlPlayer
----@operator call: LgiPlayerctlPlayer
 ---@field player_name string
 ---@field player_instance string
 ---@field source LgiPlayerctlSource
@@ -103,4 +104,25 @@ end
 
 ---@param shuffle boolean
 function M:set_shuffle(shuffle)
+end
+
+
+---@class _LgiPlayerctlPlayer
+---@operator call: LgiPlayerctlPlayer
+local S
+
+---@param name string
+---@return LgiPlayerctlPlayer
+function S.new(name)
+end
+
+---@param name string
+---@param source LgiPlayerctlSource
+---@return LgiPlayerctlPlayer
+function S.new_for_source(name, source)
+end
+
+---@param name LgiPlayerctlPlayerName
+---@return LgiPlayerctlPlayer
+function S.new_from_name(name)
 end

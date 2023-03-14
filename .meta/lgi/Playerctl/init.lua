@@ -1,7 +1,5 @@
 ---@meta
 
----@alias LgiPlayerctlMetadata { value: table<string, any> }
-
 ---@alias LgiPlayerctlSource
 ---| "NONE"
 ---| "DBUS_SESSION"
@@ -17,11 +15,12 @@
 ---| "TRACK"
 ---| "PLAYLIST"
 
----@class LgiPlayerctl
----@field Player LgiPlayerctlPlayer
----@field PlayerManager LgiPlayerctlPlayerManager
-local M
+
+---@class _LgiPlayerctl
+---@field Player _LgiPlayerctlPlayer
+---@field PlayerManager _LgiPlayerctlPlayerManager
+local S
 
 ---@return LgiPlayerctlPlayerName[]
-function M.list_players()
+function S.list_players()
 end

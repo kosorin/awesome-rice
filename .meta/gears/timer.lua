@@ -1,7 +1,6 @@
 ---@meta gears.timer
 
 ---@class gears.timer : gears.object
----@operator call : gears.timer
 ---@field started boolean
 ---@field timeout number
 local M
@@ -15,10 +14,15 @@ end
 function M:again()
 end
 
+
+---@class _gears.timer
+---@operator call : gears.timer
+local S
+
 ---Call the given function at the end of the current GLib event loop iteration.
 ---@param callback fun(...) The function that should be called
 ---@param ... any Arguments to the callback function
-function M.delayed_call(callback, ...)
+function S.delayed_call(callback, ...)
 end
 
-return M
+return S

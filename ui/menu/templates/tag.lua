@@ -92,7 +92,6 @@ function tag_menu_template.new()
             insert(items, mebox.separator)
 
             insert(items, {
-                urgent = true,
                 text = "delete",
                 icon = config.places.theme .. "/icons/delete-forever.svg",
                 icon_color = beautiful.palette.red,

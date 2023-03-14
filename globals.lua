@@ -4,7 +4,7 @@ Capi = {
     ---@diagnostic disable: undefined-global
     awesome = awesome,
     button = button,
-    client = client,
+    client = client --[[@as _client]],
     dbus = dbus,
     drawable = drawable,
     drawin = drawin,
@@ -13,9 +13,9 @@ Capi = {
     mouse = mouse,
     mousegrabber = mousegrabber,
     root = root,
-    screen = screen,
+    screen = screen --[[@as _screen]],
     selection = selection,
-    tag = tag,
+    tag = tag --[[@as _tag]],
     window = window,
     ---@diagnostic enable: undefined-global
 }

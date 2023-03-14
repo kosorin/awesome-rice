@@ -3,10 +3,8 @@ local type = type
 
 local M = {}
 
----@param value table<integer, number>
----@return thickness # Returns the same table instance (i.e. the `value` parameter).
----@overload fun(value: number): thickness
----@overload fun(value: nil): nil
+---@param value? number|number[]|thickness
+---@return thickness|nil # Returns the same table instance (i.e. the `value` parameter).
 function M.thickness(value)
     if not value then
         return nil
@@ -50,7 +48,7 @@ function M.thickness(value)
         value[2] = value.right
         value[3] = value.bottom
         value[4] = value.left
-        return value --[[@as thickness]]
+        return value
     else
         return { top = value, right = value, bottom = value, left = value }
     end

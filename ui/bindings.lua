@@ -58,19 +58,6 @@ capi.awesome.connect_signal("main_bindbox::show", function()
 end)
 
 
-if DEBUG then
-    binding.add_global_range {
-        binding.new {
-            modifiers = { mod.super },
-            triggers = "z",
-            path = "debug",
-            description = "zathura",
-            on_press = function() awful.spawn("zathura") end,
-        },
-    }
-end
-
-
 binding.add_global_range {
 
     binding.new {
@@ -230,10 +217,14 @@ binding.add_global_range {
         description = "rename selected tag",
         on_press = function()
             local screen = awful.screen.focused()
+            if not screen then
+                return
+            end
             local tag = screen and screen.selected_tag
             if tag then
-                screen.topbar.taglist:rename_tag_inline(tag)
+                return
             end
+            screen.topbar.taglist:rename_tag_inline(tag)
         end,
     },
 
@@ -694,7 +685,7 @@ binding.add_client_range {
 
 main_bindbox:add_group {
     name = "mpv",
-    ruled = { rule = { instance = "gl", class = "mpv" } },
+    rule = { rule = { instance = "gl", class = "mpv" } },
     bg = "#5f2060",
     { "q", description = "quit" },
     { modifiers = { mod.shift }, "q", description = "store the playback position and quit" },
@@ -777,7 +768,7 @@ main_bindbox:add_group {
 
 main_bindbox:add_group {
     name = "feh",
-    ruled = { rule = { instance = "feh", class = "feh" } },
+    rule = { rule = { instance = "feh", class = "feh" } },
     bg = "#70011a",
     { "Escape", "q", description = "quit" },
     { "x", description = "close current window" },

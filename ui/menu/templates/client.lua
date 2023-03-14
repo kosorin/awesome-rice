@@ -237,7 +237,6 @@ function client_menu_template.new()
         },
         mebox.separator,
         {
-            urgent = true,
             text = "quit",
             icon = config.places.theme .. "/icons/close.svg",
             icon_color = beautiful.palette.red,

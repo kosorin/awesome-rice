@@ -352,6 +352,10 @@ function media_player_widget.new(wibar)
         },
     }
 
+    gtable.crush(self, media_player_widget, true)
+
+    self._private.wibar = wibar
+
     self.buttons = binding.awful_buttons {
         binding.awful({}, btn.middle, function()
             local player_data = media_player:get_primary_player_data()
@@ -360,17 +364,12 @@ function media_player_widget.new(wibar)
         end),
     }
 
-    gtable.crush(self, media_player_widget, true)
-
-    self._private.wibar = wibar
-
     initialize_content_container(self)
     initialize_playback_bar(self)
     initialize_buttons(self)
     initialize_signals(self)
 
-    local player_data = media_player:get_primary_player_data()
-    update_all(self, player_data)
+    update_all(self, media_player:get_primary_player_data())
 
     return self
 end

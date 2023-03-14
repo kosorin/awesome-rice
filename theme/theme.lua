@@ -40,6 +40,8 @@ theme.font_name = "JetBrainsMono Nerd Font"
 theme.font_size = 11
 
 -- TODO: Move to the helpers
+---@param args? { name?: string, size?: number, size_factor?: number, style?: string|string[] }
+---@return string
 function theme.build_font(args)
     if not args then
         return theme.font_name .. " " .. theme.font_size
@@ -50,7 +52,7 @@ function theme.build_font(args)
     if args.style then
         local style
         if type(args.style) == "table" then
-            style = table.concat(args.style, " ")
+            style = table.concat(args.style --[[@as table]], " ")
         elseif type(args.style) == "string" then
             style = args.style
         end
