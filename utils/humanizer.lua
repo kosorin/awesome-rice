@@ -1,13 +1,13 @@
 local ipairs = ipairs
-local floor = math.floor
-local max = math.max
-local concat = table.concat
-local pango = require("utils.pango")
+local tostring = tostring
+local math = math
+local table = table
+local string = string
 
 
 local humanizer = {}
 
-local function round(value) return floor(value + 0.5) end
+local function round(value) return math.floor(value + 0.5) end
 
 local function clamp(value, min, max)
     if value < min then return min end
@@ -18,7 +18,7 @@ end
 function humanizer.humanize_units(units, value, from_unit)
     if not value then
         if not units.unknown_formatted then
-            units.unknown_formatted = string.format("%s%s%s", units.unknown or "--", pango.thin_space, units[1].text)
+            units.unknown_formatted = string.format("%s%s%s", units.unknown or "--", units.space or " ", units[1].text)
         end
         return units.unknown_formatted
     end
@@ -28,9 +28,9 @@ function humanizer.humanize_units(units, value, from_unit)
         local unit = units[i]
         if i >= from_unit and value < unit.to then
             return string.format(
-                units.format or unit.format or ("%." .. tostring(units.precision or unit.precision or 0) .. "f%s%s"),
+                unit.format or units.format or ("%." .. tostring(units.precision or unit.precision or 0) .. "f%s%s"),
                 value / previous_to,
-                pango.thin_space,
+                units.space or " ",
                 unit.text)
         end
         if unit.next ~= false then
@@ -40,7 +40,7 @@ function humanizer.humanize_units(units, value, from_unit)
     return units.over or "it's over 9000!"
 end
 
-local io_speed_units = {
+humanizer.io_speed_units = {
     { precision = 0, text = "B/s", to = 1000 },
     { precision = 0, text = "kB/s", to = 1000 * 1000 },
     { precision = 2, text = "MB/s", to = 1000 * 1000 * 1000 },
@@ -49,10 +49,10 @@ local io_speed_units = {
 }
 
 function humanizer.io_speed(bytes, ...)
-    return humanizer.humanize_units(io_speed_units, bytes, ...)
+    return humanizer.humanize_units(humanizer.io_speed_units, bytes, ...)
 end
 
-local file_size_units = {
+humanizer.file_size_units = {
     { precision = 0, text = "B", to = 1000 },
     { precision = 1, text = "kB", to = 1000 * 1000 },
     { precision = 1, text = "MB", to = 1000 * 1000 * 1000 },
@@ -61,7 +61,7 @@ local file_size_units = {
 }
 
 function humanizer.file_size(bytes, ...)
-    return humanizer.humanize_units(file_size_units, bytes, ...)
+    return humanizer.humanize_units(humanizer.file_size_units, bytes, ...)
 end
 
 do
@@ -109,7 +109,7 @@ do
     end
 
     function humanizer.relative_time(seconds, args)
-        seconds = round(max(0, seconds))
+        seconds = round(math.max(0, seconds))
         args = args or {}
 
         local all_part_count = #time_parts
@@ -158,7 +158,7 @@ do
                 local value = rest / time_part.div
                 local format = formats[time_part.id]
 
-                value = floor(value)
+                value = math.floor(value)
                 if value >= 1 then
                     rest = rest - (value * time_part.div)
                     parts[#parts + 1] = format_time_part(value, format, unit_separator)
@@ -181,12 +181,12 @@ do
         end
 
         if #parts == 0 then
-            local time_part = time_parts[clamp(from_part + max(1, part_count), 1, all_part_count)]
+            local time_part = time_parts[clamp(from_part + math.max(1, part_count), 1, all_part_count)]
             local format = formats[time_part.id]
             parts[1] = format_time_part(0, format, unit_separator)
         end
 
-        local text = concat(parts, part_separator)
+        local text = table.concat(parts, part_separator)
 
         if args.prefix then
             text = args.prefix .. text

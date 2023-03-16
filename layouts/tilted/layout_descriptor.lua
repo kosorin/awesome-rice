@@ -66,7 +66,7 @@ end
 function layout_descriptor.new(tag)
     return setmetatable({
         tag = tag,
-        padding = setmetatable({}, { __mode = "k" })
+        padding = setmetatable({}, { __mode = "k" }),
     }, { __index = layout_descriptor.object })
 end
 

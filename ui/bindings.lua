@@ -2,7 +2,7 @@ local capi = Capi
 local awful = require("awful")
 local amousec = require("awful.mouse.client")
 local aplacement = require("awful.placement")
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local grectangle = require("gears.geometry").rectangle
 local helper_client = require("helpers.client")
 local binding = require("io.binding")
@@ -15,7 +15,6 @@ local mebox = require("widget.mebox")
 local bindbox = require("widget.bindbox")
 local config = require("config")
 local hclient = require("helpers.client")
-local power_service = require("services.power")
 
 
 -- Available keys with `super` modifier: gstpzxcv jlyiok
@@ -28,26 +27,29 @@ main_bindbox:add_groups {
     { name = "launcher" },
     { name = "screen" },
     { name = "layout" },
-    { name = "tag",
+    {
+        name = "tag",
         groups = {
             { name = "client" },
-        }
+        },
     },
-    { name = "client",
+    {
+        name = "client",
         { modifiers = { mod.alt }, "Tab", description = "client switcher" },
         groups = {
             { name = "state" },
             { name = "layer" },
-        }
+        },
     },
     { name = "action" },
     { name = "volume" },
     { name = "media" },
-    { name = "screenshot",
+    {
+        name = "screenshot",
         groups = {
             { name = "save to file" },
             { name = "copy to clipboard" },
-        }
+        },
     },
 }
 
@@ -56,23 +58,10 @@ capi.awesome.connect_signal("main_bindbox::show", function()
 end)
 
 
-if DEBUG then
-    binding.add_global_range {
-        binding.new {
-            modifiers = { mod.super, },
-            triggers = "z",
-            path = "debug",
-            description = "zathura",
-            on_press = function() awful.spawn("zathura") end,
-        },
-    }
-end
-
-
 binding.add_global_range {
 
     binding.new {
-        modifiers = { mod.super, mod.control, },
+        modifiers = { mod.super, mod.control },
         triggers = "j",
         path = "system",
         description = "power menu",
@@ -82,11 +71,11 @@ binding.add_global_range {
     },
 
     binding.new {
-        modifiers = { mod.super, mod.control, },
+        modifiers = { mod.super, mod.control },
         triggers = "l",
         path = "system",
         description = "lock session",
-        on_press = function() power_service.lock_screen() end,
+        on_press = function() services.power.lock_screen() end,
     },
 
 
@@ -107,7 +96,7 @@ binding.add_global_range {
     },
 
     binding.new {
-        modifiers = { mod.super, mod.control, },
+        modifiers = { mod.super, mod.control },
         triggers = "w",
         path = "awesome",
         description = "show main menu",
@@ -115,7 +104,7 @@ binding.add_global_range {
     },
 
     binding.new {
-        modifiers = { mod.super, },
+        modifiers = { mod.super },
         triggers = "h",
         path = "awesome",
         description = "keyboard shortcuts",
@@ -123,7 +112,7 @@ binding.add_global_range {
     },
 
     binding.new {
-        modifiers = { mod.super, mod.control, },
+        modifiers = { mod.super, mod.control },
         triggers = "r",
         path = "awesome",
         description = "restart awesome",
@@ -132,7 +121,7 @@ binding.add_global_range {
 
 
     binding.new {
-        modifiers = { mod.super, },
+        modifiers = { mod.super },
         triggers = "a",
         path = "launcher",
         description = "launcher",
@@ -140,7 +129,7 @@ binding.add_global_range {
     },
 
     binding.new {
-        modifiers = { mod.super, },
+        modifiers = { mod.super },
         triggers = "Return",
         path = "launcher",
         description = "terminal",
@@ -148,7 +137,7 @@ binding.add_global_range {
     },
 
     binding.new {
-        modifiers = { mod.super, },
+        modifiers = { mod.super },
         triggers = "d",
         path = "launcher",
         description = "file manager",
@@ -156,7 +145,7 @@ binding.add_global_range {
     },
 
     binding.new {
-        modifiers = { mod.super, },
+        modifiers = { mod.super },
         triggers = "b",
         path = "launcher",
         description = "browser",
@@ -164,7 +153,7 @@ binding.add_global_range {
     },
 
     binding.new {
-        modifiers = { mod.control, mod.super, },
+        modifiers = { mod.control, mod.super },
         triggers = "b",
         path = "launcher",
         description = "browser (private window)",
@@ -180,7 +169,7 @@ binding.add_global_range {
     },
 
     binding.new {
-        modifiers = { mod.super, },
+        modifiers = { mod.super },
         triggers = "e",
         path = "launcher",
         description = "emoji picker",
@@ -189,7 +178,7 @@ binding.add_global_range {
 
 
     binding.new {
-        modifiers = { mod.super, mod.control, },
+        modifiers = { mod.super, mod.control },
         triggers = "space",
         path = "layout",
         description = "select next layout",
@@ -197,7 +186,7 @@ binding.add_global_range {
     },
 
     binding.new {
-        modifiers = { mod.shift, mod.super, mod.control, },
+        modifiers = { mod.shift, mod.super, mod.control },
         triggers = "space",
         path = "layout",
         description = "select previous layout",
@@ -205,7 +194,7 @@ binding.add_global_range {
     },
 
     binding.new {
-        modifiers = { mod.super, mod.control, },
+        modifiers = { mod.super, mod.control },
         triggers = binding.group.arrows_vertical,
         path = "layout",
         description = "change the number of primary clients",
@@ -213,7 +202,7 @@ binding.add_global_range {
     },
 
     binding.new {
-        modifiers = { mod.super, mod.control, },
+        modifiers = { mod.super, mod.control },
         triggers = binding.group.arrows_horizontal,
         path = "layout",
         description = "change the number of secondary columns",
@@ -222,21 +211,25 @@ binding.add_global_range {
 
 
     binding.new {
-        modifiers = { mod.super, },
+        modifiers = { mod.super },
         triggers = "r",
         path = "tag",
         description = "rename selected tag",
         on_press = function()
             local screen = awful.screen.focused()
-            local tag = screen and screen.selected_tag
-            if tag then
-                screen.topbar.taglist:rename_tag_inline(tag)
+            if not screen then
+                return
             end
+            local tag = screen.selected_tag
+            if not tag then
+                return
+            end
+            screen.topbar.taglist:rename_tag_inline(tag)
         end,
     },
 
     binding.new {
-        modifiers = { mod.super, },
+        modifiers = { mod.super },
         triggers = binding.group.numrow,
         path = "tag",
         description = "show only the specified tag",
@@ -250,7 +243,7 @@ binding.add_global_range {
     },
 
     binding.new {
-        modifiers = { mod.control, mod.super, },
+        modifiers = { mod.control, mod.super },
         triggers = binding.group.numrow,
         path = "tag",
         description = "toggle tag",
@@ -264,7 +257,7 @@ binding.add_global_range {
     },
 
     binding.new {
-        modifiers = { mod.super, },
+        modifiers = { mod.super },
         triggers = {
             { trigger = ",", action = awful.tag.viewprev },
             { trigger = ".", action = awful.tag.viewnext },
@@ -275,7 +268,7 @@ binding.add_global_range {
     },
 
     binding.new {
-        modifiers = { mod.super, },
+        modifiers = { mod.super },
         triggers = "Escape",
         path = "tag",
         description = "go back to previous tag",
@@ -284,7 +277,7 @@ binding.add_global_range {
 
 
     binding.new {
-        modifiers = { mod.super, },
+        modifiers = { mod.super },
         triggers = "u",
         path = "client",
         description = "jump to urgent client",
@@ -293,7 +286,7 @@ binding.add_global_range {
     },
 
     binding.new {
-        modifiers = { mod.super, },
+        modifiers = { mod.super },
         triggers = "Tab",
         path = "client",
         description = "go back to previous client",
@@ -306,7 +299,7 @@ binding.add_global_range {
     },
 
     binding.new {
-        modifiers = { mod.shift, mod.super, },
+        modifiers = { mod.shift, mod.super },
         triggers = "n",
         path = { "client", "state" },
         description = "restore minimized",
@@ -321,7 +314,7 @@ binding.add_global_range {
 
 
     binding.new {
-        modifiers = { mod.super, },
+        modifiers = { mod.super },
         triggers = "q",
         path = "action",
         description = "generate QR code from clipboard",
@@ -396,7 +389,7 @@ binding.add_global_range {
     },
 
     binding.new {
-        modifiers = { mod.super, },
+        modifiers = { mod.super },
         triggers = {
             { trigger = "XF86AudioRewind", offset = -30 * 1000000 },
             { trigger = "XF86AudioForward", offset = 30 * 1000000 },
@@ -407,19 +400,19 @@ binding.add_global_range {
     },
 
     binding.new {
-        modifiers = { mod.super, },
+        modifiers = { mod.super },
         triggers = "XF86AudioPlay",
         path = "media",
         description = "pause all",
-        on_press = function() services.media.player:pause(true) end,
+        on_press = function() services.media.player:pause("%all") end,
     },
 
     binding.new {
-        modifiers = { mod.super, },
+        modifiers = { mod.super },
         triggers = "XF86AudioStop",
         path = "media",
         description = "stop all",
-        on_press = function() services.media.player:stop(true) end,
+        on_press = function() services.media.player:stop("%all") end,
     },
 
 }
@@ -436,7 +429,7 @@ if config.features.screenshot_tools then
         },
 
         binding.new {
-            modifiers = { mod.alt, },
+            modifiers = { mod.alt },
             triggers = "Print",
             path = { "screenshot", "save to file" },
             description = "current window",
@@ -444,7 +437,7 @@ if config.features.screenshot_tools then
         },
 
         binding.new {
-            modifiers = { mod.control, },
+            modifiers = { mod.control },
             triggers = "Print",
             path = { "screenshot", "save to file" },
             description = "full screen",
@@ -453,7 +446,7 @@ if config.features.screenshot_tools then
 
 
         binding.new {
-            modifiers = { mod.super, },
+            modifiers = { mod.super },
             triggers = "Print",
             path = { "screenshot", "copy to clipboard" },
             description = "interactive selection",
@@ -461,7 +454,7 @@ if config.features.screenshot_tools then
         },
 
         binding.new {
-            modifiers = { mod.alt, mod.super, },
+            modifiers = { mod.alt, mod.super },
             triggers = "Print",
             path = { "screenshot", "copy to clipboard" },
             description = "current window",
@@ -469,7 +462,7 @@ if config.features.screenshot_tools then
         },
 
         binding.new {
-            modifiers = { mod.control, mod.super, },
+            modifiers = { mod.control, mod.super },
             triggers = "Print",
             path = { "screenshot", "copy to clipboard" },
             description = "full screen",
@@ -483,7 +476,7 @@ if config.features.wallpaper_menu then
     binding.add_global_range {
 
         binding.new {
-            modifiers = { mod.shift, mod.super, mod.control, },
+            modifiers = { mod.shift, mod.super, mod.control },
             triggers = "w",
             path = "action",
             description = "restore wallpaper",
@@ -496,7 +489,7 @@ end
 binding.add_client_range {
 
     binding.new {
-        modifiers = { mod.super, mod.control, },
+        modifiers = { mod.super, mod.control },
         triggers = "Escape",
         path = "client",
         description = "quit",
@@ -540,7 +533,7 @@ binding.add_client_range {
     },
 
     binding.new {
-        modifiers = { mod.super, mod.shift, },
+        modifiers = { mod.super, mod.shift },
         triggers = binding.group.numrow,
         path = { "tag", "client" },
         description = "move to tag",
@@ -553,7 +546,7 @@ binding.add_client_range {
     },
 
     binding.new {
-        modifiers = { mod.control, mod.super, mod.shift, },
+        modifiers = { mod.control, mod.super, mod.shift },
         triggers = binding.group.numrow,
         path = { "tag", "client" },
         description = "toggle on tag",
@@ -566,7 +559,7 @@ binding.add_client_range {
     },
 
     binding.new {
-        modifiers = { mod.super, },
+        modifiers = { mod.super },
         triggers = "w",
         path = "client",
         description = "show client menu",
@@ -574,7 +567,7 @@ binding.add_client_range {
             mebox(menu_templates.client.new()):show({
                 client = client,
                 placement = function(menu)
-                    aplacement.centered(menu, { parent = client, })
+                    aplacement.centered(menu, { parent = client })
                     aplacement.no_offscreen(menu, {
                         honor_workarea = true,
                         honor_padding = false,
@@ -586,7 +579,7 @@ binding.add_client_range {
     },
 
     binding.new {
-        modifiers = { mod.super, },
+        modifiers = { mod.super },
         triggers = binding.group.arrows,
         path = "client",
         description = "change focus",
@@ -594,7 +587,7 @@ binding.add_client_range {
     },
 
     binding.new {
-        modifiers = { mod.shift, mod.super, },
+        modifiers = { mod.shift, mod.super },
         triggers = binding.group.arrows,
         path = "client",
         description = "move",
@@ -602,7 +595,7 @@ binding.add_client_range {
     },
 
     binding.new {
-        modifiers = { mod.control, mod.shift, mod.super, },
+        modifiers = { mod.control, mod.shift, mod.super },
         triggers = binding.group.arrows,
         path = "client",
         description = "resize",
@@ -611,7 +604,7 @@ binding.add_client_range {
 
 
     binding.new {
-        modifiers = { mod.super, },
+        modifiers = { mod.super },
         triggers = "t",
         path = { "client", "layer" },
         description = "keep on top",
@@ -619,7 +612,7 @@ binding.add_client_range {
     },
 
     binding.new {
-        modifiers = { mod.super, mod.alt, },
+        modifiers = { mod.super, mod.alt },
         triggers = "a",
         path = { "client", "layer" },
         description = "above normal clients",
@@ -627,7 +620,7 @@ binding.add_client_range {
     },
 
     binding.new {
-        modifiers = { mod.super, mod.alt, },
+        modifiers = { mod.super, mod.alt },
         triggers = "b",
         path = { "client", "layer" },
         description = "below normal clients",
@@ -636,7 +629,7 @@ binding.add_client_range {
 
 
     binding.new {
-        modifiers = { mod.super, },
+        modifiers = { mod.super },
         triggers = "space",
         path = { "client", "state" },
         description = "toggle floating/tiling",
@@ -649,7 +642,7 @@ binding.add_client_range {
 
 
     binding.new {
-        modifiers = { mod.super, },
+        modifiers = { mod.super },
         triggers = "f",
         path = { "client", "state" },
         description = "fullscreen",
@@ -660,7 +653,7 @@ binding.add_client_range {
     },
 
     binding.new {
-        modifiers = { mod.super, },
+        modifiers = { mod.super },
         triggers = "m",
         path = { "client", "state" },
         description = "maximize",
@@ -671,7 +664,7 @@ binding.add_client_range {
     },
 
     binding.new {
-        modifiers = { mod.super, },
+        modifiers = { mod.super },
         triggers = "n",
         path = { "client", "state" },
         description = "minimize",
@@ -680,7 +673,7 @@ binding.add_client_range {
 
 
     binding.new {
-        modifiers = { mod.super, mod.shift, },
+        modifiers = { mod.super, mod.shift },
         triggers = "s",
         path = { "tag", "client" },
         description = "keep on all tags (sticky)",
@@ -692,7 +685,7 @@ binding.add_client_range {
 
 main_bindbox:add_group {
     name = "mpv",
-    ruled = { rule = { instance = "gl", class = "mpv" }, },
+    rule = { rule = { instance = "gl", class = "mpv" } },
     bg = "#5f2060",
     { "q", description = "quit" },
     { modifiers = { mod.shift }, "q", description = "store the playback position and quit" },
@@ -738,10 +731,18 @@ main_bindbox:add_group {
             { "v", description = "toggle subtitle visibility" },
             { "j", "J", description = "cycle through the available subtitles" },
             { "z", "Z", description = "adjust subtitle delay by +/- 0.1 seconds" },
-            { modifiers = { mod.control }, "Left", "Right",
-                description = "seek to the previous/next subtitle" },
-            { modifiers = { mod.control, mod.shift }, "Left", "Right",
-                description = "adjust subtitle delay so that the previous/next subtitle is displayed now" },
+            {
+                modifiers = { mod.control },
+                "Left",
+                "Right",
+                description = "seek to the previous/next subtitle"
+            },
+            {
+                modifiers = { mod.control, mod.shift },
+                "Left",
+                "Right",
+                description = "adjust subtitle delay so that the previous/next subtitle is displayed now"
+            },
             { "r", "R", description = "move subtitles up/down" },
             { modifiers = { mod.shift }, "g", "f", description = "adjust subtitle font size by +/- 10%" },
         },
@@ -767,7 +768,7 @@ main_bindbox:add_group {
 
 main_bindbox:add_group {
     name = "feh",
-    ruled = { rule = { instance = "feh", class = "feh" }, },
+    rule = { rule = { instance = "feh", class = "feh" } },
     bg = "#70011a",
     { "Escape", "q", description = "quit" },
     { "x", description = "close current window" },
@@ -781,22 +782,18 @@ main_bindbox:add_group {
             { "r", description = "reload the image" },
             { modifiers = { mod.control }, "r", description = "render the image" },
             { modifiers = { mod.shift }, binding.button.left, description = "blur the image" },
-
             { "&lt;", "&gt;", description = "rotate 90 degrees" },
             { modifiers = { mod.shift }, binding.button.middle, description = "rotate" },
             { "_", description = "vertically flip" },
             { "|", description = "horizontally flip" },
-
             { modifiers = { mod.control }, "Left", "Up", "Right", "Down", description = "scroll/pan" },
             { modifiers = { mod.alt }, "Left", "Up", "Right", "Down", description = "scroll/pan by one page" },
             { binding.button.left, description = "pan" },
-
             { binding.button.middle, "KP_Add", "KP_Subtract", "Up", "Down", description = "zoom in/out" },
             { "*", description = "zoom to 100%" },
             { "/", description = "zoom to fit the window size" },
             { "!", description = "zoom to fill the window size" },
             { modifiers = { mod.shift }, "z", description = "toggle auto-zoom in fullscreen" },
-
             { "k", description = "toggle zoom and viewport keeping" },
             { "g", description = "toggle window size keeping" },
         },

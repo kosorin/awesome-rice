@@ -1,9 +1,8 @@
 local capi = Capi
 local table = table
 local awful = require("awful")
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local gshape = require("gears.shape")
-local amousec = require("awful.mouse.client")
 local ruled = require("ruled")
 local binding = require("io.binding")
 local helper_client = require("helpers.client")
@@ -50,8 +49,8 @@ ruled.client.add_rule_source("fix_dialog", function(client, properties)
         if not parent and client.pid then
             local screen = properties.screen
                 and (type(properties.screen) == "function"
-                    and capi.screen[properties.screen(client, properties)]
-                    or capi.screen[properties.screen])
+                and capi.screen[properties.screen(client, properties)]
+                or capi.screen[properties.screen])
                 or nil
             if screen then
                 local possible_parents = {}
@@ -79,9 +78,7 @@ ruled.client.connect_signal("request::rules", function()
             focus = awful.client.focus.filter,
             titlebars_enabled = DEBUG,
             raise = true,
-            shape = function(cr, width, height)
-                gshape.rounded_rect(cr, width, height, dpi(16))
-            end,
+            shape = beautiful.client.shape,
         },
         callback = function(client)
             awful.client.setslave(client)
@@ -162,12 +159,18 @@ ruled.client.connect_signal("request::rules", function()
                 binding.new {
                     modifiers = { mod.super },
                     triggers = btn.left,
-                    on_press = function(_, client) client:activate { context = "mouse_click" } helper_client.mouse_move(client) end,
+                    on_press = function(_, client)
+                        client:activate { context = "mouse_click" }
+                        helper_client.mouse_move(client)
+                    end,
                 },
                 binding.new {
                     modifiers = { mod.super },
                     triggers = btn.right,
-                    on_press = function(_, client) client:activate { context = "mouse_click" } helper_client.mouse_resize(client) end,
+                    on_press = function(_, client)
+                        client:activate { context = "mouse_click" }
+                        helper_client.mouse_resize(client)
+                    end,
                 },
             },
         },

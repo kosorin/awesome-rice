@@ -8,7 +8,7 @@ local btn = binding.button
 local dpi = Dpi
 local common = require("awful.widget.common")
 local base = require("wibox.widget.base")
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local gtable = require("gears.table")
 local mebox = require("widget.mebox")
 local client_menu_template = require("ui.menu.templates.client")
@@ -16,6 +16,7 @@ local aplacement = require("awful.placement")
 local widget_helper = require("helpers.widget")
 local pango = require("utils.pango")
 local desktop = require("utils.desktop")
+local hui = require("helpers.ui")
 
 
 local clientlist = { mt = {} }
@@ -89,11 +90,11 @@ function clientlist.new(wibar)
                     end
                 end
 
-                local text, background, _, icon, item_args = label(client, item.text)
+                local text, bg, _, icon, item_args = label(client, item.text)
                 item_args = item_args or {}
 
                 if item.container then
-                    item.container.background = background
+                    item.container.bg = bg
                     item.container.border_width = item_args.shape_border_width
                     item.container.border_color = item_args.shape_border_color
                 end
@@ -114,7 +115,7 @@ function clientlist.new(wibar)
                 text = not icon and text or nil
                 if item.text then
                     if not item.text:set_markup_silently(text) then
-                        item.text:set_markup(pango.i("&lt;Invalid text&gt;"))
+                        item.text:set_markup(pango.i(pango.escape("<invalid>")))
                     end
                 end
 
@@ -156,11 +157,10 @@ function clientlist.new(wibar)
             {
                 id = "#container",
                 widget = capsule,
-                margins = {
-                    left = beautiful.wibar.spacing / 2,
-                    right = beautiful.wibar.spacing / 2,
-                    top = beautiful.wibar.padding.top,
-                    bottom = beautiful.wibar.padding.bottom,
+                margins = hui.thickness {
+                    beautiful.wibar.paddings.top,
+                    beautiful.wibar.spacing / 2,
+                    beautiful.wibar.paddings.bottom,
                 },
                 {
                     layout = wibox.layout.fixed.horizontal,

@@ -7,11 +7,10 @@ local gstring = require("gears.string")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local gshape = require("gears.shape")
 local dpi = Dpi
 local gtable = require("gears.table")
-local gtimer = require("gears.timer")
 local hstring = require("helpers.string")
 local hmouse = require("helpers.mouse")
 local capsule = require("widget.capsule")
@@ -20,33 +19,36 @@ local tcolor = require("helpers.color")
 local pango = require("utils.pango")
 local desktop = require("utils.desktop")
 local media_player = require("services.media").player
+local hui = require("helpers.ui")
 
 
 local media_player_widget = { mt = {} }
 
 local function left_shape(cr, width, height)
-    gshape.partially_rounded_rect(cr, width, height, true, false, false, true, beautiful.capsule.shape_radius)
+    gshape.partially_rounded_rect(cr, width, height, true, false, false, true, beautiful.capsule.border_radius)
 end
 
 local function right_shape(cr, width, height)
-    gshape.partially_rounded_rect(cr, width, height, false, true, true, false, beautiful.capsule.shape_radius)
+    gshape.partially_rounded_rect(cr, width, height, false, true, true, false, beautiful.capsule.border_radius)
 end
 
 local function set_playback_position_ratio(self, ratio)
     self._private.playback_bar:set_ratio(1, ratio)
 end
 
-local function update_player(self, player)
+local function update_player(self, player_data)
     self._private.drag_interrupted = true
 
-    local icon = desktop.lookup_icon(player and player.player_name)
+    local icon = desktop.lookup_icon(player_data and player_data.name)
     self._private.icon:set_image(icon)
 
-    self._private.content_container:set_visible(not not player)
-    self._private.content_container:set_shape(player and left_shape)
-    self._private.previous_button:set_shape(not player and left_shape)
+    self._private.separator:set_visible(not not player_data)
+    self._private.content_container:set_visible(not not player_data)
+    self._private.content_container:set_shape(player_data and right_shape)
+    self._private.next_button:set_shape(not player_data and right_shape)
+    self._private.pin:set_visible(player_data and media_player:is_pinned(player_data))
 
-    local button_style = player
+    local button_style = player_data
         and beautiful.capsule.styles.normal
         or beautiful.capsule.styles.disabled
     self._private.previous_button:apply_style(button_style)
@@ -54,22 +56,20 @@ local function update_player(self, player)
     self._private.next_button:apply_style(button_style)
 end
 
-local function update_metadata(self, player, metadata)
+local function update_metadata(self, player_data)
     self._private.drag_interrupted = true
 
-    metadata = metadata or (player and player.metadata)
+    local metadata = player_data and player_data.metadata
     local text, any_text
     if metadata then
-        local md = metadata.value
-
-        local title = gstring.xml_escape(hstring.trim(md["xesam:title"] or ""))
-        local artist = gstring.xml_escape(hstring.trim(table.concat(md["xesam:artist"] or {}, ", ")))
-        local separator = #title > 0 and #artist > 0 and " / " or ""
+        local title = pango.escape(hstring.trim(metadata.title or ""))
+        local artist = pango.escape(hstring.trim(table.concat(metadata.artist or {}, ", ")))
+        local separator = pango.escape(#title > 0 and #artist > 0 and " / " or "")
         any_text = #title > 0 or #artist > 0
 
         title = title
-        artist = #artist > 0 and pango.span { alpha = "65%", artist } or ""
-        separator = #separator > 0 and pango.span { alpha = "65%", separator } or ""
+        artist = #artist > 0 and pango.span { fgalpha = "65%", artist } or ""
+        separator = #separator > 0 and pango.span { fgalpha = "65%", separator } or ""
         text = table.concat({ title, artist }, separator)
     else
         text = ""
@@ -79,31 +79,32 @@ local function update_metadata(self, player, metadata)
     self._private.text:set_visible(any_text)
 end
 
-local function update_playback_status(self, player, playback_status)
+local function update_playback_status(self, player_data)
     self._private.drag_interrupted = true
 
-    playback_status = playback_status or (player and player.playback_status)
+    local playback_status = player_data and player_data.playback_status
     local is_playing = playback_status == "PLAYING"
 
     self._private.content_container:apply_style(is_playing
-    and beautiful.media_player.capsule.normal
-    or beautiful.media_player.capsule.disabled)
+        and beautiful.media_player.content_styles.normal
+        or beautiful.media_player.content_styles.disabled)
 
     self._private.play_pause_button.widget:set_image(is_playing
-    and config.places.theme .. "/icons/pause.svg"
-    or config.places.theme .. "/icons/play.svg")
+        and config.places.theme .. "/icons/pause.svg"
+        or config.places.theme .. "/icons/play.svg")
 
     self._private.playback_bar.opacity = is_playing and 0.5 or 0.2
     self._private.icon.opacity = is_playing and 1 or 0.5
+    self._private.pin.opacity = is_playing and 1 or 0.5
 end
 
-local function update_playback_position(self, player, position)
+local function update_playback_position(self, player_data)
     self._private.drag_interrupted = true
 
     local ratio
-    if player then
-        position = position or player:get_position() or 0
-        local length = player.metadata.value["mpris:length"] or 0
+    if player_data then
+        local position = player_data.position or 0
+        local length = player_data.metadata.length or 0
         if position <= 0 or length <= 0 then
             ratio = 0
         elseif position >= length then
@@ -118,27 +119,21 @@ local function update_playback_position(self, player, position)
     set_playback_position_ratio(self, ratio)
 end
 
-local function update(self, player)
+local function update_all(self, player_data)
     self._private.drag_interrupted = true
 
-    update_player(self, player)
-    update_metadata(self, player)
-    update_playback_status(self, player)
-    update_playback_position(self, player)
-end
-
-local function refresh_timer(self, player)
-    if player and player.playback_status == "PLAYING" then
-        self._private.playback_position_timer:again()
-    else
-        self._private.playback_position_timer:stop()
-    end
+    update_player(self, player_data)
+    update_metadata(self, player_data)
+    update_playback_status(self, player_data)
+    update_playback_position(self, player_data)
 end
 
 local function initialize_content_container(self)
+    self._private.separator = self:get_children_by_id("#separator")[1]
     self._private.content_container = self:get_children_by_id("#content_container")[1]
     self._private.icon = self:get_children_by_id("#icon")[1]
     self._private.text = self:get_children_by_id("#text")[1]
+    self._private.pin = self:get_children_by_id("#pin")[1]
 end
 
 local function initialize_playback_bar(self)
@@ -161,7 +156,7 @@ local function initialize_playback_bar(self)
 
     do
         local length
-        hmouse.start_grabbing {
+        hmouse.attach_slider_grabber {
             wibox = self._private.wibar,
             widget = self._private.playback_bar,
             minimum = 0,
@@ -171,12 +166,12 @@ local function initialize_playback_bar(self)
                     return
                 end
 
-                local player = media_player:get_primary_player()
-                if not player then
+                local player_data = media_player:get_primary_player_data()
+                if not player_data then
                     return
                 end
 
-                length = player.metadata.value["mpris:length"] or 0
+                length = player_data.metadata.length or 0
                 if length <= 0 then
                     return
                 end
@@ -192,8 +187,6 @@ local function initialize_playback_bar(self)
                 self._private.is_dragging = false
                 self._private.drag_interrupted = false
 
-                refresh_timer(self, media_player:get_primary_player())
-
                 if not interrupted then
                     self._private.is_dragging = false
                     media_player:set_position(ratio * length)
@@ -207,50 +200,51 @@ local function initialize_playback_bar(self)
 end
 
 local function initialize_buttons(self)
-    local function update_icon_foreground(button, foreground)
-        button.widget:set_stylesheet(css.style { path = { fill = foreground } })
+    local function update_icon_color(button, fg)
+        button.widget:set_stylesheet(css.style { path = { fill = fg } })
     end
 
     self._private.previous_button = self:get_children_by_id("#previous")[1]
     self._private.play_pause_button = self:get_children_by_id("#play_pause")[1]
     self._private.next_button = self:get_children_by_id("#next")[1]
 
-    self._private.previous_button.foreground = tcolor.transparent
-    self._private.play_pause_button.foreground = tcolor.transparent
-    self._private.next_button.foreground = tcolor.transparent
+    self._private.previous_button.fg = tcolor.transparent
+    self._private.play_pause_button.fg = tcolor.transparent
+    self._private.next_button.fg = tcolor.transparent
 
-    self._private.previous_button:connect_signal("property::foreground", update_icon_foreground)
-    self._private.play_pause_button:connect_signal("property::foreground", update_icon_foreground)
-    self._private.next_button:connect_signal("property::foreground", update_icon_foreground)
+    self._private.previous_button:connect_signal("property::fg", update_icon_color)
+    self._private.play_pause_button:connect_signal("property::fg", update_icon_color)
+    self._private.next_button:connect_signal("property::fg", update_icon_color)
 end
 
 local function initialize_signals(self)
-    media_player:connect_signal("media::player::metadata", function(_, player, metadata)
-        if media_player:is_primary_player(player) then
-            update_metadata(self, player, metadata)
-            update_playback_position(self, player)
-            refresh_timer(self, player)
+    media_player:connect_signal("media::player::metadata", function(_, player_data)
+        if media_player:is_primary_player(player_data) then
+            update_metadata(self, player_data)
         end
     end)
 
-    media_player:connect_signal("media::player::playback_status", function(_, player, playback_status)
-        if media_player:is_primary_player(player) then
-            update_playback_status(self, player, playback_status)
-            update_playback_position(self, player)
-            refresh_timer(self, player)
+    media_player:connect_signal("media::player::playback_status", function(_, player_data)
+        if media_player:is_primary_player(player_data) then
+            update_playback_status(self, player_data)
         end
     end)
 
-    media_player:connect_signal("media::player::seeked", function(_, player, position)
-        if media_player:is_primary_player(player) then
-            update_playback_position(self, player, position)
-            refresh_timer(self, player)
+    media_player:connect_signal("media::player::position", function(_, player_data, by_timer)
+        if by_timer and self._private.is_dragging then
+            return
+        end
+        if media_player:is_primary_player(player_data) then
+            update_playback_position(self, player_data)
         end
     end)
 
-    media_player:connect_signal("media::player::primary", function(_, player)
-        update(self, player)
-        refresh_timer(self, player)
+    media_player:connect_signal("media::player::pinned", function(_)
+        update_player(self, media_player:get_primary_player_data())
+    end)
+
+    media_player:connect_signal("media::player::primary", function(_, player_data)
+        update_all(self, player_data)
     end)
 end
 
@@ -261,52 +255,12 @@ function media_player_widget.new(wibar)
         width = dpi(500),
         {
             layout = wibox.layout.fixed.horizontal,
-            reverse = true,
-            fill_space = true,
-            {
-                id = "#content_container",
-                enabled = false,
-                widget = capsule,
-                margins = {
-                    left = beautiful.capsule.default_style.margins.left,
-                    right = 0,
-                    top = beautiful.wibar.padding.top,
-                    bottom = beautiful.wibar.padding.bottom,
-                },
-                {
-                    widget = wibox.container.constraint,
-                    strategy = "min",
-                    width = dpi(150),
-                    {
-                        layout = wibox.layout.fixed.horizontal,
-                        spacing = beautiful.capsule.item_content_spacing,
-                        {
-                            id = "#icon",
-                            widget = wibox.widget.imagebox,
-                            resize = true,
-                        },
-                        {
-                            id = "#text",
-                            widget = wibox.widget.textbox,
-                        },
-                    },
-                },
-            },
             {
                 id = "#previous",
                 widget = capsule,
-                margins = {
-                    left = 0,
-                    right = 0,
-                    top = beautiful.wibar.padding.top,
-                    bottom = beautiful.wibar.padding.bottom,
-                },
-                paddings = {
-                    left = beautiful.capsule.default_style.paddings.left,
-                    right = dpi(6),
-                    top = dpi(6),
-                    bottom = dpi(6),
-                },
+                margins = hui.thickness { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
+                paddings = hui.thickness { dpi(6), left = beautiful.capsule.default_style.paddings.left },
+                shape = left_shape,
                 buttons = binding.awful_buttons {
                     binding.awful({}, btn.left, function() media_player:previous() end),
                 },
@@ -319,17 +273,11 @@ function media_player_widget.new(wibar)
             {
                 id = "#play_pause",
                 widget = capsule,
-                margins = {
-                    left = 0,
-                    right = 0,
-                    top = beautiful.wibar.padding.top,
-                    bottom = beautiful.wibar.padding.bottom,
-                },
-                paddings = {
+                margins = hui.thickness { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
+                paddings = hui.thickness {
+                    dpi(6),
                     left = beautiful.capsule.default_style.paddings.left,
                     right = beautiful.capsule.default_style.paddings.right,
-                    top = dpi(6),
-                    bottom = dpi(6),
                 },
                 shape = false,
                 buttons = binding.awful_buttons {
@@ -343,19 +291,9 @@ function media_player_widget.new(wibar)
             {
                 id = "#next",
                 widget = capsule,
-                margins = {
-                    left = 0,
-                    right = beautiful.capsule.default_style.margins.right,
-                    top = beautiful.wibar.padding.top,
-                    bottom = beautiful.wibar.padding.bottom,
-                },
-                paddings = {
-                    left = dpi(6),
-                    right = beautiful.capsule.default_style.paddings.right,
-                    top = dpi(6),
-                    bottom = dpi(6),
-                },
-                shape = right_shape,
+                margins = hui.thickness { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
+                paddings = hui.thickness { dpi(6), right = beautiful.capsule.default_style.paddings.right },
+                shape = false,
                 buttons = binding.awful_buttons {
                     binding.awful({}, btn.left, function() media_player:next() end),
                 },
@@ -365,6 +303,52 @@ function media_player_widget.new(wibar)
                     resize = true,
                 },
             },
+            {
+                id = "#separator",
+                widget = wibox.container.margin,
+                margins = hui.thickness { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
+                {
+                    widget = wibox.container.background,
+                    forced_width = dpi(1),
+                    bg = beautiful.common.bg_120,
+                },
+            },
+            {
+                id = "#content_container",
+                widget = capsule,
+                enable_overlay = false,
+                margins = hui.thickness { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
+                shape = false,
+                {
+                    layout = wibox.layout.fixed.horizontal,
+                    reverse = true,
+                    spacing = beautiful.capsule.item_spacing,
+                    {
+                        layout = wibox.layout.fixed.horizontal,
+                        spacing = beautiful.capsule.item_content_spacing,
+                        {
+                            id = "#icon",
+                            widget = wibox.widget.imagebox,
+                            resize = true,
+                        },
+                        {
+                            id = "#text",
+                            widget = wibox.widget.textbox,
+                        },
+                    },
+                    {
+                        id = "#pin",
+                        widget = wibox.container.margin,
+                        margins = hui.thickness { dpi(2), -dpi(2) },
+                        {
+                            widget = wibox.widget.imagebox,
+                            image = config.places.theme .. "/icons/pin.svg",
+                            resize = true,
+                            stylesheet = css.style { path = { fill = beautiful.common.secondary_bright } },
+                        },
+                    },
+                },
+            },
         },
     }
 
@@ -372,24 +356,20 @@ function media_player_widget.new(wibar)
 
     self._private.wibar = wibar
 
+    self.buttons = binding.awful_buttons {
+        binding.awful({}, btn.middle, function()
+            local player_data = media_player:get_primary_player_data()
+            local is_pinned = player_data and media_player:is_pinned(player_data)
+            media_player:pin(not is_pinned and player_data or nil)
+        end),
+    }
+
     initialize_content_container(self)
     initialize_playback_bar(self)
     initialize_buttons(self)
     initialize_signals(self)
 
-    self._private.playback_position_timer = gtimer {
-        timeout = 1,
-        callback = function()
-            if self._private.is_dragging then
-                return
-            end
-            update_playback_position(self, media_player:get_primary_player())
-        end,
-    }
-
-    local player = media_player:get_primary_player()
-    update(self, player)
-    refresh_timer(self, player)
+    update_all(self, media_player:get_primary_player_data())
 
     return self
 end

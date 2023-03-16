@@ -1,7 +1,7 @@
 local awful = require("awful")
 local naughty = require("naughty")
 local ruled = require("ruled")
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local dpi = Dpi
 
 
@@ -18,13 +18,13 @@ naughty.connect_signal("request::display", function(n)
 end)
 
 
-ruled.notification.connect_signal('request::rules', function()
+ruled.notification.connect_signal("request::rules", function()
     ruled.notification.append_rule {
         rule = {},
         properties = {
             screen = awful.screen.preferred,
             max_width = dpi(400),
-        }
+        },
     }
     ruled.notification.append_rule {
         rule = { urgency = "low" },
@@ -33,7 +33,7 @@ ruled.notification.connect_signal('request::rules', function()
             bg = beautiful.palette.gray_66,
             fg = beautiful.palette.white_bright,
             border_color = beautiful.palette.gray_bright,
-        }
+        },
     }
     ruled.notification.append_rule {
         rule = { urgency = "normal" },
@@ -42,7 +42,7 @@ ruled.notification.connect_signal('request::rules', function()
             bg = beautiful.palette.blue_66,
             fg = beautiful.palette.white_bright,
             border_color = beautiful.palette.blue_bright_150,
-        }
+        },
     }
     ruled.notification.append_rule {
         rule = { urgency = "critical" },
@@ -51,6 +51,6 @@ ruled.notification.connect_signal('request::rules', function()
             bg = beautiful.palette.red_66,
             fg = beautiful.palette.white_bright,
             border_color = beautiful.palette.red_bright_150,
-        }
+        },
     }
 end)

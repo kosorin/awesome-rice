@@ -1,7 +1,7 @@
 -- DEPENDENCIES: systemctl, loginctl
 
 local capi = Capi
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local wibox = require("wibox")
 local gtable = require("gears.table")
 local dpi = Dpi
@@ -14,6 +14,7 @@ local config = require("config")
 local pango = require("utils.pango")
 local humanizer = require("utils.humanizer")
 local capsule = require("widget.capsule")
+local hui = require("helpers.ui")
 
 
 local function clamp(value, min, max)
@@ -97,38 +98,23 @@ function timer_menu_template.new(minutes)
         layout_template = {
             layout = wibox.layout.fixed.vertical,
             {
-                enabled = false,
                 widget = capsule,
-                background = beautiful.common.background_33,
-                foreground = beautiful.common.foreground,
-                margins = {
-                    left = 0,
-                    right = 0,
-                    top = dpi(8),
-                    bottom = dpi(8),
-                },
-                paddings = {
-                    left = dpi(4),
-                    right = dpi(4),
-                    top = dpi(2),
-                    bottom = dpi(2),
-                },
+                enable_overlay = false,
+                bg = beautiful.common.bg_33,
+                fg = beautiful.common.fg,
+                margins = hui.thickness { dpi(8), dpi(0) },
+                paddings = hui.thickness { dpi(2), dpi(4) },
                 {
                     id = "#hours",
                     layout = wibox.layout.align.horizontal,
                 },
             },
             {
-                enabled = false,
                 widget = capsule,
-                background = beautiful.common.background_33,
-                foreground = beautiful.common.foreground,
-                paddings = {
-                    left = dpi(4),
-                    right = dpi(4),
-                    top = dpi(2),
-                    bottom = dpi(2),
-                },
+                enable_overlay = false,
+                bg = beautiful.common.bg_33,
+                fg = beautiful.common.fg,
+                paddings = hui.thickness { dpi(2), dpi(4) },
                 {
                     id = "#minutes",
                     layout = wibox.layout.align.horizontal,
@@ -287,7 +273,7 @@ end
 
 local cancel_item = {
     text = "no, cancel",
-    callback = function(_, _, menu, context)
+    callback = function(item, menu, context)
         menu:hide({ select_parent = context.source ~= "mouse" })
         return false
     end,

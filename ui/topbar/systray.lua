@@ -1,9 +1,10 @@
 local capi = Capi
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local wibox = require("wibox")
 local dpi = Dpi
 local capsule = require("widget.capsule")
 local gtable = require("gears.table")
+local hui = require("helpers.ui")
 
 
 local systray = { mt = {} }
@@ -16,19 +17,14 @@ end
 function systray.new(wibar)
     local self = wibox.widget {
         widget = capsule,
-        enabled = false,
-        margins = {
-            left = beautiful.capsule.default_style.margins.left,
+        enable_overlay = false,
+        margins = hui.thickness {
+            top = beautiful.wibar.paddings.top,
             right = beautiful.capsule.default_style.margins.right,
-            top = beautiful.wibar.padding.top,
-            bottom = beautiful.wibar.padding.bottom,
+            bottom = beautiful.wibar.paddings.bottom,
+            left = beautiful.capsule.default_style.margins.left,
         },
-        paddings = {
-            left = dpi(10),
-            right = dpi(10),
-            top = dpi(4),
-            bottom = dpi(4),
-        },
+        paddings = hui.thickness { dpi(4), dpi(10) },
         wibox.widget.systray(),
     }
 

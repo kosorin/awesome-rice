@@ -13,8 +13,6 @@ local tilted = {
     column_strategy = require("layouts.tilted.column_strategy"),
 }
 
---- Cursors for each corner (3x3 matrix).
--- @field layouts.tilted.cursors
 tilted.cursors = {
     { "cross", "sb_v_double_arrow", "cross" },
     { "sb_h_double_arrow", "pirate", "sb_h_double_arrow" },
@@ -23,15 +21,10 @@ tilted.cursors = {
 
 local empty_padding = { left = 0, right = 0, top = 0, bottom = 0 }
 
--- @field layouts.tilted.mirror_padding
 tilted.mirror_padding = true
 
---- Resize only adjacent clients.
--- @field layouts.tilted.resize_only_neighbors
 tilted.resize_only_adjacent = false
 
---- Jump mouse cursor to the client's corner when resizing it.
--- @field layouts.tilted.resize_jump_to_corner
 tilted.resize_jump_to_corner = false
 
 local function any_button(buttons)
@@ -63,12 +56,12 @@ local function get_decoration_size(client, useless_gap)
 end
 
 local function apply_padding(workarea, padding)
-    return {
-        x = workarea.x + padding.left,
-        y = workarea.y + padding.top,
-        width = workarea.width - padding.left - padding.right,
-        height = workarea.height - padding.top - padding.bottom,
-    }
+    return padding and {
+            x = workarea.x + padding.left,
+            y = workarea.y + padding.top,
+            width = workarea.width - padding.left - padding.right,
+            height = workarea.height - padding.top - padding.bottom,
+        } or workarea
 end
 
 local function inflate(geometry, size)
@@ -147,9 +140,8 @@ function tilted.object:resize(screen, tag, client, corner)
         return
     end
 
-    local padding = layout_descriptor.allow_padding and layout_descriptor.padding[self] or empty_padding
     local full_workarea = parameters.workarea
-    local workarea = apply_padding(full_workarea, padding)
+    local workarea = apply_padding(full_workarea, layout_descriptor.allow_padding and layout_descriptor.padding[self])
     local useless_gap = parameters.useless_gap
 
     local initial_geometry = inflate(client:geometry(), client.border_width + useless_gap)
@@ -229,7 +221,7 @@ function tilted.object:resize(screen, tag, client, corner)
                 local value = cursor_directions.x > 0
                     and (full_workarea.x + full_workarea.width - coords.x)
                     or (coords.x - full_workarea.x)
-                value = value - 32 -- Easier resetting
+                -- value = value - 32 -- Easier resetting
                 if value < 0 then
                     value = 0
                 end
@@ -248,7 +240,7 @@ function tilted.object:resize(screen, tag, client, corner)
                 local value = cursor_directions.y > 0
                     and (full_workarea.y + full_workarea.height - coords.y)
                     or (coords.y - full_workarea.y)
-                value = value - 32 -- Easier resetting
+                -- value = value - 32 -- Easier resetting
                 if value < 0 then
                     value = 0
                 end
@@ -446,9 +438,8 @@ function tilted.object:arrange(parameters)
             [oi.bottom] = 0,
         }
     end
-    local padding = layout_descriptor.allow_padding and layout_descriptor.padding[self] or empty_padding
 
-    local workarea = apply_padding(full_workarea, padding)
+    local workarea = apply_padding(full_workarea, layout_descriptor.allow_padding and layout_descriptor.padding[self])
     local useless_gap = parameters.useless_gap
 
     local width = workarea[oi.width]
@@ -616,24 +607,14 @@ function tilted.new(name, args)
     return setmetatable(self, { __index = tilted.object })
 end
 
---- The extended tile layout, on the right.
--- @usebeautiful beautiful.layout_tilted_right
 tilted.right = tilted.new("tilted_right")
 
---- The extended tile layout, on the left.
--- @usebeautiful beautiful.layout_tilted_left
 tilted.left = tilted.new("tilted_left", { is_reversed = true })
 
---- The extended tile layout, on the bottom.
--- @usebeautiful beautiful.layout_tilted_bottom
 tilted.bottom = tilted.new("tilted_bottom", { is_horizontal = false })
 
---- The extended tile layout, on the top.
--- @usebeautiful beautiful.layout_tilted_top
 tilted.top = tilted.new("tilted_top", { is_horizontal = false, is_reversed = true })
 
---- The extended tile layout, on the center.
--- @usebeautiful beautiful.layout_tilted_center
 tilted.center = tilted.new("tilted_center", { column_strategy = "center" })
 
 amouse.resize.add_enter_callback(function(client, args)

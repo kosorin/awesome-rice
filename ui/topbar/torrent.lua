@@ -4,6 +4,7 @@ if not config.features.torrent_widget then
 end
 
 local capi = Capi
+local setmetatable = setmetatable
 local concat = table.concat
 local insert = table.insert
 local max = math.max
@@ -13,7 +14,7 @@ local wibox = require("wibox")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local torrent_service = require("services.torrent")
 local dpi = Dpi
 local humanizer = require("utils.humanizer")
@@ -24,7 +25,10 @@ local widget_helper = require("helpers.widget")
 local mebox = require("widget.mebox")
 local pango = require("utils.pango")
 local css = require("utils.css")
+local hui = require("helpers.ui")
 
+
+local file_size_units = setmetatable({ space = pango.thin_space }, { __index = humanizer.file_size_units })
 
 local torrent_widget = { mt = {} }
 
@@ -84,13 +88,13 @@ function torrent_widget:refresh()
             text = "verifying"
         else
             style = styles.unknown_status
-            text = format("status:%s", tostring(data.status) or "-")
+            text = format("status:%s", pango.escape(tostring(data.status)) or "-")
         end
 
         local info_parts = {}
         local missing_size = max(0, data.wanted_size - data.downloaded_size)
         if missing_size > 0 then
-            insert(info_parts, humanizer.file_size(max(0, data.wanted_size - data.downloaded_size)))
+            insert(info_parts, humanizer.humanize_units(file_size_units, max(0, data.wanted_size - data.downloaded_size)))
         end
         if data.total_count > 0 then
             insert(info_parts, format("%d/%d", data.downloaded_count, data.total_count))
@@ -109,10 +113,10 @@ function torrent_widget:refresh()
     self:apply_style(style)
 
     local text_widget = self:get_children_by_id("text")[1]
-    text_widget:set_markup(pango.span { foreground = style.foreground, text, })
+    text_widget:set_markup(pango.span { fgcolor = style.fg, text })
 
     local icon_path = config.places.theme .. "/icons/" .. icon .. ".svg"
-    local icon_stylesheet = css.style { path = { fill = style.foreground } }
+    local icon_stylesheet = css.style { path = { fill = style.fg } }
     local icon_widget = self:get_children_by_id("icon")[1]
     icon_widget:set_stylesheet(icon_stylesheet)
     icon_widget:set_image(icon_path)
@@ -121,11 +125,11 @@ end
 function torrent_widget.new(wibar)
     local self = wibox.widget {
         widget = capsule,
-        margins = {
-            left = beautiful.capsule.default_style.margins.left,
+        margins = hui.thickness {
+            top = beautiful.wibar.paddings.top,
             right = beautiful.capsule.default_style.margins.right,
-            top = beautiful.wibar.padding.top,
-            bottom = beautiful.wibar.padding.bottom,
+            bottom = beautiful.wibar.paddings.bottom,
+            left = beautiful.capsule.default_style.margins.left,
         },
         {
             layout = wibox.layout.fixed.horizontal,
@@ -183,7 +187,7 @@ function torrent_widget.new(wibar)
         {
             text = "alternative speed limit",
             on_show = function(item) item.checked = not not torrent_service.last_response.data.alternative_speed_enabled end,
-            callback = function(_, item) torrent_service.alternative_speed(not item.checked) end,
+            callback = function(item) torrent_service.alternative_speed(not item.checked) end,
         },
         mebox.separator,
         {

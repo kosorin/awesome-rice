@@ -1,6 +1,6 @@
 local capi = Capi
 local insert = table.insert
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local naughty = require("naughty")
 local dpi = Dpi
 local mebox = require("widget.mebox")
@@ -16,7 +16,7 @@ local function build_simple_toggle(name, property, checkbox_type)
         text = name,
         checkbox_type = checkbox_type,
         on_show = function(item, menu) item.checked = not not menu.tag[property] end,
-        callback = function(_, item, menu) menu.tag[property] = not item.checked end,
+        callback = function(item, menu) menu.tag[property] = not item.checked end,
     }
 end
 
@@ -87,14 +87,11 @@ function tag_menu_template.new()
             insert(items, {
                 text = "volatile",
                 on_show = function(item) item.checked = not not tag.volatile end,
-                callback = function(_, item)
-                    tag.volatile = not item.checked
-                end,
+                callback = function(item) tag.volatile = not item.checked end,
             })
             insert(items, mebox.separator)
 
             insert(items, {
-                urgent = true,
                 text = "delete",
                 icon = config.places.theme .. "/icons/delete-forever.svg",
                 icon_color = beautiful.palette.red,
@@ -110,7 +107,7 @@ function tag_menu_template.new()
             })
 
             return items
-        end
+        end,
     }
 end
 

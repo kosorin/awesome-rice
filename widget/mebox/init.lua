@@ -3,7 +3,7 @@ local setmetatable = setmetatable
 local ipairs = ipairs
 local math = math
 local awful = require("awful")
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local gtable = require("gears.table")
 local grectangle = require("gears.geometry").rectangle
 local wibox = require("wibox")
@@ -13,10 +13,11 @@ local mod = binding.modifier
 local btn = binding.button
 local widget_helper = require("helpers.widget")
 local noice = require("theme.style")
+local templates = require("widget.mebox.templates")
 
 
-local do_not_cache = "<do-not-cache>"
-
+---@param value? number
+---@return sign
 local function sign(value)
     value = tonumber(value)
     if not value or value == 0 then
@@ -25,29 +26,121 @@ local function sign(value)
     return value > 0 and 1 or -1
 end
 
+---@todo Create helper function
+---@param screen? integer|screen
+---@return screen|nil
 local function get_screen(screen)
     return screen and capi.screen[screen]
 end
 
-local mebox = { mt = {} }
 
-function mebox.separator(menu)
+---@class Mebox.module
+---@operator call: Mebox
+local M = { mt = {} }
+
+function M.mt:__call(...)
+    return M.new(...)
+end
+
+
+---@class MeboxItem
+---@field index integer
+---@field visible boolean
+---@field enabled boolean
+---@field selected boolean
+---@field mouse_move_select? boolean
+---@field mouse_move_show_submenu? boolean
+---@field cache_submenu? boolean
+---@field submenu? (fun(menu: Mebox): Mebox.new.args)|Mebox.new.args
+---@field callback? fun(item: MeboxItem, menu: Mebox, context?: Mebox.context)
+---@field on_show? fun(item: MeboxItem, menu: Mebox, args?: Mebox.show.args, context?: Mebox.context): boolean?
+---@field on_hide? fun(item: MeboxItem, menu: Mebox)
+---@field on_ready? fun(item_widget?: wibox.widget.base, item: MeboxItem, menu: Mebox, args?: Mebox.show.args, context?: Mebox.context)
+---@field layout_id? string
+---@field layout_add? fun(layout: wibox.layout, item_widget: wibox.widget.base)
+---@field buttons_builder? fun(item: MeboxItem, menu: Mebox, default_click_action: function): awful.button[]
+---@field template? widget_template
+
+---@class Mebox.context
+---@field action? "callback"|"submenu"
+---@field source? "keyboard"|"mouse"
+---@field select_parent? boolean
+
+---@class Mebox : wibox, stylable
+---@field package _private Mebox.private
+---Style properties:
+---@field paddings thickness
+---@field item_width number
+---@field item_height number
+---@field placement placement
+---@field placement_bounding_args table
+---@field active_opacity number
+---@field inactive_opacity number
+---@field submenu_offset number
+M.object = {}
+---@class Mebox.private
+---@field parent? Mebox
+---@field active_submenu? { index: integer, menu: Mebox }
+---@field submenu_cache? (Mebox|false)[]
+---@field items? MeboxItem[]
+---@field item_widgets? (wibox.widget.base|false)[]
+---@field selected_index? integer
+---@field orientation orientation
+---@field layout? wibox.layout
+---@field layout_template widget_value
+---@field layout_container wibox.container
+---@field layout_navigator? fun(menu: Mebox, x: sign, y: sign, direction?: direction, context?: Mebox.context)
+---@field items_source MeboxItem[]|fun(menu: Mebox, args?: Mebox.show.args, context?: Mebox.context)
+---@field on_show? fun(menu: Mebox, args?: Mebox.show.args, context?: Mebox.context): boolean
+---@field on_hide? fun(menu: Mebox)
+---@field on_ready? fun(menu: Mebox, args?: Mebox.show.args, context?: Mebox.context)
+---@field mouse_move_select boolean
+---@field mouse_move_show_submenu boolean
+---@field keygrabber_auto boolean
+---@field keygrabber awful.keygrabber
+---@field item_template widget_template
+---@field separator_template widget_template
+---@field header_template widget_template
+
+noice.define_style(M.object, {
+    bg = { proxy = true },
+    fg = { proxy = true },
+    border_color = { proxy = true },
+    border_width = { proxy = true },
+    shape = { proxy = true },
+    paddings = { id = "#layout_container", property = "margins" },
+    item_width = {},
+    item_height = {},
+    placement = {},
+    placement_bounding_args = {},
+    active_opacity = {},
+    inactive_opacity = {},
+    submenu_offset = {},
+})
+
+---@param menu Mebox
+---@return MeboxItem
+function M.separator(menu)
     return {
         enabled = false,
-        template = menu.separator_template,
+        template = menu._private.separator_template,
     }
 end
 
-function mebox.header(text)
+---@param text string
+---@return fun(menu: Mebox): MeboxItem
+function M.header(text)
     return function(menu)
         return {
             enabled = false,
             text = text,
-            template = menu.header_template,
+            template = menu._private.header_template,
         }
     end
 end
 
+---@param menu Mebox
+---@param args { geometry?: geometry, coords: point, bounding_rect: geometry }
 local function default_placement(menu, args)
     local border_width = menu.border_width
     local width = menu.width + 2 * border_width
@@ -78,6 +171,8 @@ local function default_placement(menu, args)
     menu.y = y < min_y and min_y or (y > max_y and max_y or y)
 end
 
+---@param menu Mebox
+---@param args? Mebox.show.args
 local function place(menu, args)
     args = args or {}
 
@@ -85,7 +180,7 @@ local function place(menu, args)
     local screen = args.screen
         or awful.screen.getbycoord(coords.x, coords.y)
         or capi.mouse.screen
-    screen = get_screen(screen)
+    screen = assert(get_screen(screen))
     local bounds = screen:get_bounding_geometry(menu.placement_bounding_args)
 
     local border_width = menu.border_width
@@ -102,7 +197,7 @@ local function place(menu, args)
 
     local parent = menu._private.parent
     local placement_args = {
-        geometry = parent and parent:get_item_geometry(parent.active_submenu.index),
+        geometry = parent and parent:get_item_geometry(parent._private.active_submenu.index),
         coords = coords,
         bounding_rect = bounds,
         screen = screen,
@@ -114,18 +209,15 @@ local function place(menu, args)
     placement(menu, placement_args)
 end
 
-local function get_property_value(property, item, menu)
-    if item[property] ~= nil then
-        return item[property]
-    else
-        return menu[property]
-    end
-end
-
+---@param item MeboxItem
+---@param menu Mebox
+---@return widget_template
 local function get_item_template(item, menu)
-    return (item and item.template) or (menu and menu.item_template)
+    return (item and item.template) or (menu and menu._private.item_template)
 end
 
+---@param menu Mebox
+---@param keep_selected_index boolean
 local function fix_selected_item(menu, keep_selected_index)
     local actual_selected_index
 
@@ -147,7 +239,7 @@ local function fix_selected_item(menu, keep_selected_index)
             end
         end
 
-        local item_widget = menu._private.item_widgets[index]
+        local item_widget = menu:get_item_widget(index)
         if item_widget then
             menu:update_item(index)
         end
@@ -156,11 +248,25 @@ local function fix_selected_item(menu, keep_selected_index)
     menu._private.selected_index = actual_selected_index
 end
 
-function mebox:get_item_geometry(index)
+---@param index integer
+---@return wibox.widget.base|nil
+function M.object:get_item_widget(index)
+    -- Leave it as it is!
+    -- Return `nil` if item widget is `false`
+    return self._private.item_widgets[index] or nil
+end
+
+---@param index integer
+---@return geometry|nil
+function M.object:get_item_geometry(index)
     local border_width = self.border_width
     local geometry = self:geometry()
-    local item_widget = self._private.item_widgets[index]
-    local item_geometry = item_widget and widget_helper.find_geometry(item_widget, self)
+    local item_widget = self:get_item_widget(index)
+    if not item_widget then
+        return
+    end
+
+    local item_geometry = widget_helper.find_geometry(item_widget, self)
     return item_geometry and {
         x = geometry.x + item_geometry.x + border_width,
         y = geometry.y + item_geometry.y + border_width,
@@ -169,14 +275,18 @@ function mebox:get_item_geometry(index)
     }
 end
 
-function mebox:is_item_active(index)
+---Returns `true` if item at specified index is visible and enabled.
+---@param index? integer
+---@return boolean
+function M.object:is_item_active(index)
     local item = self._private.items[index]
     return item and item.visible and item.enabled
 end
 
-function mebox:update_item(index)
-    local item = self._private.items[index]
-    local item_widget = self._private.item_widgets[index]
+---@param index? integer
+function M.object:update_item(index)
+    local item = index and self._private.items[index]
+    local item_widget = index and self:get_item_widget(index)
     if not item or not item_widget then
         return
     end
@@ -186,8 +296,11 @@ function mebox:update_item(index)
     end
 end
 
-local control = { current = setmetatable({ instance = nil }, { __mode = "v" }) }
+---@class MeboxControl
+---@field current { instance?: Mebox }
+local control = { current = setmetatable({}, { __mode = "v" }) }
 
+---@param menu Mebox
 function control.hide(menu)
     local cm = control.current
     if cm.instance == menu then
@@ -195,6 +308,8 @@ function control.hide(menu)
     end
 end
 
+---@param menu Mebox
+---@return boolean
 function control.show(menu)
     local cm = control.current
     if cm.instance then
@@ -205,6 +320,9 @@ function control.show(menu)
     end
 end
 
+---@param menu Mebox
+---@param submenu Mebox
+---@param submenu_index integer
 local function attach_active_submenu(menu, submenu, submenu_index)
     assert(not menu._private.active_submenu)
     menu._private.active_submenu = {
@@ -215,13 +333,14 @@ local function attach_active_submenu(menu, submenu, submenu_index)
     menu:unselect()
 end
 
+---@param menu Mebox
 local function detach_active_submenu(menu)
     if menu._private.active_submenu then
         local clear_parent = true
         local submenu = menu._private.active_submenu.menu
         if menu._private.submenu_cache then
             local cached_submenu = menu._private.submenu_cache[menu._private.active_submenu.index]
-            if cached_submenu ~= do_not_cache then
+            if cached_submenu ~= false then
                 assert(submenu == cached_submenu)
                 clear_parent = false
             end
@@ -234,6 +353,7 @@ local function detach_active_submenu(menu)
     menu.opacity = menu.active_opacity or 1
 end
 
+---@param menu Mebox
 local function hide_active_submenu(menu)
     if menu._private.active_submenu then
         menu._private.active_submenu.menu:hide()
@@ -241,7 +361,8 @@ local function hide_active_submenu(menu)
     end
 end
 
-function mebox:get_active_menu()
+---@return Mebox
+function M.object:get_active_menu()
     local active = self
     while active._private.active_submenu do
         active = active._private.active_submenu.menu
@@ -249,15 +370,20 @@ function mebox:get_active_menu()
     return active
 end
 
-function mebox:get_root_menu()
+---@return Mebox
+function M.object:get_root_menu()
     local root = self
+    ---@diagnostic disable-next-line: need-check-nil
     while root._private.parent do
         root = root._private.parent
     end
+    ---@diagnostic disable-next-line: return-type-mismatch
     return root
 end
 
-function mebox:show_submenu(index, context)
+---@param index integer
+---@param context Mebox.context
+function M.object:show_submenu(index, context)
     context = context or {}
 
     if self._private.active_submenu and self._private.active_submenu.index == index then
@@ -273,6 +399,7 @@ function mebox:show_submenu(index, context)
     if not self:is_item_active(index) then
         return
     end
+    ---@cast index -nil
 
     local item = self._private.items[index]
     if not item.submenu then
@@ -280,21 +407,15 @@ function mebox:show_submenu(index, context)
     end
 
     local submenu = self._private.submenu_cache and self._private.submenu_cache[index]
-    if not submenu or submenu == do_not_cache then
+    if not submenu then
         local submenu_args = type(item.submenu) == "function"
-            and item.submenu(self)
+            and item.submenu(self) --[[@as Mebox.new.args]]
             or item.submenu
-        submenu = mebox.new(submenu_args, true)
+        submenu = M.new(submenu_args, true)
         submenu._private.parent = self
         if self._private.submenu_cache then
-            self._private.submenu_cache[index] = item.cache_submenu == false
-                and do_not_cache
-                or submenu
+            self._private.submenu_cache[index] = item.cache_submenu ~= false and submenu
         end
-    end
-
-    if not submenu then
-        return
     end
 
     attach_active_submenu(self, submenu, index)
@@ -302,14 +423,15 @@ function mebox:show_submenu(index, context)
     submenu:show(nil, context)
 end
 
-function mebox:hide_all()
+function M.object:hide_all()
     local root_menu = self:get_root_menu()
     if root_menu then
         root_menu:hide()
     end
 end
 
-function mebox:hide(context)
+---@param context? Mebox.context
+function M.object:hide(context)
     if not self.visible then
         return
     end
@@ -350,10 +472,14 @@ function mebox:hide(context)
     control.hide(self)
 end
 
+---@param self Mebox
+---@param args Mebox.show.args
+---@param context Mebox.context
 local function add_items(self, args, context)
     local items = type(self._private.items_source) == "function"
         and self._private.items_source(self, args, context)
         or self._private.items_source
+    ---@cast items MeboxItem[]
     for index, item in ipairs(items) do
         if type(item) == "function" then
             item = item(self, args, context)
@@ -375,7 +501,7 @@ local function add_items(self, args, context)
 
         if item.visible then
             local item_template = get_item_template(item, self)
-            local item_widget = base.make_widget_from_value(item_template)
+            local item_widget = assert(base.make_widget_from_value(item_template))
 
             local function click_action()
                 self:execute(index, { source = "mouse" })
@@ -384,17 +510,24 @@ local function add_items(self, args, context)
             item_widget.buttons = item.buttons_builder
                 and item.buttons_builder(item, self, click_action)
                 or binding.awful_buttons {
-                    binding.awful({}, btn.left,
-                        not item.urgent and click_action,
-                        item.urgent and click_action),
+                    binding.awful({}, btn.left, click_action),
                 }
 
             item_widget:connect_signal("mouse::enter", function()
-                if get_property_value("mouse_move_select", item, self) then
+                local select = item.mouse_move_select
+                if select == nil then
+                    select = self._private.mouse_move_select
+                end
+                if select then
                     self:select(index)
                 end
-                if get_property_value("mouse_move_show_submenu", item, self) then
-                    self:show_submenu(index)
+
+                local show_submenu = item.mouse_move_show_submenu
+                if show_submenu == nil then
+                    show_submenu = self._private.mouse_move_show_submenu
+                end
+                if show_submenu then
+                    self:show_submenu(index, context)
                 else
                     hide_active_submenu(self)
                 end
@@ -403,7 +536,9 @@ local function add_items(self, args, context)
             local layout = item.layout_id
                 and self._private.layout:get_children_by_id(item.layout_id)[1]
                 or self._private.layout
-            local layout_add = item.layout_add or layout.add
+            ---@cast layout wibox.layout
+
+            local layout_add = item.layout_add or assert(layout.add)
             layout_add(layout, item_widget)
 
             self._private.item_widgets[index] = item_widget
@@ -413,7 +548,15 @@ local function add_items(self, args, context)
     end
 end
 
-function mebox:show(args, context)
+---@class Mebox.show.args
+---@field selected_index? integer
+---@field coords? point
+---@field screen? screen
+---@field placement? placement
+
+---@param args? Mebox.show.args
+---@param context? Mebox.context
+function M.object:show(args, context)
     if self.visible then
         return
     end
@@ -431,7 +574,7 @@ function mebox:show(args, context)
         end
     end
 
-    self._private.layout = base.make_widget_from_value(self._private.layout_template)
+    self._private.layout = base.make_widget_from_value(self._private.layout_template) --[[@as wibox.layout]]
     self._private.layout_container:set_widget(self._private.layout)
     self._private.items = {}
     self._private.item_widgets = {}
@@ -444,7 +587,7 @@ function mebox:show(args, context)
     end
     for index, item in ipairs(self._private.items) do
         if type(item.on_ready) == "function" then
-            local item_widget = self._private.item_widgets[index]
+            local item_widget = self:get_item_widget(index)
             item.on_ready(item_widget, item, self, args, context)
         end
     end
@@ -465,7 +608,9 @@ function mebox:show(args, context)
     self.visible = true
 end
 
-function mebox:toggle(args, context)
+---@param args? Mebox.show.args
+---@param context? Mebox.context
+function M.object:toggle(args, context)
     if self.visible then
         self:hide(context)
         return false
@@ -475,7 +620,7 @@ function mebox:toggle(args, context)
     end
 end
 
-function mebox:unselect()
+function M.object:unselect()
     local index = self._private.selected_index
 
     self._private.selected_index = nil
@@ -488,10 +633,13 @@ function mebox:unselect()
     self:update_item(index)
 end
 
-function mebox:select(index)
+---@param index? integer
+---@return boolean
+function M.object:select(index)
     if not self:is_item_active(index) then
         return false
     end
+    ---@cast index -nil
 
     self:unselect()
 
@@ -506,11 +654,14 @@ function mebox:select(index)
     return true
 end
 
-function mebox:execute(index, context)
+---@param index? integer
+---@param context? Mebox.context
+function M.object:execute(index, context)
     index = index or self._private.selected_index
     if not self:is_item_active(index) then
         return
     end
+    ---@cast index -nil
 
     context = context or {}
 
@@ -529,8 +680,7 @@ function mebox:execute(index, context)
     end
 
     if can_process("callback") then
-        local item_widget = self._private.item_widgets[index]
-        done = item.callback(item_widget, item, self, context) ~= false
+        done = item.callback(item, self, context) ~= false
     end
 
     if done then
@@ -538,7 +688,10 @@ function mebox:execute(index, context)
     end
 end
 
-function mebox:select_next(direction, seek_origin)
+---@param direction? sign|"begin"|"end"
+---@param seek_origin integer|"begin"|"end"
+---@overload fun(seek_origin: "begin"|"end")
+function M.object:select_next(direction, seek_origin)
     local count = #self._private.items
     if count < 1 then
         return
@@ -550,6 +703,8 @@ function mebox:select_next(direction, seek_origin)
     elseif direction == "end" then
         seek_origin = direction
         direction = -1
+    else
+        direction = sign(direction --[[@as integer?]])
     end
 
     local index
@@ -563,7 +718,6 @@ function mebox:select_next(direction, seek_origin)
         index = self._private.selected_index or 0
     end
 
-    direction = sign(direction)
     if direction == 0 then
         return
     end
@@ -581,9 +735,14 @@ function mebox:select_next(direction, seek_origin)
     end
 end
 
-mebox.layout_navigators = {}
+M.layout_navigators = {}
 
-function mebox.layout_navigators.direction(menu, x, y, direction, context)
+---@param menu Mebox
+---@param x? sign
+---@param y? sign
+---@param direction? direction
+---@param context Mebox.context
+function M.layout_navigators.direction(menu, x, y, direction, context)
     local current_region_index
     local current_region
     local boundary = {}
@@ -591,7 +750,7 @@ function mebox.layout_navigators.direction(menu, x, y, direction, context)
     local region_map = {}
     local i = 0
     for index, item_widget in ipairs(menu._private.item_widgets) do
-        if menu._private.items[index].visible then
+        if item_widget then
             local region = widget_helper.find_geometry(item_widget, menu)
             if region then
                 i = i + 1
@@ -672,94 +831,41 @@ function mebox.layout_navigators.direction(menu, x, y, direction, context)
     until found
 end
 
-function mebox:navigate(x, y, direction, context)
+---@param x? sign
+---@param y? sign
+---@param direction? direction
+---@param context? Mebox.context
+function M.object:navigate(x, y, direction, context)
     context = context or {}
     local layout_navigator = type(self._private.layout_navigator) == "function"
         and self._private.layout_navigator
-        or mebox.layout_navigators.direction
+        or M.layout_navigators.direction
     layout_navigator(self, sign(x), sign(y), direction, context)
 end
 
-noice.define_style_properties(mebox, {
-    bg = { proxy = true },
-    fg = { proxy = true },
-    border_color = { proxy = true },
-    border_width = { proxy = true },
-    shape = { proxy = true },
-    paddings = { id = "#layout_container", property = "margins" },
-    item_width = {},
-    item_height = {},
-    item_template = {},
-    placement = {},
-    placement_bounding_args = {},
-    active_opacity = {},
-    inactive_opacity = {},
-    submenu_offset = {},
-    separator_template = {},
-    header_template = {},
-})
 
---[[
+---@class Mebox.new.args
+---@field orientation? orientation
+---@field layout_template? widget_value -- TODO: Rename `layout_template` property
+---@field layout_navigator? fun(menu: Mebox, x: sign, y: sign, direction?: direction, context?: Mebox.context)
+---@field cache_submenus? boolean
+---@field items_source (fun(menu: Mebox, args?: Mebox.show.args, context?: Mebox.context): MeboxItem[])|MeboxItem[]
+---@field on_show? fun(menu: Mebox, args?: Mebox.show.args, context?: Mebox.context): boolean?
+---@field on_hide? fun(menu: Mebox)
+---@field on_ready? fun(menu: Mebox, args?: Mebox.show.args, context?: Mebox.context)
+---@field mouse_move_select? boolean
+---@field mouse_move_show_submenu? boolean
+---@field keygrabber_auto? boolean
+---@field keygrabber_builder? fun(menu: Mebox): awful.keygrabber
+---@field buttons_builder? fun(menu: Mebox): awful.button[]
+---@field item_template? widget_template
+---@field separator_template? widget_template
+---@field header_template? widget_template
 
-new_args:
-- (style properties)
-- orientation : string | nil ["vertical"]
-- layout_template : widget | table | function [wibox.layout.fixed.vertical]
-- layout_navigator : function(menu, x, y, navigation_context) [nil]
-- cache_submenus : boolean [true]
-- items_source : table<item> | function(menu, show_args, show_context) [self]
-- on_show : function(menu, show_args, show_context) [nil]
-- on_hide : function(menu) [nil]
-- on_ready : function(menu, show_args, show_context) [nil]
-- mouse_move_select : boolean [false]
-- mouse_move_show_submenu : boolean [true]
-- keygrabber_auto : boolean [true]
-- keygrabber_builder : function(menu) [nil]
-- buttons_builder : function(menu) [nil]
-
-menu._private:
-- parent : menu | nil
-- active_submenu : table | nil
-- submenu_cache : table<menu> | nil
-- items : table<item> | nil
-- item_widgets : table<widget> | nil
-- selected_index : number | nil
-- orientation : string
-- layout_template : widget | table | function
-- layout_navigator : function(menu, x, y, navigation_context) | nil
-- items_source : table<item> | function(menu, show_args, show_context)
-- on_show : function(menu, show_args, show_context) | nil
-- on_hide : function(menu) | nil
-- on_ready : function(menu, show_args, show_context) | nil
-- mouse_move_select : boolean
-- mouse_move_show_submenu : boolean
-- keygrabber_auto : boolean
-- keygrabber : awful.keygrabber
-
-item:
-- index : number
-- visible : boolean
-- enabled : boolean
-- selected : boolean
-- mouse_move_select : boolean | nil
-- mouse_move_show_submenu : boolean | nil
-- cache_submenu : boolean | nil
-- submenu : ctor_args | nil
-- callback : function(item_widget, item, menu, execute_context) | nil
-- on_show : function(item, menu, show_args, show_context) | nil
-- on_hide : function(item, menu) | nil
-- on_ready : function(item_widget, item, menu, show_args, show_context) | nil
-- layout : string | nil
-- layout_add : function(layout, item_widget) | nil
-- buttons_builder : function(item, menu, default_click_action) [nil]
-
-active_submenu:
-- index : number
-- menu : menu
-
-]]
-
-function mebox.new(args, is_submenu)
+---@param args? Mebox.new.args
+---@param is_submenu? boolean
+---@return Mebox
+function M.new(args, is_submenu)
     args = args or {}
 
     local self = wibox {
@@ -770,9 +876,9 @@ function mebox.new(args, is_submenu)
             id = "#layout_container",
             layout = wibox.container.margin,
         },
-    }
+    } --[[@as Mebox]]
 
-    gtable.crush(self, mebox, true)
+    gtable.crush(self, M.object, true)
 
     self._private.submenu_cache = args.cache_submenus ~= false and {} or nil
     self._private.items_source = args.items_source or args
@@ -785,18 +891,15 @@ function mebox.new(args, is_submenu)
     self._private.orientation = args.orientation or "vertical"
     self._private.layout_navigator = args.layout_navigator
     self._private.layout_template = args.layout_template or wibox.layout.fixed[self._private.orientation]
-    self._private.layout_container = self:get_children_by_id("#layout_container")[1]
-
-    noice.initialize_style(self, self.widget, beautiful.mebox.default_style)
-
-    self:apply_style(args)
+    self._private.layout_container = self:get_children_by_id("#layout_container")[1] --[[@as wibox.container]]
+    self._private.item_template = args.item_template or templates.item
+    self._private.separator_template = args.separator_template or templates.separator
+    self._private.header_template = args.header_template or templates.header
 
     self.buttons = type(args.buttons_builder) == "function"
         and args.buttons_builder(self)
         or binding.awful_buttons {
-            binding.awful({}, btn.right, function()
-                self:hide()
-            end),
+            binding.awful({}, btn.right, function() self:hide() end),
         }
 
     if not is_submenu then
@@ -852,11 +955,11 @@ function mebox.new(args, is_submenu)
             }
     end
 
+    self:initialize_style(self.widget, beautiful.mebox.default_style)
+
+    self:apply_style(args)
+
     return self
 end
 
-function mebox.mt:__call(...)
-    return mebox.new(...)
-end
-
-return setmetatable(mebox, mebox.mt)
+return setmetatable(M, M.mt)

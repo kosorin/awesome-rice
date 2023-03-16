@@ -28,7 +28,7 @@ function tags.build_tag(args)
 end
 
 function tags.add_volatile_tag(screen, name)
-    local name = name or tostring(1 + (#screen.tags or 0))
+    name = name or tostring(1 + (#screen.tags or 0))
     local tag = awful.tag.add(name, tags.build_tag {
         screen = screen,
         volatile = true,

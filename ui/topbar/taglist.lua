@@ -5,7 +5,7 @@ local awful = require("awful")
 local common = require("awful.widget.common")
 local base = require("wibox.widget.base")
 local wibox = require("wibox")
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local tcolor = require("helpers.color")
 local config = require("config")
 local binding = require("io.binding")
@@ -22,6 +22,7 @@ local widget_helper = require("helpers.widget")
 local screen_helper = require("helpers.screen")
 local pango = require("utils.pango")
 local css = require("utils.css")
+local hui = require("helpers.ui")
 
 
 local taglist = { mt = {} }
@@ -38,8 +39,8 @@ function taglist:rename_tag_inline(tag)
         capi.mousegrabber.run(function() return true end, nil)
         awful.prompt.run {
             text = old_name,
-            bg_cursor = beautiful.taglist_bg_rename,
-            fg_cursor = beautiful.taglist_fg_rename,
+            bg_cursor = beautiful.taglist.rename.bg,
+            fg_cursor = beautiful.taglist.rename.fg,
             ul_cursor = "none",
             selectall = true,
             textbox = textbox,
@@ -104,7 +105,7 @@ function taglist.new(wibar)
 
                 local plus_button = layout.widget.children[2]
                 local plus_button_icon = layout:get_children_by_id("#icon")[1]
-                plus_button_icon:set_stylesheet(css.style { path = { fill = plus_button.foreground } })
+                plus_button_icon:set_stylesheet(css.style { path = { fill = plus_button.fg } })
             end
 
             root_container:reset()
@@ -141,18 +142,19 @@ function taglist.new(wibar)
                     end
                 end
 
-                local text, background, _, _, item_args = label(tag, item.text)
+                local text, bg, _, _, item_args = label(tag, item.text)
+                text = text or ""
                 item_args = item_args or {}
 
                 if item.container then
-                    item.container.background = background
+                    item.container.bg = bg
                     item.container.border_width = item_args.shape_border_width
                     item.container.border_color = item_args.shape_border_color
                 end
 
                 if item.text then
                     if not item.text:set_markup_silently(text) then
-                        item.text:set_markup(pango.i("&lt;Invalid text&gt;"))
+                        item.text:set_markup(pango.i(pango.escape("<nvalid>")))
                     end
                 end
 
@@ -169,7 +171,7 @@ function taglist.new(wibar)
             binding.awful({}, btn.middle, function(_, tag)
                 awful.tag.viewtoggle(tag)
             end),
-            binding.awful({ mod.super, }, btn.left, function(_, tag)
+            binding.awful({ mod.super }, btn.left, function(_, tag)
                 screen_helper.clients_to_tag(self.screen, tag)
             end),
             binding.awful({}, {
@@ -190,20 +192,14 @@ function taglist.new(wibar)
                 },
                 {
                     widget = capsule,
-                    margins = {
-                        left = beautiful.wibar.spacing / 2,
-                        right = beautiful.wibar.spacing / 2,
-                        top = beautiful.wibar.padding.top,
-                        bottom = beautiful.wibar.padding.bottom,
+                    margins = hui.thickness {
+                        beautiful.wibar.paddings.top,
+                        beautiful.wibar.spacing / 2,
+                        beautiful.wibar.paddings.bottom,
                     },
-                    paddings = {
-                        left = dpi(6),
-                        right = dpi(6),
-                        top = dpi(6),
-                        bottom = dpi(6),
-                    },
-                    background = tcolor.transparent,
-                    foreground = beautiful.capsule.styles.disabled.foreground,
+                    paddings = hui.thickness { dpi(6) },
+                    bg = tcolor.transparent,
+                    fg = beautiful.capsule.styles.disabled.fg,
                     border_width = 0,
                     buttons = binding.awful_buttons {
                         binding.awful({}, btn.left, function()
@@ -225,11 +221,10 @@ function taglist.new(wibar)
         widget_template = {
             id = "#container",
             widget = capsule,
-            margins = {
-                left = beautiful.wibar.spacing / 2,
-                right = beautiful.wibar.spacing / 2,
-                top = beautiful.wibar.padding.top,
-                bottom = beautiful.wibar.padding.bottom,
+            margins = hui.thickness {
+                beautiful.wibar.paddings.top,
+                beautiful.wibar.spacing / 2,
+                beautiful.wibar.paddings.bottom,
             },
             {
                 id = "#text",

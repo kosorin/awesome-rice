@@ -4,12 +4,13 @@ local format = string.format
 local dpi = Dpi
 local awful = require("awful")
 local wibox = require("wibox")
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local focus_history = awful.client.focus.history
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
 local tcolor = require("helpers.color")
+local hui = require("helpers.ui")
 local mebox = require("widget.mebox")
 local capsule = require("widget.capsule")
 local pango = require("utils.pango")
@@ -17,14 +18,9 @@ local pango = require("utils.pango")
 
 return mebox {
     item_width = dpi(1000),
-    bg = tcolor.change(beautiful.common.background, { alpha = 0.85 }),
+    bg = tcolor.change(beautiful.common.bg, { alpha = 0.85 }),
     placement = awful.placement.centered,
-    paddings = {
-        left = dpi(16),
-        right = dpi(16),
-        top = dpi(16),
-        bottom = dpi(16),
-    },
+    paddings = hui.thickness { dpi(16) },
     items_source = function()
         local items = {}
         for _, client in ipairs(focus_history.list) do
@@ -33,11 +29,11 @@ return mebox {
                 client = client,
                 active = client.active,
                 text = pango.span {
-                    pango.span { fgalpha = "65%", weight = "light", "[", tag and tag.name or "", "]" },
+                    pango.span { fgalpha = "65%", weight = "light", "[", pango.escape(tag and tag.name or ""), "]" },
                     " ",
-                    pango.b(client.class or ""),
+                    pango.b(pango.escape(client.class or "")),
                     " ",
-                    pango.span { fgalpha = "65%", weight = "light", size = "small", client.name or "" },
+                    pango.span { fgalpha = "65%", weight = "light", size = "small", pango.escape(client.name or "") },
                 },
                 on_hide = function(item)
                     if not item.selected then
@@ -57,9 +53,7 @@ return mebox {
     end,
     item_template = {
         widget = capsule,
-        enabled = false,
-        hover_overlay = tcolor.transparent,
-        press_overlay = tcolor.transparent,
+        enable_overlay = false,
         {
             layout = wibox.layout.fixed.horizontal,
             spacing = dpi(12),
@@ -88,8 +82,8 @@ return mebox {
             local style = item.urgent
                 and styles.urgent
                 or (item.active
-                    and styles.active
-                    or styles.normal)
+                and styles.active
+                or styles.normal)
             self:apply_style(style)
 
             local icon_widget = self:get_children_by_id("#icon")[1]
@@ -100,7 +94,7 @@ return mebox {
             local text_widget = self:get_children_by_id("#text")[1]
             if text_widget then
                 text_widget:set_markup(pango.span {
-                    foreground = style.foreground,
+                    fgcolor = style.fg,
                     item.text or "",
                 })
             end

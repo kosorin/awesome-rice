@@ -2,7 +2,7 @@ local capi = Capi
 local ipairs = ipairs
 
 
-local widget_helper = {}
+local M = {}
 
 local function find_geometry_core(widget, drawable, hierarchy)
     local hierarchy_widget = hierarchy:get_widget()
@@ -31,7 +31,7 @@ local function find_geometry_core(widget, drawable, hierarchy)
     end
 end
 
-function widget_helper.find_geometry(widget, wibox)
+function M.find_geometry(widget, wibox)
     local drawable = wibox and wibox._drawable
     local hierarchy = drawable and drawable._widget_hierarchy
     if not hierarchy then
@@ -64,7 +64,7 @@ local function is_under_pointer_core(widget, x, y, hierarchy)
     end
 end
 
-function widget_helper.is_under_pointer(widget)
+function M.is_under_pointer(widget)
     local wibox = capi.mouse.current_wibox
     if not wibox then
         return
@@ -84,4 +84,4 @@ function widget_helper.is_under_pointer(widget)
     return is_under_pointer_core(widget, x, y, hierarchy)
 end
 
-return widget_helper
+return M

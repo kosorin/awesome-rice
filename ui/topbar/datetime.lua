@@ -5,7 +5,7 @@ local config = require("config")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local gshape = require("gears.shape")
 local calendar_popup = require("ui.popup.calendar")
 local dpi = Dpi
@@ -18,6 +18,7 @@ local aplacement = require("awful.placement")
 local widget_helper = require("helpers.widget")
 local htable = require("helpers.table")
 local css = require("utils.css")
+local hui = require("helpers.ui")
 
 
 local datetime_widget = { mt = {} }
@@ -55,7 +56,7 @@ function datetime_widget:refresh_date_widget()
         or beautiful.capsule.styles.normal
     date_container:apply_style(style)
 
-    local icon_stylesheet = css.style { path = { fill = style.foreground } }
+    local icon_stylesheet = css.style { path = { fill = style.fg } }
     local icon_widget = date_container.widget:get_children_by_id("icon")[1]
     icon_widget:set_stylesheet(icon_stylesheet)
 end
@@ -69,7 +70,7 @@ local function initialize_date_widget(self, style)
             widget = wibox.widget.imagebox,
             resize = true,
             image = config.places.theme .. "/icons/calendar-month.svg",
-            stylesheet = css.style { path = { fill = style.foreground } },
+            stylesheet = css.style { path = { fill = style.fg } },
         },
         {
             id = "text",
@@ -138,7 +139,7 @@ local function initialize_time_widget(self, style)
             id = "icon",
             widget = wibox.widget.imagebox,
             resize = true,
-            stylesheet = clock_icon.generate_style(style.foreground),
+            stylesheet = clock_icon.generate_style(style.fg),
         },
         {
             id = "text",
@@ -185,7 +186,7 @@ local function initialize_time_widget(self, style)
         {
             text = "show seconds",
             on_show = function(item) item.checked = not not self._private.seconds end,
-            callback = function(_, item) self:show_seconds(not item.checked) end,
+            callback = function(item) self:show_seconds(not item.checked) end,
         },
     }
 
@@ -205,27 +206,27 @@ function datetime_widget.new(wibar)
         {
             id = "#date",
             widget = capsule,
-            margins = {
-                left = beautiful.capsule.default_style.margins.left,
+            margins = hui.thickness {
+                top = beautiful.wibar.paddings.top,
                 right = 0,
-                top = beautiful.wibar.padding.top,
-                bottom = beautiful.wibar.padding.bottom,
+                bottom = beautiful.wibar.paddings.bottom,
+                left = beautiful.capsule.default_style.margins.left,
             },
             shape = function(cr, width, height)
-                gshape.partially_rounded_rect(cr, width, height, true, false, false, true, beautiful.capsule.shape_radius)
+                gshape.partially_rounded_rect(cr, width, height, true, false, false, true, beautiful.capsule.border_radius)
             end,
         },
         {
             id = "#time",
             widget = capsule,
-            margins = {
-                left = 0,
+            margins = hui.thickness {
+                top = beautiful.wibar.paddings.top,
                 right = beautiful.capsule.default_style.margins.right,
-                top = beautiful.wibar.padding.top,
-                bottom = beautiful.wibar.padding.bottom,
+                bottom = beautiful.wibar.paddings.bottom,
+                left = 0,
             },
             shape = function(cr, width, height)
-                gshape.partially_rounded_rect(cr, width, height, false, true, true, false, beautiful.capsule.shape_radius)
+                gshape.partially_rounded_rect(cr, width, height, false, true, true, false, beautiful.capsule.border_radius)
             end,
         },
     }

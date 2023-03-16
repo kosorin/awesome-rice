@@ -6,9 +6,10 @@ local tcolor = require("helpers.color")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local weather_service = require("services.weather")
 local widget_helper = require("helpers.widget")
+local hui = require("helpers.ui")
 local dpi = Dpi
 local humanizer = require("utils.humanizer")
 local glib = require("lgi").GLib
@@ -18,32 +19,32 @@ local DateTime_new_from_unix_local = DateTime.new_from_unix_local
 
 local wind_info = {
     [8] = {
-        { icon = "", short = "N", long = "north", },
-        { icon = "", short = "NE", long = "northeast", },
-        { icon = "", short = "E", long = "east", },
-        { icon = "", short = "SE", long = "southeast", },
-        { icon = "", short = "S", long = "south", },
-        { icon = "", short = "SW", long = "southwest", },
-        { icon = "", short = "W", long = "west", },
-        { icon = "", short = "NW", long = "northwest", },
+        { icon = "", short = "N", long = "north" },
+        { icon = "", short = "NE", long = "northeast" },
+        { icon = "", short = "E", long = "east" },
+        { icon = "", short = "SE", long = "southeast" },
+        { icon = "", short = "S", long = "south" },
+        { icon = "", short = "SW", long = "southwest" },
+        { icon = "", short = "W", long = "west" },
+        { icon = "", short = "NW", long = "northwest" },
     },
     [16] = {
-        { icon = "", short = "S", long = "sever", },
-        { icon = "", short = "SSV", long = "severo-severovýchod", },
-        { icon = "", short = "SV", long = "severovýchod", },
-        { icon = "", short = "VSV", long = "východo-severovýchod", },
-        { icon = "", short = "V", long = "východ", },
-        { icon = "", short = "VJV", long = "východo-jihovýchod", },
-        { icon = "", short = "JV", long = "jihovýchod", },
-        { icon = "", short = "JJV", long = "jiho-jihovýchod", },
-        { icon = "", short = "J", long = "jih", },
-        { icon = "", short = "JJZ", long = "jiho-jihozápad", },
-        { icon = "", short = "JZ", long = "jihozápad", },
-        { icon = "", short = "ZJZ", long = "západo-jihozápad", },
-        { icon = "", short = "Z", long = "západ", },
-        { icon = "", short = "ZSZ", long = "západo-severozápad", },
-        { icon = "", short = "SZ", long = "severozápad", },
-        { icon = "", short = "SSZ", long = "severo-severozápad", },
+        { icon = "", short = "S", long = "sever" },
+        { icon = "", short = "SSV", long = "severo-severovýchod" },
+        { icon = "", short = "SV", long = "severovýchod" },
+        { icon = "", short = "VSV", long = "východo-severovýchod" },
+        { icon = "", short = "V", long = "východ" },
+        { icon = "", short = "VJV", long = "východo-jihovýchod" },
+        { icon = "", short = "JV", long = "jihovýchod" },
+        { icon = "", short = "JJV", long = "jiho-jihovýchod" },
+        { icon = "", short = "J", long = "jih" },
+        { icon = "", short = "JJZ", long = "jiho-jihozápad" },
+        { icon = "", short = "JZ", long = "jihozápad" },
+        { icon = "", short = "ZJZ", long = "západo-jihozápad" },
+        { icon = "", short = "Z", long = "západ" },
+        { icon = "", short = "ZSZ", long = "západo-severozápad" },
+        { icon = "", short = "SZ", long = "severozápad" },
+        { icon = "", short = "SSZ", long = "severo-severozápad" },
     },
 }
 
@@ -55,25 +56,25 @@ end
 local ns = "<span size='x-small'> </span>"
 
 local display_info = {
-    time = { title = "Time", format = "%a, %b %-e, %-H:%M:%S", },
-    humidity = { title = "Humidity", format = "%d %%%%", },
-    pressure = { title = "Pressure", format = "%.2f hPa", },
-    dew_point = { title = "Dew point", format = "%.1f &#176;C", },
-    temperature = { title = "Temperature", format = "%.1f" .. ns .. "&#176;C", },
-    wind_speed = { title = "Wind speed", format = "%.1f m/s", },
-    wind_gust = { title = "Wind gust", format = "%.1f m/s", },
-    wind_chill = { title = "Wind chill", format = "%.1f &#176;C", },
-    wind_direction = { title = "Wind direction", format = "%d&#176;", },
-    apparent_temperature = { title = "Feels like", format = "%.1f &#176;C", },
-    uv = { title = "UV index", format = "%d ", },
-    solar_radiation = { title = "Solar radiation", format = "%.1f W/m<sup>2</sup>", },
-    precipitation_rate = { title = "Rain rate", format = "%.1f mm/h", },
-    precipitation_day = { title = "Rain (day)", format = "%.1f mm", },
-    precipitation_week = { title = "Rain (week)", format = "%.1f mm", },
-    precipitation_month = { title = "Rain (month)", format = "%.1f mm", },
-    indoor_humidity = { title = "Humidity", format = "%d %%%%", },
-    indoor_temperature = { title = "Temperature", format = "%.1f &#176;C", },
-    indoor_apparent_temperature = { title = "Feels like", format = "%.1f &#176;C", },
+    time = { title = "Time", format = "%a, %b %-e, %-H:%M:%S" },
+    humidity = { title = "Humidity", format = "%d %%%%" },
+    pressure = { title = "Pressure", format = "%.2f hPa" },
+    dew_point = { title = "Dew point", format = "%.1f &#176;C" },
+    temperature = { title = "Temperature", format = "%.1f" .. ns .. "&#176;C" },
+    wind_speed = { title = "Wind speed", format = "%.1f m/s" },
+    wind_gust = { title = "Wind gust", format = "%.1f m/s" },
+    wind_chill = { title = "Wind chill", format = "%.1f &#176;C" },
+    wind_direction = { title = "Wind direction", format = "%d&#176;" },
+    apparent_temperature = { title = "Feels like", format = "%.1f &#176;C" },
+    uv = { title = "UV index", format = "%d " },
+    solar_radiation = { title = "Solar radiation", format = "%.1f W/m<sup>2</sup>" },
+    precipitation_rate = { title = "Rain rate", format = "%.1f mm/h" },
+    precipitation_day = { title = "Rain (day)", format = "%.1f mm" },
+    precipitation_week = { title = "Rain (week)", format = "%.1f mm" },
+    precipitation_month = { title = "Rain (month)", format = "%.1f mm" },
+    indoor_humidity = { title = "Humidity", format = "%d %%%%" },
+    indoor_temperature = { title = "Temperature", format = "%.1f &#176;C" },
+    indoor_apparent_temperature = { title = "Feels like", format = "%.1f &#176;C" },
 }
 
 local weather_popup = {}
@@ -105,7 +106,6 @@ local empty_cell = {
 }
 
 local function create_temperature_data_widget()
-
     local time_tooltip
 
     local data_widget = wibox.widget {
@@ -116,13 +116,14 @@ local function create_temperature_data_widget()
             id = "temperature",
             widget = wibox.widget.textbox,
             halign = "center",
-            pattern = "<span weight='bold' size='300%' foreground='"
+            pattern = "<span weight='bold' size='300%' fgcolor='"
                 .. beautiful.common.primary
                 .. "'>{value}</span>",
         },
         {
             layout = wibox.container.place,
-            halign = "center", {
+            halign = "center",
+            {
                 layout = wibox.layout.grid,
                 orientation = "vertical",
                 horizontal_homogeneous = true,
@@ -131,7 +132,6 @@ local function create_temperature_data_widget()
                 forced_num_cols = 2,
                 horizontal_spacing = dpi(12),
                 vertical_spacing = dpi(8),
-
                 data_header("apparent_temperature"),
                 data_cell("apparent_temperature"),
                 data_header("humidity"),
@@ -140,7 +140,8 @@ local function create_temperature_data_widget()
                 data_cell("dew_point"),
                 data_header("pressure"),
                 data_cell("pressure"),
-                empty_cell, empty_cell,
+                empty_cell,
+                empty_cell,
                 data_header("wind_chill"),
                 data_cell("wind_chill"),
                 data_header("wind_speed"),
@@ -154,14 +155,16 @@ local function create_temperature_data_widget()
                         return string.format(format, value)
                             .. " " .. info.short
                             .. " " .. info.icon
-                    end
+                    end,
                 }),
-                empty_cell, empty_cell,
+                empty_cell,
+                empty_cell,
                 data_header("solar_radiation"),
                 data_cell("solar_radiation"),
                 data_header("uv"),
                 data_cell("uv"),
-                empty_cell, empty_cell,
+                empty_cell,
+                empty_cell,
                 data_header("precipitation_rate"),
                 data_cell("precipitation_rate"),
                 data_header("precipitation_day"),
@@ -208,7 +211,6 @@ local function create_temperature_data_widget()
 end
 
 local function create_indoor_data_widget()
-
     local time_tooltip
 
     local data_widget = wibox.widget {
@@ -219,7 +221,7 @@ local function create_indoor_data_widget()
             id = "indoor_temperature",
             widget = wibox.widget.textbox,
             halign = "center",
-            pattern = "<span weight='bold' size='300%' foreground='"
+            pattern = "<span weight='bold' size='300%' fgcolor='"
                 .. beautiful.common.primary
                 .. "'>{value}</span>",
         },
@@ -235,7 +237,6 @@ local function create_indoor_data_widget()
                 forced_num_cols = 2,
                 horizontal_spacing = dpi(12),
                 vertical_spacing = dpi(8),
-
                 data_header("indoor_apparent_temperature"),
                 data_cell("indoor_apparent_temperature"),
                 data_header("indoor_humidity"),
@@ -376,16 +377,14 @@ local function new(parent, data_widget_factory, args)
         height = args.height or dpi(592),
         bg = args.bg or beautiful.popup.default_style.bg,
         opacity = args.opacity or 1,
-        border_width = args.border_width or beautiful.border_width,
+        border_width = args.border_width or dpi(1),
         border_color = args.border_color or beautiful.common.primary_66,
         padding = args.padding or dpi(24),
     }, { __index = WeatherPopup })
 
-    self.margins = args.margins or {
-        left = beautiful.useless_gap,
-        right = beautiful.useless_gap,
-        top = beautiful.useless_gap - (self.arrow_size / 2) - self.border_width,
-        bottom = beautiful.useless_gap,
+    self.margins = args.margins or hui.thickness {
+        beautiful.gap,
+        top = beautiful.gap - (self.arrow_size / 2) - self.border_width,
     }
 
     self.data_widget = data_widget_factory()
@@ -397,7 +396,7 @@ local function new(parent, data_widget_factory, args)
         valign = "center",
         {
             widget = wibox.widget.textbox,
-            markup = "<span size='150%' fgcolor='" .. beautiful.common.foreground_66 .. "'>No Data</span>",
+            markup = "<span size='150%' fgcolor='" .. beautiful.common.fg_66 .. "'>No Data</span>",
         },
     }
 

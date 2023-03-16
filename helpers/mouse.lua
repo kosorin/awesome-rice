@@ -5,76 +5,94 @@ local mod = binding.modifier
 local btn = binding.button
 
 
-local mouse_helper = {}
+local M = {}
 
-function mouse_helper.stop_grabbing(widget, callback)
-    widget:disconnect_signal("button::press", callback)
-end
+do
+    local orientations = {
+        horizontal = {
+            position = "x",
+            size = "width",
+        },
+        vertical = {
+            position = "y",
+            size = "height",
+        },
+    }
 
-function mouse_helper.start_grabbing(args)
-    local calculate_value
-    if args.minimum and args.maximum then
-        assert(args.minimum < args.maximum)
-        local size = args.maximum - args.minimum
-        calculate_value = function(value)
-            return args.minimum + min(max(0, value * size), size)
-        end
-    else
-        calculate_value = function(value)
-            return value
-        end
-    end
-
-    local function callback(widget, x, y, button, modifiers, geometry)
-        if button ~= (args.button or btn.left) or capi.mousegrabber.isrunning() then
-            return
-        end
-
-        if args.start and not args.start() then
-            return
-        end
-
-        local wibox_geometry = args.wibox and args.wibox:geometry()
-        local wibox_x = wibox_geometry and wibox_geometry.x or 0
-
-        do
-            local value = calculate_value(x / geometry.width)
-            if args.fix_value then
-                value = args.fix_value(value)
+    function M.attach_slider_grabber(args)
+        local calculate_value
+        if args.minimum and args.maximum then
+            assert(args.minimum < args.maximum)
+            local size = args.maximum - args.minimum
+            calculate_value = function(value)
+                return args.minimum + min(max(0, value * size), size)
             end
-            args.update(value)
+        else
+            calculate_value = function(value)
+                return value
+            end
         end
 
-        capi.mousegrabber.run(function(grab)
-            local value = calculate_value((grab.x - geometry.x - wibox_x) / geometry.width)
-            if args.fix_value then
-                value = args.fix_value(value)
+        local function callback(_, x, y, button, modifiers, geometry)
+            if button ~= (args.button or btn.left) or capi.mousegrabber.isrunning() then
+                return
             end
 
-            if args.interrupt and args.interrupt(value) then
-                if args.finish then
-                    args.finish(value, true)
+            if args.start and not args.start() then
+                return
+            end
+
+            local orientation = assert(orientations[args.orientation or "horizontal"])
+
+            local wibox_geometry = args.wibox and args.wibox:geometry()
+            local wibox_position = wibox_geometry and wibox_geometry[orientation.position] or 0
+
+            do
+                local positions = { x = x, y = y }
+                local position = positions[orientation.position]
+                local size = geometry[orientation.size]
+                local value = calculate_value(position / size)
+                if args.fix_value then
+                    value = args.fix_value(value)
                 end
-                return false
-            end
-
-            if grab.buttons[button] then
                 args.update(value)
-                return true
-            else
-                if args.finish then
-                    args.finish(value, false)
-                else
-                    args.update(value, true)
-                end
-                return false
             end
-        end, args.cursor or "sb_up_arrow")
+
+            capi.mousegrabber.run(function(grab)
+                local position = grab[orientation.position] - geometry[orientation.position] - wibox_position
+                local size = geometry[orientation.size]
+                local value = calculate_value(position / size)
+                if args.fix_value then
+                    value = args.fix_value(value)
+                end
+
+                if args.interrupt and args.interrupt(value) then
+                    if args.finish then
+                        args.finish(value, true)
+                    end
+                    return false
+                end
+
+                if grab.buttons[button] then
+                    args.update(value)
+                    return true
+                else
+                    if args.finish then
+                        args.finish(value, false)
+                    else
+                        args.update(value, true)
+                    end
+                    return false
+                end
+            end, args.cursor or "sb_up_arrow")
+        end
+
+        args.widget:connect_signal("button::press", callback)
+
+        return function()
+            args.widget:disconnect_signal("button::press", callback)
+        end
     end
-
-    args.widget:connect_signal("button::press", callback)
-
-    return callback
 end
 
-return mouse_helper
+return M

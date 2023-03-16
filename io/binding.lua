@@ -1,10 +1,52 @@
+local type = type
+local ipairs = ipairs
 local table = table
 local awful = require("awful")
 local gtable = require("gears.table")
 
 
+local last_order = 0
+local empty_modifiers = {}
+
+local trigger_type = {
+    button = "number",
+    key = "string",
+}
+
+---@alias BindingTrigger.value
+---| button
+---| key
+
+---@alias BindingTrigger.group { text?: string, from?: string, to?: string, [integer]: BindingTrigger|BindingTrigger.value }
+
+---@alias BindingTrigger.new.args BindingTrigger.group|BindingTrigger.value
+
+---@class BindingTrigger
+---@field trigger BindingTrigger.value
+---@field [string] any
+
+---@class Binding
+---@field on_press? fun(trigger: BindingTrigger, ...)
+---@field on_release? fun(trigger: BindingTrigger, ...)
+---@field modifiers key_modifier[]
+---@field triggers BindingTrigger[]
+---@field path? string[]
+---@field description? string
+---@field text? string
+---@field from? string
+---@field to? string
+---@field target? string
+---@field order integer
+---@field package _awful? { keys: awful.key[], buttons: awful.button[], hooks: awful.hook[] }
+
+---@class _Binding
+---@field awesome_bindings Binding[]
+---@field button table<string, button>
+---@field modifier table<string, key_modifier>
+---@field group table<string, BindingTrigger.group>
 local binding = {
     awesome_bindings = {},
+    trigger_type = trigger_type,
     button = {
         left = 1,
         middle = 2,
@@ -25,7 +67,6 @@ local binding = {
         alt_gr = "Mod5",
     },
     group = {
-        mouse_wheel = nil,
         fkeys = {
             from = "F1",
             to = "F35",
@@ -49,53 +90,57 @@ local binding = {
             { trigger = "#81", number = 9 },
         },
         arrows = {
-            { trigger = "Left", direction = "left", x = -1, y = 0, },
-            { trigger = "Right", direction = "right", x = 1, y = 0, },
-            { trigger = "Up", direction = "up", x = 0, y = 1, },
-            { trigger = "Down", direction = "down", x = 0, y = -1, },
+            { trigger = "Left", direction = "left", x = -1, y = 0 },
+            { trigger = "Right", direction = "right", x = 1, y = 0 },
+            { trigger = "Up", direction = "up", x = 0, y = 1 },
+            { trigger = "Down", direction = "down", x = 0, y = -1 },
         },
         arrows_horizontal = {
-            { trigger = "Left", direction = "left", x = -1, y = 0, },
-            { trigger = "Right", direction = "right", x = 1, y = 0, },
+            { trigger = "Left", direction = "left", x = -1, y = 0 },
+            { trigger = "Right", direction = "right", x = 1, y = 0 },
         },
         arrows_vertical = {
-            { trigger = "Up", direction = "up", x = 0, y = 1, },
-            { trigger = "Down", direction = "down", x = 0, y = -1, },
+            { trigger = "Up", direction = "up", x = 0, y = 1 },
+            { trigger = "Down", direction = "down", x = 0, y = -1 },
         },
     },
 }
 
 binding.group.mouse_wheel = {
-    { trigger = binding.button.wheel_up, direction = "up", y = 1, },
-    { trigger = binding.button.wheel_down, direction = "down", y = -1, },
+    { trigger = binding.button.wheel_up, direction = "up", y = 1 },
+    { trigger = binding.button.wheel_down, direction = "down", y = -1 },
 }
 
 for i = 1, 10 do
     table.insert(binding.group.numrow, { trigger = "#" .. i + 9, index = i, number = i == 10 and 0 or i })
 end
 
-for i = 1, 35 do
+for i = 1, 12 do
     table.insert(binding.group.fkeys, { trigger = "F" .. i, index = i })
 end
 
-local modifier_hash_data = { length = 0 }
+do
+    ---@type { length: integer, [key_modifier]: integer }
+    local modifier_hash_data = { length = 0 }
 
-function binding.get_modifiers_hash(modifiers)
-    local hash = 0
-    for _, v in ipairs(modifiers) do
-        local modifier_hash = modifier_hash_data[v]
-        if not modifier_hash then
-            modifier_hash = 1 << modifier_hash_data.length
-            modifier_hash_data[v] = modifier_hash
-            modifier_hash_data.length = modifier_hash_data.length + 1
+    ---@param modifiers key_modifier[]
+    ---@return integer # Returns a hash value for a set of modifiers.
+    function binding.get_modifiers_hash(modifiers)
+        local hash = 0
+        for _, m in ipairs(modifiers) do
+            local modifier_hash = modifier_hash_data[m]
+            if not modifier_hash then
+                modifier_hash = 1 << modifier_hash_data.length
+                modifier_hash_data[m] = modifier_hash
+                modifier_hash_data.length = modifier_hash_data.length + 1
+            end
+            hash = hash | modifier_hash
         end
-        hash = hash | modifier_hash
+        return hash
     end
-    return hash
 end
 
-local Binding = {}
-
+---@param self Binding
 local function _ensure_awful_bindings(self)
     if self._awful then
         return
@@ -109,7 +154,8 @@ local function _ensure_awful_bindings(self)
 
     if self.on_press or self.on_release then
         for _, trigger in ipairs(self.triggers) do
-            if trigger._type == "key" then
+            local tt = type(trigger.trigger)
+            if tt == trigger_type.key then
                 table.insert(self._awful.keys, awful.key {
                     modifiers = self.modifiers,
                     key = trigger.trigger,
@@ -125,7 +171,7 @@ local function _ensure_awful_bindings(self)
                         function(...) return self.on_press(trigger, ...) end,
                     })
                 end
-            elseif trigger._type == "button" then
+            elseif tt == trigger_type.button then
                 table.insert(self._awful.buttons, awful.button {
                     modifiers = self.modifiers,
                     button = trigger.trigger,
@@ -137,20 +183,28 @@ local function _ensure_awful_bindings(self)
     end
 end
 
-local last_order = 0
+---@class Binding.new.args
+---@field on_press? fun(trigger: BindingTrigger, ...)
+---@field on_release? fun(trigger: BindingTrigger, ...)
+---@field modifiers? key_modifier[]
+---@field triggers BindingTrigger.new.args
+---@field path? string|string[]
+---@field description? string
+---@field text? string
+---@field from? string
+---@field to? string
+---@field target? string
+---@field order? integer
 
-local trigger_types = {
-    string = "key",
-    number = "button",
-}
-
+---@param args Binding.new.args
+---@return Binding
 function binding.new(args)
+    ---@type Binding
     local self = {
         on_press = args.on_press,
         on_release = args.on_release,
-        modifiers = args.modifiers or {},
+        modifiers = args.modifiers or empty_modifiers,
         triggers = {},
-        path = type(args.path) == "string" and { args.path } or args.path,
         description = args.description,
         text = args.text,
         from = args.from,
@@ -159,6 +213,13 @@ function binding.new(args)
         order = args.order,
     }
 
+    local path = args.path
+    if type(path) == "table" then
+        self.path = path
+    else
+        self.path = { path }
+    end
+
     if not self.order then
         self.order = last_order + 1
     end
@@ -166,12 +227,16 @@ function binding.new(args)
 
     local triggers = args.triggers or args
 
+    ---@param trigger BindingTrigger
     local function add_trigger(trigger)
-        local trigger_type = trigger_types[type(trigger.trigger)]
-        if trigger_type then
-            trigger._type = trigger_type
-            table.insert(self.triggers, trigger)
+        if type(trigger) ~= "table" then
+            return
         end
+        local tt = type(trigger.trigger)
+        if tt ~= trigger_type.key and tt ~= trigger_type.button then
+            return
+        end
+        table.insert(self.triggers, trigger)
     end
 
     if type(triggers) == "table" then
@@ -179,19 +244,22 @@ function binding.new(args)
         self.from = triggers.from
         self.to = triggers.to
         for _, trigger in ipairs(triggers) do
-            if type(trigger) == "table" then
-                add_trigger(trigger)
-            else
+            if type(trigger) ~= "table" then
+                ---@cast trigger -BindingTrigger
                 add_trigger({ trigger = trigger })
+            else
+                add_trigger(trigger)
             end
         end
     else
         add_trigger({ trigger = triggers })
     end
 
-    return setmetatable(self, { __index = Binding })
+    return self
 end
 
+---@param b Binding
+---@return Binding
 function binding.add_global(b)
     table.insert(binding.awesome_bindings, b)
     _ensure_awful_bindings(b)
@@ -200,6 +268,8 @@ function binding.add_global(b)
     return b
 end
 
+---@param b Binding
+---@return Binding
 function binding.add_client(b)
     table.insert(binding.awesome_bindings, b)
     _ensure_awful_bindings(b)
@@ -208,20 +278,28 @@ function binding.add_client(b)
     return b
 end
 
+---@param bindings Binding[]
 function binding.add_global_range(bindings)
     for _, b in ipairs(bindings) do
         binding.add_global(b)
     end
 end
 
+---@param bindings Binding[]
 function binding.add_client_range(bindings)
     for _, b in ipairs(bindings) do
         binding.add_client(b)
     end
 end
 
+---@param modifiers? key_modifier[]
+---@param triggers BindingTrigger.new.args
+---@param on_press? fun(trigger: BindingTrigger, ...)
+---@param on_release? fun(trigger: BindingTrigger, ...)
+---@param args? table
+---@return Binding
 function binding.awful(modifiers, triggers, on_press, on_release, args)
-    if type(on_release) == 'table' then
+    if type(on_release) == "table" then
         args = on_release
         on_release = nil
     end
@@ -233,6 +311,8 @@ function binding.awful(modifiers, triggers, on_press, on_release, args)
     }, args or {}))
 end
 
+---@param bindings Binding[]
+---@return awful.key[]
 function binding.awful_keys(bindings)
     return gtable.join(table.unpack(gtable.map(function(b)
         _ensure_awful_bindings(b)
@@ -240,6 +320,8 @@ function binding.awful_keys(bindings)
     end, bindings)))
 end
 
+---@param bindings Binding[]
+---@return awful.button[]
 function binding.awful_buttons(bindings)
     return gtable.join(table.unpack(gtable.map(function(b)
         _ensure_awful_bindings(b)
@@ -247,15 +329,13 @@ function binding.awful_buttons(bindings)
     end, bindings)))
 end
 
+---@param bindings Binding[]
+---@return awful.hook[]
 function binding.awful_hooks(bindings)
     return gtable.join(table.unpack(gtable.map(function(b)
         _ensure_awful_bindings(b)
         return b._awful.hooks
     end, bindings)))
-end
-
-function binding.require()
-    return binding, binding.modifier, binding.button
 end
 
 return binding

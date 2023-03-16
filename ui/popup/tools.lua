@@ -1,4 +1,3 @@
-local os = os
 local awful = require("awful")
 local wibox = require("wibox")
 local gtable = require("gears.table")
@@ -6,7 +5,7 @@ local tcolor = require("helpers.color")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local dpi = Dpi
 local capsule = require("widget.capsule")
 local noice = require("theme.style")
@@ -14,29 +13,23 @@ local config = require("config")
 local redshift_widget = require("ui.topbar.redshift")
 
 
-local tools_popup = { mt = {} }
+---@class ToolsPopup.module
+---@operator call: ToolsPopup
+local M = { mt = {} }
 
-function tools_popup:show()
-    if self.visible then
-        return
-    end
-
-    self.visible = true
+function M.mt:__call(...)
+    return M.new(...)
 end
 
-function tools_popup:hide()
-    self.visible = false
-end
 
-function tools_popup:toggle()
-    if self.visible then
-        self:hide()
-    else
-        self:show()
-    end
-end
+---@class ToolsPopup : awful.popup, stylable
+---@field package _private ToolsPopup.private
+---Style properties:
+---@field paddings thickness
+M.object = {}
+---@class ToolsPopup.private
 
-noice.define_style_properties(tools_popup, {
+noice.define_style(M.object, {
     bg = { proxy = true },
     fg = { proxy = true },
     border_color = { proxy = true },
@@ -46,17 +39,41 @@ noice.define_style_properties(tools_popup, {
     paddings = { property = "paddings" },
 })
 
-function tools_popup.new(args)
+function M.object:show()
+    if self.visible then
+        return
+    end
+
+    self.visible = true
+end
+
+function M.object:hide()
+    self.visible = false
+end
+
+function M.object:toggle()
+    if self.visible then
+        self:hide()
+    else
+        self:show()
+    end
+end
+
+
+---@class ToolsPopup.new.args
+
+---@param args? ToolsPopup.new.args
+---@return ToolsPopup
+function M.new(args)
     args = args or {}
 
-    local self
-    self = awful.popup {
+    local self = awful.popup {
         ontop = true,
         visible = false,
         widget = {
-            enabled = false,
             widget = capsule,
-            background = tcolor.transparent,
+            enable_overlay = false,
+            bg = tcolor.transparent,
             {
                 id = "#container",
                 forced_width = dpi(250),
@@ -64,28 +81,25 @@ function tools_popup.new(args)
                 spacing = beautiful.wibar.spacing,
             },
         },
-    }
+    } --[[@as ToolsPopup]]
 
-    gtable.crush(self, tools_popup, true)
+    gtable.crush(self, M.object, true)
 
-    noice.initialize_style(self, self.widget, beautiful.tools_popup.default_style)
+    self:initialize_style(self.widget, beautiful.tools_popup.default_style)
 
     self:apply_style(args)
 
-    local container = self.widget:get_children_by_id("#container")[1]
+    local container = self.widget:get_children_by_id("#container")[1] --[[@as wibox.layout]]
     if config.features.redshift_widget then
-        container:add(wibox.container.constraint(
+        container:add(wibox.widget {
+            widget = wibox.container.constraint,
+            strategy = "max",
+            height = beautiful.wibar.item_height,
             redshift_widget(self, true),
-            "max", nil, beautiful.wibar.item_height))
+        })
     end
-
-    self.buttons = binding.awful_buttons {}
 
     return self
 end
 
-function tools_popup.mt:__call(...)
-    return tools_popup.new(...)
-end
-
-return setmetatable(tools_popup, tools_popup.mt)
+return setmetatable(M, M.mt)

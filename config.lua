@@ -1,6 +1,6 @@
 -- DEPENDENCIES (see below)
 
-local filesystem = require("gears.filesystem")
+local gfilesystem = require("gears.filesystem")
 
 
 local config = {}
@@ -17,7 +17,7 @@ config.features = {
 config.places = {}
 config.places.home = os.getenv("HOME")
 config.places.config = os.getenv("XDG_CONFIG_HOME") or (config.places.home .. "/.config")
-config.places.awesome = string.match(filesystem.get_configuration_dir(), "^(/?.-)/*$")
+config.places.awesome = string.match(gfilesystem.get_configuration_dir(), "^(/?.-)/*$")
 config.places.theme = config.places.awesome .. "/theme"
 config.places.screenshots = config.places.home .. "/inbox/screenshots"
 config.places.wallpapers = config.places.home .. "/media/look/wallpapers"
@@ -43,7 +43,7 @@ config.power = {
     shutdown = "systemctl poweroff",
     reboot = "systemctl reboot",
     suspend = "systemctl suspend",
-    kill_session = "loginctl kill-session",
+    kill_session = "loginctl kill-session ''",
     lock_session = "loginctl lock-session",
     lock_screen = "light-locker-command --lock",
 }
@@ -63,5 +63,12 @@ end
 function config.commands.copy_text(text)
     return "echo -n \"" .. text .. "\" | xclip -selection clipboard"
 end
+
+
+local awful_utils = require("awful.util")
+awful_utils.shell = config.apps.shell
+
+local desktop_utils = require("utils.desktop")
+desktop_utils.terminal = config.apps.terminal
 
 return config

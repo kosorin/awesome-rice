@@ -2,20 +2,20 @@ DEBUG = (os.getenv("DEBUG") or "") ~= ""
 
 Capi = {
     ---@diagnostic disable: undefined-global
-    awesome = awesome,
+    awesome = awesome --[[@as _awesome]],
     button = button,
-    client = client,
+    client = client --[[@as _client]],
     dbus = dbus,
     drawable = drawable,
     drawin = drawin,
     key = key,
     keygrabber = keygrabber,
-    mouse = mouse,
-    mousegrabber = mousegrabber,
-    root = root,
-    screen = screen,
-    selection = selection,
-    tag = tag,
+    mouse = mouse --[[@as _mouse]],
+    mousegrabber = mousegrabber --[[@as _mousegrabber]],
+    root = root --[[@as _root]],
+    screen = screen --[[@as _screen]],
+    selection = selection --[[@as _selection]],
+    tag = tag --[[@as _tag]],
     window = window,
     ---@diagnostic enable: undefined-global
 }
@@ -27,15 +27,15 @@ local dump
 if DEBUG then
     local gdebug = require("gears.debug")
 
-    ---@type fun(data: any, tag: string|nil, depth: integer|nil)
+    ---@type fun(data: any, tag?: string, depth?: integer)
     dump = gdebug.dump
 else
     local gdebug = require("gears.debug")
     local notification = require("naughty.notification")
 
     ---@param data any
-    ---@param tag string|nil
-    ---@param depth integer|nil
+    ---@param tag? string
+    ---@param depth? integer
     function dump(data, tag, depth)
         notification {
             title = "DUMP",

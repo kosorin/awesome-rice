@@ -1,0 +1,116 @@
+local beautiful = require("theme.theme")
+local wibox = require("wibox")
+local capsule = require("widget.capsule")
+local css = require("utils.css")
+local pango = require("utils.pango")
+local config = require("config")
+local dpi = Dpi
+local hui = require("helpers.ui")
+
+
+return {
+    id = "#container",
+    widget = capsule,
+    margins = hui.thickness { dpi(2), 0 },
+    paddings = hui.thickness { dpi(6), dpi(8) },
+    {
+        layout = wibox.layout.align.horizontal,
+        expand = "inside",
+        nil,
+        {
+            layout = wibox.layout.fixed.horizontal,
+            spacing = dpi(12),
+            {
+                id = "#icon",
+                widget = wibox.widget.imagebox,
+                resize = true,
+            },
+            {
+                id = "#text",
+                widget = wibox.widget.textbox,
+            },
+        },
+        {
+            widget = wibox.container.margin,
+            right = -dpi(4),
+            {
+                visible = false,
+                id = "#submenu_icon",
+                widget = wibox.widget.imagebox,
+                resize = true,
+            },
+        },
+    },
+    update_callback = function(self, item, menu)
+        self.forced_width = item.width or menu.item_width
+        self.forced_height = item.height or menu.item_height
+
+        self.enable_overlay = item.enabled
+        self.opacity = item.enabled and 1 or 0.5
+
+        local styles = item.selected
+            and beautiful.mebox.item_styles.selected
+            or beautiful.mebox.item_styles.normal
+        local style = item.urgent
+            and styles.urgent
+            or (item.active
+            and styles.active
+            or styles.normal)
+        self:apply_style(style)
+
+        local icon_widget = self:get_children_by_id("#icon")[1]
+        if icon_widget then
+            local paddings = menu.paddings
+            icon_widget.forced_width = self.forced_height - paddings.top - paddings.bottom
+
+            local icon, color
+            if item.checked == nil then
+                icon = item.icon
+                color = item.icon_color
+            else
+                local checkbox_type = item.checkbox_type or "checkbox"
+                local checkbox_style = beautiful.mebox[checkbox_type][not not item.checked]
+                icon = checkbox_style.icon
+                color = checkbox_style.color
+            end
+
+            if color ~= false then
+                if not color or item.active or item.selected then
+                    color = style.fg
+                end
+                local stylesheet = css.style { path = { fill = color } }
+                icon_widget:set_stylesheet(stylesheet)
+            else
+                icon_widget:set_stylesheet(nil)
+            end
+
+            icon_widget:set_image(icon)
+        end
+
+        local text_widget = self:get_children_by_id("#text")[1]
+        if text_widget then
+            local text = item.text or ""
+            text_widget:set_markup(pango.span { fgcolor = style.fg, pango.escape(text) })
+        end
+
+        local submenu_icon_widget = self:get_children_by_id("#submenu_icon")[1]
+        if submenu_icon_widget then
+            submenu_icon_widget.visible = not not item.submenu
+            if submenu_icon_widget.visible then
+                local icon = item.submenu_icon or config.places.theme .. "/icons/chevron-right.svg"
+                local color = style.fg
+                local stylesheet = css.style { path = { fill = color } }
+                submenu_icon_widget:set_stylesheet(stylesheet)
+                submenu_icon_widget:set_image(icon)
+            end
+        end
+
+        if item.flex then
+            self.forced_width = self:fit({
+                screen = menu.screen,
+                dpi = menu.screen.dpi,
+                drawable = menu._drawable,
+            }, menu.screen.geometry.width, menu.screen.geometry.height)
+        end
+    end,
+}

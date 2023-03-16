@@ -1,91 +1,89 @@
-local string = string
-local math = math
+local setmetatable = setmetatable
+local type = type
+local tostring = tostring
 local pairs = pairs
 local table = table
+local dpi = Dpi
 local aplacement = require("awful.placement")
-local wibox = require("wibox")
-local gdebug = require("gears.debug")
+local gmath = require("gears.math")
 local gshape = require("gears.shape")
 local gtable = require("gears.table")
-local dpi = Dpi
-local tcolor = require("helpers.color")
-local capsule = require("widget.capsule")
-local pango = require("utils.pango")
-local css = require("utils.css")
-local config = require("config")
+local wibox = require("wibox")
 local htable = require("helpers.table")
+local hcolor = require("helpers.color")
+local hui = require("helpers.ui")
 local hwidget = require("helpers.widget")
+local css = require("utils.css")
+local pango = require("utils.pango")
+local config = require("config")
+local noice = require("theme.style")
 
 
----------------------------------------------------------------------------------------------------
-
+---@class Theme
 local theme = {}
+
+----------------------------------------------------------------------------------------------------
+
+local main_border_radius = dpi(16)
+
+----------------------------------------------------------------------------------------------------
+
+theme.gap = dpi(6)
+
+----------------------------------------------------------------------------------------------------
 
 theme.icon_theme = "Archdroid-Amber"
 
-theme.useless_gap = dpi(6)
+----------------------------------------------------------------------------------------------------
 
+theme.font_name = "JetBrainsMono Nerd Font"
+theme.font_size = 11
 
----------------------------------------------------------------------------------------------------
-
-do
-    theme.font_name = "JetBrainsMono Nerd Font"
-    theme.font_size = 11
-
-    local default_font = theme.font_name .. " " .. theme.font_size
-
-    function theme.build_font(args)
-        if not args then
-            return default_font
-        end
-
-        args.name = args.name or theme.font_name
-        args.size = args.size or theme.font_size
-        args.size_factor = args.size_factor or 1
-
-        local style = ""
-        if args.style then
-            if type(args.style) == "table" then
-                style = table.concat(args.style, " ")
-            elseif type(args.style) == "string" then
-                style = args.style
-            end
-        end
-
-        return string.format("%s %s %.0f",
-            args.name,
-            style,
-            args.size * args.size_factor
-        )
+-- TODO: Move to the helpers
+---@param args? { name?: string, size?: number, size_factor?: number, style?: string|string[] }
+---@return string
+function theme.build_font(args)
+    if not args then
+        return theme.font_name .. " " .. theme.font_size
     end
 
-    theme.font = theme.build_font()
+    local font = args.name or theme.font_name
+
+    if args.style then
+        local style
+        if type(args.style) == "table" then
+            style = table.concat(args.style --[[@as table]], " ")
+        elseif type(args.style) == "string" then
+            style = args.style
+        end
+        if style then
+            font = font .. " " .. style
+        end
+    end
+
+    args.size = args.size or theme.font_size
+    args.size_factor = args.size_factor or 1
+    local size = gmath.round(args.size * args.size_factor)
+    font = font .. " " .. tostring(size)
+
+    return font
 end
 
+----------------------------------------------------------------------------------------------------
 
----------------------------------------------------------------------------------------------------
-
-theme.common_color_names = {
-    background = "black",
-    foreground = "white",
-    primary    = "yellow",
-    secondary  = "blue",
-    urgent     = "red",
-}
-
--- Tomorrow Night
-theme.palette = {
-    black   = "#1d1f21",
-    white   = "#c5c8c6",
-    red     = "#cc6666",
-    orange  = "#de935f",
-    yellow  = "#f0c674",
-    green   = "#7cb36b", -- original: #b5bd68
-    cyan    = "#78bab9", -- original: #8abeb7
-    blue    = "#81a2be",
-    magenta = "#b294bb",
-    gray    = "#767876",
-
+-- Tomorrow Night (https://github.com/chriskempson/tomorrow-theme)
+theme.palette = setmetatable({
+    black          = "#1d1f21",
+    white          = "#c5c8c6",
+    red            = "#cc6666",
+    orange         = "#de935f",
+    yellow         = "#f0c674",
+    green          = "#7cb36b", -- original: #b5bd68
+    cyan           = "#78bab9", -- original: #8abeb7
+    blue           = "#81a2be",
+    magenta        = "#b294bb",
+    gray           = "#767876",
+    --
     black_bright   = "#3c4044",
     white_bright   = "#eaeaea",
     red_bright     = "#d54e53",
@@ -96,203 +94,128 @@ theme.palette = {
     blue_bright    = "#7aa6da",
     magenta_bright = "#c397d8",
     gray_bright    = "#a7aaa8",
+}, hcolor.palette_metatable)
+
+theme.color_names = {
+    palette = {
+        "black",
+        "white",
+        "red",
+        "orange",
+        "yellow",
+        "green",
+        "cyan",
+        "blue",
+        "magenta",
+        "gray",
+    },
+    common = {
+        bg        = "black",
+        fg        = "white",
+        primary   = "yellow",
+        secondary = "blue",
+        urgent    = "red",
+    },
 }
 
-theme.common = {
-    background = theme.palette[theme.common_color_names.background],
-    foreground = theme.palette[theme.common_color_names.foreground],
-    primary    = theme.palette[theme.common_color_names.primary],
-    secondary  = theme.palette[theme.common_color_names.secondary],
-    urgent     = theme.palette[theme.common_color_names.urgent],
-
-    background_bright = theme.palette[theme.common_color_names.background .. "_bright"],
-    foreground_bright = theme.palette[theme.common_color_names.foreground .. "_bright"],
-    primary_bright    = theme.palette[theme.common_color_names.primary .. "_bright"],
-    secondary_bright  = theme.palette[theme.common_color_names.secondary .. "_bright"],
-    urgent_bright     = theme.palette[theme.common_color_names.urgent .. "_bright"],
-}
-
-theme.palette_color_names = {}
-for k in pairs(theme.palette) do
-    if not string.match(k, "_bright$") then
-        table.insert(theme.palette_color_names, k)
-    end
+theme.common = setmetatable({}, hcolor.palette_metatable)
+for k, v in pairs(theme.color_names.common) do
+    theme.common[k] = theme.palette[v]
+    theme.common[k .. "_bright"] = theme.palette[v .. "_bright"]
 end
 
+----------------------------------------------------------------------------------------------------
 
----------------------------------------------------------------------------------------------------
-
-do
-    local print_generated_colors = false
-    local unknown_color = "#FFFF00" -- Something bright, easy to spot
-
-    local colors_mt = {}
-
-    function colors_mt.__index(t, k)
-        local name, value = string.match(k, "^([_%a]+)_(%d+)$")
-        if not name then
-            gdebug.print_warning("Unknown color '" .. k .. "'")
-            rawset(t, k, unknown_color)
-            return unknown_color
-        end
-        value = (tonumber(value) - 100) / 100
-        local source_color = t[name]
-        local new_color = tcolor.change(source_color, { lighten = value })
-        if print_generated_colors then
-            print("Generate color: ", string.format("%24s %s <- %s %s", k, new_color, source_color, name))
-        end
-        rawset(t, k, new_color)
-        return new_color
-    end
-
-    setmetatable(theme.palette, colors_mt)
-    setmetatable(theme.common, colors_mt)
-
-    if print_generated_colors then
-        for k, _ in pairs(theme.palette) do
-            if not string.find(k, "_") then
-                local _ = theme.palette[k .. "_66"]
-            end
-        end
-    end
+function theme.get_progressbar_bg(color)
+    -- TODO: Solid color instead of alpha
+    return hcolor.change(color, { alpha = 0.25 })
 end
 
-
----------------------------------------------------------------------------------------------------
-
-theme.bg_normal = theme.common.background
-theme.fg_normal = theme.common.foreground
-theme.bg_focus = theme.common.primary_66
-theme.fg_focus = theme.common.foreground_bright
-theme.bg_urgent = theme.common.urgent_bright
-theme.fg_urgent = theme.common.foreground_bright
-theme.bg_minimize = theme.common.background_bright
-theme.fg_minimize = theme.common.foreground_bright
-theme.bg_disabled = theme.common.background_bright
-theme.fg_disabled = theme.common.foreground_50
-
-
----------------------------------------------------------------------------------------------------
-
-theme.border_width = dpi(3)
-theme.border_color_normal = theme.common.background_140
-theme.border_color_active = theme.common.primary
-theme.border_color_urgent = theme.common.urgent_bright
-theme.border_color_marked = theme.common.secondary
-
-
----------------------------------------------------------------------------------------------------
-
-theme.bg_systray = theme.common.background_110
-theme.systray_icon_spacing = dpi(12)
-
-
----------------------------------------------------------------------------------------------------
-
-function theme.get_progressbar_background_color(color)
-    return tcolor.change(color, { alpha = 0.25 })
-end
-
----------------------------------------------------------------------------------------------------
-
-theme.snap_bg = "#ff0000"
-theme.snapper_gap = theme.useless_gap
-theme.snap_border_width = 8 -- (dpi is applied automatically)
-theme.snap_shape = function(cr, width, height)
-    gshape.rounded_rect(cr, width, height, dpi(16))
-end
-
-
----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 
 theme.screen_selection_border_width = dpi(1)
-theme.screen_selection_color = tcolor.change(theme.common.primary, { alpha = 0.20 --[[ 0x33 ]] })
+theme.screen_selection_color = hcolor.change(theme.common.primary, { alpha = 0.20 --[[ 0x33 ]] })
 
-
----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 
 theme.wibar = {
+    bg = theme.common.bg,
     spacing = dpi(12),
-    item_height = dpi(30),
-    padding = {
-        left = dpi(16),
-        right = dpi(16),
-        top = dpi(8),
-        bottom = dpi(8),
-    },
-    build_placement = function(widget, wibar, args)
-        return function(d)
-            aplacement.next_to_widget(d, gtable.crush({
-                geometry = hwidget.find_geometry(widget, wibar),
-                position = "bottom",
-                anchor = "middle",
-                outside = true,
-                screen = wibar.screen,
-                margins = theme.popup.margins,
-            }, args or {}))
-        end
-    end
+    paddings = hui.thickness { dpi(8), dpi(16) },
 }
 
-theme.wibar_height = theme.wibar.item_height + theme.wibar.padding.top + theme.wibar.padding.bottom
-theme.wibar_bg = theme.common.background
+theme.wibar.item_height = dpi(30)
+theme.wibar.height = theme.wibar.item_height + theme.wibar.paddings.top + theme.wibar.paddings.bottom
 
+-- TODO: Rename `theme.wibar.build_placement`
+function theme.wibar.build_placement(widget, wibar, args)
+    return function(d)
+        aplacement.next_to_widget(d, gtable.crush({
+            geometry = hwidget.find_geometry(widget, wibar),
+            position = "bottom",
+            anchor = "middle",
+            outside = true,
+            screen = wibar.screen,
+            margins = theme.popup.margins,
+        }, args or {}))
+    end
+end
 
----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 
 theme.capsule = {
-    -- TODO: move these into `default_style`?
+    -- TODO: Move these into `default_style`?
     item_content_spacing = dpi(8),
     item_spacing = dpi(16),
     bar_width = dpi(80),
     bar_height = dpi(12),
-    shape_radius = dpi(8),
+    border_radius = dpi(8),
 }
+
 theme.capsule.default_style = {
-    hover_overlay = tcolor.white .. "10",
-    press_overlay = tcolor.white .. "10",
-    background = theme.common.background_110,
-    foreground = theme.common.foreground,
-    border_color = theme.common.background_130,
+    hover_overlay = hcolor.white .. "10",
+    press_overlay = hcolor.white .. "10",
+    bg = theme.common.bg_110,
+    fg = theme.common.fg,
+    border_color = theme.common.bg_130,
     border_width = 0,
     shape = function(cr, width, height)
-        gshape.rounded_rect(cr, width, height, theme.capsule.shape_radius)
+        gshape.rounded_rect(cr, width, height, theme.capsule.border_radius)
     end,
-    margins = {
-        left = 0,
-        right = 0,
-        top = 0,
-        bottom = 0,
-    },
-    paddings = {
-        left = dpi(14),
-        right = dpi(14),
-        top = dpi(6),
-        bottom = dpi(6),
-    },
+    margins = hui.thickness { 0 },
+    paddings = hui.thickness { dpi(6), dpi(14) },
 }
+
 theme.capsule.styles = {
     normal = {
-        background = theme.capsule.default_style.background,
-        foreground = theme.capsule.default_style.foreground,
-        border_color = theme.capsule.default_style.border_color,
-        border_width = theme.capsule.default_style.border_width,
+        hover_overlay = noice.value.Default,
+        press_overlay = noice.value.Default,
+        bg = theme.common.bg_110,
+        fg = theme.common.fg,
+        border_color = theme.common.bg_130,
+        border_width = 0,
     },
     disabled = {
-        background = theme.common.background_105,
-        foreground = theme.common.foreground_50,
-        border_color = theme.common.background_115,
+        hover_overlay = noice.value.Default,
+        press_overlay = noice.value.Default,
+        bg = theme.common.bg_105,
+        fg = theme.common.fg_50,
+        border_color = theme.common.bg_115,
         border_width = 0,
     },
     selected = {
-        background = theme.common.background_125,
-        foreground = theme.common.foreground_bright,
-        border_color = theme.common.background_145,
+        hover_overlay = noice.value.Default,
+        press_overlay = noice.value.Default,
+        bg = theme.common.bg_125,
+        fg = theme.common.fg_bright,
+        border_color = theme.common.bg_145,
         border_width = dpi(1),
     },
     urgent = {
-        background = theme.palette.red_66,
-        foreground = theme.common.foreground_bright,
+        hover_overlay = noice.value.Default,
+        press_overlay = noice.value.Default,
+        bg = theme.palette.red_66,
+        fg = theme.common.fg_bright,
         border_color = theme.palette.red,
         border_width = dpi(1),
     },
@@ -302,93 +225,41 @@ theme.capsule.styles.palette = {}
 do
     local function generate_capsule_color_style(color)
         return {
-            background = theme.palette[color .. "_33"],
-            foreground = theme.palette[color .. "_bright"],
+            hover_overlay = noice.value.Default,
+            press_overlay = noice.value.Default,
+            bg = theme.palette[color .. "_33"],
+            fg = theme.palette[color .. "_bright"],
             border_color = theme.palette[color .. "_66"],
             border_width = dpi(1),
         }
     end
 
-    for _, color in pairs(theme.palette_color_names) do
+    for _, color in pairs(theme.color_names.palette) do
         theme.capsule.styles.palette[color] = generate_capsule_color_style(color)
     end
 end
 
-
----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 
 theme.popup = {
-    margins = dpi(6),
+    margins = hui.thickness { dpi(6) },
 }
+
 theme.popup.default_style = {
-    bg = theme.common.background,
-    fg = theme.common.foreground,
-    border_color = theme.common.background_bright,
+    bg = theme.common.bg,
+    fg = theme.common.fg,
+    border_color = theme.common.bg_bright,
     border_width = dpi(1),
     shape = function(cr, width, height)
-        gshape.rounded_rect(cr, width, height, dpi(16))
+        gshape.rounded_rect(cr, width, height, main_border_radius)
     end,
     placement = aplacement.under_mouse,
-    paddings = {
-        left = dpi(20),
-        right = dpi(20),
-        top = dpi(20),
-        bottom = dpi(20),
-    },
+    paddings = hui.thickness { dpi(20) },
 }
 
-
----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 
 theme.mebox = {
-    separator_template = {
-        widget = wibox.widget.separator,
-        orientation = "auto",
-        color = theme.common.background_bright,
-        thickness = dpi(1),
-        span_ratio = 1,
-        update_callback = function(self, item, menu)
-            -- This orientation is inverted from the actual orientation of the separator
-            local orientation = item.orientation or menu.orientation
-            local size = dpi(16)
-            if orientation == "vertical" then
-                self.forced_width = item.width or menu.item_width
-                self.forced_height = size
-            elseif orientation == "horizontal" then
-                self.forced_width = size
-                self.forced_height = item.height or menu.item_height
-            else
-                error(orientation)
-            end
-        end,
-    },
-    header_template = {
-        widget = wibox.container.margin,
-        margins = {
-            left = dpi(8),
-            right = dpi(8),
-            top = dpi(6),
-            bottom = dpi(6),
-        },
-        {
-            id = "#text",
-            widget = wibox.widget.textbox,
-        },
-        update_callback = function(self, item)
-            local text_widget = self:get_children_by_id("#text")[1]
-            if text_widget then
-                local color = theme.common.foreground_66
-                local text = item.text or ""
-                text_widget:set_markup(pango.span {
-                    size = "smaller",
-                    text_transform = "uppercase",
-                    foreground = color,
-                    weight = "bold",
-                    text,
-                })
-            end
-        end,
-    },
     checkbox = {
         [false] = {
             icon = config.places.theme .. "/icons/checkbox-blank-outline.svg",
@@ -422,39 +293,39 @@ theme.mebox = {
     item_styles = {
         normal = {
             normal = {
-		        hover_overlay = tcolor.white .. "20",
-		        press_overlay = tcolor.white .. "20",
-		        background = tcolor.transparent,
-		        foreground = theme.common.foreground,
-		        border_color = theme.capsule.default_style.border_color,
-		        border_width = 0,
+                hover_overlay = hcolor.white .. "20",
+                press_overlay = hcolor.white .. "20",
+                bg = hcolor.transparent,
+                fg = theme.common.fg,
+                border_color = theme.common.bg_130,
+                border_width = 0,
             },
             active = {
-		        hover_overlay = tcolor.white .. "20",
-		        press_overlay = tcolor.white .. "20",
-		        background = tcolor.transparent,
-		        foreground = theme.common.secondary_bright,
-		        border_color = theme.capsule.default_style.border_color,
-		        border_width = 0,
+                hover_overlay = hcolor.white .. "20",
+                press_overlay = hcolor.white .. "20",
+                bg = hcolor.transparent,
+                fg = theme.common.secondary_bright,
+                border_color = theme.common.bg_130,
+                border_width = 0,
             },
             urgent = {
-		        hover_overlay = theme.common.urgent_bright .. "40",
-		        background = tcolor.transparent,
-		        foreground = theme.common.foreground,
-		        border_color = theme.capsule.default_style.border_color,
-		        border_width = 0,
+                hover_overlay = theme.common.urgent_bright .. "40",
+                press_overlay = hcolor.white .. "10",
+                bg = hcolor.transparent,
+                fg = theme.common.fg,
+                border_color = theme.common.bg_130,
+                border_width = 0,
             },
         },
         selected = {
-            normal = htable.crush_clone(theme.capsule.styles.palette[theme.common_color_names.primary], { border_width = 0 }),
-            active = htable.crush_clone(theme.capsule.styles.palette[theme.common_color_names.secondary], { border_width = 0 }),
-            urgent = htable.crush_clone(theme.capsule.styles.palette.red, { border_width = 0 }),
+            normal = setmetatable({ border_width = 0 }, { __index = theme.capsule.styles.palette[theme.color_names.common.primary] }),
+            active = setmetatable({ border_width = 0 }, { __index = theme.capsule.styles.palette[theme.color_names.common.secondary] }),
+            urgent = setmetatable({ border_width = 0 }, { __index = theme.capsule.styles.palette.red }),
         },
     },
 }
-theme.mebox.default_style = htable.crush_clone(theme.popup.default_style, {
-    separator_template = theme.mebox.separator_template,
-    header_template = theme.mebox.header_template,
+
+theme.mebox.default_style = setmetatable({
     placement_bounding_args = {
         honor_workarea = true,
         honor_padding = false,
@@ -464,237 +335,94 @@ theme.mebox.default_style = htable.crush_clone(theme.popup.default_style, {
     submenu_offset = dpi(4),
     active_opacity = 1,
     inactive_opacity = 1,
-    paddings = {
-        left = dpi(8),
-        right = dpi(8),
-        top = dpi(8),
-        bottom = dpi(8),
-    },
+    paddings = hui.thickness { dpi(8) },
     item_width = dpi(128),
     item_height = dpi(36),
-    item_template = {
-        id = "#container",
-        widget = capsule,
-        margins = {
-            left = 0,
-            right = 0,
-            top = dpi(2),
-            bottom = dpi(2),
-        },
-        paddings = {
-            left = dpi(8),
-            right = dpi(8),
-            top = dpi(6),
-            bottom = dpi(6),
-        },
-        {
-            layout = wibox.layout.align.horizontal,
-            expand = "inside",
-            nil,
-            {
-                layout = wibox.layout.fixed.horizontal,
-                spacing = dpi(12),
-                {
-                    id = "#icon",
-                    widget = wibox.widget.imagebox,
-                    resize = true,
-                },
-                {
-                    id = "#text",
-                    widget = wibox.widget.textbox,
-                },
-            },
-            {
-                widget = wibox.container.margin,
-                right = -dpi(4),
-                {
-                    visible = false,
-                    id = "#submenu_icon",
-                    widget = wibox.widget.imagebox,
-                    resize = true,
-                },
-            },
-        },
-        update_callback = function(self, item, menu)
-            self.forced_width = item.width or menu.item_width
-            self.forced_height = item.height or menu.item_height
+}, { __index = theme.popup.default_style })
 
-            self.enabled = item.enabled
-            self.opacity = item.enabled and 1 or 0.5
-
-            local styles = item.selected
-                and theme.mebox.item_styles.selected
-                or theme.mebox.item_styles.normal
-            local style = item.urgent
-                and styles.urgent
-                or (item.active
-                    and styles.active
-                    or styles.normal)
-            self:apply_style(style)
-
-            local icon_widget = self:get_children_by_id("#icon")[1]
-            if icon_widget then
-                local paddings = menu.paddings
-                icon_widget.forced_width = self.forced_height - paddings.top - paddings.bottom
-
-                local icon, color
-                if item.checked == nil then
-                    icon = item.icon
-                    color = item.icon_color
-                else
-                    local checkbox_type = item.checkbox_type or "checkbox"
-                    local style = theme.mebox[checkbox_type][not not item.checked]
-                    icon = style.icon
-                    color = style.color
-                end
-
-                if color ~= false then
-                    if not color or item.active or item.selected then
-                        color = style.foreground
-                    end
-                    local stylesheet = css.style { path = { fill = color } }
-                    icon_widget:set_stylesheet(stylesheet)
-                else
-                    icon_widget:set_stylesheet(nil)
-                end
-
-                icon_widget:set_image(icon)
-            end
-
-            local text_widget = self:get_children_by_id("#text")[1]
-            if text_widget then
-                local text = item.text or ""
-                text_widget:set_markup(pango.span { foreground = style.foreground, text, })
-            end
-
-            local submenu_icon_widget = self:get_children_by_id("#submenu_icon")[1]
-            if submenu_icon_widget then
-                submenu_icon_widget.visible = not not item.submenu
-                if submenu_icon_widget.visible then
-                    local icon = item.submenu_icon or config.places.theme .. "/icons/chevron-right.svg"
-                    local color = style.foreground
-                    local stylesheet = css.style { path = { fill = color } }
-                    submenu_icon_widget:set_stylesheet(stylesheet)
-                    submenu_icon_widget:set_image(icon)
-                end
-            end
-
-            if item.flex then
-                self.forced_width = self:fit({
-                    screen = menu.screen,
-                    dpi = menu.screen.dpi,
-                    drawable = menu._drawable,
-                }, menu.screen.geometry.width, menu.screen.geometry.height)
-            end
-        end,
-    },
-})
-
-
----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 
 theme.bindbox = {}
-theme.bindbox.default_style = htable.crush_clone(theme.popup.default_style, {
-    bg = tcolor.change(theme.common.background, { alpha = 0.85 }),
-    font = theme.font,
+
+theme.bindbox.default_style = setmetatable({
+    bg = hcolor.change(theme.common.bg, { alpha = 0.85 }),
+    font = theme.build_font(),
     placement = function(d)
         aplacement.centered(d, {
             honor_workarea = true,
             honor_padding = false,
         })
     end,
-
-    page_paddings = {
-        left = dpi(8),
-        right = dpi(8),
-        top = dpi(8),
-        bottom = dpi(16),
-    },
+    page_paddings = hui.thickness { dpi(8), bottom = dpi(16) },
     page_width = dpi(1400),
     page_height = dpi(1000),
     page_columns = 2,
-
     group_spacing = dpi(16),
     item_spacing = dpi(8),
-
-    trigger_background = theme.common.foreground,
-    trigger_background_alpha = "20%",
-    trigger_foreground = theme.common.foreground,
-
-    group_background = theme.common.primary_50,
-    group_foreground = theme.common.foreground_bright,
-    group_ruled_background = theme.common.urgent_50,
-    group_ruled_foreground = theme.common.foreground_bright,
-
-    find_dim_background = nil,
-    find_dim_foreground = theme.common.foreground_66,
-    find_highlight_background = nil,
-    find_highlight_foreground = theme.common.urgent_bright,
-
-    group_path_separator_markup = pango.span { fgalpha = "50%", "  ", },
-    slash_separator_markup = pango.span { fgalpha = "50%", size = "smaller", " / ", },
-    plus_separator_markup = pango.span { fgalpha = "50%", "+", },
-    range_separator_markup = pango.span { fgalpha = "50%", "..", },
-
+    trigger_bg = theme.common.fg,
+    trigger_bg_alpha = "20%",
+    trigger_fg = theme.common.fg,
+    group_bg = theme.common.primary_50,
+    group_fg = theme.common.fg_bright,
+    group_ruled_bg = theme.common.urgent_50,
+    group_ruled_fg = theme.common.fg_bright,
+    find_dim_bg = nil,
+    find_dim_fg = theme.common.fg_66,
+    find_highlight_bg = nil,
+    find_highlight_fg = theme.common.urgent_bright,
+    group_path_separator_markup = pango.span { fgalpha = "50%", "  " },
+    slash_separator_markup = pango.span { fgalpha = "50%", size = "smaller", " / " },
+    plus_separator_markup = pango.span { fgalpha = "50%", "+" },
+    range_separator_markup = pango.span { fgalpha = "50%", ".." },
     status_style = {
-        background = theme.palette.black_50,
-        foreground = theme.common.foreground,
+        -- TODO: Fix me - capsule:set_style() no longer exists
+        bg = theme.palette.black_50,
+        fg = theme.common.fg,
         border_color = theme.palette.black_115,
         border_width = dpi(1),
-        paddings = {
-            left = dpi(16),
-            right = dpi(16),
-            top = dpi(12),
-            bottom = dpi(12),
-        },
+        paddings = hui.thickness { dpi(12), dpi(16) },
     },
     status_spacing = dpi(24),
+    find_placeholder_fg = theme.common.fg_66,
+    find_cursor_bg = theme.common.secondary_66,
+    find_cursor_fg = theme.common.fg_bright,
+}, { __index = theme.popup.default_style })
 
-    find_placeholder_foreground = theme.common.foreground_66,
-    find_cursor_background = theme.common.secondary_66,
-    find_cursor_foreground = theme.common.foreground_bright,
-})
-
-
----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 
 theme.media_player = {}
-theme.media_player.capsule = {
-    normal = {
-        background = theme.common.background_105,
-        foreground = theme.common.foreground,
+
+theme.media_player.content_styles = {
+    normal = setmetatable({
+        bg = theme.common.bg_105,
+        fg = theme.common.fg,
         border_width = 0,
-    },
-    disabled = {
-        background = theme.common.background_105,
-        foreground = theme.common.foreground_50,
+    }, { __index = theme.capsule.styles.normal }),
+    disabled = setmetatable({
+        bg = theme.common.bg_105,
+        fg = theme.common.fg_50,
         border_width = 0,
-    },
+    }, { __index = theme.capsule.styles.disabled }),
 }
 
-
----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 
 theme.volume_osd = {
-    default_style = htable.crush_clone(theme.popup.default_style, {
-        bg = theme.common.background,
-        fg = theme.common.foreground,
-        border_color = theme.common.background_bright,
+    default_style = setmetatable({
+        bg = theme.common.bg,
+        fg = theme.common.fg,
+        border_color = theme.common.bg_bright,
         border_width = dpi(1),
         placement = function(d)
             aplacement.top(d, {
                 honor_workarea = true,
-                margins = dpi(32),
+                margins = hui.thickness { dpi(32) },
             })
         end,
-        paddings = {
-            left = dpi(32),
-            right = dpi(32),
-            top = dpi(16),
-            bottom = dpi(16),
-        },
-    }),
+        paddings = hui.thickness { dpi(16), dpi(32) },
+    }, { __index = theme.popup.default_style }),
 }
+
 theme.volume_osd.styles = {
     normal = {
         bg = theme.volume_osd.default_style.bg,
@@ -702,29 +430,27 @@ theme.volume_osd.styles = {
         border_color = theme.volume_osd.default_style.border_color,
     },
     boosted = {
-        bg = theme.capsule.styles.palette.yellow.background,
-        fg = theme.capsule.styles.palette.yellow.foreground,
+        bg = theme.capsule.styles.palette.yellow.bg,
+        fg = theme.capsule.styles.palette.yellow.fg,
         border_color = theme.capsule.styles.palette.yellow.border_color,
     },
     muted = {
         bg = theme.volume_osd.default_style.bg,
-        fg = theme.common.foreground_50,
+        fg = theme.common.fg_50,
         border_color = theme.volume_osd.default_style.border_color,
     },
 }
 
-
----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 
 theme.tools_popup = {
-    default_style = htable.crush_clone(theme.popup.default_style),
+    default_style = setmetatable({}, { __index = theme.popup.default_style }),
 }
 
-
----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 
 theme.calendar_popup = {
-    default_style = htable.crush_clone(theme.popup.default_style),
+    default_style = setmetatable({}, { __index = theme.popup.default_style }),
 }
 
 do
@@ -742,7 +468,7 @@ do
             widget.valign = "center"
             return wibox.widget {
                 widget = wibox.container.background,
-                bg = is_weekend(date) and theme.common.background_127 or theme.common.background_115,
+                bg = is_weekend(date) and theme.common.bg_127 or theme.common.bg_115,
                 shape = calendar_item_shape,
                 widget,
             }
@@ -752,14 +478,14 @@ do
             return wibox.widget {
                 widget = wibox.container.background,
                 bg = theme.common.primary_66,
-                fg = theme.common.foreground_bright,
+                fg = theme.common.fg_bright,
                 shape = calendar_item_shape,
                 widget,
             }
         elseif flag == "normal_other" then
             widget.halign = "center"
             widget.valign = "center"
-            widget.markup = pango.span { color = theme.common.foreground_50, widget.text }
+            widget.markup = pango.span { fgcolor = theme.common.fg_50, widget.text }
             return widget
         elseif flag == "focus_other" then
             widget.halign = "center"
@@ -767,32 +493,24 @@ do
             return wibox.widget {
                 widget = wibox.container.background,
                 bg = theme.common.primary_50,
-                fg = theme.common.foreground,
+                fg = theme.common.fg,
                 shape = calendar_item_shape,
                 widget,
             }
         elseif flag == "weeknumber" then
             widget.halign = "right"
             widget.valign = "center"
-            widget.markup = pango.span { color = theme.common.foreground_50, weight = "bold", widget.text, " " }
+            widget.markup = pango.span { fgcolor = theme.common.fg_50, weight = "bold", widget.text, " " }
             return wibox.widget {
                 widget = wibox.container.margin,
-                margins = {
-                    top = dpi(6),
-                    bottom = dpi(6),
-                },
+                margins = hui.thickness { dpi(6), 0 },
                 widget,
             }
         elseif flag == "weekday" then
             widget.halign = "center"
             return wibox.widget {
                 widget = wibox.container.margin,
-                margins = {
-                    left = dpi(4),
-                    right = dpi(4),
-                    top = dpi(2),
-                    bottom = dpi(2),
-                },
+                margins = hui.thickness { dpi(2), dpi(4) },
                 widget,
             }
         elseif flag == "monthheader" or flag == "header" then
@@ -800,10 +518,7 @@ do
             widget.markup = pango.b(widget.text)
             return wibox.widget {
                 widget = wibox.container.margin,
-                margins = {
-                    top = dpi(6),
-                    bottom = dpi(14),
-                },
+                margins = hui.thickness { dpi(6), 0, dpi(14) },
                 widget,
             }
         elseif flag == "month" then
@@ -814,125 +529,128 @@ do
     end
 end
 
+----------------------------------------------------------------------------------------------------
 
----------------------------------------------------------------------------------------------------
+theme.taglist = {
+    rename = {
+        bg = theme.common.secondary_66,
+        fg = theme.common.fg_bright,
+    },
+}
 
-theme.taglist_bg_occupied = theme.capsule.styles.normal.background
-theme.taglist_fg_occupied = theme.capsule.styles.normal.foreground
-theme.taglist_shape_border_color = theme.capsule.styles.normal.border_color
-theme.taglist_shape_border_width = dpi(1)
+theme.taglist.item = {
+    normal = setmetatable({
+        border_width = dpi(1),
+    }, { __index = theme.capsule.styles.normal }),
+    active = setmetatable({
+        bg           = theme.common.primary_50,
+        fg           = theme.common.fg_bright,
+        border_color = theme.common.primary_75,
+        border_width = dpi(1),
+    }, { __index = theme.capsule.styles.normal }),
+    urgent = setmetatable({
+    }, { __index = theme.capsule.styles.urgent }),
+    empty = setmetatable({
+    }, { __index = theme.capsule.styles.disabled }),
+    volatile = setmetatable({
+        border_color = theme.common.secondary_75,
+        border_width = dpi(1),
+    }, { __index = theme.capsule.styles.normal }),
+}
 
-theme.taglist_bg_focus = theme.common.primary_50
-theme.taglist_fg_focus = theme.common.foreground_bright
-theme.taglist_shape_border_color_focus = theme.common.primary_75
-theme.taglist_shape_border_width_focus = dpi(1)
+----------------------------------------------------------------------------------------------------
 
-theme.taglist_bg_urgent = theme.capsule.styles.urgent.background
-theme.taglist_fg_urgent = theme.capsule.styles.urgent.foreground
-theme.taglist_shape_border_color_urgent = theme.capsule.styles.urgent.border_color
-theme.taglist_shape_border_width_urgent = theme.capsule.styles.urgent.border_width
+theme.clientlist = {
+    rename = {
+        bg = theme.common.secondary_66,
+        fg = theme.common.fg_bright,
+    },
+    enable_glyphs = false,
+    glyphs = {
+        sticky = " ",
+        ontop = " ",
+        above = " ",
+        below = " ",
+        floating = " ",
+        maximized = " ",
+        maximized_horizontal = " ",
+        maximized_vertical = "",
+        minimized = " ",
+    },
+}
 
-theme.taglist_bg_empty = theme.capsule.styles.disabled.background
-theme.taglist_fg_empty = theme.capsule.styles.disabled.foreground
-theme.taglist_shape_border_color_empty = theme.capsule.styles.disabled.border_color
-theme.taglist_shape_border_width_empty = theme.capsule.styles.disabled.border_width
+theme.clientlist.item = {
+    normal = setmetatable({
+    }, { __index = theme.capsule.styles.normal }),
+    active = setmetatable({
+    }, { __index = theme.capsule.styles.selected }),
+    urgent = setmetatable({
+    }, { __index = theme.capsule.styles.urgent }),
+    minimized = setmetatable({
+    }, { __index = theme.capsule.styles.disabled }),
+}
 
-theme.taglist_bg_volatile = theme.capsule.styles.normal.background
-theme.taglist_fg_volatile = theme.capsule.styles.normal.foreground
-theme.taglist_shape_border_color_volatile = theme.common.secondary_75
-theme.taglist_shape_border_width_volatile = dpi(1)
+----------------------------------------------------------------------------------------------------
 
-theme.taglist_bg_rename = theme.common.secondary_66
-theme.taglist_fg_rename = theme.common.foreground_bright
+local client_border_width = dpi(3)
+local client_border_radius = main_border_radius
 
+theme.client = {
+    normal = {
+        bg = theme.common.bg_66,
+        fg = theme.common.fg,
+        border_color = theme.common.bg_140,
+        border_width = client_border_width,
+    },
+    active = {
+        bg = theme.common.bg,
+        fg = theme.common.fg_bright,
+        border_color = theme.common.primary,
+        border_width = client_border_width,
+    },
+    urgent = {
+        bg = theme.common.urgent_bright,
+        fg = theme.common.fg_bright,
+        border_color = theme.common.urgent_bright,
+        border_width = client_border_width,
+    },
+}
 
----------------------------------------------------------------------------------------------------
+function theme.client.shape(cr, width, height)
+    gshape.rounded_rect(cr, width, height, client_border_radius)
+end
 
-theme.tasklist_bg_normal = theme.capsule.styles.normal.background
-theme.tasklist_fg_normal = theme.capsule.styles.normal.foreground
-theme.tasklist_shape_border_color = theme.capsule.styles.normal.border_color
-theme.tasklist_shape_border_width = theme.capsule.styles.normal.border_width
-
-theme.tasklist_bg_focus = theme.capsule.styles.selected.background
-theme.tasklist_fg_focus = theme.capsule.styles.selected.foreground
-theme.tasklist_shape_border_color_focus = theme.capsule.styles.selected.border_color
-theme.tasklist_shape_border_width_focus = theme.capsule.styles.selected.border_width
-
-theme.tasklist_bg_urgent = theme.capsule.styles.urgent.background
-theme.tasklist_fg_urgent = theme.capsule.styles.urgent.foreground
-theme.tasklist_shape_border_color_urgent = theme.capsule.styles.urgent.border_color
-theme.tasklist_shape_border_width_urgent = theme.capsule.styles.urgent.border_width
-
-theme.tasklist_bg_minimize = theme.capsule.styles.disabled.background
-theme.tasklist_fg_minimize = theme.capsule.styles.disabled.foreground
-theme.tasklist_shape_border_color_minimized = theme.capsule.styles.disabled.border_color
-theme.tasklist_shape_border_width_minimized = theme.capsule.styles.disabled.border_width
-
-theme.tasklist_plain_task_name = true
-theme.tasklist_sticky = " "
-theme.tasklist_ontop = " "
-theme.tasklist_above = " "
-theme.tasklist_below = " "
-theme.tasklist_floating = " "
-theme.tasklist_maximized = " "
-theme.tasklist_maximized_horizontal = " "
-theme.tasklist_maximized_vertical = ""
-theme.tasklist_minimized = " "
-
-
----------------------------------------------------------------------------------------------------
-
-theme.titlebar_bg_normal = theme.common.background_66
-theme.titlebar_fg_normal = theme.common.foreground
-theme.titlebar_bg_focus = theme.common.background
-theme.titlebar_fg_focus = theme.common.foreground_bright
-theme.titlebar_bg_urgent = theme.common.urgent_bright
-theme.titlebar_fg_urgent = theme.common.foreground_bright
+----------------------------------------------------------------------------------------------------
 
 do
     local button_shape = function(cr, width, height)
         gshape.rounded_rect(cr, width, height, dpi(3))
     end
-    local button_paddings = {
-        left = dpi(12),
-        right = dpi(12),
-        top = dpi(4),
-        bottom = dpi(4),
-    }
-    local button_margins = {
-        left = dpi(0),
-        right = dpi(0),
-        top = dpi(4),
-        bottom = dpi(8),
-    }
+    local button_paddings = hui.thickness { dpi(4), dpi(12) }
+    local button_margins = hui.thickness { dpi(4), 0, dpi(8) }
     theme.titlebar = {
         height = dpi(36),
-        paddings = {
-            left = dpi(12),
-            right = dpi(12),
-            top = dpi(0),
-            bottom = dpi(0),
-        },
+        paddings = hui.thickness { 0, dpi(12) },
         button = {
             opacity_normal = 0.5,
             opacity_focus = 1,
             spacing = dpi(4),
             styles = {
                 normal = {
-                    hover_overlay = tcolor.white .. "30",
-                    press_overlay = tcolor.white .. "30",
-                    background = tcolor.transparent,
-                    foreground = theme.common.foreground,
+                    hover_overlay = hcolor.white .. "30",
+                    press_overlay = hcolor.white .. "30",
+                    bg = hcolor.transparent,
+                    fg = theme.common.fg,
                     border_width = 0,
                     shape = button_shape,
                     paddings = button_paddings,
                     margins = button_margins,
                 },
                 active = {
-                    hover_overlay = tcolor.white .. "20",
-                    press_overlay = tcolor.white .. "20",
-                    background = theme.common.primary_50,
-                    foreground = theme.common.foreground_bright,
+                    hover_overlay = hcolor.white .. "20",
+                    press_overlay = hcolor.white .. "20",
+                    bg = theme.common.primary_50,
+                    fg = theme.common.fg_bright,
                     border_color = theme.common.primary_75,
                     border_width = dpi(1),
                     shape = button_shape,
@@ -942,8 +660,8 @@ do
                 close = {
                     hover_overlay = theme.common.urgent_bright,
                     press_overlay = theme.palette.white .. "30",
-                    background = tcolor.transparent,
-                    foreground = theme.common.foreground_bright,
+                    bg = hcolor.transparent,
+                    fg = theme.common.fg_bright,
                     border_width = 0,
                     shape = button_shape,
                     paddings = button_paddings,
@@ -967,26 +685,11 @@ do
     local toolbox_button_shape = function(cr, width, height)
         gshape.rounded_rect(cr, width, height, dpi(2))
     end
-    local toolbox_button_paddings = {
-        left = dpi(4),
-        right = dpi(4),
-        top = dpi(4),
-        bottom = dpi(4),
-    }
-    local toolbox_button_margins = {
-        left = dpi(0),
-        right = dpi(0),
-        top = dpi(0),
-        bottom = dpi(0),
-    }
+    local toolbox_button_paddings = hui.thickness { dpi(4) }
+    local toolbox_button_margins = hui.thickness { 0 }
     theme.toolbox_titlebar = {
         height = dpi(24),
-        paddings = {
-            left = dpi(2),
-            right = dpi(2),
-            top = dpi(2),
-            bottom = dpi(2),
-        },
+        paddings = hui.thickness { dpi(2) },
         button = {
             opacity_normal = theme.titlebar.button.opacity_normal,
             opacity_focus = theme.titlebar.button.opacity_focus,
@@ -995,8 +698,8 @@ do
                 normal = {
                     hover_overlay = theme.titlebar.button.styles.normal.hover_overlay,
                     press_overlay = theme.titlebar.button.styles.normal.press_overlay,
-                    background = theme.titlebar.button.styles.normal.background,
-                    foreground = theme.titlebar.button.styles.normal.foreground,
+                    bg = theme.titlebar.button.styles.normal.bg,
+                    fg = theme.titlebar.button.styles.normal.fg,
                     border_width = theme.titlebar.button.styles.normal.border_width,
                     shape = toolbox_button_shape,
                     paddings = toolbox_button_paddings,
@@ -1005,8 +708,8 @@ do
                 active = {
                     hover_overlay = theme.titlebar.button.styles.active.hover_overlay,
                     press_overlay = theme.titlebar.button.styles.active.press_overlay,
-                    background = theme.titlebar.button.styles.active.background,
-                    foreground = theme.titlebar.button.styles.active.foreground,
+                    bg = theme.titlebar.button.styles.active.bg,
+                    fg = theme.titlebar.button.styles.active.fg,
                     border_color = theme.titlebar.button.styles.active.border_width,
                     border_width = dpi(1),
                     shape = toolbox_button_shape,
@@ -1016,8 +719,8 @@ do
                 close = {
                     hover_overlay = theme.titlebar.button.styles.close.hover_overlay,
                     press_overlay = theme.titlebar.button.styles.close.press_overlay,
-                    background = theme.titlebar.button.styles.close.background,
-                    foreground = theme.titlebar.button.styles.close.foreground,
+                    bg = theme.titlebar.button.styles.close.bg,
+                    fg = theme.titlebar.button.styles.close.fg,
                     border_width = theme.titlebar.button.styles.close.border_width,
                     shape = toolbox_button_shape,
                     paddings = toolbox_button_paddings,
@@ -1029,11 +732,10 @@ do
     }
 end
 
-
----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 
 function theme.build_layout_stylesheet(color)
-    color = color or theme.common.foreground
+    color = color or theme.common.fg
     return css.style {
         [".primary"] = {
             fill = color,
@@ -1046,26 +748,14 @@ function theme.build_layout_stylesheet(color)
 end
 
 theme.layout_icons = {
-    tilted_right = config.places.theme .. "/layouts/tilted_right.svg",
-    tilted_center = config.places.theme .. "/layouts/tilted_center.svg",
-    floating = config.places.theme .. "/layouts/floating.svg",
-    max = config.places.theme .. "/layouts/max.svg",
-    fullscreen = config.places.theme .. "/layouts/fullscreen.svg",
+    tilted_right = config.places.theme .. "/icons/layouts/tilted_right.svg",
+    tilted_center = config.places.theme .. "/icons/layouts/tilted_center.svg",
+    floating = config.places.theme .. "/icons/layouts/floating.svg",
+    max = config.places.theme .. "/icons/layouts/max.svg",
+    fullscreen = config.places.theme .. "/icons/layouts/fullscreen.svg",
 }
 
-
----------------------------------------------------------------------------------------------------
-
-theme.notification_width = dpi(400)
-theme.notification_spacing = dpi(16)
-theme.notification_margin = dpi(8)
-theme.notification_border_width = theme.border_width
-theme.notification_shape = function(cr, width, height)
-    gshape.rounded_rect(cr, width, height, dpi(8))
-end
-
-
----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 
 theme.application_menu_categories = {
     utility = {
@@ -1136,7 +826,31 @@ theme.application_menu_categories = {
     },
 }
 
+----------------------------------------------------------------------------------------------------
 
----------------------------------------------------------------------------------------------------
+theme.systray = {
+    bg = theme.capsule.default_style.bg,
+    spacing = dpi(12),
+}
+
+----------------------------------------------------------------------------------------------------
+
+theme.snap = {
+    gap = theme.gap * 2,
+    distance = dpi(16),
+    edge = {
+        distance = dpi(4),
+        bg = "#ff0000",
+        border_width = 6, -- no dpi required
+    },
+}
+
+function theme.snap.edge.shape(cr, width, height)
+    local bw = theme.snap.edge.border_width
+    cr:translate(bw, bw)
+    gshape.rounded_rect(cr, width - 2 * bw, height - 2 * bw, client_border_radius)
+end
+
+----------------------------------------------------------------------------------------------------
 
 return theme

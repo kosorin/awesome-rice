@@ -1,6 +1,6 @@
 local capi = Capi
 local awful = require("awful")
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local wibox = require("wibox")
 local dpi = Dpi
 local config = require("config")
@@ -84,7 +84,11 @@ capi.screen.connect_signal("request::desktop_decoration", function(screen)
             right:add(weather_widget.new(wibar))
         end
         right:add(tools_widget.new(wibar))
+        right:add(datetime_widget.new(wibar))
+        right:add(power_widget.new(wibar))
+    else
+        right:add(volume_widget.new(wibar))
+        right:add(datetime_widget.new(wibar))
+        right:add(power_widget.new(wibar))
     end
-    right:add(datetime_widget.new(wibar))
-    right:add(power_widget.new(wibar))
 end)

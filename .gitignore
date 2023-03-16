@@ -6,3 +6,9 @@
 !.vscode/launch.json
 !.vscode/extensions.json
 !.vscode/*.code-snippets
+
+# Lua extension
+/.luarc.json
+
+# rc files
+rc.*.lua

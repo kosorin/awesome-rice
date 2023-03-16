@@ -1,100 +1,207 @@
 local capi = Capi
+local type = type
 local setmetatable = setmetatable
 local ipairs = ipairs
+local select = select
+local tostring = tostring
 local math = math
 local table = table
 local string = string
 local awful = require("awful")
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local gtable = require("gears.table")
 local gmatcher = require("gears.matcher")
 local wibox = require("wibox")
 local pbinding = require("io.binding")
 local mod = pbinding.modifier
 local btn = pbinding.button
-local tree = require("utils.tree")
+local utree = require("utils.tree")
 local capsule = require("widget.capsule")
 local noice = require("theme.style")
 local pango = require("utils.pango")
 
 
-local bindbox = { mt = {} }
-
-local s25p = pango.span { size = "25%", " ", }
-local s50p = pango.span { size = "50%", " ", }
+local s25p = pango.span { size = "25%", " " }
+local s50p = pango.span { size = "50%", " " }
 local force_ltr = "&#x200E;"
-local mouse_label_icon = "" --    
+local mouse_label_icon = ""
 local labels = {
-    [btn.left]          = mouse_label_icon .. " Left",
-    [btn.middle]        = mouse_label_icon .. " Middle",
-    [btn.right]         = mouse_label_icon .. " Right",
-    [btn.wheel_up]      = mouse_label_icon .. " Wheel Up",
-    [btn.wheel_down]    = mouse_label_icon .. " Wheel Down",
-    [btn.wheel_left]    = mouse_label_icon .. " Wheel Left",
-    [btn.wheel_right]   = mouse_label_icon .. " Wheel Right",
-    [btn.extra_back]    = mouse_label_icon .. " Back",
-    [btn.extra_forward] = mouse_label_icon .. " Forward",
-
-    Control          = "Ctrl",
-    Mod1             = "Alt",
-    ISO_Level3_Shift = "Alt Gr",
-    Mod4             = "Super",
-
-    Insert    = "Ins",
-    Delete    = "Del",
-    Next      = "PgDn",
-    Prior     = "PgUp",
-    Left      = "" .. s25p, -- ←
-    Up        = "" .. s25p, -- ↑
-    Right     = "" .. s25p, -- →
-    Down      = "" .. s25p, -- ↓
-    Escape    = "Esc",
-    Tab       = "Tab",
-    space     = "Space",
-    Return    = "Enter",
-    BackSpace = " ",
-
-    KP_End      = "Num1",
-    KP_Down     = "Num2",
-    KP_Next     = "Num3",
-    KP_Left     = "Num4",
-    KP_Begin    = "Num5",
-    KP_Right    = "Num6",
-    KP_Home     = "Num7",
-    KP_Up       = "Num8",
-    KP_Prior    = "Num9",
-    KP_Insert   = "Num0",
-    KP_Delete   = "Num.",
-    KP_Divide   = "Num/",
-    KP_Multiply = "Num*",
-    KP_Subtract = "Num-",
-    KP_Add      = "Num+",
-    KP_Enter    = "NumEnter",
-
-    dead_acute      = "´",
-    dead_circumflex = "^",
-    dead_grave      = "`",
-
+    [btn.left]            = mouse_label_icon .. " Left",
+    [btn.middle]          = mouse_label_icon .. " Middle",
+    [btn.right]           = mouse_label_icon .. " Right",
+    [btn.wheel_up]        = mouse_label_icon .. " Wheel Up",
+    [btn.wheel_down]      = mouse_label_icon .. " Wheel Down",
+    [btn.wheel_left]      = mouse_label_icon .. " Wheel Left",
+    [btn.wheel_right]     = mouse_label_icon .. " Wheel Right",
+    [btn.extra_back]      = mouse_label_icon .. " Back",
+    [btn.extra_forward]   = mouse_label_icon .. " Forward",
+    --
+    Control               = "Ctrl",
+    Mod1                  = "Alt",
+    ISO_Level3_Shift      = "Alt Gr",
+    Mod4                  = "Super",
+    --
+    Insert                = "Ins",
+    Delete                = "Del",
+    Next                  = "PgDn",
+    Prior                 = "PgUp",
+    Left                  = "" .. s25p,
+    Up                    = "" .. s25p,
+    Right                 = "" .. s25p,
+    Down                  = "" .. s25p,
+    Escape                = "Esc",
+    Tab                   = "Tab",
+    space                 = "Space",
+    Return                = "Enter",
+    BackSpace             = " ",
+    --
+    KP_End                = "Num1",
+    KP_Down               = "Num2",
+    KP_Next               = "Num3",
+    KP_Left               = "Num4",
+    KP_Begin              = "Num5",
+    KP_Right              = "Num6",
+    KP_Home               = "Num7",
+    KP_Up                 = "Num8",
+    KP_Prior              = "Num9",
+    KP_Insert             = "Num0",
+    KP_Delete             = "Num.",
+    KP_Divide             = "Num/",
+    KP_Multiply           = "Num*",
+    KP_Subtract           = "Num-",
+    KP_Add                = "Num+",
+    KP_Enter              = "NumEnter",
+    --
+    dead_acute            = "´",
+    dead_circumflex       = "^",
+    dead_grave            = "`",
+    --
     XF86MonBrightnessUp   = "󰃟 +",
     XF86MonBrightnessDown = "󰃟 -",
-    XF86AudioRaiseVolume  = force_ltr .. "ﱛ", -- ﱛ 
-    XF86AudioLowerVolume  = force_ltr .. "ﱜ", -- ﱜ 
-    XF86AudioMute         = force_ltr .. "ﱝ", -- ﱝ 婢 
-    XF86AudioPlay         = "契", -- 懶
+    XF86AudioRaiseVolume  = force_ltr .. "ﱛ",
+    XF86AudioLowerVolume  = force_ltr .. "ﱜ",
+    XF86AudioMute         = force_ltr .. "ﱝ",
+    XF86AudioPlay         = "契",
     XF86AudioPause        = "",
     XF86AudioStop         = "栗",
-    XF86AudioPrev         = "玲", -- ⏮
-    XF86AudioNext         = "怜", -- ⏭
+    XF86AudioPrev         = "玲",
+    XF86AudioNext         = "怜",
     XF86AudioRewind       = "丹",
     XF86AudioForward      = "",
-
-    Print          = "" .. s50p,
-    XF86Calculator = "" .. s50p,
+    --
+    Print                 = "" .. s50p,
+    XF86Calculator        = "" .. s50p,
 }
 
+
+---@class Bindbox.module
+---@operator call: Bindbox
+local M = { mt = {} }
+
+function M.mt:__call(...)
+    return M.new(...)
+end
+
+
+---@class Bindbox.data.item
+---@field binding Binding
+---@field trigger { size: size, markup: string, highlighted?: string, widget?: wibox.widget.textbox }
+---@field description { size: size, markup: string, highlighted?: string, widget?: wibox.widget.textbox }
+
+---@class Bindbox.data.group
+---@field markup string
+---@field size size
+---@field page_break? boolean
+---@field [integer] Bindbox.data.item
+
+---@class Bindbox.data
+---@field max_trigger_width number
+---@field max_description_width number -- also used for group header
+---@field [integer] Bindbox.data.group
+
+---@class Bindbox : awful.popup, stylable
+---@field package _private Bindbox.private
+---Style properties:
+---@field font unknown
+---@field paddings unknown
+---@field page_paddings unknown
+---@field page_width unknown
+---@field page_height unknown
+---@field page_columns unknown
+---@field group_spacing unknown
+---@field item_spacing unknown
+---@field trigger_bg unknown
+---@field trigger_bg_alpha unknown
+---@field trigger_fg unknown
+---@field group_bg unknown
+---@field group_fg unknown
+---@field group_ruled_bg unknown
+---@field group_ruled_fg unknown
+---@field find_dim_bg unknown
+---@field find_dim_fg unknown
+---@field find_highlight_bg unknown
+---@field find_highlight_fg unknown
+---@field group_path_separator_markup unknown
+---@field slash_separator_markup unknown
+---@field plus_separator_markup unknown
+---@field range_separator_markup unknown
+---@field status_style unknown
+---@field status_spacing unknown
+---@field find_placeholder_fg unknown
+---@field find_cursor_bg unknown
+---@field find_cursor_fg unknown
+M.object = {}
+---@class Bindbox.private
+---@field current_page? integer
+---@field pages unknown
+---@field find unknown
+---@field matcher gears.matcher
+---@field source_binding_tree Tree
+---@field include_awesome_bindings boolean
+
+noice.define_style(M.object, {
+    bg = { proxy = true },
+    fg = { proxy = true },
+    border_color = { proxy = true },
+    border_width = { proxy = true },
+    shape = { proxy = true },
+    placement = { proxy = true },
+    font = {},
+    paddings = { id = "#padding", property = "margins" },
+    page_paddings = { id = "#page_container_border", property = "margins" },
+    page_width = {},
+    page_height = {},
+    page_columns = {},
+    group_spacing = {},
+    item_spacing = {},
+    trigger_bg = {},
+    trigger_bg_alpha = {},
+    trigger_fg = {},
+    group_bg = {},
+    group_fg = {},
+    group_ruled_bg = {},
+    group_ruled_fg = {},
+    find_dim_bg = {},
+    find_dim_fg = {},
+    find_highlight_bg = {},
+    find_highlight_fg = {},
+    group_path_separator_markup = {},
+    slash_separator_markup = {},
+    plus_separator_markup = {},
+    range_separator_markup = {},
+    status_style = { id = "#status_container", property = "style" }, -- TODO: Fix me - capsule:set_style() no longer exists
+    status_spacing = { id = "#status_bindings", property = "spacing" },
+    find_placeholder_fg = { id = "#find_placeholder", property = "fg" },
+    find_cursor_bg = {},
+    find_cursor_fg = {},
+})
+
+---@param a Node
+---@param b Node
+---@return boolean
 local function default_group_sort(a, b)
-    local ga, gb = a.state, b.state
-    local ra, rb = not not ga.ruled, not not gb.ruled
+    local ga, gb = a.state --[[@as BindboxGroup]], b.state --[[@as BindboxGroup]]
+    local ra, rb = not not ga.rule, not not gb.rule
     if ra == rb then
         local oa, ob = ga.order, gb.order
         if oa and ob then
@@ -102,13 +209,16 @@ local function default_group_sort(a, b)
         elseif not oa and not ob then
             return a.name < b.name
         else
-            return oa
+            return not not oa
         end
     else
         return ra
     end
 end
 
+---@param a Binding
+---@param b Binding
+---@return boolean
 local function default_binding_sort(a, b)
     local oa, ob = a.order, b.order
     if oa and ob then
@@ -116,22 +226,38 @@ local function default_binding_sort(a, b)
     elseif not oa and not ob then
         return (a.description or "") < (b.description or "")
     else
-        return oa
+        return not not oa
     end
 end
 
+---@param modifier key_modifier
+---@return string
 local function get_modifier_label(modifier)
     return labels[modifier] or modifier
 end
 
+---@param trigger BindingTrigger.value
+---@return string
 local function get_trigger_label(trigger)
-    if type(trigger) == "string" then
+    local label
+    local tt = type(trigger)
+    if tt == pbinding.trigger_type.key then
         local keysym, keyprint = awful.keyboard.get_key_name(trigger)
-        return labels[keysym] or keyprint or keysym or trigger
+        label = labels[keysym] or keyprint or keysym
+    elseif tt == pbinding.trigger_type.button then
+        label = labels[trigger]
     end
-    return labels[trigger] or tostring(trigger)
+    return label or tostring(trigger)
 end
 
+---@class Bindbox.highlight.args
+---@field find_terms? string[]
+
+---@param self Bindbox
+---@param text string
+---@param args? Bindbox.highlight.args
+---@return string
+---@return boolean
 local function highlight_text(self, text, args)
     text = text or ""
 
@@ -152,12 +278,12 @@ local function highlight_text(self, text, args)
 
     local total_found = 0
     local lower_text = string.lower(text)
-    for _, st in ipairs(args.find_terms) do
+    for _, ft in ipairs(args.find_terms) do
         local found = false
         local from = 1
         local to
         while true do
-            from, to = string.find(lower_text, st, from, true)
+            from, to = string.find(lower_text, ft, from, true)
             if from == nil then
                 break
             end
@@ -174,9 +300,9 @@ local function highlight_text(self, text, args)
 
     if total_found ~= #args.find_terms then
         return pango.span {
-            fgcolor = self.find_dim_foreground,
-            bgcolor = self.find_dim_background,
-            text,
+            fgcolor = self.find_dim_fg,
+            bgcolor = self.find_dim_bg,
+            pango.escape(text),
         }, false
     end
 
@@ -207,10 +333,10 @@ local function highlight_text(self, text, args)
         local capture = string.sub(text, part.from, part.to)
         if part.matched then
             return pango.span {
-                fgcolor = self.find_highlight_foreground,
-                bgcolor = self.find_highlight_background,
+                fgcolor = self.find_highlight_fg,
+                bgcolor = self.find_highlight_bg,
                 bgalpha = "100%",
-                capture,
+                pango.escape(capture),
             }
         else
             return capture
@@ -218,35 +344,35 @@ local function highlight_text(self, text, args)
     end, parts), ""), true
 end
 
+---@param self Bindbox
+---@param node Node
+---@param path string[]
+---@return string
 local function get_group_markup(self, node, path)
-    local is_ruled = node:find_parent(function(n) return n.state.ruled end, true)
-    local background = select(2, node:find_parent(function(n) return n.state.bg end, true))
-        or (is_ruled and self.group_ruled_background or self.group_background)
-    local foreground = select(2, node:find_parent(function(n) return n.state.fg end, true))
-        or (is_ruled and self.group_ruled_foreground or self.group_foreground)
+    local is_ruled = node:find_parent(function(n) return (n.state --[[@as BindboxGroup]]).rule end, true)
+    local _, bg = node:find_parent(function(n) return (n.state --[[@as BindboxGroup]]).bg end, true)
+    local _, fg = node:find_parent(function(n) return (n.state --[[@as BindboxGroup]]).fg end, true)
+    bg = bg or (is_ruled and self.group_ruled_bg or self.group_bg)
+    fg = fg or (is_ruled and self.group_ruled_fg or self.group_fg)
     local text = " " .. table.concat(path, self.group_path_separator_markup) .. " "
     return pango.span {
-        fgcolor = foreground,
-        bgcolor = background,
-        text,
+        fgcolor = fg,
+        bgcolor = bg,
+        pango.escape(text),
     }
 end
 
+---@param self Bindbox
+---@param binding Binding
+---@return string
 local function get_trigger_markup(self, binding)
-
     local function trigger_box(content)
         return pango.span {
-            bgcolor = self.trigger_background,
-            bgalpha = self.trigger_background_alpha,
-            " " .. content .. " ",
-        }
-    end
-
-    local function trigger_target(target)
-        return pango.span {
-            fgalpha = "50%",
-            size = "smaller",
-            " (" .. target .. ")",
+            bgcolor = self.trigger_bg,
+            bgalpha = self.trigger_bg_alpha,
+            " ",
+            pango.escape(content),
+            " ",
         }
     end
 
@@ -276,16 +402,29 @@ local function get_trigger_markup(self, binding)
     end
 
     if binding.target then
-        trigger_text = trigger_text .. trigger_target(binding.target)
+        trigger_text = trigger_text .. pango.span {
+            fgalpha = "50%",
+            size = "smaller",
+            " (",
+            pango.escape(binding.target),
+            ")",
+        }
     end
 
     return modifier_markup .. trigger_box(trigger_text)
 end
 
+---@param self Bindbox
+---@param binding Binding
+---@param highlight_args? Bindbox.highlight.args
+---@return string
 local function get_description_markup(self, binding, highlight_args)
-    return highlight_text(self, binding.description, highlight_args)
+    return select(1, highlight_text(self, binding.description, highlight_args))
 end
 
+---@param self Bindbox
+---@param markup string
+---@return size
 local function get_markup_geometry(self, markup)
     return wibox.widget.textbox.get_markup_geometry(
         markup,
@@ -293,40 +432,42 @@ local function get_markup_geometry(self, markup)
         self.font)
 end
 
-local function sort_node(node, group_sort, binding_sort)
-    table.sort(node.children, group_sort)
-    table.sort(node.state, binding_sort)
-end
-
+---@param node Node
+---@param binding Binding
 local function merge_binding(node, binding)
     table.insert(node.state, binding)
 end
 
-local function merge_group(self, tree, node, group_args)
-    if not group_args or not group_args.groups then
+---@param self Bindbox
+---@param tree Tree
+---@param node Node
+---@param group BindboxGroup
+local function merge_group(self, tree, node, group)
+    if not group or not group.groups then
         return
     end
-    for _, child_args in ipairs(group_args.groups) do
-        local child, is_new = tree:get_or_add_node(node, child_args.name, child_args)
+    for _, g in ipairs(group.groups) do
+        local child, is_new = tree:get_or_add_node(node, g.name, g)
         if is_new then
-            if not child_args.order then
-                child_args.order = (self._private.last_group_order or 0) + 1
+            if not g.order then
+                g.order = (self._private.last_group_order or 0) + 1
             end
-            self._private.last_group_order = child_args.order
+            self._private.last_group_order = g.order
         end
-        for i = 1, #child_args do
-            local binding = pbinding.new(child_args[i])
+        for i = 1, #g do
+            local binding = pbinding.new(g[i])
             if is_new then
                 -- Just replace binding args with an actual binding
-                child_args[i] = binding
+                g[i] = binding
             else
                 merge_binding(child, binding)
             end
         end
-        merge_group(self, tree, child, child_args)
+        merge_group(self, tree, child, g)
     end
 end
 
+---@param tree Tree
 local function merge_awesome_bindings(tree)
     for _, binding in ipairs(pbinding.awesome_bindings) do
         local node = tree:ensure_path(binding.path)
@@ -334,14 +475,17 @@ local function merge_awesome_bindings(tree)
     end
 end
 
+---@param self Bindbox
+---@param client? client
+---@return Tree
 local function build_binding_tree(self, client)
     local function group_clone(node)
         return gtable.clone(node.state, false)
     end
-
     local function node_filter(node)
-        local ruled = node.state.ruled
-        return not ruled or (client and self._private.matcher:matches_rule(client, ruled))
+        local group = node.state --[[@as BindboxGroup]]
+        local rule = group.rule
+        return not rule or (client and self._private.matcher:matches_rule(client, rule))
     end
 
     local binding_tree = self._private.source_binding_tree:clone(group_clone, node_filter)
@@ -351,30 +495,35 @@ local function build_binding_tree(self, client)
     end
 
     for node in binding_tree:traverse() do
-        sort_node(node, self._private.group_sort, self._private.binding_sort)
+        table.sort(node.children, default_group_sort)
+        table.sort(node.state, default_binding_sort)
     end
 
     return binding_tree
 end
 
+---@param self Bindbox
+---@param binding_tree Tree
+---@return Bindbox.data
 local function build_data(self, binding_tree)
+    ---@type Bindbox.data
     local data = {
         max_trigger_width = 0,
-        max_description_width = 0, -- also used for group header
+        max_description_width = 0,
     }
     for node, path in binding_tree:traverse() do
-        local group = node.state
+        local group = node.state --[[@as BindboxGroup]]
         if #path > 0 and #group > 0 then
             local group_markup = get_group_markup(self, node, path)
             local group_size = get_markup_geometry(self, group_markup)
+            ---@type Bindbox.data.group
             local group_data = {
                 markup = group_markup,
                 size = group_size,
                 page_break = group.page_break,
-                items = {},
             }
-            if data.max_description_width < group_size.width then
-                data.max_description_width = group_size.width
+            if data.max_description_width < group_data.size.width then
+                data.max_description_width = group_data.size.width
             end
             for _, binding in ipairs(group) do
                 if binding.description then
@@ -382,6 +531,7 @@ local function build_data(self, binding_tree)
                     local trigger_size = get_markup_geometry(self, trigger_markup)
                     local description_markup = get_description_markup(self, binding)
                     local description_size = get_markup_geometry(self, description_markup)
+                    ---@type Bindbox.data.item
                     local item = {
                         binding = binding,
                         trigger = {
@@ -397,7 +547,7 @@ local function build_data(self, binding_tree)
                             widget = nil,
                         },
                     }
-                    table.insert(group_data.items, item)
+                    group_data[#group_data + 1] = item
                     if data.max_trigger_width < trigger_size.width then
                         data.max_trigger_width = trigger_size.width
                     end
@@ -406,16 +556,22 @@ local function build_data(self, binding_tree)
                     end
                 end
             end
-            if #group_data.items > 0 then
-                table.insert(data, group_data)
+            if #group_data > 0 then
+                data[#data + 1] = group_data
             end
         end
     end
     return data
 end
 
+---@param self Bindbox
+---@param data Bindbox.data
+---@param width number
+---@param height number
+---@param filter_highlighted? boolean
+---@return table
 local function build_pages(self, data, width, height, filter_highlighted)
-    local font = self.font or beautiful.font
+    local font = self.font or beautiful.build_font()
     local line_size = get_markup_geometry(self, "foobar")
 
     width = math.floor(width / self.page_columns) - ((self.page_columns - 1) * self.group_spacing)
@@ -498,8 +654,8 @@ local function build_pages(self, data, width, height, filter_highlighted)
         end
 
         local item_count = 0
-        for j = next_column.item, #group.items do
-            local item = group.items[j]
+        for j = next_column.item, #group do
+            local item = group[j]
             if not filter_highlighted or item.trigger.highlighted or item.description.highlighted then
                 local trigger_offset_x = data.max_trigger_width - item.trigger.size.width
                 local trigger_widget = wibox.widget {
@@ -513,8 +669,8 @@ local function build_pages(self, data, width, height, filter_highlighted)
                         y = offset_y,
                         width = item.trigger.size.width,
                         height = item.trigger.size.height,
-                    }
-                }
+                    },
+                } --[[@as wibox.widget.textbox]]
                 item.trigger.widget = trigger_widget
                 local description_widget
                 if show_description_column then
@@ -529,11 +685,11 @@ local function build_pages(self, data, width, height, filter_highlighted)
                             y = offset_y,
                             width = max_description_width,
                         },
-                    }
+                    } --[[@as wibox.widget.textbox]]
                     item.description.widget = description_widget
                     description_widget.line_spacing_factor = 1 + (self.item_spacing / item.description.size.height)
-                    description_widget.point.height = description_widget:get_height_for_width(
-                        max_description_width, self.screen) + self.item_spacing
+                    description_widget.point.height = description_widget:get_height_for_width(max_description_width, self.screen)
+                        + self.item_spacing
                     offset_y = offset_y +
                         math.max(trigger_widget.point.height, description_widget.point.height - self.item_spacing)
                 else
@@ -594,9 +750,11 @@ local function build_pages(self, data, width, height, filter_highlighted)
     return pages
 end
 
+---@param query string
+---@return string[]
 local function get_find_terms(query)
-    local unique_term_map = {}
     local terms = {}
+    local unique_term_map = {}
     query = string.gsub(query, "%s+", " ")
     for term in string.gmatch(query, "([^%s]+)") do
         term = string.lower(term)
@@ -611,10 +769,13 @@ local function get_find_terms(query)
     return terms
 end
 
+---@param self Bindbox
+---@param query? string
+---@param data Bindbox.data
 local function find(self, query, data)
     self._private.find.query = query or ""
 
-    local terms = get_find_terms(query)
+    local terms = get_find_terms(self._private.find.query)
 
     local hash = table.concat(terms, " ")
     if self._private.find.hash == hash then
@@ -627,7 +788,7 @@ local function find(self, query, data)
     }
 
     for _, group in ipairs(data) do
-        for _, item in ipairs(group.items) do
+        for _, item in ipairs(group) do
             item.trigger.highlighted = get_trigger_markup(self, item.binding)
             item.trigger.widget:set_markup(item.trigger.highlighted)
             item.description.highlighted = get_description_markup(self, item.binding, highlight_args)
@@ -636,20 +797,31 @@ local function find(self, query, data)
     end
 end
 
+---@param current? integer
+---@param total? integer
+---@return string
 local function format_page_info(current, total)
     return string.format("%s/%s", tostring(current) or "-", tostring(total) or "-")
 end
 
+---@param self Bindbox
+---@param page? wibox.widget.base
+---@param page_info? string
 local function set_page_content(self, page, page_info)
-    self.widget:get_children_by_id("#page_container")[1]:set_widget(page)
-    self.widget:get_children_by_id("#page_info")[1]:set_markup(page_info or format_page_info())
+    self.widget:get_children_by_id("#page_container")[1] --[[@as wibox.container]]
+        :set_widget(page)
+    self.widget:get_children_by_id("#page_info")[1] --[[@as wibox.widget.textbox]]
+        :set_markup(page_info or format_page_info())
 end
 
-function bindbox:get_page()
+---@return integer
+function M.object:get_page()
     return self._private.current_page or 0
 end
 
-function bindbox:set_page(page, force)
+---@param page? integer
+---@param force? boolean
+function M.object:set_page(page, force)
     local pages = self._private.pages or {}
     local page_count = #pages
 
@@ -672,19 +844,34 @@ function bindbox:set_page(page, force)
     end
 end
 
-function bindbox:add_group(group_args)
-    self:add_groups { group_args }
+---@class BindboxGroup
+---@field name string
+---@field order? integer
+---@field rule? gears.matcher.rule
+---@field bg? color
+---@field fg? color
+---@field page_break? boolean
+---@field groups BindboxGroup[]
+
+---@param group BindboxGroup
+function M.object:add_group(group)
+    self:add_groups { group }
 end
 
-function bindbox:add_groups(groups)
+---@param groups BindboxGroup[]
+function M.object:add_groups(groups)
     merge_group(self, self._private.source_binding_tree, self._private.source_binding_tree.root, { groups = groups })
 end
 
+---@param self Bindbox
 local function stop_find(self)
     awful.keygrabber.stop()
     capi.mousegrabber.stop()
 end
 
+---@param self Bindbox
+---@param data Bindbox.data
+---@param restore_find? boolean
 local function start_find(self, data, restore_find)
     local find_text_widget = self.widget:get_children_by_id("#find_text")[1]
     local find_placeholder_widget = self.widget:get_children_by_id("#find_placeholder")[1]
@@ -720,8 +907,8 @@ local function start_find(self, data, restore_find)
     awful.prompt.run {
         textbox = find_text_widget,
         text = self._private.find.query,
-        bg_cursor = self.find_cursor_background,
-        fg_cursor = self.find_cursor_foreground,
+        bg_cursor = self.find_cursor_bg,
+        fg_cursor = self.find_cursor_fg,
         ul_cursor = "none",
         changed_callback = function(input)
             find(self, input, data)
@@ -744,12 +931,16 @@ local function start_find(self, data, restore_find)
     }
 end
 
+---@param self Bindbox
+---@param screen screen
+---@return number width
+---@return number height
 local function prepare_wibox(self, screen)
     self.screen = screen
 
     local workarea = screen.workarea
-    local workarea_width = workarea.width - beautiful.useless_gap * 4
-    local workarea_height = workarea.height - beautiful.useless_gap * 4
+    local workarea_width = workarea.width - beautiful.gap * 4
+    local workarea_height = workarea.height - beautiful.gap * 4
 
     local page_container = self.widget:get_children_by_id("#page_container")[1]
     page_container.width = self.page_width
@@ -777,7 +968,7 @@ local function prepare_wibox(self, screen)
     return width, height
 end
 
-function bindbox:hide()
+function M.object:hide()
     self._private.pages = nil
     self:set_page(nil, true)
 
@@ -786,7 +977,12 @@ function bindbox:hide()
     self.visible = false
 end
 
-function bindbox:show(args)
+---@class Bindbox.show.args
+---@field client? client
+---@field screen? screen
+
+---@param args? Bindbox.show.args
+function M.object:show(args)
     if self.visible then
         return
     end
@@ -808,7 +1004,9 @@ function bindbox:show(args)
     self.visible = true
 end
 
-function bindbox:toggle(args)
+---@param args? Bindbox.show.args
+---@return boolean
+function M.object:toggle(args)
     if self.visible then
         self:hide()
         return false
@@ -818,52 +1016,13 @@ function bindbox:toggle(args)
     end
 end
 
-noice.define_style_properties(bindbox, {
-    font = {},
-    bg = { proxy = true },
-    fg = { proxy = true },
-    border_color = { proxy = true },
-    border_width = { proxy = true },
-    shape = { proxy = true },
-    paddings = { id = "#padding", property = "margins" },
-    placement = { proxy = true, },
 
-    page_paddings = { id = "#page_container_border", property = "margins" },
-    page_width = {},
-    page_height = {},
-    page_columns = {},
+---@class Bindbox.new.args
+---@field include_awesome_bindings? boolean # Default: `true`
 
-    group_spacing = {},
-    item_spacing = {},
-
-    trigger_background = {},
-    trigger_background_alpha = {},
-    trigger_foreground = {},
-
-    group_background = {},
-    group_foreground = {},
-    group_ruled_background = {},
-    group_ruled_foreground = {},
-
-    find_dim_background = {},
-    find_dim_foreground = {},
-    find_highlight_background = {},
-    find_highlight_foreground = {},
-
-    group_path_separator_markup = {},
-    slash_separator_markup = {},
-    plus_separator_markup = {},
-    range_separator_markup = {},
-
-    status_style = { id = "#status_container", property = "style" },
-    status_spacing = {},
-
-    find_placeholder_foreground = { id = "#find_placeholder", property = "fg" },
-    find_cursor_background = {},
-    find_cursor_foreground = {},
-})
-
-function bindbox.new(args)
+---@param args? Bindbox.new.args
+---@return Bindbox
+function M.new(args)
     args = args or {}
 
     local self = awful.popup {
@@ -889,8 +1048,7 @@ function bindbox.new(args)
                 {
                     id = "#status_container",
                     widget = capsule,
-                    hover_overlay = false,
-                    press_overlay = false,
+                    enable_overlay = false,
                     {
                         layout = wibox.layout.stack,
                         {
@@ -903,7 +1061,7 @@ function bindbox.new(args)
                             {
                                 widget = wibox.widget.textbox,
                                 text = "Type to find",
-                            }
+                            },
                         },
                         {
                             layout = wibox.container.place,
@@ -933,33 +1091,28 @@ function bindbox.new(args)
                 },
             },
         },
-    }
+    } --[[@as Bindbox]]
 
-    gtable.crush(self, bindbox, true)
+    gtable.crush(self, M.object, true)
 
     self._private.matcher = gmatcher()
-    self._private.source_binding_tree = tree.new()
-    self._private.group_sort = args.group_sort or default_group_sort
-    self._private.binding_sort = args.binding_sort or default_binding_sort
+    self._private.source_binding_tree = utree.new()
     self._private.include_awesome_bindings = args.include_awesome_bindings ~= false
 
-
-    self:connect_signal("property::status_spacing", function(_, spacing)
-        self.widget:get_children_by_id("#status_bindings")[1]:set_spacing(spacing)
-    end)
-
-    noice.initialize_style(self, self.widget, beautiful.bindbox.default_style)
+    self:initialize_style(self.widget, beautiful.bindbox.default_style)
 
     self:apply_style(args)
 
-
+    ---@param id string
+    ---@param triggers BindingTrigger.new.args
+    ---@param description string
     local function set_binding_hint(id, triggers, description)
         local binding = pbinding.new {
             triggers = triggers,
             description = description,
         }
-        self.widget:get_children_by_id(id)[1]:set_markup(get_trigger_markup(self, binding)
-            .. " " .. get_description_markup(self, binding))
+        local markup = get_trigger_markup(self, binding) .. " " .. get_description_markup(self, binding)
+        self.widget:get_children_by_id(id)[1] --[[@as wibox.widget.textbox]]:set_markup(markup)
     end
 
     set_binding_hint("#binding_hide", "Escape", "close")
@@ -969,8 +1122,4 @@ function bindbox.new(args)
     return self
 end
 
-function bindbox.mt:__call(...)
-    return bindbox.new(...)
-end
-
-return setmetatable(bindbox, bindbox.mt)
+return setmetatable(M, M.mt)

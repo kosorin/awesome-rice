@@ -5,7 +5,7 @@ end
 
 local insert = table.insert
 local awful = require("awful")
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local mebox = require("widget.mebox")
 local dpi = Dpi
 local wallpaper_service = require("services.wallpaper")
@@ -39,7 +39,7 @@ function wallpaper_menu_template.new()
                     callback = function()
                         wallpaper_service.set_collection(collection)
                         return false
-                    end
+                    end,
                 })
             end
             if contains_any_collection then
@@ -53,7 +53,7 @@ function wallpaper_menu_template.new()
                 icon_color = beautiful.palette.blue,
                 callback = function()
                     awful.spawn(config.commands.open(config.places.wallpapers))
-                end
+                end,
             })
 
             return items

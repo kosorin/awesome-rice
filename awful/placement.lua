@@ -1157,17 +1157,19 @@ function placement.resize_to_mouse(d, args)
     end
 
     -- Use p0 (mouse), p1 and p2 to create a rectangle
-    local pts = resize_to_point_map[closest_corner]
-    local p1  = pts.p1 and rect_to_point(ngeo, pts.p1[1], pts.p1[2]) or coords
-    local p2  = pts.p2 and rect_to_point(ngeo, pts.p2[1], pts.p2[2]) or coords
+    local pts = args.axis ~= "none" and resize_to_point_map[closest_corner]
+    if pts then
+        local p1 = pts.p1 and rect_to_point(ngeo, pts.p1[1], pts.p1[2]) or coords
+        local p2 = pts.p2 and rect_to_point(ngeo, pts.p2[1], pts.p2[2]) or coords
 
-    -- Create top_left and bottom_right points, convert to rectangle
-    ngeo = rect_from_points(
-        pts.y_only and ngeo.x               or math.min(p1.x, p2.x),
-        pts.x_only and ngeo.y               or math.min(p1.y, p2.y),
-        pts.y_only and ngeo.x + ngeo.width  or math.max(p2.x, p1.x),
-        pts.x_only and ngeo.y + ngeo.height or math.max(p2.y, p1.y)
-    )
+        -- Create top_left and bottom_right points, convert to rectangle
+        ngeo = rect_from_points(
+            pts.y_only and ngeo.x or math.min(p1.x, p2.x),
+            pts.x_only and ngeo.y or math.min(p1.y, p2.y),
+            pts.y_only and ngeo.x + ngeo.width or math.max(p2.x, p1.x),
+            pts.x_only and ngeo.y + ngeo.height or math.max(p2.y, p1.y)
+        )
+    end
 
     remove_border(d, args, ngeo)
 
@@ -1181,9 +1183,11 @@ function placement.resize_to_mouse(d, args)
             ngeo.width,
             ngeo.height
         )
-        local offset = align_map[pts.align](w, h, ngeo.width, ngeo.height)
-        ngeo.x = ngeo.x - offset.x
-        ngeo.y = ngeo.y - offset.y
+        if pts then
+            local offset = align_map[pts.align](w, h, ngeo.width, ngeo.height)
+            ngeo.x = ngeo.x - offset.x
+            ngeo.y = ngeo.y - offset.y
+        end
     end
 
     geometry_common(d, args, ngeo)

@@ -4,7 +4,7 @@ end
 
 local capi = Capi
 local awful = require("awful")
-local beautiful = require("beautiful")
+local beautiful = require("theme.theme")
 local wibox = require("wibox")
 
 
@@ -22,6 +22,6 @@ capi.screen.connect_signal("request::wallpaper", function(screen)
                     { 1, beautiful.palette.yellow_25 },
                 },
             },
-        }
+        },
     }
 end)
