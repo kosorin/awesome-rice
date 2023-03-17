@@ -24,8 +24,7 @@ function humanizer.humanize_units(units, value, from_unit)
     end
     from_unit = from_unit or 1
     local previous_to = 1
-    for i = 1, #units do
-        local unit = units[i]
+    for i, unit in ipairs(units) do
         if i >= from_unit and value < unit.to then
             return string.format(
                 unit.format or units.format or ("%." .. tostring(units.precision or unit.precision or 0) .. "f%s%s"),
