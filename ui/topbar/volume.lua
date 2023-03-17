@@ -189,7 +189,7 @@ function volume_widget.new(wibar)
         widget = bar_container,
         minimum = 0,
         maximum = 100,
-        fix_value = function(volume)
+        coerce_value = function(volume)
             return math.floor(volume)
         end,
         start = function()
