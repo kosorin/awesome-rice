@@ -8,7 +8,6 @@ media_service.player = playerctl.new {
     metadata = {
         title = "xesam:title",
         artist = "xesam:artist",
-        length = "mpris:length",
     },
 }
 

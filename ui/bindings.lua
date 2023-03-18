@@ -380,23 +380,23 @@ binding.add_global_range {
     binding.new {
         modifiers = {},
         triggers = {
-            { trigger = "XF86AudioRewind", offset = -5 * 1000000 },
-            { trigger = "XF86AudioForward", offset = 5 * 1000000 },
+            { trigger = "XF86AudioRewind", offset = -5 },
+            { trigger = "XF86AudioForward", offset = 5 },
         },
         path = "media",
         description = "rewind/fast forward (5s)",
-        on_press = function(trigger) services.media.player:seek(trigger.offset) end,
+        on_press = function(trigger) services.media.player:seek(trigger.offset * services.media.player.second) end,
     },
 
     binding.new {
         modifiers = { mod.super },
         triggers = {
-            { trigger = "XF86AudioRewind", offset = -30 * 1000000 },
-            { trigger = "XF86AudioForward", offset = 30 * 1000000 },
+            { trigger = "XF86AudioRewind", offset = -30 },
+            { trigger = "XF86AudioForward", offset = 30 },
         },
         path = "media",
         description = "rewind/fast forward (30s)",
-        on_press = function(trigger) services.media.player:seek(trigger.offset) end,
+        on_press = function(trigger) services.media.player:seek(trigger.offset * services.media.player.second) end,
     },
 
     binding.new {

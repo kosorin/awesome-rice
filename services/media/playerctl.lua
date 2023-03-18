@@ -14,6 +14,10 @@ local lgi_playerctl = require("lgi").Playerctl
 ---| string # Select player by `instance`
 ---| "%all" # Select all players
 
+---@class Playerctl.position_data
+---@field position? integer
+---@field length? integer
+
 ---@class Playerctl.data
 ---@field name string
 ---@field instance string
@@ -33,13 +37,24 @@ local playerctl = {
 }
 
 ---@class Playerctl : gears.object
+---@field second integer
 ---@field package primary_player_data? Playerctl.data
 ---@field package player_data table<string, Playerctl.data>
 ---@field package tracked_metadata string[]
 ---@field package excluded_players table<string, boolean>
 ---@field package player_priorities table<string, integer>
 ---@field package manager lgi.Playerctl.PlayerManager
-playerctl.object = {}
+playerctl.object = { second = 1000000 }
+
+---@param  player_data? Playerctl.data
+---@return Playerctl.position_data|nil
+function playerctl.object:get_position_data(player_data)
+    player_data = player_data or self.primary_player_data
+    return (player_data and player_data.metadata) and {
+        position = player_data.position,
+        length = player_data.metadata.length,
+    }
+end
 
 ---@param self Playerctl
 ---@param instance string
@@ -513,6 +528,9 @@ local function parse_args(self, args)
     args = args or {}
 
     self.tracked_metadata = args.metadata or {}
+
+    -- Always track length
+    self.tracked_metadata.length = "mpris:length"
 
     local excluded_players = {}
     if type(args.excluded_players) == "string" then

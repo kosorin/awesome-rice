@@ -135,7 +135,7 @@ function redshift_widget.new(wibar, on_dashboard)
         end),
     }
 
-    mouse_helper.attach_slider_grabber {
+    mouse_helper.attach_slider {
         wibox = self._private.wibar,
         widget = self:get_children_by_id("bar_container")[1],
         minimum = min_temperature,

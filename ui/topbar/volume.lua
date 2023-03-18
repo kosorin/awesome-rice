@@ -184,7 +184,7 @@ function volume_widget.new(wibar)
         end),
     }
 
-    mouse_helper.attach_slider_grabber {
+    mouse_helper.attach_slider {
         wibox = self._private.wibar,
         widget = bar_container,
         minimum = 0,

@@ -13,6 +13,27 @@ local trigger_type = {
     key = "string",
 }
 
+local button = {
+    left = 1,
+    middle = 2,
+    right = 3,
+    wheel_up = 4,
+    wheel_down = 5,
+    wheel_left = 6,
+    wheel_right = 7,
+    extra_back = 8,
+    extra_forward = 9,
+}
+
+local modifier = {
+    any = "Any",
+    super = "Mod4",
+    alt = "Mod1",
+    control = "Control",
+    shift = "Shift",
+    alt_gr = "Mod5",
+}
+
 ---@alias BindingTrigger.value
 ---| button
 ---| key
@@ -41,31 +62,11 @@ local trigger_type = {
 
 ---@class _Binding
 ---@field awesome_bindings Binding[]
----@field button table<string, button>
----@field modifier table<string, key_modifier>
----@field group table<string, BindingTrigger.group>
 local binding = {
     awesome_bindings = {},
     trigger_type = trigger_type,
-    button = {
-        left = 1,
-        middle = 2,
-        right = 3,
-        wheel_up = 4,
-        wheel_down = 5,
-        wheel_left = 6,
-        wheel_right = 7,
-        extra_back = 8,
-        extra_forward = 9,
-    },
-    modifier = {
-        any = "Any",
-        super = "Mod4",
-        alt = "Mod1",
-        control = "Control",
-        shift = "Shift",
-        alt_gr = "Mod5",
-    },
+    button = button,
+    modifier = modifier,
     group = {
         fkeys = {
             from = "F1",
@@ -103,12 +104,11 @@ local binding = {
             { trigger = "Up", direction = "up", x = 0, y = 1 },
             { trigger = "Down", direction = "down", x = 0, y = -1 },
         },
+        mouse_wheel = {
+            { trigger = button.wheel_up, direction = "up", y = 1 },
+            { trigger = button.wheel_down, direction = "down", y = -1 },
+        },
     },
-}
-
-binding.group.mouse_wheel = {
-    { trigger = binding.button.wheel_up, direction = "up", y = 1 },
-    { trigger = binding.button.wheel_down, direction = "down", y = -1 },
 }
 
 for i = 1, 10 do

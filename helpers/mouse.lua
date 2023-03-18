@@ -5,6 +5,7 @@ local unpack = table.unpack
 local min, max = math.min, math.max
 local binding = require("io.binding")
 local gtable = require("gears.table")
+local gtimer = require("gears.timer")
 local mod = binding.modifier
 local btn = binding.button
 
@@ -23,9 +24,9 @@ do
         },
     }
 
-    ---@alias helpers.mouse.attach_slider_grabber.args.modifiers { exact_match?: boolean, [integer]: key_modifier }
+    ---@alias helpers.mouse.attach.modifiers { exact_match?: boolean, [integer]: key_modifier }
 
-    ---@param required helpers.mouse.attach_slider_grabber.args.modifiers # Required modifiers. Modifiers may repeat!
+    ---@param required helpers.mouse.attach.modifiers # Required modifiers. Modifiers may repeat!
     ---@param actual key_modifier[] # List of unique modifiers currently pressed.
     ---@return boolean
     local function modifier_match(required, actual)
@@ -58,7 +59,7 @@ do
         end
     end
 
-    ---@class helpers.mouse.attach_slider_grabber.args
+    ---@class helpers.mouse.attach_slider.args
     ---@field wibox wibox
     ---@field widget wibox.widget.base
     ---@field cursor? cursor # Cursor when dragging. Default: `"sb_up_arrow"`
@@ -72,17 +73,17 @@ do
     ---@field minimum? number # Minimum value. Must be less than or equal to `maximum`.
     ---@field maximum? number # Maximum value. Must be greater than or equal to `minimum`.
     ---@field button? button # A mouse button required to trigger the drag action. Default: `1` (left mouse button)
-    ---@field modifiers? helpers.mouse.attach_slider_grabber.args.modifiers # Modifiers required to trigger the drag action.
+    ---@field modifiers? helpers.mouse.attach.modifiers # Modifiers required to trigger the drag action.
     ---@field orientation? orientation # Dragging orientation.
     ---@field coerce_value? fun(value: number): number # Adjust the value that is passed to other callback functions.
     ---@field start? fun(value: number): boolean|nil # A callback function called at the start. Must return `true` to continue in dragging.
     ---@field update? fun(value: number) # A callback function called on every change.
     ---@field finish? fun(value: number, interrupted: boolean) # A callback function called at the end of dragging.
-    ---@field interrupt? fun(value: number): boolean # A callback function.
+    ---@field interrupt? fun(value: number): boolean # An interrupt callback function. Called before every `update` callback.
 
-    ---@param args helpers.mouse.attach_slider_grabber.args
+    ---@param args helpers.mouse.attach_slider.args
     ---@return function # A detach function. When called detach the drag action from the widget. Does not interrupt current drag action.
-    function M.attach_slider_grabber(args)
+    function M.attach_slider(args)
         local relative = not args.absolute
         local minimum = tonumber(args.minimum)
         local maximum = tonumber(args.maximum)
@@ -141,7 +142,16 @@ do
                     return
                 end
 
-                args.update(value)
+                if args.interrupt and args.interrupt(value) then
+                    if args.finish then
+                        args.finish(value, true)
+                    end
+                    return
+                end
+
+                if args.update then
+                    args.update(value)
+                end
             end
 
             local wibox_geometry = args.wibox and args.wibox:geometry()
@@ -159,7 +169,9 @@ do
                     return false
                 end
 
-                args.update(value)
+                if args.update then
+                    args.update(value)
+                end
 
                 if grab.buttons[button] then
                     return true
@@ -174,9 +186,100 @@ do
 
         args.widget:connect_signal("button::press", callback)
 
-        return function()
+        local function detach()
             args.widget:disconnect_signal("button::press", callback)
         end
+
+        return detach
+    end
+
+    ---@class helpers.mouse.attach_wheel.args
+    ---@field widget wibox.widget.base
+    ---@field step? number # Default: `1`
+    ---@field debounce? number # Default: `0.5`
+    ---@field modifiers? helpers.mouse.attach.modifiers # Modifiers required to trigger the action.
+    ---@field start? fun(delta: number): boolean|nil # A callback function called at the start. Must return `true` to continue.
+    ---@field update? fun(total_delta: number) # A callback function called on every change.
+    ---@field finish? fun(total_delta: number, interrupted: boolean) # A callback function called at the end.
+
+    ---@param args helpers.mouse.attach_wheel.args
+    ---@return function # An interrupt function.
+    ---@return function # A detach function. When called detach the drag action from the widget. Does not interrupt current drag action.
+    function M.attach_wheel(args)
+        ---@type gears.timer
+        local timer
+        local is_running = false
+        local total_delta = 0
+
+        local function stop(interrupted)
+            if not is_running then
+                return
+            end
+
+            timer:stop()
+            is_running = false
+
+            if args.finish then
+                args.finish(total_delta, interrupted)
+            end
+
+            total_delta = 0
+        end
+
+        timer = gtimer {
+            timeout = args.debounce or 0.5,
+            single_shot = true,
+            callback = function()
+                stop(false)
+            end,
+        }
+
+        local step = args.step or 1
+        local buttons = {
+            [btn.wheel_up] = step,
+            [btn.wheel_down] = -step,
+        }
+
+        local function callback(_, _, _, button, modifiers, _)
+            if capi.mousegrabber.isrunning() then
+                return
+            end
+
+            local delta = buttons[button]
+            if not delta then
+                return
+            end
+            if args.modifiers and not modifier_match(args.modifiers, modifiers) then
+                return
+            end
+
+            if not is_running then
+                if args.start and not args.start(delta) then
+                    return
+                end
+                is_running = true
+                total_delta = 0
+            end
+
+            timer:again()
+            total_delta = total_delta + delta
+
+            if args.update then
+                args.update(total_delta)
+            end
+        end
+
+        args.widget:connect_signal("button::press", callback)
+
+        local function interrupt()
+            stop(true)
+        end
+
+        local function detach()
+            args.widget:disconnect_signal("button::press", callback)
+        end
+
+        return interrupt, detach
     end
 end
 
