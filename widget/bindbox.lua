@@ -358,7 +358,7 @@ local function get_group_markup(self, node, path)
     return pango.span {
         fgcolor = fg,
         bgcolor = bg,
-        pango.escape(text),
+        text,
     }
 end
 
@@ -371,7 +371,7 @@ local function get_trigger_markup(self, binding)
             bgcolor = self.trigger_bg,
             bgalpha = self.trigger_bg_alpha,
             " ",
-            pango.escape(content),
+            content,
             " ",
         }
     end

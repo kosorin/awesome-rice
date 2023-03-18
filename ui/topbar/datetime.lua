@@ -109,7 +109,7 @@ local function initialize_date_widget(self, style)
             callback = function() self:to_clipboard("date") end,
         },
         {
-            text = "copy date &amp; time",
+            text = "copy date & time",
             icon = config.places.theme .. "/icons/content-copy.svg",
             icon_color = beautiful.palette.gray,
             callback = function() self:to_clipboard() end,
@@ -177,7 +177,7 @@ local function initialize_time_widget(self, style)
             callback = function() self:to_clipboard("time") end,
         },
         {
-            text = "copy date &amp; time",
+            text = "copy date & time",
             icon = config.places.theme .. "/icons/content-copy.svg",
             icon_color = beautiful.palette.gray,
             callback = function() self:to_clipboard() end,
