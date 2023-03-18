@@ -15,18 +15,38 @@ function M.mt:__call(...)
 end
 
 
----@class Capsule : wibox.widget.base, stylable
+---@class Capsule : wibox.container, stylable
 ---@field package _private Capsule.private
----Style properties:
+---
 ---@field bg color
 ---@field fg color
 ---@field border_color color
 ---@field border_width number
----@field shape shape
+---@field shape? shape
 ---@field margins thickness
 ---@field paddings thickness
 ---@field hover_overlay color
 ---@field press_overlay color
+---
+---@field get_bg fun(self: Capsule): color
+---@field get_fg fun(self: Capsule): color
+---@field get_border_color fun(self: Capsule): color
+---@field get_border_width fun(self: Capsule): number
+---@field get_shape fun(self: Capsule): shape|nil
+---@field get_margins fun(self: Capsule): thickness
+---@field get_paddings fun(self: Capsule): thickness
+---@field get_hover_overlay fun(self: Capsule): color
+---@field get_press_overlay fun(self: Capsule): color
+---
+---@field set_bg fun(self: Capsule, bg: color)
+---@field set_fg fun(self: Capsule, fg: color)
+---@field set_border_color fun(self: Capsule, border_color: color)
+---@field set_border_width fun(self: Capsule, border_width: number)
+---@field set_shape fun(self: Capsule, shape?: shape)
+---@field set_margins fun(self: Capsule, margins: thickness)
+---@field set_paddings fun(self: Capsule, paddings: thickness)
+---@field set_hover_overlay fun(self: Capsule, hover_overlay: color)
+---@field set_press_overlay fun(self: Capsule, press_overlay: color)
 M.object = {}
 ---@class Capsule.private
 ---@field layout wibox.widget.base
@@ -45,11 +65,11 @@ noice.define_style(M.object, {
     press_overlay = { id = "#press_overlay", property = "bg" },
 })
 
----@param _ any
----@param width any
----@param height any
+---@param context widget_context
+---@param width number
+---@param height number
 ---@return widget_layout_result[]|nil
-function M.object:layout(_, width, height)
+function M.object:layout(context, width, height)
     if not self._private.layout then
         return
     end

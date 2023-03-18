@@ -1,14 +1,21 @@
+local type = type
 local ipairs = ipairs
 local tostring = tostring
 local math = math
 local table = table
 local string = string
+local gtable = require("gears.table")
 
 
 local humanizer = {}
 
 local function round(value) return math.floor(value + 0.5) end
 
+---@generic T
+---@param value `T`
+---@param min T
+---@param max T
+---@return T
 local function clamp(value, min, max)
     if value < min then return min end
     if value > max then return max end
@@ -77,6 +84,20 @@ do
         { id = "second", count = 60, div = 1 },
     }
 
+    ---@alias utils.humanizer.time.part.id
+    ---| "year"
+    ---| "month"
+    ---| "week"
+    ---| "day"
+    ---| "hour"
+    ---| "minute"
+    ---| "second"
+
+    ---@class utils.humanizer.relative_time.format
+    ---@field format? string # Formatting string.
+    ---@field text? string # Unit text.
+    ---@field plural? string # Unit text if the `value ~= 1`.
+
     humanizer.long_time_formats = {
         year = { text = "year", plural = "years" },
         month = { text = "month", plural = "months" },
@@ -97,6 +118,10 @@ do
         second = { text = "s" },
     }
 
+    ---@param value number
+    ---@param format utils.humanizer.relative_time.format
+    ---@param unit_separator string
+    ---@return string
     local function format_time_part(value, format, unit_separator)
         local value_text = format.format
             and string.format(format.format, value)
@@ -104,9 +129,27 @@ do
         local unit_text = (value ~= 1 and format.plural)
             and format.plural
             or format.text
-        return value_text .. (unit_separator or " ") .. unit_text
+            or ""
+        return value_text .. unit_separator .. unit_text
     end
 
+    ---@class utils.humanizer.relative_time.args
+    ---@field unit_separator? string # Default: `" "`
+    ---@field part_separator? string # Default: `" "`
+    ---@field prefix? string
+    ---@field suffix? string
+    ---@field formats? table<utils.humanizer.time.part.id, utils.humanizer.relative_time.format>
+    ---@field from_part? integer|utils.humanizer.time.part.id
+    ---@field force_from_part? integer|utils.humanizer.time.part.id # Must be greater than `from_part`.
+    ---@field part_count? integer
+    ---@field skip_week? boolean # Default: `false`
+    ---@field include_leading_zero? boolean # Default: `false`
+    ---@field include_zero? boolean # Default: `true`
+    ---@field stop_on_zero? boolean # Default: `true`
+
+    ---@param seconds number
+    ---@param args? utils.humanizer.relative_time.args
+    ---@return string
     function humanizer.relative_time(seconds, args)
         seconds = round(math.max(0, seconds))
         args = args or {}
@@ -120,34 +163,44 @@ do
         local include_zero = args.include_zero ~= false
         local stop_on_zero = args.stop_on_zero ~= false
 
-        local from_part
-        local part_count
-        if args.from_part then
-            if type(args.from_part) == "string" then
-                for i, v in ipairs(time_parts) do
-                    if v.id == args.from_part then
-                        from_part = i
-                        break
+        ---@param arg integer|utils.humanizer.time.part.id
+        ---@return integer|nil
+        local function get_from_part(arg)
+            if arg then
+                if type(arg) == "string" then
+                    for i, v in ipairs(time_parts) do
+                        if v.id == arg then
+                            return i
+                        end
                     end
+                elseif type(arg) == "number" then
+                    return arg
                 end
-            elseif type(args.from_part) == "number" then
-                from_part = args.from_part
             end
-        else
+            return nil
+        end
+
+        local from_part = get_from_part(args.from_part)
+        local force_from_part = get_from_part(args.force_from_part)
+        local part_count = args.part_count or gtable.count_keys(formats)
+
+        if not from_part then
             for i, v in ipairs(time_parts) do
                 if formats[v.id] then
                     from_part = i
                     break
                 end
             end
+            assert(from_part, "Bad `formats`.")
         end
-        if args.part_count then
-            part_count = args.part_count
-        else
-            part_count = #formats
-        end
+
         from_part = clamp(from_part or 1, 1, all_part_count)
+        force_from_part = force_from_part and clamp(force_from_part, 1, all_part_count)
         part_count = clamp(part_count or 1, 1, all_part_count - from_part + 1)
+
+        if force_from_part then
+            assert(from_part < force_from_part)
+        end
 
         local parts = {}
         local rest = seconds
@@ -162,7 +215,7 @@ do
                     rest = rest - (value * time_part.div)
                     parts[#parts + 1] = format_time_part(value, format, unit_separator)
                 elseif rest == seconds then
-                    if include_leading_zero then
+                    if include_leading_zero or i >= force_from_part then
                         parts[#parts + 1] = format_time_part(0, format, unit_separator)
                     end
                 else
