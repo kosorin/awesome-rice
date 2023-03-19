@@ -216,7 +216,6 @@ local function update_playback_status(self, player_data)
 
     self._private.playback_bar.opacity = is_playing and 0.5 or 0.2
     self._private.icon.opacity = is_playing and 1 or 0.5
-    self._private.pin.opacity = is_playing and 1 or 0.5
 end
 
 ---@param self MediaPlayer
