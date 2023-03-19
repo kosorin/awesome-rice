@@ -215,11 +215,11 @@ do
                     rest = rest - (value * time_part.div)
                     parts[#parts + 1] = format_time_part(value, format, unit_separator)
                 elseif rest == seconds then
-                    if include_leading_zero or (force_from_part and force_from_part < i) then
+                    if include_leading_zero or (force_from_part and force_from_part <= i) then
                         parts[#parts + 1] = format_time_part(0, format, unit_separator)
                     end
                 else
-                    if include_zero then
+                    if include_zero or (force_from_part and force_from_part <= i) then
                         parts[#parts + 1] = format_time_part(0, format, unit_separator)
                     elseif stop_on_zero then
                         break

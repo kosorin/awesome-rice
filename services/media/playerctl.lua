@@ -37,7 +37,7 @@ local playerctl = {
 }
 
 ---@class Playerctl : gears.object
----@field second integer
+---@field second integer # Number of microseconds in a second.
 ---@field package primary_player_data? Playerctl.data
 ---@field package player_data table<string, Playerctl.data>
 ---@field package tracked_metadata string[]

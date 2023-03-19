@@ -36,10 +36,10 @@ local time_args = {
     part_separator = "",
 }
 
----@param seconds integer
+---@param useconds integer
 ---@return string
-local function format_time(seconds)
-    local text = humanizer.relative_time(seconds / 1000000, time_args)
+local function format_time(useconds)
+    local text = humanizer.relative_time(useconds / media_player.second, time_args)
     local trimmed = string.gsub(text, "^[0:]+", "")
     if #trimmed >= 4 then
         return trimmed
