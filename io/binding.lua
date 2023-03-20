@@ -123,9 +123,12 @@ do
     ---@type { length: integer, [key_modifier]: integer }
     local modifier_hash_data = { length = 0 }
 
-    ---@param modifiers key_modifier[]
-    ---@return integer # Returns a hash value for a set of modifiers.
+    ---@param modifiers? key_modifier[]
+    ---@return integer|nil # Returns a hash value for a set of modifiers.
     function binding.get_modifiers_hash(modifiers)
+        if not modifiers then
+            return 0
+        end
         local hash = 0
         for _, m in ipairs(modifiers) do
             local modifier_hash = modifier_hash_data[m]
@@ -137,6 +140,21 @@ do
             hash = hash | modifier_hash
         end
         return hash
+    end
+
+    ---@param actual? key_modifier[] # A set of actual modifiers.
+    ---@param required? key_modifier[] # A set of required modifiers.
+    ---@param exact_match? boolean # If `true` then both `required` and `actual` must contain exactly the same set of modifiers. Otherwise `actual` must contain all `required` modifiers (other modifiers in `actual` will be ignored). Default: `true`
+    ---@return boolean
+    function binding.modifiers_match(actual, required, exact_match)
+        local required_hash = binding.get_modifiers_hash(required)
+        local actual_hash = binding.get_modifiers_hash(actual)
+
+        if exact_match ~= false then
+            return required_hash == actual_hash
+        else
+            return (required_hash & actual_hash) == required_hash
+        end
     end
 end
 

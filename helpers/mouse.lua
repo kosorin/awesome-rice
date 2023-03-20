@@ -26,39 +26,6 @@ do
 
     ---@alias helpers.mouse.attach.modifiers { exact_match?: boolean, [integer]: key_modifier }
 
-    ---@param required helpers.mouse.attach.modifiers # Required modifiers. Modifiers may repeat!
-    ---@param actual key_modifier[] # List of unique modifiers currently pressed.
-    ---@return boolean
-    local function modifier_match(required, actual)
-        local exact_match = required.exact_match ~= false
-
-        local diff = {}
-        for _, m in ipairs(required) do
-            diff[m] = true
-        end
-        for _, m in ipairs(actual) do
-            if diff[m] then
-                diff[m] = nil
-            else
-                if exact_match then
-                    return false
-                end
-                diff[m] = false
-            end
-        end
-
-        if exact_match then
-            return gtable.count_keys(diff) == 0
-        else
-            for _, m in ipairs(required) do
-                if diff[m] ~= nil then
-                    return false
-                end
-            end
-            return true
-        end
-    end
-
     ---@class helpers.mouse.attach_slider.args
     ---@field wibox wibox
     ---@field widget wibox.widget.base
@@ -128,7 +95,8 @@ do
             if button ~= (args.button or btn.left) then
                 return
             end
-            if args.modifiers and not modifier_match(args.modifiers, modifiers) then
+
+            if args.modifiers and not binding.modifiers_match(modifiers, args.modifiers, args.modifiers.exact_match) then
                 return
             end
 
@@ -249,7 +217,7 @@ do
             if not delta then
                 return
             end
-            if args.modifiers and not modifier_match(args.modifiers, modifiers) then
+            if args.modifiers and not binding.modifiers_match(modifiers, args.modifiers, args.modifiers.exact_match) then
                 return
             end
 
