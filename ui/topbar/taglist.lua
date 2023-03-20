@@ -154,7 +154,7 @@ function taglist.new(wibar)
 
                 if item.text then
                     if not item.text:set_markup_silently(text) then
-                        item.text:set_markup(pango.i(pango.escape("<nvalid>")))
+                        item.text:set_markup(pango.i(pango.escape("<invalid>")))
                     end
                 end
 

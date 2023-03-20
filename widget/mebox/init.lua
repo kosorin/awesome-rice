@@ -27,7 +27,7 @@ local function sign(value)
 end
 
 ---@todo Create helper function
----@param screen? integer|screen
+---@param screen? iscreen
 ---@return screen|nil
 local function get_screen(screen)
     return screen and capi.screen[screen]

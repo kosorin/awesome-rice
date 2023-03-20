@@ -88,7 +88,7 @@ function torrent_widget:refresh()
             text = "verifying"
         else
             style = styles.unknown_status
-            text = format("status:%s", pango.escape(tostring(data.status)) or "-")
+            text = format("status:%s", pango.escape(tostring(data.status) or "-"))
         end
 
         local info_parts = {}

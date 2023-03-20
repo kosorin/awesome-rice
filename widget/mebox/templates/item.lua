@@ -90,7 +90,7 @@ return {
         local text_widget = self:get_children_by_id("#text")[1]
         if text_widget then
             local text = item.text or ""
-            text_widget:set_markup(pango.span { fgcolor = style.fg, pango.escape(text) })
+            text_widget:set_markup(pango.span { fgcolor = style.fg, text })
         end
 
         local submenu_icon_widget = self:get_children_by_id("#submenu_icon")[1]

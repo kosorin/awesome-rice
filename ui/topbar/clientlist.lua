@@ -102,7 +102,6 @@ function clientlist.new(wibar)
                 icon = icon or (client.desktop_file and client.desktop_file.icon_path)
                 if not icon then
                     local icon_path = (client.class or ""):lower():gsub("%s", "-")
-                    print("find icon", icon_path)
                     icon = desktop.lookup_icon(icon_path)
                 end
                 if item.icon then
@@ -113,6 +112,7 @@ function clientlist.new(wibar)
                 end
 
                 text = not icon and text or nil
+                text = text or ""
                 if item.text then
                     if not item.text:set_markup_silently(text) then
                         item.text:set_markup(pango.i(pango.escape("<invalid>")))

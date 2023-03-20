@@ -25,11 +25,11 @@ local css = {}
 function css.style(rules)
     local result = ""
     for selector, declarations in pairs(rules) do
-        result = format("%s %s { ", result, selector)
+        result = format("%s %s {", result, selector)
         for property, value in pairs(declarations) do
-            result = format("%s %s: %s; ", result, property, tostring(value))
+            result = format("%s %s: %s;", result, property, tostring(value))
         end
-        result = format("%s} ", result)
+        result = format("%s } ", result)
     end
     return result
 end
