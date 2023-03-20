@@ -2,6 +2,9 @@
 -- @author Antonio Terceiro
 -- @copyright 2009, 2011-2012, 2023 Antonio Terceiro, Alexander Yakushev, SkyyySi, me ;)
 ---------------------------------------------------------------------------
+-- NOTE: This icons/desktop files module was written according to the following freedesktop.org specifications:
+-- Icons: http://standards.freedesktop.org/icon-theme-spec/icon-theme-spec-0.11.html
+-- Desktop files: http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-1.0.html
 
 local capi = Capi
 local tostring = tostring
@@ -14,6 +17,8 @@ local gdebug = require("gears.debug")
 local gtable = require("gears.table")
 local gfilesystem = require("gears.filesystem")
 local gpcall = require("gears.protected_call").call
+local config = require("config")
+local theme = require("theme.theme")
 local lgi = require("lgi")
 local gio = lgi.Gio
 local glib = lgi.GLib
@@ -61,25 +66,6 @@ local glib = lgi.GLib
 local M = {}
 
 M.desktop_files = {}
-
--- NOTE: This icons/desktop files module was written according to the following freedesktop.org specifications:
--- Icons: http://standards.freedesktop.org/icon-theme-spec/icon-theme-spec-0.11.html
--- Desktop files: http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-1.0.html
-
----Terminal which applications that need terminal would open in.
----@type string
-M.terminal = "xterm"
-
----The default icon for applications that don't provide any icon in their .desktop files.
----@type string|nil
-M.default_icon = nil
-
----@type string|nil
-M.icon_theme = nil
-
----Name of the WM for the OnlyShowIn entry in the .desktop file.
----@type string
-M.wm_name = "awesome"
 
 ---Maps keys in desktop entries to suitable getter function.
 ---The order of entries is as in the spec.
@@ -209,7 +195,7 @@ function M.get_icon_lookup_paths_uncached()
 
     local icon_lookup_path = {}
     local theme_priority = { "hicolor" }
-    if M.icon_theme then table.insert(theme_priority, 1, M.icon_theme) end
+    if theme.icon_theme then table.insert(theme_priority, 1, theme.icon_theme) end
 
     local paths = add_with_dir({}, glib.get_home_dir(), ".icons")
     add_with_dir(paths, {
@@ -295,12 +281,12 @@ do
     ---@return string|nil # Full name of the icon.
     function M.lookup_icon(icon, default_icon)
         if not icon then
-            return default_icon or M.default_icon
+            return default_icon or theme.application_default_icon
         end
         if not lookup_icon_cache[icon] and lookup_icon_cache[icon] ~= false then
             lookup_icon_cache[icon] = M.lookup_icon_uncached(icon)
         end
-        return lookup_icon_cache[icon] or default_icon or M.default_icon
+        return lookup_icon_cache[icon] or default_icon or theme.application_default_icon
     end
 end
 
@@ -360,13 +346,15 @@ function M.parse_desktop_file(path)
     else
         -- Only check these values is NoDisplay is true (or non-existent)
 
+        local wm_name = config.wm.name
+
         -- Only show the program if there is no OnlyShowIn attribute
         -- or if it contains wm_name or wm_name is empty
-        if M.wm_name ~= "" then
+        if wm_name ~= "" then
             if desktop_file.OnlyShowIn then
                 desktop_file.show = false -- Assume false until found
                 for _, wm in ipairs(desktop_file.OnlyShowIn) do
-                    if wm == M.wm_name then
+                    if wm == wm_name then
                         desktop_file.show = true
                         break
                     end
@@ -379,7 +367,7 @@ function M.parse_desktop_file(path)
         -- Only need to check NotShowIn if the program is being shown
         if desktop_file.show and desktop_file.NotShowIn then
             for _, wm in ipairs(desktop_file.NotShowIn) do
-                if wm == M.wm_name then
+                if wm == wm_name then
                     desktop_file.show = false
                     break
                 end
@@ -407,7 +395,7 @@ function M.parse_desktop_file(path)
             command = command:gsub("%%i", "")
         end
         if desktop_file.Terminal then
-            command = M.terminal .. " -e " .. command
+            command = config.apps.terminal .. " -e " .. command
         end
         desktop_file.command = command
     end
@@ -492,7 +480,8 @@ do
 
     ---@param all_desktop_files table<string, (DesktopFile|true)[]>
     ---@param directory_count integer
-    local function process_desktop_files(all_desktop_files, directory_count)
+    ---@param callback? fun(desktop_files: DesktopFile[]) # Will be fired when all the files were parsed with the resulting list of menu entries as argument.
+    local function process_desktop_files(all_desktop_files, directory_count, callback)
         local new_desktop_files = {}
         for id, desktop_files in pairs(all_desktop_files) do
             for priority = 1, directory_count do
@@ -505,12 +494,17 @@ do
                 end
             end
         end
+
         M.desktop_files = new_desktop_files
         capi.awesome.emit_signal("desktop::files", new_desktop_files)
+        if callback then
+            callback(new_desktop_files)
+        end
     end
 
     ---Loads all .desktop files and emits signal `desktop::files` with .desktop files as a first argument.
-    function M.load_desktop_files()
+    ---@param callback? fun(desktop_files: DesktopFile[]) # Will be fired when all the files were parsed with the resulting list of menu entries as argument.
+    function M.load_desktop_files(callback)
         local all_desktop_files = {}
         local all_directories = get_xdg_directories()
         local directory_count = #all_directories
@@ -531,7 +525,7 @@ do
                 end
                 parsed_directory_count = parsed_directory_count + 1
                 if parsed_directory_count == directory_count then
-                    process_desktop_files(all_desktop_files, directory_count)
+                    process_desktop_files(all_desktop_files, directory_count, callback)
                 end
             end)
         end

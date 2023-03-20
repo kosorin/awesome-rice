@@ -1,7 +1,7 @@
 local beautiful = require("beautiful")
 local pretty = require("theme.pretty")
 local theme = require("theme.theme")
-local desktop_utils = require("utils.desktop")
+local desktop_utils = require("services.desktop")
 
 local manager = {}
 

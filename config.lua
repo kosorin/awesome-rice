@@ -22,6 +22,10 @@ config.places.theme = config.places.awesome .. "/theme"
 config.places.screenshots = config.places.home .. "/inbox/screenshots"
 config.places.wallpapers = config.places.home .. "/media/look/wallpapers"
 
+config.wm = {
+    name = "awesome",
+}
+
 local terminal = "alacritty"
 local terminal_execute = terminal .. " -e "
 
@@ -67,8 +71,5 @@ end
 
 local awful_utils = require("awful.util")
 awful_utils.shell = config.apps.shell
-
-local desktop_utils = require("utils.desktop")
-desktop_utils.terminal = config.apps.terminal
 
 return config

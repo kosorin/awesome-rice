@@ -757,6 +757,10 @@ theme.layout_icons = {
 
 ----------------------------------------------------------------------------------------------------
 
+---The default icon for applications that don't provide any icon in their .desktop files.
+---@type string|nil
+theme.application_default_icon = nil
+
 theme.application_menu_categories = {
     utility = {
         id = "Utility",

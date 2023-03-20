@@ -15,7 +15,7 @@ local client_menu_template = require("ui.menu.templates.client")
 local aplacement = require("awful.placement")
 local widget_helper = require("helpers.widget")
 local pango = require("utils.pango")
-local desktop = require("utils.desktop")
+local desktop = require("services.desktop")
 local hui = require("helpers.ui")
 
 
