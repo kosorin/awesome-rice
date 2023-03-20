@@ -1,4 +1,3 @@
-require("ui.bindings")
 require("ui.notification")
 require("ui.client")
 require("ui.mouse")
