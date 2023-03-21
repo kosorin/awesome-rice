@@ -109,7 +109,7 @@ local function initialize_date_widget(self, style)
             callback = function() self:to_clipboard("date") end,
         },
         {
-            text = "copy date & time",
+            text = "copy date &amp; time",
             icon = config.places.theme .. "/icons/content-copy.svg",
             icon_color = beautiful.palette.gray,
             callback = function() self:to_clipboard() end,
@@ -168,7 +168,7 @@ local function initialize_time_widget(self, style)
     self:show_seconds(false)
 
     self._private.time_menu = mebox {
-        item_width = dpi(192),
+        item_width = dpi(232),
         placement = beautiful.wibar.build_placement(time_container, self._private.wibar),
         {
             text = "copy time",
@@ -177,14 +177,16 @@ local function initialize_time_widget(self, style)
             callback = function() self:to_clipboard("time") end,
         },
         {
-            text = "copy date & time",
+            text = "copy date &amp; time",
             icon = config.places.theme .. "/icons/content-copy.svg",
             icon_color = beautiful.palette.gray,
             callback = function() self:to_clipboard() end,
         },
         mebox.separator,
         {
-            text = "show seconds",
+            text = "seconds",
+            icon = config.places.theme .. "/icons/clock-fast.svg",
+            icon_color = beautiful.palette.gray,
             on_show = function(item) item.checked = not not self._private.seconds end,
             callback = function(item) self:show_seconds(not item.checked) end,
         },

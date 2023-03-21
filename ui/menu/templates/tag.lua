@@ -11,15 +11,6 @@ local config = require("config")
 
 local tag_menu_template = { mt = { __index = {} } }
 
-local function build_simple_toggle(name, property, checkbox_type)
-    return {
-        text = name,
-        checkbox_type = checkbox_type,
-        on_show = function(item, menu) item.checked = not not menu.tag[property] end,
-        callback = function(item, menu) menu.tag[property] = not item.checked end,
-    }
-end
-
 local function on_hide(menu)
     menu.tag = nil
     menu.taglist = nil
@@ -38,7 +29,7 @@ end
 
 function tag_menu_template.new()
     return {
-        item_width = dpi(180),
+        item_width = dpi(212),
         on_show = on_show,
         on_hide = on_hide,
         items_source = function(menu)
@@ -86,6 +77,8 @@ function tag_menu_template.new()
 
             insert(items, {
                 text = "volatile",
+                icon = config.places.theme .. "/icons/delete-clock.svg",
+                icon_color = beautiful.palette.gray,
                 on_show = function(item) item.checked = not not tag.volatile end,
                 callback = function(item) tag.volatile = not item.checked end,
             })

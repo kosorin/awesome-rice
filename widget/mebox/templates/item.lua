@@ -32,10 +32,10 @@ return {
         },
         {
             widget = wibox.container.margin,
-            right = -dpi(4),
+            right = -dpi(2),
             {
                 visible = false,
-                id = "#submenu_icon",
+                id = "#right_icon",
                 widget = wibox.widget.imagebox,
                 resize = true,
             },
@@ -53,9 +53,7 @@ return {
             or beautiful.mebox.item_styles.normal
         local style = item.urgent
             and styles.urgent
-            or (item.active
-            and styles.active
-            or styles.normal)
+            or styles.normal
         self:apply_style(style)
 
         local icon_widget = self:get_children_by_id("#icon")[1]
@@ -63,19 +61,10 @@ return {
             local paddings = menu.paddings
             icon_widget.forced_width = self.forced_height - paddings.top - paddings.bottom
 
-            local icon, color
-            if item.checked == nil then
-                icon = item.icon
-                color = item.icon_color
-            else
-                local checkbox_type = item.checkbox_type or "checkbox"
-                local checkbox_style = beautiful.mebox[checkbox_type][not not item.checked]
-                icon = checkbox_style.icon
-                color = checkbox_style.color
-            end
-
-            if color ~= false then
-                if not color or item.active or item.selected then
+            local icon = item.icon
+            local color = item.icon_color
+            if icon and color ~= false then
+                if not color or item.selected then
                     color = style.fg
                 end
                 local stylesheet = css.style { path = { fill = color } }
@@ -93,15 +82,27 @@ return {
             text_widget:set_markup(pango.span { fgcolor = style.fg, text })
         end
 
-        local submenu_icon_widget = self:get_children_by_id("#submenu_icon")[1]
-        if submenu_icon_widget then
-            submenu_icon_widget.visible = not not item.submenu
-            if submenu_icon_widget.visible then
-                local icon = item.submenu_icon or config.places.theme .. "/icons/chevron-right.svg"
-                local color = style.fg
-                local stylesheet = css.style { path = { fill = color } }
-                submenu_icon_widget:set_stylesheet(stylesheet)
-                submenu_icon_widget:set_image(icon)
+        local right_icon_widget = self:get_children_by_id("#right_icon")[1]
+        if right_icon_widget then
+            local icon, color
+            if item.checked ~= nil then
+                local checkbox_type = item.checkbox_type or "checkbox"
+                local checkbox_style = beautiful.mebox[checkbox_type][not not item.checked]
+                icon = checkbox_style.icon
+                color = checkbox_style.color
+            elseif item.submenu then
+                icon = item.submenu_icon or config.places.theme .. "/icons/chevron-right.svg"
+                color = style.fg
+            end
+
+            if item.selected then
+                color = style.fg
+            end
+
+            right_icon_widget.visible = not not icon
+            if right_icon_widget.visible then
+                right_icon_widget:set_stylesheet(css.style { path = { fill = color } })
+                right_icon_widget:set_image(icon)
             end
         end
 

@@ -133,10 +133,12 @@ setmetatable(opacity_menu_template, opacity_menu_template.mt)
 
 local client_menu_template = { mt = { __index = {} } }
 
-local function build_simple_toggle(name, property, checkbox_type)
+local function build_simple_toggle(name, property, checkbox_type, icon, icon_color)
     return {
         text = name,
         checkbox_type = checkbox_type,
+        icon = icon and (config.places.theme .. icon) or nil,
+        icon_color = icon_color,
         on_show = function(item, menu) item.checked = not not menu.client[property] end,
         callback = function(item, menu) menu.client[property] = not item.checked end,
     }
@@ -145,20 +147,22 @@ end
 -- TODO:
 -- - toggle titlebar
 function client_menu_template.new()
+    ---@type Mebox.new.args
     return {
-        item_width = dpi(150),
+        item_width = dpi(184),
         on_show = on_show,
         on_hide = on_hide,
         {
             text = "tags",
             icon = config.places.theme .. "/icons/tag-multiple.svg",
             icon_color = beautiful.palette.green,
+            ---@type Mebox.new.args
             submenu = {
                 item_width = dpi(150),
                 on_show = on_show,
                 on_hide = on_hide,
                 items_source = function(menu)
-                    local client = menu.client
+                    local client = menu.client --[[@as client|nil]]
                     if not client then
                         return {}
                     end
@@ -166,13 +170,16 @@ function client_menu_template.new()
                     local tags = client:tags()
                     local screen_tags = client.screen.tags
 
-                    local items = { build_simple_toggle("sticky", "sticky") }
+                    ---@type MeboxItem.submenu[]
+                    local items = { build_simple_toggle("sticky", "sticky", nil, "/icons/pin.svg", beautiful.palette.white) }
                     if #screen_tags > 0 then
-                        items[#items + 1] = menu.separator
+                        items[#items + 1] = mebox.separator
                         for _, tag in ipairs(screen_tags) do
                             items[#items + 1] = {
                                 enabled = false,
                                 text = tag.name,
+                                icon = config.places.theme .. "/icons/tag.svg",
+                                icon_color = beautiful.palette.white,
                                 on_show = function(item) item.checked = not not gtable.hasitem(tags, tag) end,
                             }
                         end
@@ -182,12 +189,12 @@ function client_menu_template.new()
             },
         },
         mebox.separator,
-        build_simple_toggle("minimize", "minimized"),
-        build_simple_toggle("maximize", "maximized"),
-        build_simple_toggle("fullscreen", "fullscreen"),
+        build_simple_toggle("minimize", "minimized", nil, "/icons/window-minimize.svg", beautiful.palette.white),
+        build_simple_toggle("maximize", "maximized", nil, "/icons/window-maximize.svg", beautiful.palette.white),
+        build_simple_toggle("fullscreen", "fullscreen", nil, "/icons/fullscreen.svg", beautiful.palette.white),
         mebox.separator,
-        build_simple_toggle("on top", "ontop"),
-        build_simple_toggle("floating", "floating"),
+        build_simple_toggle("on top", "ontop", nil, "/icons/chevron-double-up.svg", beautiful.palette.white),
+        build_simple_toggle("floating", "floating", nil, "/icons/arrange-bring-forward.svg", beautiful.palette.white),
         mebox.separator,
         {
             text = "opacity",
@@ -201,15 +208,17 @@ function client_menu_template.new()
             icon = config.places.theme .. "/icons/cogs.svg",
             icon_color = beautiful.palette.blue,
             submenu = {
-                item_width = dpi(200),
+                item_width = dpi(184),
                 on_show = on_show,
                 on_hide = on_hide,
                 mebox.header("layer"),
-                build_simple_toggle("top", "ontop", "radiobox"),
-                build_simple_toggle("above", "above", "radiobox"),
+                build_simple_toggle("top", "ontop", "radiobox", "/icons/chevron-double-up.svg", beautiful.palette.white),
+                build_simple_toggle("above", "above", "radiobox", "/icons/chevron-up.svg", beautiful.palette.white),
                 {
                     text = "normal",
                     checkbox_type = "radiobox",
+                    icon = config.places.theme .. "/icons/unfold-less-vertical.svg",
+                    icon_color = beautiful.palette.white,
                     on_show = function(item, menu)
                         item.checked = not (menu.client.ontop or menu.client.above or menu.client.below)
                     end,
@@ -219,11 +228,11 @@ function client_menu_template.new()
                         menu.client.below = false
                     end,
                 },
-                build_simple_toggle("below", "below", "radiobox"),
+                build_simple_toggle("below", "below", "radiobox", "/icons/chevron-down.svg", beautiful.palette.white),
                 mebox.separator,
-                build_simple_toggle("dockable", "dockable"),
-                build_simple_toggle("focusable", "focusable"),
-                build_simple_toggle("honor size hints", "size_hints_honor"),
+                build_simple_toggle("dockable", "dockable", nil, "/icons/dock-left.svg", beautiful.palette.white),
+                build_simple_toggle("focusable", "focusable", nil, "/icons/image-filter-center-focus.svg", beautiful.palette.white),
+                build_simple_toggle("size hints", "size_hints_honor", nil, "/icons/move-resize.svg", beautiful.palette.white),
                 mebox.separator,
                 {
                     text = "hide",

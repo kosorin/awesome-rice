@@ -43,6 +43,7 @@ function M.mt:__call(...)
     return M.new(...)
 end
 
+---@alias MeboxItem.submenu (fun(menu: Mebox): Mebox.new.args)|Mebox.new.args
 
 ---@class MeboxItem
 ---@field index integer
@@ -52,7 +53,7 @@ end
 ---@field mouse_move_select? boolean
 ---@field mouse_move_show_submenu? boolean
 ---@field cache_submenu? boolean
----@field submenu? (fun(menu: Mebox): Mebox.new.args)|Mebox.new.args
+---@field submenu? MeboxItem.submenu
 ---@field callback? fun(item: MeboxItem, menu: Mebox, context?: Mebox.context): boolean?
 ---@field on_show? fun(item: MeboxItem, menu: Mebox, args?: Mebox.show.args, context?: Mebox.context): boolean?
 ---@field on_hide? fun(item: MeboxItem, menu: Mebox)

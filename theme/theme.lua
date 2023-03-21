@@ -257,6 +257,16 @@ theme.popup.default_style = {
 ----------------------------------------------------------------------------------------------------
 
 theme.mebox = {
+    checkmark = {
+        [false] = {
+            icon = config.places.theme .. "/icons/_blank.svg",
+            color = theme.palette.gray,
+        },
+        [true] = {
+            icon = config.places.theme .. "/icons/check.svg",
+            color = theme.common.fg,
+        },
+    },
     checkbox = {
         [false] = {
             icon = config.places.theme .. "/icons/checkbox-blank-outline.svg",
@@ -277,7 +287,7 @@ theme.mebox = {
             color = theme.palette.gray_bright,
         },
     },
-    toggle_switch = {
+    switch = {
         [false] = {
             icon = config.places.theme .. "/icons/toggle-switch-off-outline.svg",
             color = theme.palette.gray,
@@ -667,8 +677,8 @@ do
             },
             icons = {
                 menu = config.places.theme .. "/icons/menu.svg",
-                floating = config.places.theme .. "/icons/floating.svg",
-                on_top = config.places.theme .. "/icons/arrow-to-top.svg",
+                floating = config.places.theme .. "/icons/arrange-bring-forward.svg",
+                on_top = config.places.theme .. "/icons/chevron-double-up.svg",
                 sticky = config.places.theme .. "/icons/pin.svg",
                 minimize = config.places.theme .. "/icons/window-minimize.svg",
                 maximize = config.places.theme .. "/icons/window-maximize.svg",

@@ -1,8 +1,0 @@
-<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-  <mask id="mask">
-    <rect x="0" y="0" width="100%" height="100%" fill="white" />
-    <rect x="4" y="4" width="44" height="44" rx="4" ry="4" fill="black" />
-  </mask>
-  <rect class="fill" x="4" y="4" width="37" height="37" rx="4" ry="4" />
-  <rect class="fill" mask="url(#mask)" x="20" y="26" width="40" height="34" rx="4" ry="4" />
-</svg>

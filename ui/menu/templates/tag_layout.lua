@@ -5,6 +5,8 @@ local dpi = Dpi
 local capsule = require("widget.capsule")
 local pango = require("utils.pango")
 local hui = require("utils.ui")
+local css = require("utils.css")
+local config = require("config")
 
 
 local tag_layout_menu_template = { mt = { __index = {} } }
@@ -41,16 +43,30 @@ local menu_item_template = {
     margins = hui.thickness { dpi(2), 0 },
     paddings = hui.thickness { dpi(8), dpi(12) },
     {
-        layout = wibox.layout.fixed.horizontal,
-        spacing = dpi(12),
+        layout = wibox.layout.align.horizontal,
+        expand = "inside",
+        nil,
         {
-            id = "#icon",
-            widget = wibox.widget.imagebox,
-            resize = true,
+            layout = wibox.layout.fixed.horizontal,
+            spacing = dpi(12),
+            {
+                id = "#icon",
+                widget = wibox.widget.imagebox,
+                resize = true,
+            },
+            {
+                id = "#text",
+                widget = wibox.widget.textbox,
+            },
         },
         {
-            id = "#text",
-            widget = wibox.widget.textbox,
+            widget = wibox.container.margin,
+            margins = hui.thickness { dpi(4), right = 0 },
+            {
+                id = "#right_icon",
+                widget = wibox.widget.imagebox,
+                resize = true,
+            },
         },
     },
     update_callback = function(self, item, menu)
@@ -62,9 +78,7 @@ local menu_item_template = {
             or beautiful.mebox.item_styles.normal
         local style = item.urgent
             and styles.urgent
-            or (item.active
-            and styles.active
-            or styles.normal)
+            or styles.normal
         self:apply_style(style)
 
         local icon_widget = self:get_children_by_id("#icon")[1]
@@ -77,12 +91,23 @@ local menu_item_template = {
 
         local text_widget = self:get_children_by_id("#text")[1]
         if text_widget then
-            local text = item.text
-            text_widget:set_markup(pango.span {
-                fgcolor = style.fg,
-                weight = "bold",
-                pango.escape(text),
-            })
+            local text = item.text or ""
+            text_widget:set_markup(pango.span { fgcolor = style.fg, pango.escape(text) })
+        end
+
+        local right_icon_widget = self:get_children_by_id("#right_icon")[1]
+        if right_icon_widget then
+            local checkbox_type = item.checkbox_type or "radiobox"
+            local checkbox_style = beautiful.mebox[checkbox_type][not not item.checked]
+            local icon = checkbox_style.icon
+            local color = checkbox_style.color
+
+            if item.selected then
+                color = style.fg
+            end
+
+            right_icon_widget:set_stylesheet(css.style { path = { fill = color } })
+            right_icon_widget:set_image(icon)
         end
     end,
 }
@@ -113,7 +138,7 @@ end
 
 function tag_layout_menu_template.new()
     return {
-        item_width = dpi(200),
+        item_width = dpi(248),
         item_height = dpi(48),
         on_show = on_show,
         on_hide = on_hide,
@@ -138,12 +163,12 @@ function tag_layout_menu_template.new()
 
                 local name = layout.name or ""
                 local icon = beautiful.layout_icons[name]
-                local active = tag.layout == layout
+                local checked = tag.layout == layout
 
                 items[i] = {
                     text = name,
                     icon = icon,
-                    active = active,
+                    checked = checked,
                     callback = function() tag.layout = layout end,
                     template = menu_item_template,
                 }

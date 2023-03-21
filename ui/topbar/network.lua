@@ -233,10 +233,12 @@ function network_widget.new(wibar)
         :insert(1, self._private.graph_container)
 
     self._private.menu = mebox {
-        item_width = dpi(144),
+        item_width = dpi(136),
         placement = beautiful.wibar.build_placement(self, self._private.wibar),
         {
-            text = "show graph",
+            text = "graph",
+            icon = config.places.theme .. "/icons/chart-line.svg",
+            icon_color = beautiful.palette.gray,
             on_show = function(item) item.checked = not not self._private.show_graph end,
             callback = function(item) self:show_graph(not item.checked) end,
         },

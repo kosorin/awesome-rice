@@ -151,7 +151,7 @@ function torrent_widget.new(wibar)
     self._private.wibar = wibar
 
     self._private.menu = mebox {
-        item_width = dpi(260),
+        item_width = dpi(300),
         placement = beautiful.wibar.build_placement(self, self._private.wibar),
         {
             text = "open transmission",
@@ -186,6 +186,8 @@ function torrent_widget.new(wibar)
         },
         {
             text = "alternative speed limit",
+            icon = config.places.theme .. "/icons/tortoise.svg",
+            icon_color = beautiful.palette.gray,
             on_show = function(item) item.checked = not not torrent_service.last_response.data.alternative_speed_enabled end,
             callback = function(item) torrent_service.alternative_speed(not item.checked) end,
         },
