@@ -2,7 +2,7 @@ local capi = Capi
 local awful = require("awful")
 local wibox = require("wibox")
 local gtimer = require("gears.timer")
-local tcolor = require("helpers.color")
+local tcolor = require("utils.color")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
@@ -14,7 +14,7 @@ local capsule = require("widget.capsule")
 local pango = require("utils.pango")
 local css = require("utils.css")
 local config = require("config")
-local htable = require("helpers.table")
+local htable = require("utils.table")
 local noice = require("theme.style")
 
 

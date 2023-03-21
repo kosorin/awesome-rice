@@ -4,7 +4,7 @@ local ipairs = ipairs
 
 local M = {}
 
----@class helpers.widget.find_geometry
+---@class utils.widget.find_geometry
 ---@field drawable wibox.drawable
 ---@field hierarchy wibox.hierarchy
 ---@field widget wibox.widget.base
@@ -18,7 +18,7 @@ local M = {}
 ---@param widget wibox.widget.base
 ---@param drawable wibox.drawable
 ---@param hierarchy wibox.hierarchy
----@return helpers.widget.find_geometry|nil
+---@return utils.widget.find_geometry|nil
 local function find_geometry_core(widget, drawable, hierarchy)
     local hierarchy_widget = hierarchy:get_widget()
     if hierarchy_widget == widget then
@@ -48,7 +48,7 @@ end
 
 ---@param widget wibox.widget.base
 ---@param wibox wibox
----@return helpers.widget.find_geometry|nil
+---@return utils.widget.find_geometry|nil
 function M.find_geometry(widget, wibox)
     local drawable = wibox and wibox._drawable
     local hierarchy = drawable and drawable._widget_hierarchy

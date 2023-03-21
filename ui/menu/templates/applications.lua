@@ -8,7 +8,7 @@ local gtable = require("gears.table")
 local gfilesystem = require("gears.filesystem")
 local desktop_utils = require("services.desktop")
 local mebox = require("widget.mebox")
-local hstring = require("helpers.string")
+local hstring = require("utils.string")
 local config = require("config")
 local dpi = Dpi
 

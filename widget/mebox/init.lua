@@ -11,7 +11,7 @@ local base = require("wibox.widget.base")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
-local widget_helper = require("helpers.widget")
+local widget_helper = require("utils.widget")
 local noice = require("theme.style")
 local templates = require("widget.mebox.templates")
 

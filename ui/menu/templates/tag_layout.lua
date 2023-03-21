@@ -4,7 +4,7 @@ local beautiful = require("theme.theme")
 local dpi = Dpi
 local capsule = require("widget.capsule")
 local pango = require("utils.pango")
-local hui = require("helpers.ui")
+local hui = require("utils.ui")
 
 
 local tag_layout_menu_template = { mt = { __index = {} } }

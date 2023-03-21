@@ -13,10 +13,10 @@ local gtable = require("gears.table")
 local mebox = require("widget.mebox")
 local client_menu_template = require("ui.menu.templates.client")
 local aplacement = require("awful.placement")
-local widget_helper = require("helpers.widget")
+local widget_helper = require("utils.widget")
 local pango = require("utils.pango")
 local desktop = require("services.desktop")
-local hui = require("helpers.ui")
+local hui = require("utils.ui")
 
 
 local clientlist = { mt = {} }

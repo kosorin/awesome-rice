@@ -14,11 +14,11 @@ local capsule = require("widget.capsule")
 local mebox = require("widget.mebox")
 local pango = require("utils.pango")
 local css = require("utils.css")
-local tcolor = require("helpers.color")
+local tcolor = require("utils.color")
 local aplacement = require("awful.placement")
-local widget_helper = require("helpers.widget")
-local htable = require("helpers.table")
-local hui = require("helpers.ui")
+local widget_helper = require("utils.widget")
+local htable = require("utils.table")
+local hui = require("utils.ui")
 
 
 local network_widget = { mt = {} }

@@ -9,10 +9,10 @@ local gmath = require("gears.math")
 local gshape = require("gears.shape")
 local gtable = require("gears.table")
 local wibox = require("wibox")
-local htable = require("helpers.table")
-local hcolor = require("helpers.color")
-local hui = require("helpers.ui")
-local hwidget = require("helpers.widget")
+local htable = require("utils.table")
+local hcolor = require("utils.color")
+local hui = require("utils.ui")
+local hwidget = require("utils.widget")
 local css = require("utils.css")
 local pango = require("utils.pango")
 local config = require("config")
@@ -39,7 +39,7 @@ theme.icon_theme = "Archdroid-Amber"
 theme.font_name = "JetBrainsMono Nerd Font"
 theme.font_size = 11
 
--- TODO: Move to the helpers
+-- TODO: Move to the utils?
 ---@param args? { name?: string, size?: number, size_factor?: number, style?: string|string[] }
 ---@return string
 function theme.build_font(args)

@@ -4,7 +4,7 @@ local amousec = require("awful.mouse.client")
 local aplacement = require("awful.placement")
 local beautiful = require("theme.theme")
 local grectangle = require("gears.geometry").rectangle
-local helper_client = require("helpers.client")
+local helper_client = require("utils.client")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
@@ -14,7 +14,7 @@ local menu_templates = require("ui.menu.templates")
 local mebox = require("widget.mebox")
 local bindbox = require("widget.bindbox")
 local config = require("config")
-local hclient = require("helpers.client")
+local hclient = require("utils.client")
 
 
 -- Available keys with `super` modifier: gstpzxcv jlyiok

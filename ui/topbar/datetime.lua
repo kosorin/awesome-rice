@@ -15,10 +15,10 @@ local capsule = require("widget.capsule")
 local mebox = require("widget.mebox")
 local clock_icon = require("widget.clock_icon")
 local aplacement = require("awful.placement")
-local widget_helper = require("helpers.widget")
-local htable = require("helpers.table")
+local widget_helper = require("utils.widget")
+local htable = require("utils.table")
 local css = require("utils.css")
-local hui = require("helpers.ui")
+local hui = require("utils.ui")
 
 
 local datetime_widget = { mt = {} }

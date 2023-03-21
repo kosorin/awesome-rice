@@ -24,9 +24,9 @@ do
         },
     }
 
-    ---@alias helpers.mouse.attach.modifiers { exact_match?: boolean, [integer]: key_modifier }
+    ---@alias utils.mouse.attach.modifiers { exact_match?: boolean, [integer]: key_modifier }
 
-    ---@class helpers.mouse.attach_slider.args
+    ---@class utils.mouse.attach_slider.args
     ---@field wibox wibox
     ---@field widget wibox.widget.base
     ---@field cursor? cursor # Cursor when dragging. Default: `"sb_up_arrow"`
@@ -40,7 +40,7 @@ do
     ---@field minimum? number # Minimum value. Must be less than or equal to `maximum`.
     ---@field maximum? number # Maximum value. Must be greater than or equal to `minimum`.
     ---@field button? button # A mouse button required to trigger the drag action. Default: `1` (left mouse button)
-    ---@field modifiers? helpers.mouse.attach.modifiers # Modifiers required to trigger the drag action.
+    ---@field modifiers? utils.mouse.attach.modifiers # Modifiers required to trigger the drag action.
     ---@field orientation? orientation # Dragging orientation.
     ---@field coerce_value? fun(value: number): number # Adjust the value that is passed to other callback functions.
     ---@field start? fun(value: number): boolean|nil # A callback function called at the start. Must return `true` to continue in dragging.
@@ -48,7 +48,7 @@ do
     ---@field finish? fun(value: number, interrupted: boolean) # A callback function called at the end of dragging.
     ---@field interrupt? fun(value: number): boolean # An interrupt callback function. Called before every `update` callback.
 
-    ---@param args helpers.mouse.attach_slider.args
+    ---@param args utils.mouse.attach_slider.args
     ---@return function # A detach function. When called detach the drag action from the widget. Does not interrupt current drag action.
     function M.attach_slider(args)
         local relative = not args.absolute
@@ -161,16 +161,16 @@ do
         return detach
     end
 
-    ---@class helpers.mouse.attach_wheel.args
+    ---@class utils.mouse.attach_wheel.args
     ---@field widget wibox.widget.base
     ---@field step? number # Default: `1`
     ---@field debounce? number # Default: `0.5`
-    ---@field modifiers? helpers.mouse.attach.modifiers # Modifiers required to trigger the action.
+    ---@field modifiers? utils.mouse.attach.modifiers # Modifiers required to trigger the action.
     ---@field start? fun(delta: number): boolean|nil # A callback function called at the start. Must return `true` to continue.
     ---@field update? fun(total_delta: number) # A callback function called on every change.
     ---@field finish? fun(total_delta: number, interrupted: boolean) # A callback function called at the end.
 
-    ---@param args helpers.mouse.attach_wheel.args
+    ---@param args utils.mouse.attach_wheel.args
     ---@return function # An interrupt function.
     ---@return function # A detach function. When called detach the drag action from the widget. Does not interrupt current drag action.
     function M.attach_wheel(args)

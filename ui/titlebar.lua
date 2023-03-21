@@ -15,7 +15,7 @@ local capsule = require("widget.capsule")
 local mebox = require("widget.mebox")
 local client_menu_template = require("ui.menu.templates.client")
 local config = require("config")
-local helper_client = require("helpers.client")
+local helper_client = require("utils.client")
 local css = require("utils.css")
 
 

@@ -21,11 +21,11 @@ local humanizer = require("utils.humanizer")
 local gtable = require("gears.table")
 local capsule = require("widget.capsule")
 local aplacement = require("awful.placement")
-local widget_helper = require("helpers.widget")
+local widget_helper = require("utils.widget")
 local mebox = require("widget.mebox")
 local pango = require("utils.pango")
 local css = require("utils.css")
-local hui = require("helpers.ui")
+local hui = require("utils.ui")
 
 
 local file_size_units = setmetatable({ space = pango.thin_space }, { __index = humanizer.file_size_units })

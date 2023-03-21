@@ -5,7 +5,7 @@ local css = require("utils.css")
 local pango = require("utils.pango")
 local config = require("config")
 local dpi = Dpi
-local hui = require("helpers.ui")
+local hui = require("utils.ui")
 
 
 return {

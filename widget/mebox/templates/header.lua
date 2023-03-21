@@ -2,7 +2,7 @@ local beautiful = require("theme.theme")
 local wibox = require("wibox")
 local pango = require("utils.pango")
 local dpi = Dpi
-local hui = require("helpers.ui")
+local hui = require("utils.ui")
 
 
 return {

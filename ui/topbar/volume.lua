@@ -13,12 +13,12 @@ local gshape = require("gears.shape")
 local gtable = require("gears.table")
 local capsule = require("widget.capsule")
 local aplacement = require("awful.placement")
-local widget_helper = require("helpers.widget")
+local widget_helper = require("utils.widget")
 local mebox = require("widget.mebox")
-local mouse_helper = require("helpers.mouse")
+local mouse_helper = require("utils.mouse")
 local pango = require("utils.pango")
 local css = require("utils.css")
-local hui = require("helpers.ui")
+local hui = require("utils.ui")
 
 
 local volume_widget = { mt = {} }

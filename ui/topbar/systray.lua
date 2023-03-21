@@ -4,7 +4,7 @@ local wibox = require("wibox")
 local dpi = Dpi
 local capsule = require("widget.capsule")
 local gtable = require("gears.table")
-local hui = require("helpers.ui")
+local hui = require("utils.ui")
 
 
 local systray = { mt = {} }

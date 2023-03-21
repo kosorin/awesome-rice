@@ -18,10 +18,10 @@ local capsule = require("widget.capsule")
 local mebox = require("widget.mebox")
 local gtable = require("gears.table")
 local aplacement = require("awful.placement")
-local widget_helper = require("helpers.widget")
+local widget_helper = require("utils.widget")
 local pango = require("utils.pango")
 local css = require("utils.css")
-local hui = require("helpers.ui")
+local hui = require("utils.ui")
 
 
 local function set_text(widget, id, index, text, color)

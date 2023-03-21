@@ -14,7 +14,7 @@ local config = require("config")
 local pango = require("utils.pango")
 local humanizer = require("utils.humanizer")
 local capsule = require("widget.capsule")
-local hui = require("helpers.ui")
+local hui = require("utils.ui")
 
 
 local function clamp(value, min, max)

@@ -4,7 +4,7 @@ local beautiful = require("theme.theme")
 local naughty = require("naughty")
 local dpi = Dpi
 local mebox = require("widget.mebox")
-local screen_helper = require("helpers.screen")
+local screen_helper = require("utils.screen")
 local tag_layout_menu_template = require("ui.menu.templates.tag_layout")
 local config = require("config")
 

@@ -15,7 +15,7 @@ local mebox = require("widget.mebox")
 local power_menu_template = require("ui.menu.templates.power")
 local power_service = require("services.power")
 local humanizer = require("utils.humanizer")
-local hui = require("helpers.ui")
+local hui = require("utils.ui")
 
 
 local power_widget = { mt = {} }

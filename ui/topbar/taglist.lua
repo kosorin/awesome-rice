@@ -6,7 +6,7 @@ local common = require("awful.widget.common")
 local base = require("wibox.widget.base")
 local wibox = require("wibox")
 local beautiful = require("theme.theme")
-local tcolor = require("helpers.color")
+local tcolor = require("utils.color")
 local config = require("config")
 local binding = require("io.binding")
 local mod = binding.modifier
@@ -18,11 +18,11 @@ local core_tags = require("core.tags")
 local mebox = require("widget.mebox")
 local tag_menu_template = require("ui.menu.templates.tag")
 local aplacement = require("awful.placement")
-local widget_helper = require("helpers.widget")
-local screen_helper = require("helpers.screen")
+local widget_helper = require("utils.widget")
+local screen_helper = require("utils.screen")
 local pango = require("utils.pango")
 local css = require("utils.css")
-local hui = require("helpers.ui")
+local hui = require("utils.ui")
 
 
 local taglist = { mt = {} }

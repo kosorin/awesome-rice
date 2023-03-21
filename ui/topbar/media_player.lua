@@ -10,16 +10,16 @@ local gshape = require("gears.shape")
 local dpi = Dpi
 local aspawn = require("awful.spawn")
 local gtable = require("gears.table")
-local hstring = require("helpers.string")
-local hmouse = require("helpers.mouse")
+local hstring = require("utils.string")
+local hmouse = require("utils.mouse")
 local capsule = require("widget.capsule")
 local css = require("utils.css")
-local tcolor = require("helpers.color")
+local tcolor = require("utils.color")
 local pango = require("utils.pango")
 local desktop = require("services.desktop")
 local humanizer = require("utils.humanizer")
 local media_player = require("services.media").player
-local hui = require("helpers.ui")
+local hui = require("utils.ui")
 
 
 ---@type utils.humanizer.relative_time.args
