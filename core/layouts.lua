@@ -4,12 +4,22 @@ local suit = require("awful.layout.suit")
 local tilted = require("layouts.tilted")
 
 
+local layouts = {
+    default = {
+        tile = tilted.new("tile"),
+        floating = suit.floating,
+        max = suit.max,
+        fullscreen = suit.max.fullscreen,
+    },
+}
+
 capi.tag.connect_signal("request::default_layouts", function()
     awful.layout.append_default_layouts {
-        tilted.right,
-        tilted.center,
-        suit.floating,
-        suit.max,
-        suit.max.fullscreen,
+        layouts.default.tile,
+        layouts.default.floating,
+        layouts.default.max,
+        layouts.default.fullscreen,
     }
 end)
+
+return layouts

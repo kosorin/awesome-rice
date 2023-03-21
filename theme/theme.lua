@@ -755,8 +755,7 @@ function theme.build_layout_stylesheet(color)
 end
 
 theme.layout_icons = {
-    tilted_right = config.places.theme .. "/icons/layouts/tilted_right.svg",
-    tilted_center = config.places.theme .. "/icons/layouts/tilted_center.svg",
+    tile = config.places.theme .. "/icons/layouts/tile.right.svg",
     floating = config.places.theme .. "/icons/layouts/floating.svg",
     max = config.places.theme .. "/icons/layouts/max.svg",
     fullscreen = config.places.theme .. "/icons/layouts/fullscreen.svg",

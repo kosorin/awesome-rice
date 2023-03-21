@@ -138,7 +138,7 @@ end
 
 function tag_layout_menu_template.new()
     return {
-        item_width = dpi(248),
+        item_width = dpi(224),
         item_height = dpi(48),
         on_show = on_show,
         on_hide = on_hide,

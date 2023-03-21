@@ -32,4 +32,12 @@ function M.crush_clone(source, crush)
     return clone
 end
 
+function M.values(t)
+    local result = {}
+    for _, v in pairs(t) do
+        result[#result + 1] = v
+    end
+    return result
+end
+
 return M
