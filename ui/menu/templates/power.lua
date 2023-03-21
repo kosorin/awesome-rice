@@ -15,13 +15,8 @@ local pango = require("utils.pango")
 local humanizer = require("utils.humanizer")
 local capsule = require("widget.capsule")
 local hui = require("utils.ui")
+local umath = require("utils.math")
 
-
-local function clamp(value, min, max)
-    if value < min then return min end
-    if value > max then return max end
-    return value
-end
 
 local timer_menu_template = { mt = { __index = {} } }
 
@@ -88,7 +83,7 @@ function timer_menu_template.new(minutes)
     end
 
     local function change_minutes(change)
-        minutes = clamp(minutes + change, 1, 10 * 24 * 60)
+        minutes = umath.clamp(minutes + change, 1, 10 * 24 * 60)
         update_hours_text()
         update_minutes_text()
     end

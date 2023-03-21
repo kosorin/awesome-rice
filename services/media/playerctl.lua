@@ -31,7 +31,7 @@ local lgi_playerctl = require("lgi").Playerctl
 
 
 local playerctl = {
-    lowest_priority = math.huge,
+    lowest_priority = math.maxinteger,
     any = { name = "%any" },
     all = { name = "%all" },
 }

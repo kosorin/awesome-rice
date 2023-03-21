@@ -12,6 +12,7 @@ local widget_helper = require("utils.widget")
 local hui = require("utils.ui")
 local dpi = Dpi
 local humanizer = require("utils.humanizer")
+local umath = require("utils.math")
 local glib = require("lgi").GLib
 local DateTime = glib.DateTime
 local DateTime_new_from_unix_local = DateTime.new_from_unix_local
@@ -49,7 +50,7 @@ local wind_info = {
 }
 
 local function get_wind_direction_info(direction, count)
-    local index = 1 + (math.floor(0.5 + (direction / (360 / count))) % count)
+    local index = 1 + (umath.round(direction / (360 / count)) % count)
     return wind_info[count][index]
 end
 

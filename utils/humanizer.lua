@@ -5,22 +5,10 @@ local math = math
 local table = table
 local string = string
 local gtable = require("gears.table")
+local umath = require("utils.math")
 
 
 local humanizer = {}
-
-local function round(value) return math.floor(value + 0.5) end
-
----@generic T
----@param value `T`
----@param min T
----@param max T
----@return T
-local function clamp(value, min, max)
-    if value < min then return min end
-    if value > max then return max end
-    return value
-end
 
 function humanizer.humanize_units(units, value, from_unit)
     if not value then
@@ -151,7 +139,7 @@ do
     ---@param args? utils.humanizer.relative_time.args
     ---@return string
     function humanizer.relative_time(seconds, args)
-        seconds = round(math.max(0, seconds))
+        seconds = umath.round(math.max(0, seconds))
         args = args or {}
 
         local all_part_count = #time_parts
@@ -194,9 +182,9 @@ do
             assert(from_part, "Bad `formats`.")
         end
 
-        from_part = clamp(from_part or 1, 1, all_part_count)
-        force_from_part = force_from_part and clamp(force_from_part, 1, all_part_count)
-        part_count = clamp(part_count or 1, 1, all_part_count - from_part + 1)
+        from_part = umath.clamp(from_part or 1, 1, all_part_count)
+        force_from_part = force_from_part and umath.clamp(force_from_part, 1, all_part_count)
+        part_count = umath.clamp(part_count or 1, 1, all_part_count - from_part + 1)
 
         if force_from_part then
             assert(from_part < force_from_part)
@@ -233,7 +221,7 @@ do
         end
 
         if #parts == 0 then
-            local time_part = time_parts[clamp(from_part + math.max(1, part_count), 1, all_part_count)]
+            local time_part = time_parts[umath.clamp(from_part + math.max(1, part_count), 1, all_part_count)]
             local format = formats[time_part.id]
             parts[1] = format_time_part(0, format, unit_separator)
         end

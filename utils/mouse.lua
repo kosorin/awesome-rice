@@ -6,6 +6,7 @@ local min, max = math.min, math.max
 local binding = require("io.binding")
 local gtable = require("gears.table")
 local gtimer = require("gears.timer")
+local umath = require("utils.math")
 local mod = binding.modifier
 local btn = binding.button
 
@@ -71,7 +72,7 @@ do
                 if size > 0 then
                     position = position / size
                     if total_size then
-                        value = minimum + min(max(0, position * total_size), total_size)
+                        value = minimum + umath.clamp(position * total_size, 0, total_size)
                     else
                         value = position
                     end

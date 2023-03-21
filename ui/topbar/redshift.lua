@@ -24,6 +24,7 @@ local hui = require("utils.ui")
 local mouse_helper = require("utils.mouse")
 local pango = require("utils.pango")
 local css = require("utils.css")
+local umath = require("utils.math")
 
 
 local redshift_widget = { mt = {} }
@@ -32,9 +33,12 @@ local min_temperature = 1000
 local max_temperature = 10000
 local default_temperature = 6500
 local temperature_step = 100
+local display_value_factor = 0.001
 local text_format = "%.1f" .. pango.thin_space .. "K"
 local style = beautiful.capsule.styles.normal
 
+---@param temperature number
+---@return number
 local function clamp(temperature)
     if not temperature then
         temperature = default_temperature
@@ -43,26 +47,20 @@ local function clamp(temperature)
     temperature = math.ceil(temperature)
     temperature = temperature - math.fmod(temperature, temperature_step)
 
-    if temperature < min_temperature then
-        temperature = min_temperature
-    elseif temperature > max_temperature then
-        temperature = max_temperature
-    end
-
-    return temperature
+    return umath.clamp(temperature, min_temperature, max_temperature)
 end
 
 function redshift_widget:refresh()
     local data = self._private.data
 
-    local temperature_text = string.format(text_format, data.temperature * 0.001)
+    local temperature_text = string.format(text_format, data.temperature * display_value_factor)
 
     local text_markup = temperature_text
     local text_widget = self:get_children_by_id("text")[1]
     text_widget:set_markup(text_markup)
 
     local bar_widget = self:get_children_by_id("bar")[1]
-    bar_widget:set_value(100 * (data.temperature - min_temperature) / (max_temperature - min_temperature))
+    bar_widget:set_value(umath.translate(data.temperature, min_temperature, max_temperature, 0, 1))
 end
 
 function redshift_widget:update_local_only(temperature)
@@ -109,7 +107,6 @@ function redshift_widget.new(wibar, on_dashboard)
                     widget = wibox.widget.progressbar,
                     shape = function(cr, width, height) gshape.rounded_rect(cr, width, height, dpi(4)) end,
                     bar_shape = function(cr, width, height) gshape.rounded_rect(cr, width, height, dpi(4)) end,
-                    max_value = 100,
                     forced_width = not on_dashboard and beautiful.capsule.bar_width,
                     forced_height = beautiful.capsule.bar_height,
                     color = style.fg,

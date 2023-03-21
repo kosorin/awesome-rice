@@ -212,7 +212,7 @@ function network_widget.new(wibar)
             {
                 id = "#graph",
                 widget = wibox.widget.graph,
-                capacity = math.floor(900 / network_service.config.interval), -- 900 ~ 15 minuts
+                capacity = math.floor(900 / network_service.config.interval), -- 900 ~ 15 minutes
                 background_color = tcolor.transparent,
                 group_colors = {
                     beautiful.palette.blue_bright,

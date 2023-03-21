@@ -1,7 +1,4 @@
 local ipairs = ipairs
-local floor = math.floor
-local min = math.min
-local max = math.max
 local wibox = require("wibox")
 local beautiful = require("theme.theme")
 local dpi = Dpi
@@ -11,6 +8,7 @@ local mod = binding.modifier
 local btn = binding.button
 local gtable = require("gears.table")
 local pango = require("utils.pango")
+local umath = require("utils.math")
 local config = require("config")
 
 
@@ -51,13 +49,13 @@ function opacity_menu_template.new()
         end
         opacity = tonumber(opacity)
         local text = opacity
-            and tostring(floor((opacity * 100) + 0.5))
+            and tostring(umath.round(opacity * 100))
             or "--"
         value_widget:set_markup(text .. pango.thin_space .. "%")
     end
 
     local function change_opacity(menu, value)
-        menu.client.opacity = min(max(menu.client.opacity + value, min_opacity), max_opacity)
+        menu.client.opacity = umath.clamp(menu.client.opacity + value, min_opacity, max_opacity)
         update_opacity_text(menu.client.opacity)
     end
 

@@ -1,15 +1,13 @@
 local setmetatable = setmetatable
 local type = type
-local tostring = tostring
 local pairs = pairs
 local table = table
+local string = string
 local dpi = Dpi
 local aplacement = require("awful.placement")
-local gmath = require("gears.math")
 local gshape = require("gears.shape")
 local gtable = require("gears.table")
 local wibox = require("wibox")
-local htable = require("utils.table")
 local hcolor = require("utils.color")
 local hui = require("utils.ui")
 local hwidget = require("utils.widget")
@@ -63,8 +61,7 @@ function theme.build_font(args)
 
     args.size = args.size or theme.font_size
     args.size_factor = args.size_factor or 1
-    local size = gmath.round(args.size * args.size_factor)
-    font = font .. " " .. tostring(size)
+    font = font .. " " .. string.format("%.0f", args.size * args.size_factor)
 
     return font
 end
