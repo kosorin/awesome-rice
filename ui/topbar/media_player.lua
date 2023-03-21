@@ -314,6 +314,7 @@ local function initialize_content_container(self)
 
     self._private.wheel_seeking_interrupt = hmouse.attach_wheel {
         widget = self,
+        debounce = 0.5,
         step = 5 * media_player.second,
         start = function()
             if self._private.is_seeking then

@@ -162,10 +162,14 @@ do
         return detach
     end
 
+
+    local function empty_interrupt()
+    end
+
     ---@class utils.mouse.attach_wheel.args
     ---@field widget wibox.widget.base
     ---@field step? number # Default: `1`
-    ---@field debounce? number # Default: `0.5`
+    ---@field debounce? number # Debounce in seconds.
     ---@field modifiers? utils.mouse.attach.modifiers # Modifiers required to trigger the action.
     ---@field start? fun(delta: number): boolean|nil # A callback function called at the start. Must return `true` to continue.
     ---@field update? fun(total_delta: number) # A callback function called on every change.
@@ -175,8 +179,8 @@ do
     ---@return function # An interrupt function.
     ---@return function # A detach function. When called detach the drag action from the widget. Does not interrupt current drag action.
     function M.attach_wheel(args)
-        ---@type gears.timer
-        local timer
+        ---@type gears.timer, function
+        local timer, interrupt
         local is_running = false
         local total_delta = 0
 
@@ -185,7 +189,9 @@ do
                 return
             end
 
-            timer:stop()
+            if timer then
+                timer:stop()
+            end
             is_running = false
 
             if args.finish then
@@ -195,13 +201,21 @@ do
             total_delta = 0
         end
 
-        timer = gtimer {
-            timeout = args.debounce or 0.5,
-            single_shot = true,
-            callback = function()
-                stop(false)
-            end,
-        }
+        if args.debounce and args.debounce > 0 then
+            function interrupt()
+                stop(true)
+            end
+
+            timer = gtimer {
+                timeout = args.debounce,
+                single_shot = true,
+                callback = function()
+                    stop(false)
+                end,
+            }
+        else
+            interrupt = empty_interrupt
+        end
 
         local step = args.step or 1
         local buttons = {
@@ -230,19 +244,21 @@ do
                 total_delta = 0
             end
 
-            timer:again()
+            if timer then
+                timer:again()
+            end
             total_delta = total_delta + delta
 
             if args.update then
                 args.update(total_delta)
             end
+
+            if not timer then
+                stop(false)
+            end
         end
 
         args.widget:connect_signal("button::press", callback)
-
-        local function interrupt()
-            stop(true)
-        end
 
         local function detach()
             args.widget:disconnect_signal("button::press", callback)
