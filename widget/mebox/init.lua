@@ -1,4 +1,5 @@
 local capi = Capi
+local type = type
 local setmetatable = setmetatable
 local ipairs = ipairs
 local math = math
@@ -52,7 +53,7 @@ end
 ---@field mouse_move_show_submenu? boolean
 ---@field cache_submenu? boolean
 ---@field submenu? (fun(menu: Mebox): Mebox.new.args)|Mebox.new.args
----@field callback? fun(item: MeboxItem, menu: Mebox, context?: Mebox.context)
+---@field callback? fun(item: MeboxItem, menu: Mebox, context?: Mebox.context): boolean?
 ---@field on_show? fun(item: MeboxItem, menu: Mebox, args?: Mebox.show.args, context?: Mebox.context): boolean?
 ---@field on_hide? fun(item: MeboxItem, menu: Mebox)
 ---@field on_ready? fun(item_widget?: wibox.widget.base, item: MeboxItem, menu: Mebox, args?: Mebox.show.args, context?: Mebox.context)

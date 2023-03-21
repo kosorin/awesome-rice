@@ -461,7 +461,7 @@ local function initialize_manager(self)
     end)
 
     ---@param full_name lgi.Playerctl.PlayerName
-    ---@return lgi.Playerctl.Player?
+    ---@return lgi.Playerctl.Player|nil
     local function try_manage(full_name)
         if filter_name(self, full_name.name) then
             return manage_player(self, full_name)
