@@ -2,6 +2,7 @@ local capi = Capi
 local time = os.time
 local execute = os.execute
 local gtimer = require("gears.timer")
+local config = require("config")
 
 
 local power_service = {
@@ -11,27 +12,27 @@ local power_service = {
 }
 
 function power_service.shutdown()
-    execute("systemctl poweroff")
+    execute(config.power.shutdown)
 end
 
 function power_service.reboot()
-    execute("systemctl reboot")
+    execute(config.power.reboot)
 end
 
 function power_service.suspend()
-    execute("systemctl suspend")
+    execute(config.power.suspend)
 end
 
 function power_service.kill_session()
-    execute("loginctl kill-session")
+    execute(config.power.kill_session)
 end
 
 function power_service.lock_session()
-    execute("loginctl lock-session")
+    execute(config.power.lock_session)
 end
 
 function power_service.lock_screen()
-    execute("light-locker-command --lock")
+    execute(config.power.lock_screen)
 end
 
 do
