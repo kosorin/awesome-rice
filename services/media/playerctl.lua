@@ -290,16 +290,17 @@ end
 ---@param self Playerctl
 ---@param player_data Playerctl.data
 ---@param metadata lgi.Playerctl.Metadata
+---@return boolean
 ---@return table<string, boolean>
 local function update_metadata(self, player_data, metadata)
     metadata = metadata and metadata.value or {}
 
-    ---@type table<string, boolean>
-    local changed = {}
+    local changed = false
+    local changed_data = {}
 
     local function mark_changed(name)
-        changed = changed or {}
-        changed[name] = true
+        changed = true
+        changed_data[name] = true
     end
 
     local target_metadata = player_data.metadata
@@ -342,7 +343,7 @@ local function update_metadata(self, player_data, metadata)
         end
     end
 
-    return changed
+    return changed, changed_data
 end
 
 ---@param self Playerctl
