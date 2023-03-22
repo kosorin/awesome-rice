@@ -1,3 +1,4 @@
+local select = select
 local table = table
 local string = string
 local wibox = require("wibox")
@@ -116,12 +117,12 @@ M.object = {}
 ---@field pin wibox.container
 ---@field playback_bar unknown
 ---@field is_seeking? "drag"|"wheel"
----@field seeking_interrupted? boolean
+---@field drag_seeking_interrupt function
 ---@field wheel_seeking_interrupt function
 
 ---@param self MediaPlayer
 local function interrupt_seeking(self)
-    self._private.seeking_interrupted = true
+    self._private.drag_seeking_interrupt()
     self._private.wheel_seeking_interrupt()
 end
 
@@ -277,18 +278,17 @@ local function initialize_content_container(self)
     set_playback_position_ratio(self, 0)
     set_playback_time(self, 0, 0)
 
-    hmouse.attach_slider {
+    self._private.drag_seeking_interrupt = select(2, hmouse.attach_slider {
         wibox = self._private.wibar,
         widget = self._private.content_container,
         minimum = 0,
         maximum = 1,
         start = function()
             if self._private.is_seeking then
-                return
+                return false
             end
 
             self._private.is_seeking = "drag"
-            self._private.seeking_interrupted = false
             return true
         end,
         update = function(ratio)
@@ -299,7 +299,6 @@ local function initialize_content_container(self)
         end,
         finish = function(ratio, interrupted)
             self._private.is_seeking = nil
-            self._private.seeking_interrupted = false
 
             if not interrupted then
                 local position_data = media_player:get_position_data()
@@ -307,22 +306,17 @@ local function initialize_content_container(self)
                 media_player:set_position(ratio * length)
             end
         end,
-        interrupt = function()
-            return self._private.seeking_interrupted
-        end,
-    }
+    })
 
-    self._private.wheel_seeking_interrupt = hmouse.attach_wheel {
+    self._private.wheel_seeking_interrupt = select(2, hmouse.attach_wheel {
         widget = self,
-        debounce = 0.5,
         step = 5 * media_player.second,
         start = function()
             if self._private.is_seeking then
-                return
+                return false
             end
 
             self._private.is_seeking = "wheel"
-            self._private.seeking_interrupted = false
             return true
         end,
         update = function(total_delta)
@@ -336,13 +330,12 @@ local function initialize_content_container(self)
         end,
         finish = function(total_delta, interrupted)
             self._private.is_seeking = nil
-            self._private.seeking_interrupted = false
 
             if not interrupted then
                 media_player:seek(total_delta)
             end
         end,
-    }
+    })
 end
 
 ---@param self MediaPlayer
