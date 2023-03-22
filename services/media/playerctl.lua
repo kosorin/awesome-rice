@@ -279,11 +279,12 @@ end
 
 ---@param self Playerctl
 ---@param player_data Playerctl.data
-local function update_position(self, player_data)
+---@param by_timer? boolean
+local function update_position(self, player_data, by_timer)
     local player = find_player_by_instance(self, player_data.instance)
     if player then
         player_data.position = player:get_position()
-        self:emit_signal("media::player::position", player_data)
+        self:emit_signal("media::player::position", player_data, by_timer)
     end
 end
 
@@ -490,11 +491,7 @@ local function initialize_manager(self)
         player_data._position_timer = gtimer {
             timeout = 1,
             callback = function()
-                local p = find_player_by_instance(self, player_data.instance)
-                if p then
-                    player_data.position = p:get_position()
-                    self:emit_signal("media::player::position", player_data, true)
-                end
+                update_position(self, player_data, true)
             end,
         }
         refresh_position_timer(player_data)
