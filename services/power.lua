@@ -7,7 +7,7 @@ local config = require("config")
 
 local power_service = {
     config = {
-        default_timeout = 30, -- minutes
+        default_timeout = 60, -- minutes
     },
 }
 
