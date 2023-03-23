@@ -965,11 +965,12 @@ function M.new(args, is_submenu)
             }
 
         self._private.mousegrabber = function(status)
+            -- Dump(status)
             local buttons = self._private.mousegrabber_buttons
             if buttons then
                 for button, pressed in ipairs(status.buttons) do
                     if buttons[button] ~= nil and buttons[button] ~= pressed and not pressed then
-                        self:hide_all()
+                        -- self:hide_all()
                         break
                     else
                         buttons[button] = pressed

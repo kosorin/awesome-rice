@@ -58,6 +58,16 @@ capi.awesome.connect_signal("main_bindbox::show", function()
 end)
 
 
+awful.mouse.append_mousegrabber_bindings(binding.awful_buttons {
+    binding.awful({}, { btn.left, btn.right }, function()
+        local menu = mebox.control.current.instance
+        if menu then
+            menu:hide_all()
+        end
+    end),
+})
+
+
 binding.add_global_range {
 
     binding.new {
