@@ -388,14 +388,13 @@ end
 function M.object:show_submenu(index, context)
     context = context or {}
 
-    if self._private.active_submenu and self._private.active_submenu.index == index then
-        if context.source == "mouse" then
+    if self._private.active_submenu then
+        if self._private.active_submenu.index == index then
+            return
+        else
             hide_active_submenu(self)
         end
-        return
     end
-
-    hide_active_submenu(self)
 
     index = index or self._private.selected_index
     if not self:is_item_active(index) then
