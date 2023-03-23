@@ -19,6 +19,7 @@ local utree = require("utils.tree")
 local capsule = require("widget.capsule")
 local noice = require("theme.style")
 local pango = require("utils.pango")
+local ui_controller = require("ui.controller")
 
 
 local s25p = pango.span { size = "25%", " " }
@@ -975,6 +976,7 @@ function M.object:hide()
     stop_find(self)
 
     self.visible = false
+    ui_controller.leave(self)
 end
 
 ---@class Bindbox.show.args
@@ -983,7 +985,7 @@ end
 
 ---@param args? Bindbox.show.args
 function M.object:show(args)
-    if self.visible then
+    if self.visible or not ui_controller.enter(self) then
         return
     end
 

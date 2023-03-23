@@ -12,6 +12,7 @@ local capsule = require("widget.capsule")
 local noice = require("theme.style")
 local config = require("config")
 local css = require("utils.css")
+local ui_controller = require("ui.controller")
 
 
 ---@param time? integer
@@ -51,7 +52,7 @@ noice.define_style(M.object, {
 })
 
 function M.object:show()
-    if self.visible then
+    if self.visible or not ui_controller.enter(self) then
         return
     end
 
@@ -62,6 +63,7 @@ end
 
 function M.object:hide()
     self.visible = false
+    ui_controller.leave(self)
 end
 
 function M.object:toggle()

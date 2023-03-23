@@ -15,6 +15,7 @@ local btn = binding.button
 local widget_helper = require("utils.widget")
 local noice = require("theme.style")
 local templates = require("widget.mebox.templates")
+local ui_controller = require("ui.controller")
 
 
 ---@param value? number
@@ -298,30 +299,6 @@ function M.object:update_item(index)
     end
 end
 
----@class MeboxControl
----@field current { instance?: Mebox }
-local control = { current = setmetatable({}, { __mode = "v" }) }
-
----@param menu Mebox
-function control.hide(menu)
-    local cm = control.current
-    if cm.instance == menu then
-        cm.instance = nil
-    end
-end
-
----@param menu Mebox
----@return boolean
-function control.show(menu)
-    local cm = control.current
-    if cm.instance then
-        return cm.instance == menu:get_root_menu()
-    else
-        cm.instance = menu
-        return true
-    end
-end
-
 ---@param menu Mebox
 ---@param submenu Mebox
 ---@param submenu_index integer
@@ -470,7 +447,7 @@ function M.object:hide(context)
     self._private.item_widgets = nil
     self._private.selected_index = nil
 
-    control.hide(self)
+    ui_controller.leave(self)
 end
 
 ---@param self Mebox
@@ -558,11 +535,7 @@ end
 ---@param args? Mebox.show.args
 ---@param context? Mebox.context
 function M.object:show(args, context)
-    if self.visible then
-        return
-    end
-
-    if not control.show(self) then
+    if self.visible or not ui_controller.enter(self:get_root_menu()) then
         return
     end
 
