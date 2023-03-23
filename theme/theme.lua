@@ -633,8 +633,8 @@ do
     local button_shape = function(cr, width, height)
         gshape.rounded_rect(cr, width, height, dpi(3))
     end
-    local button_paddings = hui.thickness { dpi(4), dpi(12) }
-    local button_margins = hui.thickness { dpi(4), 0, dpi(8) }
+    local button_paddings = hui.thickness { dpi(5), dpi(5) }
+    local button_margins = hui.thickness { dpi(3), 0, dpi(7) }
     theme.titlebar = {
         height = dpi(36),
         paddings = hui.thickness { 0, dpi(12) },
@@ -659,7 +659,7 @@ do
                     bg = theme.common.primary_50,
                     fg = theme.common.fg_bright,
                     border_color = theme.common.primary_75,
-                    border_width = dpi(1),
+                    border_width = 0,
                     shape = button_shape,
                     paddings = button_paddings,
                     margins = button_margins,
