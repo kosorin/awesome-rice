@@ -170,7 +170,7 @@ function client_menu_template.new()
                     local tags = client:tags()
                     local screen_tags = client.screen.tags
 
-                    ---@type MeboxItem.submenu[]
+                    ---@type MeboxItem.args[]
                     local items = { build_simple_toggle("sticky", "sticky", nil, "/icons/pin.svg", beautiful.palette.white) }
                     if #screen_tags > 0 then
                         items[#items + 1] = mebox.separator

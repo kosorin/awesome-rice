@@ -44,6 +44,8 @@ function M.mt:__call(...)
     return M.new(...)
 end
 
+---@alias MeboxItem.args (fun(menu: Mebox): MeboxItem)|MeboxItem
+
 ---@alias MeboxItem.submenu (fun(menu: Mebox): Mebox.new.args)|Mebox.new.args
 
 ---@class MeboxItem
