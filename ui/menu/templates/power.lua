@@ -443,17 +443,17 @@ function power_menu_template.new()
         {
             enabled = false,
             opacity = 1,
-            text = get_uptime(),
             icon = config.places.theme .. "/icons/timer-play.svg",
             icon_color = beautiful.palette.cyan,
             on_hide = function(item)
                 item.timer:stop()
                 item.timer = nil
             end,
-            on_ready = function(_, item, menu)
+            on_show = function(item, menu)
                 item.timer = gtimer {
                     timeout = 1,
                     autostart = true,
+                    call_now = true,
                     callback = function()
                         item.text = get_uptime()
                         menu:update_item(item.index)
