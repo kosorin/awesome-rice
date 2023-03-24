@@ -21,13 +21,23 @@ local core_system = require("core.system")
 local now = os.time
 
 
+local uptime_args = {
+    formats = {
+        year = { text = "year" },
+        month = { text = "month" },
+        week = { text = "week" },
+        day = { text = "day" },
+        hour = { text = "hour" },
+        minute = { text = "min" },
+        second = { text = "sec" },
+    },
+    part_count = 2,
+    part_separator = ", ",
+    unit_separator = pango.thin_space,
+}
+
 local function get_uptime()
-    return humanizer.relative_time(now() - core_system.up_since, {
-        formats = humanizer.long_time_formats,
-        part_count = 2,
-        part_separator = ", ",
-        unit_separator = pango.thin_space,
-    })
+    return humanizer.relative_time(now() - core_system.up_since, uptime_args)
 end
 
 
@@ -287,7 +297,7 @@ local cancel_item = {
     end,
 }
 
-local item_width = dpi(192)
+local item_width = dpi(200)
 
 function power_menu_template.new()
     ---@type Mebox.new.args
