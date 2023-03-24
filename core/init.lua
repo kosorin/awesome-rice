@@ -1,3 +1,4 @@
+require("core.system")
 require("core.screen")
 require("core.layouts")
 require("core.tags")

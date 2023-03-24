@@ -44,7 +44,7 @@ function M.mt:__call(...)
     return M.new(...)
 end
 
----@alias MeboxItem.args (fun(menu: Mebox): MeboxItem)|MeboxItem
+---@alias MeboxItem.args (fun(menu: Mebox, args?: Mebox.show.args, context?: Mebox.context): MeboxItem)|MeboxItem
 
 ---@alias MeboxItem.submenu (fun(menu: Mebox): Mebox.new.args)|Mebox.new.args
 
@@ -95,7 +95,7 @@ M.object = {}
 ---@field layout_template widget_value
 ---@field layout_container wibox.container
 ---@field layout_navigator? fun(menu: Mebox, x: sign, y: sign, direction?: direction, context?: Mebox.context)
----@field items_source MeboxItem[]|fun(menu: Mebox, args?: Mebox.show.args, context?: Mebox.context)
+---@field items_source (fun(menu: Mebox, args?: Mebox.show.args, context?: Mebox.context): MeboxItem.args[])|MeboxItem.args[]
 ---@field on_show? fun(menu: Mebox, args?: Mebox.show.args, context?: Mebox.context): boolean
 ---@field on_hide? fun(menu: Mebox)
 ---@field on_ready? fun(menu: Mebox, args?: Mebox.show.args, context?: Mebox.context)
@@ -507,7 +507,7 @@ local function add_items(self, args, context)
                     show_submenu = self._private.mouse_move_show_submenu
                 end
                 if show_submenu then
-                    self:show_submenu(index, context)
+                    self:show_submenu(index, setmetatable({ source = "mouse" }, context))
                 else
                     hide_active_submenu(self)
                 end
@@ -837,6 +837,7 @@ end
 ---@field item_template? widget_template
 ---@field separator_template? widget_template
 ---@field header_template? widget_template
+---@field [integer] MeboxItem.args
 
 ---@param args? Mebox.new.args
 ---@param is_submenu? boolean

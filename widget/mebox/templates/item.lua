@@ -46,7 +46,7 @@ return {
         self.forced_height = item.height or menu.item_height
 
         self.enable_overlay = item.enabled
-        self.opacity = item.enabled and 1 or 0.5
+        self.opacity = item.opacity or (item.enabled and 1 or 0.5)
 
         local styles = item.selected
             and beautiful.mebox.item_styles.selected

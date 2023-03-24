@@ -4,6 +4,7 @@ local capi = Capi
 local beautiful = require("theme.theme")
 local wibox = require("wibox")
 local gtable = require("gears.table")
+local gtimer = require("gears.timer")
 local dpi = Dpi
 local mebox = require("widget.mebox")
 local binding = require("io.binding")
@@ -16,6 +17,18 @@ local humanizer = require("utils.humanizer")
 local capsule = require("widget.capsule")
 local hui = require("utils.ui")
 local umath = require("utils.math")
+local core_system = require("core.system")
+local now = os.time
+
+
+local function get_uptime()
+    return humanizer.relative_time(now() - core_system.up_since, {
+        formats = humanizer.long_time_formats,
+        part_count = 2,
+        part_separator = ", ",
+        unit_separator = pango.thin_space,
+    })
+end
 
 
 local timer_menu_template = { mt = { __index = {} } }
@@ -277,7 +290,8 @@ local cancel_item = {
 local item_width = dpi(192)
 
 function power_menu_template.new()
-    return {
+    ---@type Mebox.new.args
+    local args = {
         item_width = item_width,
         mouse_move_show_submenu = false,
         mebox.header("power"),
@@ -414,7 +428,31 @@ function power_menu_template.new()
                 },
             },
         },
+        mebox.separator,
+        mebox.header("uptime"),
+        {
+            enabled = false,
+            opacity = 1,
+            text = get_uptime(),
+            icon = config.places.theme .. "/icons/timer-play.svg",
+            icon_color = beautiful.palette.cyan,
+            on_hide = function(item)
+                item.timer:stop()
+                item.timer = nil
+            end,
+            on_ready = function(_, item, menu)
+                item.timer = gtimer {
+                    timeout = 1,
+                    autostart = true,
+                    callback = function()
+                        item.text = get_uptime()
+                        menu:update_item(item.index)
+                    end,
+                }
+            end,
+        },
     }
+    return args
 end
 
 power_menu_template.mt.__index.shared = power_menu_template.new()
