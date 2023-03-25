@@ -1,4 +1,6 @@
 local capi = Capi
+local tonumber = tonumber
+local maxinteger = math.maxinteger
 local awful = require("awful")
 local wibox = require("wibox")
 local beautiful = require("theme.theme")
@@ -34,7 +36,9 @@ local time_args = {
 
 function power_widget:refresh(status)
     local style = status
-        and beautiful.capsule.styles.palette.orange
+        and (((tonumber(status) or maxinteger) <= power_service.config.alert_threshold)
+        and beautiful.capsule.styles.palette.red
+        or beautiful.capsule.styles.palette.orange)
         or beautiful.capsule.styles.normal
     self:apply_style(style)
 

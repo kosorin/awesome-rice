@@ -51,9 +51,9 @@ return {
         local styles = item.selected
             and beautiful.mebox.item_styles.selected
             or beautiful.mebox.item_styles.normal
-        local style = item.urgent
+        local style = (not item.selected and item.style) or (item.urgent
             and styles.urgent
-            or styles.normal
+            or styles.normal)
         self:apply_style(style)
 
         local icon_widget = self:get_children_by_id("#icon")[1]

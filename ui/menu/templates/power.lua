@@ -1,6 +1,8 @@
 -- DEPENDENCIES: systemctl, loginctl
 
 local capi = Capi
+local tonumber = tonumber
+local maxinteger = math.maxinteger
 local beautiful = require("theme.theme")
 local wibox = require("wibox")
 local gtable = require("gears.table")
@@ -388,7 +390,6 @@ function power_menu_template.new()
         mebox.header("shut down timer"),
         {
             icon = config.places.theme .. "/icons/power.svg",
-            icon_color = beautiful.palette.orange,
             mouse_move_show_submenu = true,
             submenu = timer_menu_template.shared,
             on_hide = function(item, menu)
@@ -409,8 +410,14 @@ function power_menu_template.new()
                             })
                         end
                         item.text = text
+                        item.style = ((tonumber(status) or maxinteger) <= power_service.config.alert_threshold)
+                            and beautiful.capsule.styles.palette.red
+                            or beautiful.capsule.styles.palette.orange
+                        item.icon_color = item.style.fg
                     else
-                        item.text = "off"
+                        item.text = "not scheduled"
+                        item.style = nil
+                        item.icon_color = beautiful.palette.orange
                     end
                 end)
             end,
