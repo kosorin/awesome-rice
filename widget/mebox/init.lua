@@ -1,5 +1,6 @@
 local capi = Capi
 local type = type
+local tonumber = tonumber
 local setmetatable = setmetatable
 local ipairs = ipairs
 local math = math
@@ -13,19 +14,16 @@ local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
 local widget_helper = require("utils.widget")
+local gmath = require("gears.math")
 local noice = require("theme.style")
 local templates = require("widget.mebox.templates")
 local ui_controller = require("ui.controller")
 
 
----@param value? number
+---@param value? any
 ---@return sign
 local function sign(value)
-    value = tonumber(value)
-    if not value or value == 0 then
-        return 0
-    end
-    return value > 0 and 1 or -1
+    return gmath.sign(tonumber(value) or 0)
 end
 
 ---@todo Create helper function
@@ -708,7 +706,7 @@ function M.object:select_next(direction, seek_origin)
         seek_origin = direction
         direction = -1
     else
-        direction = sign(direction --[[@as integer?]])
+        direction = sign(direction)
     end
 
     local index
