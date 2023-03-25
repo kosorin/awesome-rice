@@ -23,7 +23,9 @@ return mebox {
     paddings = hui.thickness { dpi(16) },
     items_source = function()
         local items = {}
-        for _, client in ipairs(focus_history.list) do
+
+        ---@param client client
+        local function add_client(client)
             local tag = client:tags()[1]
             items[#items + 1] = {
                 client = client,
@@ -42,6 +44,9 @@ return mebox {
                     if not client.valid then
                         return
                     end
+                    if client.hidden then
+                        client.hidden = false
+                    end
                     if not client:isvisible() then
                         awful.tag.viewmore(client:tags(), client.screen)
                     end
@@ -49,6 +54,26 @@ return mebox {
                 end,
             }
         end
+
+        local hidden_clients = {}
+        for _, client in ipairs(focus_history.list) do
+            if client.hidden then
+                hidden_clients[#hidden_clients + 1] = client
+            else
+                add_client(client)
+            end
+        end
+
+        if #hidden_clients > 0 then
+            if #items > 0 then
+                items[#items + 1] = mebox.separator
+            end
+            items[#items + 1] = mebox.header("hidden clients")
+            for _, client in ipairs(hidden_clients) do
+                add_client(client)
+            end
+        end
+
         return items
     end,
     item_template = {
