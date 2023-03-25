@@ -12,7 +12,7 @@ local gtable = require("gears.table")
 local aplacement = require("awful.placement")
 local widget_helper = require("utils.widget")
 local mebox = require("widget.mebox")
-local tag_layout_menu_template = require("ui.menu.templates.tag_layout")
+local tag_layout_menu_template = require("ui.menu.templates.tag.layout")
 local main_menu = require("ui.menu.main")
 local hui = require("utils.ui")
 

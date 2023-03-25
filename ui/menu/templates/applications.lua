@@ -13,7 +13,7 @@ local config = require("config")
 local dpi = Dpi
 
 
-local application_menu_template = { mt = { __index = {} } }
+local M = {}
 
 local root_menu
 
@@ -21,7 +21,7 @@ local function build_categories(category_factory)
     local categories = {}
     local category_map = {}
 
-    for _, menu_category in pairs(beautiful.application_menu_categories) do
+    for _, menu_category in pairs(beautiful.application.categories) do
         local category = category_factory(menu_category)
         categories[#categories + 1] = category
         category_map[menu_category.id] = category_map[menu_category.id]
@@ -39,25 +39,24 @@ local function build_categories(category_factory)
         end
     end
 
-    return categories, category_mapper
+    local fallback_category = category_factory(beautiful.application.fallback_category)
+
+    return categories, fallback_category, category_mapper
 end
 
 local function generate_menu(desktop_files)
     desktop_files = desktop_files or desktop_utils.desktop_files or {}
 
-    local categories, category_mapper = build_categories(function(menu_category)
+    local function category_builder(menu_category)
         return {
             text = menu_category.name,
-            icon = desktop_utils.lookup_icon(menu_category.icon_name),
+            icon = menu_category.icon_name and desktop_utils.lookup_icon(menu_category.icon_name),
             icon_color = menu_category.icon_color,
             submenu = {},
         }
-    end)
+    end
 
-    local fallback_category = {
-        text = "other",
-        submenu = {},
-    }
+    local categories, fallback_category, category_mapper = build_categories(category_builder)
 
     for _, desktop_file in pairs(desktop_files) do
         local category = category_mapper(desktop_file) or fallback_category
@@ -110,8 +109,8 @@ end)
 
 generate_menu()
 
-function application_menu_template.mt.__index.shared()
+function M.shared()
     return root_menu or {}
 end
 
-return setmetatable(application_menu_template, application_menu_template.mt)
+return M

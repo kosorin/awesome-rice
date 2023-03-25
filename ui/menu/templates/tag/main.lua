@@ -5,33 +5,20 @@ local naughty = require("naughty")
 local dpi = Dpi
 local mebox = require("widget.mebox")
 local screen_helper = require("utils.screen")
-local tag_layout_menu_template = require("ui.menu.templates.tag_layout")
 local config = require("config")
+local common = require("ui.menu.templates.tag._common")
+local layout_menu_template = require("ui.menu.templates.tag.layout")
 
 
-local tag_menu_template = { mt = { __index = {} } }
+local M = {}
 
-local function on_hide(menu)
-    menu.tag = nil
-    menu.taglist = nil
-end
-
-local function on_show(menu, args)
-    local parent = menu._private.parent
-    menu.tag = parent and parent.tag or args.tag
-    menu.taglist = parent and parent.taglist or args.taglist
-
-    if not menu.tag or not menu.tag.activated then
-        on_hide(menu)
-        return false
-    end
-end
-
-function tag_menu_template.new()
-    return {
+---@return Mebox.new.args
+function M.new()
+    ---@type Mebox.new.args
+    local args = {
         item_width = dpi(212),
-        on_show = on_show,
-        on_hide = on_hide,
+        on_show = common.on_show,
+        on_hide = common.on_hide,
         items_source = function(menu)
             local tag = menu.tag
             local taglist = menu.taglist
@@ -71,17 +58,11 @@ function tag_menu_template.new()
                 text = "layout",
                 icon = config.places.theme .. "/icons/view-grid.svg",
                 icon_color = beautiful.palette.blue,
-                submenu = tag_layout_menu_template.new(),
+                submenu = layout_menu_template.shared,
             })
             insert(items, mebox.separator)
 
-            insert(items, {
-                text = "volatile",
-                icon = config.places.theme .. "/icons/delete-clock.svg",
-                icon_color = beautiful.palette.gray,
-                on_show = function(item) item.checked = not not tag.volatile end,
-                callback = function(item) tag.volatile = not item.checked end,
-            })
+            insert(items, common.build_simple_toggle("volatile", "volatile", nil, "/icons/delete-clock.svg", beautiful.palette.gray))
             insert(items, mebox.separator)
 
             insert(items, {
@@ -102,8 +83,10 @@ function tag_menu_template.new()
             return items
         end,
     }
+
+    return args
 end
 
-tag_menu_template.mt.__index.shared = tag_menu_template.new()
+M.shared = M.new()
 
-return setmetatable(tag_menu_template, tag_menu_template.mt)
+return M

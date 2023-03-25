@@ -13,7 +13,7 @@ local aplacement = require("awful.placement")
 local amousec = require("awful.mouse.client")
 local capsule = require("widget.capsule")
 local mebox = require("widget.mebox")
-local client_menu_template = require("ui.menu.templates.client")
+local client_menu_template = require("ui.menu.templates.client.main")
 local config = require("config")
 local helper_client = require("utils.client")
 local css = require("utils.css")
@@ -101,7 +101,7 @@ local function ensure_client_menu(client)
         return
     end
 
-    local template = client_menu_template.new()
+    local template = client_menu_template.shared
     local old_on_hide = template.on_hide
 
     function template.on_hide(...)

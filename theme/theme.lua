@@ -763,76 +763,79 @@ theme.layout_icons = {
 
 ----------------------------------------------------------------------------------------------------
 
----The default icon for applications that don't provide any icon in their .desktop files.
----@type string|nil
-theme.application_default_icon = nil
-
-theme.application_menu_categories = {
-    utility = {
-        id = "Utility",
-        name = "accessories",
-        icon_name = "applications-accessories",
-        icon_color = theme.palette.green,
+theme.application = {
+    ---@type string|nil # The default icon for applications that don't provide any icon in their .desktop files.
+    default_icon = nil,
+    fallback_category = {
+        name = "other",
     },
-    development = {
-        id = "Development",
-        name = "development",
-        icon_name = "applications-development",
-        icon_color = theme.palette.cyan,
-    },
-    education = {
-        id = "Education",
-        name = "education",
-        icon_name = "applications-science",
-        icon_color = theme.palette.gray,
-    },
-    games = {
-        id = "Game",
-        name = "games",
-        icon_name = "applications-games",
-        icon_color = theme.palette.red,
-    },
-    graphics = {
-        id = "Graphics",
-        name = "graphics",
-        icon_name = "applications-graphics",
-        icon_color = theme.palette.yellow,
-    },
-    internet = {
-        id = "Network",
-        name = "internet",
-        icon_name = "applications-internet",
-        icon_color = theme.palette.blue,
-    },
-    multimedia = {
-        id = "AudioVideo",
-        name = "multimedia",
-        icon_name = "applications-multimedia",
-        icon_color = theme.palette.cyan,
-    },
-    office = {
-        id = "Office",
-        name = "office",
-        icon_name = "applications-office",
-        icon_color = theme.palette.white,
-    },
-    science = {
-        id = "Science",
-        name = "science",
-        icon_name = "applications-science",
-        icon_color = theme.palette.magenta,
-    },
-    settings = {
-        id = "Settings",
-        name = "settings",
-        icon_name = "applications-utilities",
-        icon_color = theme.palette.orange,
-    },
-    tools = {
-        id = "System",
-        name = "system tools",
-        icon_name = "applications-system",
-        icon_color = theme.palette.gray,
+    categories = {
+        utility = {
+            id = "Utility",
+            name = "accessories",
+            icon_name = "applications-accessories",
+            icon_color = theme.palette.green,
+        },
+        development = {
+            id = "Development",
+            name = "development",
+            icon_name = "applications-development",
+            icon_color = theme.palette.cyan,
+        },
+        education = {
+            id = "Education",
+            name = "education",
+            icon_name = "applications-science",
+            icon_color = theme.palette.gray,
+        },
+        games = {
+            id = "Game",
+            name = "games",
+            icon_name = "applications-games",
+            icon_color = theme.palette.red,
+        },
+        graphics = {
+            id = "Graphics",
+            name = "graphics",
+            icon_name = "applications-graphics",
+            icon_color = theme.palette.yellow,
+        },
+        internet = {
+            id = "Network",
+            name = "internet",
+            icon_name = "applications-internet",
+            icon_color = theme.palette.blue,
+        },
+        multimedia = {
+            id = "AudioVideo",
+            name = "multimedia",
+            icon_name = "applications-multimedia",
+            icon_color = theme.palette.cyan,
+        },
+        office = {
+            id = "Office",
+            name = "office",
+            icon_name = "applications-office",
+            icon_color = theme.palette.white,
+        },
+        science = {
+            id = "Science",
+            name = "science",
+            icon_name = "applications-science",
+            icon_color = theme.palette.magenta,
+        },
+        settings = {
+            id = "Settings",
+            name = "settings",
+            icon_name = "applications-utilities",
+            icon_color = theme.palette.orange,
+        },
+        tools = {
+            id = "System",
+            name = "system tools",
+            icon_name = "applications-system",
+            icon_color = theme.palette.gray,
+        },
     },
 }
 

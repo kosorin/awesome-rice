@@ -6,12 +6,12 @@ local capsule = require("widget.capsule")
 local pango = require("utils.pango")
 local hui = require("utils.ui")
 local css = require("utils.css")
-local config = require("config")
+local common = require("ui.menu.templates.tag._common")
 
 
-local tag_layout_menu_template = { mt = { __index = {} } }
+local M = {}
 
-local info_menu_item_template = {
+local info_item_template = {
     widget = wibox.container.margin,
     margins = hui.thickness { dpi(12), dpi(16) },
     {
@@ -37,7 +37,15 @@ local info_menu_item_template = {
     end,
 }
 
-local menu_item_template = {
+local function info_item(text)
+    return {
+        enabled = false,
+        text = text,
+        template = info_item_template,
+    }
+end
+
+M.item_template = {
     id = "#container",
     widget = capsule,
     margins = hui.thickness { dpi(2), 0 },
@@ -112,51 +120,30 @@ local menu_item_template = {
     end,
 }
 
-local function on_hide(menu)
-    menu.tag = nil
-    menu.taglist = nil
-end
-
-local function on_show(menu, args)
-    local parent = menu._private.parent
-    menu.tag = parent and parent.tag or args.tag
-    menu.taglist = parent and parent.taglist or args.taglist
-
-    if not menu.tag or not menu.tag.activated then
-        on_hide(menu)
-        return false
-    end
-end
-
-local function info_menu_item(text)
-    return {
-        enabled = false,
-        text = text,
-        template = info_menu_item_template,
-    }
-end
-
-function tag_layout_menu_template.new()
-    return {
+---@return Mebox.new.args
+function M.new()
+    ---@type Mebox.new.args
+    local args = {
         item_width = dpi(224),
         item_height = dpi(48),
-        on_show = on_show,
-        on_hide = on_hide,
+        on_show = common.on_show,
+        on_hide = common.on_hide,
         items_source = function(menu)
-            local tag = menu.tag
+            local tag = menu.tag --[[@as tag]]
             if not tag then
-                return { info_menu_item("No tag selected") }
+                return { info_item("No tag selected") }
             end
             local screen = tag.screen
             if not screen then
-                return { info_menu_item("Unknown screen") }
+                return { info_item("Unknown screen") }
             end
             local layouts = tag.layouts
             local count = layouts and #layouts or awful.layout.layouts
             if count == 0 then
-                return { info_menu_item("No layout available") }
+                return { info_item("No layout available") }
             end
 
+            ---@type MeboxItem.args[]
             local items = {}
             for i = 1, count do
                 local layout = layouts[i]
@@ -170,14 +157,16 @@ function tag_layout_menu_template.new()
                     icon = icon,
                     checked = checked,
                     callback = function() tag.layout = layout end,
-                    template = menu_item_template,
+                    template = M.item_template,
                 }
             end
             return items
         end,
     }
+
+    return args
 end
 
-tag_layout_menu_template.mt.__index.shared = tag_layout_menu_template.new()
+M.shared = M.new()
 
-return setmetatable(tag_layout_menu_template, tag_layout_menu_template.mt)
+return M

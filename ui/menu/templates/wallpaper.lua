@@ -11,11 +11,14 @@ local dpi = Dpi
 local wallpaper_service = require("services.wallpaper")
 
 
-local wallpaper_menu_template = { mt = { __index = {} } }
+local M = {}
 
-function wallpaper_menu_template.new()
-    return {
+---@return Mebox.new.args
+function M.new()
+    ---@type Mebox.new.args
+    local args = {
         items_source = function()
+            ---@type MeboxItem.args[]
             local items = {
                 {
                     flex = true,
@@ -59,8 +62,10 @@ function wallpaper_menu_template.new()
             return items
         end,
     }
+
+    return args
 end
 
-wallpaper_menu_template.mt.__index.shared = wallpaper_menu_template.new()
+M.shared = M.new()
 
-return setmetatable(wallpaper_menu_template, wallpaper_menu_template.mt)
+return M

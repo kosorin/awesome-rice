@@ -62,18 +62,22 @@ return {
             icon_widget.forced_width = self.forced_height - paddings.top - paddings.bottom
 
             local icon = item.icon
-            local color = item.icon_color
-            if icon and color ~= false then
-                if not color or item.selected then
-                    color = style.fg
-                end
-                local stylesheet = css.style { path = { fill = color } }
-                icon_widget:set_stylesheet(stylesheet)
+            if icon == false then
+                icon_widget.visible = false
+                icon_widget:set_image(nil)
             else
-                icon_widget:set_stylesheet(nil)
+                local color = item.icon_color
+                if icon and color ~= false then
+                    if not color or item.selected then
+                        color = style.fg
+                    end
+                    local stylesheet = css.style { path = { fill = color } }
+                    icon_widget:set_stylesheet(stylesheet)
+                else
+                    icon_widget:set_stylesheet(nil)
+                end
+                icon_widget:set_image(icon)
             end
-
-            icon_widget:set_image(icon)
         end
 
         local text_widget = self:get_children_by_id("#text")[1]

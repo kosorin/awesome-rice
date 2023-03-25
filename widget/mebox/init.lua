@@ -44,9 +44,11 @@ function M.mt:__call(...)
     return M.new(...)
 end
 
----@alias MeboxItem.args (fun(menu: Mebox, args?: Mebox.show.args, context?: Mebox.context): MeboxItem)|MeboxItem
+---@alias Mebox.items_source (fun(menu: Mebox, args: Mebox.show.args, context: Mebox.context): MeboxItem.args[])|MeboxItem.args[]
 
----@alias MeboxItem.submenu (fun(menu: Mebox): Mebox.new.args)|Mebox.new.args
+---@alias MeboxItem.args (fun(menu: Mebox, args: Mebox.show.args, context: Mebox.context): MeboxItem)|MeboxItem
+
+---@alias MeboxItem.submenu (fun(parent: Mebox): Mebox.new.args)|Mebox.new.args
 
 ---@class MeboxItem
 ---@field index integer
@@ -57,10 +59,10 @@ end
 ---@field mouse_move_show_submenu? boolean
 ---@field cache_submenu? boolean
 ---@field submenu? MeboxItem.submenu
----@field callback? fun(item: MeboxItem, menu: Mebox, context?: Mebox.context): boolean?
----@field on_show? fun(item: MeboxItem, menu: Mebox, args?: Mebox.show.args, context?: Mebox.context): boolean?
+---@field callback? fun(item: MeboxItem, menu: Mebox, context: Mebox.context): boolean?
+---@field on_show? fun(item: MeboxItem, menu: Mebox, args: Mebox.show.args, context: Mebox.context): boolean?
 ---@field on_hide? fun(item: MeboxItem, menu: Mebox)
----@field on_ready? fun(item_widget?: wibox.widget.base, item: MeboxItem, menu: Mebox, args?: Mebox.show.args, context?: Mebox.context)
+---@field on_ready? fun(item_widget?: wibox.widget.base, item: MeboxItem, menu: Mebox, args: Mebox.show.args, context: Mebox.context)
 ---@field layout_id? string
 ---@field layout_add? fun(layout: wibox.layout, item_widget: wibox.widget.base)
 ---@field buttons_builder? fun(item: MeboxItem, menu: Mebox, default_click_action: function): awful.button[]
@@ -94,11 +96,11 @@ M.object = {}
 ---@field layout? wibox.layout
 ---@field layout_template widget_value
 ---@field layout_container wibox.container
----@field layout_navigator? fun(menu: Mebox, x: sign, y: sign, direction?: direction, context?: Mebox.context)
----@field items_source (fun(menu: Mebox, args?: Mebox.show.args, context?: Mebox.context): MeboxItem.args[])|MeboxItem.args[]
----@field on_show? fun(menu: Mebox, args?: Mebox.show.args, context?: Mebox.context): boolean
+---@field layout_navigator? fun(menu: Mebox, x: sign, y: sign, direction?: direction, context: Mebox.context)
+---@field items_source Mebox.items_source
+---@field on_show? fun(menu: Mebox, args: Mebox.show.args, context: Mebox.context): boolean
 ---@field on_hide? fun(menu: Mebox)
----@field on_ready? fun(menu: Mebox, args?: Mebox.show.args, context?: Mebox.context)
+---@field on_ready? fun(menu: Mebox, args: Mebox.show.args, context: Mebox.context)
 ---@field mouse_move_select boolean
 ---@field mouse_move_show_submenu boolean
 ---@field keygrabber_auto boolean
@@ -144,9 +146,11 @@ function M.header(text)
     end
 end
 
+M.placement = {}
+
 ---@param menu Mebox
 ---@param args { geometry?: geometry, coords: point, bounding_rect: geometry }
-local function default_placement(menu, args)
+function M.placement.default(menu, args)
     local border_width = menu.border_width
     local width = menu.width + 2 * border_width
     local height = menu.height + 2 * border_width
@@ -171,6 +175,27 @@ local function default_placement(menu, args)
         x = coords.x
         y = coords.y
     end
+
+    menu.x = x < min_x and min_x or (x > max_x and max_x or x)
+    menu.y = y < min_y and min_y or (y > max_y and max_y or y)
+end
+
+---@param menu Mebox
+---@param args { geometry?: geometry, coords: point, bounding_rect: geometry }
+function M.placement.confirmation(menu, args)
+    local border_width = menu.border_width
+    local width = menu.width + 2 * border_width
+    local height = menu.height + 2 * border_width
+    local min_x = args.bounding_rect.x
+    local min_y = args.bounding_rect.y
+    local max_x = min_x + args.bounding_rect.width - width
+    local max_y = min_y + args.bounding_rect.height - height
+
+    local parent_border_width = menu._private.parent.border_width
+    local parent_paddings = menu._private.parent.paddings
+    local paddings = menu.paddings
+    local x = args.geometry.x - parent_paddings.left - parent_border_width
+    local y = args.geometry.y - paddings.top - border_width
 
     menu.x = x < min_x and min_x or (x > max_x and max_x or x)
     menu.y = y < min_y and min_y or (y > max_y and max_y or y)
@@ -210,7 +235,7 @@ local function place(menu, args)
 
     local placement = args.placement
         or menu.placement
-        or default_placement
+        or M.placement.default
     placement(menu, placement_args)
 end
 
@@ -290,6 +315,9 @@ end
 
 ---@param index? integer
 function M.object:update_item(index)
+    if not self._private.items then
+        return
+    end
     local item = index and self._private.items[index]
     local item_widget = index and self:get_item_widget(index)
     if not item or not item_widget then
@@ -819,16 +847,15 @@ function M.object:navigate(x, y, direction, context)
     layout_navigator(self, sign(x), sign(y), direction, context)
 end
 
-
 ---@class Mebox.new.args
 ---@field orientation? orientation
 ---@field layout_template? widget_value -- TODO: Rename `layout_template` property
----@field layout_navigator? fun(menu: Mebox, x: sign, y: sign, direction?: direction, context?: Mebox.context)
+---@field layout_navigator? fun(menu: Mebox, x: sign, y: sign, direction?: direction, context: Mebox.context)
 ---@field cache_submenus? boolean
----@field items_source (fun(menu: Mebox, args?: Mebox.show.args, context?: Mebox.context): MeboxItem[])|MeboxItem[]
----@field on_show? fun(menu: Mebox, args?: Mebox.show.args, context?: Mebox.context): boolean?
+---@field items_source Mebox.items_source
+---@field on_show? fun(menu: Mebox, args: Mebox.show.args, context: Mebox.context): boolean?
 ---@field on_hide? fun(menu: Mebox)
----@field on_ready? fun(menu: Mebox, args?: Mebox.show.args, context?: Mebox.context)
+---@field on_ready? fun(menu: Mebox, args: Mebox.show.args, context: Mebox.context)
 ---@field mouse_move_select? boolean
 ---@field mouse_move_show_submenu? boolean
 ---@field keygrabber_auto? boolean
@@ -837,7 +864,7 @@ end
 ---@field item_template? widget_template
 ---@field separator_template? widget_template
 ---@field header_template? widget_template
----@field [integer] MeboxItem.args
+---@field [integer] MeboxItem.args -- TODO: Remove this, always use `items_source`
 
 ---@param args? Mebox.new.args
 ---@param is_submenu? boolean

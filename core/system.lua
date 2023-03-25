@@ -1,5 +1,7 @@
+-- DEPENDENCIES: uptime
+
 ---@class core.system
----@field up_since integer # Number of seconds the system has been running.
+---@field up_since integer # System startup timestamp.
 local M = {}
 
 do

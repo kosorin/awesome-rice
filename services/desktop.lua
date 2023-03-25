@@ -281,12 +281,12 @@ do
     ---@return string|nil # Full name of the icon.
     function M.lookup_icon(icon, default_icon)
         if not icon then
-            return default_icon or theme.application_default_icon
+            return default_icon or theme.application.default_icon
         end
         if not lookup_icon_cache[icon] and lookup_icon_cache[icon] ~= false then
             lookup_icon_cache[icon] = M.lookup_icon_uncached(icon)
         end
-        return lookup_icon_cache[icon] or default_icon or theme.application_default_icon
+        return lookup_icon_cache[icon] or default_icon or theme.application.default_icon
     end
 end
 

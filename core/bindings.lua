@@ -564,7 +564,7 @@ binding.add_client_range {
         path = "client",
         description = "show client menu",
         on_press = function(_, client)
-            mebox(menu_templates.client.new()):show({
+            mebox(menu_templates.client.main.shared):show({
                 client = client,
                 placement = function(menu)
                     aplacement.centered(menu, { parent = client })
