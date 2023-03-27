@@ -849,8 +849,8 @@ end
 ---@field name string
 ---@field order? integer
 ---@field rule? gears.matcher.rule
----@field bg? color
----@field fg? color
+---@field bg? hex_color
+---@field fg? hex_color
 ---@field page_break? boolean
 ---@field groups BindboxGroup[]
 

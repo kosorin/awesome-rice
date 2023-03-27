@@ -3,7 +3,9 @@ local type = type
 
 local M = {}
 
----@param value? number|number[]|thickness
+---@alias thickness_value number|number[]|thickness
+
+---@param value? thickness_value
 ---@return thickness|nil # Returns the same table instance (i.e. the `value` parameter).
 function M.thickness(value)
     if not value then
