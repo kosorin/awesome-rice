@@ -13,6 +13,10 @@ function M.thickness(value)
     end
 
     if type(value) == "table" then
+        if value.is_thickness then
+            return value
+        end
+
         local top, right, bottom, left
 
         local length = #value
@@ -50,10 +54,23 @@ function M.thickness(value)
         value[2] = value.right
         value[3] = value.bottom
         value[4] = value.left
+        value.is_thickness = true
         return value
     else
-        return { top = value, right = value, bottom = value, left = value }
+        return {
+            top = value,
+            right = value,
+            bottom = value,
+            left = value,
+            [1] = value,
+            [2] = value,
+            [3] = value,
+            [4] = value,
+            is_thickness = true,
+        }
     end
 end
+
+M.zero_thickness = M.thickness(0)
 
 return M
