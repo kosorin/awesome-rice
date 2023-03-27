@@ -14,6 +14,7 @@ local trigger_type = {
 }
 
 local button = {
+    any = 0,
     left = 1,
     middle = 2,
     right = 3,
@@ -23,6 +24,10 @@ local button = {
     wheel_right = 7,
     extra_back = 8,
     extra_forward = 9,
+}
+
+local key = {
+    any = "Any",
 }
 
 local modifier = {
@@ -131,6 +136,9 @@ do
         end
         local hash = 0
         for _, m in ipairs(modifiers) do
+            if m == modifier.any then
+                return -1
+            end
             local modifier_hash = modifier_hash_data[m]
             if not modifier_hash then
                 modifier_hash = 1 << modifier_hash_data.length
@@ -146,9 +154,13 @@ do
     ---@param required? key_modifier[] # A set of required modifiers.
     ---@param exact_match? boolean # If `true` then both `required` and `actual` must contain exactly the same set of modifiers. Otherwise `actual` must contain all `required` modifiers (other modifiers in `actual` will be ignored). Default: `true`
     ---@return boolean
-    function binding.modifiers_match(actual, required, exact_match)
+    function binding.match_modifiers(actual, required, exact_match)
         local required_hash = binding.get_modifiers_hash(required)
         local actual_hash = binding.get_modifiers_hash(actual)
+
+        if required_hash == -1 and actual_hash > 0 then
+            return true
+        end
 
         if exact_match ~= false then
             return required_hash == actual_hash
@@ -156,6 +168,28 @@ do
             return (required_hash & actual_hash) == required_hash
         end
     end
+end
+
+---@param actual_button button
+---@param required_button? button
+---@param actual_modifiers? key_modifier[]
+---@param required_modifiers? key_modifier[]
+function binding.match_button(actual_button, required_button, actual_modifiers, required_modifiers)
+    if required_button ~= button.any and required_button ~= actual_button then
+        return false
+    end
+    return binding.match_modifiers(actual_modifiers, required_modifiers)
+end
+
+---@param actual_key key
+---@param required_key? key
+---@param actual_modifiers? key_modifier[]
+---@param required_modifiers? key_modifier[]
+function binding.match_key(actual_key, required_key, actual_modifiers, required_modifiers)
+    if required_key ~= key.any and required_key ~= actual_key then
+        return false
+    end
+    return binding.match_modifiers(actual_modifiers, required_modifiers)
 end
 
 ---@param self Binding

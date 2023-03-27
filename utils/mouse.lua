@@ -28,8 +28,6 @@ do
     local function empty_interrupt()
     end
 
-    ---@alias utils.mouse.attach.modifiers { exact_match?: boolean, [integer]: key_modifier }
-
     ---@class utils.mouse.attach_slider.args
     ---@field wibox wibox
     ---@field widget wibox.widget.base
@@ -44,7 +42,7 @@ do
     ---@field minimum? number # Minimum value. Must be less than or equal to `maximum`.
     ---@field maximum? number # Maximum value. Must be greater than or equal to `minimum`.
     ---@field button? button # A mouse button required to trigger the drag action. Default: `1` (left mouse button)
-    ---@field modifiers? utils.mouse.attach.modifiers # Modifiers required to trigger the drag action.
+    ---@field modifiers? key_modifier[] # Modifiers required to trigger the drag action.
     ---@field orientation? orientation # Dragging orientation.
     ---@field coerce_value? fun(value: number): number # Adjust the value that is passed to other callback functions.
     ---@field start? fun(value: number): boolean|nil # A callback function called at the start. Must return `true` to continue in dragging.
@@ -121,10 +119,7 @@ do
                 return
             end
 
-            if button ~= (args.button or btn.left) then
-                return
-            end
-            if args.modifiers and not binding.modifiers_match(modifiers, args.modifiers, args.modifiers.exact_match) then
+            if not binding.match_button(button, args.button or btn.left, modifiers, args.modifiers) then
                 return
             end
 
@@ -183,7 +178,7 @@ do
     ---@field widget wibox.widget.base
     ---@field step? number # Default: `1`
     ---@field debounce? number # Debounce in seconds. Default: `0.5`
-    ---@field modifiers? utils.mouse.attach.modifiers # Modifiers required to trigger the action.
+    ---@field modifiers? key_modifier[] # Modifiers required to trigger the action.
     ---@field start? fun(delta: number): boolean|nil # A callback function called at the start. Must return `true` to continue.
     ---@field update? fun(total_delta: number) # A callback function called on every change.
     ---@field finish? fun(total_delta: number, interrupted: boolean) # A callback function called at the end.
@@ -249,7 +244,8 @@ do
             if not delta then
                 return
             end
-            if args.modifiers and not binding.modifiers_match(modifiers, args.modifiers, args.modifiers.exact_match) then
+
+            if not binding.match_modifiers(modifiers, args.modifiers) then
                 return
             end
 
