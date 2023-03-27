@@ -11,6 +11,7 @@ local gshape = require("gears.shape")
 local dpi = Dpi
 local aspawn = require("awful.spawn")
 local gtable = require("gears.table")
+local gcolor = require("gears.color")
 local hstring = require("utils.string")
 local hmouse = require("utils.mouse")
 local capsule = require("widget.capsule")
@@ -340,7 +341,7 @@ end
 ---@param self MediaPlayer
 local function initialize_buttons(self)
     local function update_icon_color(button, fg)
-        button.widget:set_stylesheet(css.style { path = { fill = fg } })
+        button.widget:set_stylesheet(css.style { path = { fill = gcolor.ensure_pango_color(fg) } })
     end
 
     self._private.previous_button = self:get_children_by_id("#previous")[1] --[[@as Capsule]]
@@ -356,10 +357,10 @@ local function initialize_buttons(self)
     self._private.next_button:connect_signal("property::fg", update_icon_color)
 
 
-    local icon = self:get_children_by_id("#no_player_button.icon")[1] --[[@as wibox.widget.imagebox]]
     self.no_player_button.fg = tcolor.transparent
+    local icon = self:get_children_by_id("#no_player_button.icon")[1] --[[@as wibox.widget.imagebox]]
     self.no_player_button:connect_signal("property::fg", function(_, fg)
-        icon:set_stylesheet(css.style { path = { fill = fg } })
+        icon:set_stylesheet(css.style { path = { fill = gcolor.ensure_pango_color(fg) } })
     end)
 end
 
