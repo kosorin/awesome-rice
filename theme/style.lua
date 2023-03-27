@@ -10,6 +10,9 @@ local gtable = require("gears.table")
 ---@field id? string
 ---@field property? string
 ---@field fallback? any
+---@field convert? fun(value: any): any
+---@field emit_layout_changed? boolean
+---@field emit_redraw_needed? boolean
 
 ---@alias style_properties table<string, style_property>
 
@@ -90,6 +93,11 @@ local function set_value(self, property_name, property, value)
             value = property.fallback
         end
     end
+
+    if property.convert then
+        value = property.convert(value)
+    end
+
     if property.proxy then
         self[property_name] = value
     else
@@ -105,6 +113,13 @@ local function set_value(self, property_name, property, value)
                 or self._style.root
             if widget then
                 widget[property.property] = value
+            end
+        else
+            if property.emit_layout_changed then
+                self:emit_signal("widget::layout_changed")
+            end
+            if property.emit_redraw_needed then
+                self:emit_signal("widget::redraw_needed")
             end
         end
     end
@@ -144,12 +159,15 @@ function noice.define_style(stylable, style_properties)
 
     for property_name, property in pairs(style_properties) do
         if not property.proxy then
-            assert(not stylable["get_" .. property_name] and not stylable["set_" .. property_name],
+            local getter = "get_" .. property_name
+            local setter = "set_" .. property_name
+            assert(not stylable[getter] and not stylable[setter],
                 "Property '" .. property_name .. "' already exists.")
-            stylable["get_" .. property_name] = function(self)
+
+            stylable[getter] = function(self)
                 return get_value(self, property_name, property)
             end
-            stylable["set_" .. property_name] = function(self, value)
+            stylable[setter] = function(self, value)
                 set_value(self, property_name, property, value)
             end
         end
