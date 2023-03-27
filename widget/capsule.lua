@@ -221,7 +221,7 @@ function M.new(args)
 
     self.enable_overlay = args.enable_overlay ~= false
 
-    self:initialize_style(self._private.layout, beautiful.capsule.default_style)
+    self:initialize_style(beautiful.capsule.default_style, self._private.layout)
 
     self:apply_style(args)
 

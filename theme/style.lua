@@ -27,16 +27,16 @@ local noice = {
 ---@class stylable.data
 ---@field default style
 ---@field current style
----@field root wibox.widget.base
+---@field root? wibox.widget.base
 
 ---@class stylable : gears.object
 ---@field package _style stylable.data
 ---@field package get_style_properties fun(): style_properties
 noice.object = {}
 
----@param root wibox.widget.base
 ---@param default_style style
-function noice.object:initialize_style(root, default_style)
+---@param root? wibox.widget.base
+function noice.object:initialize_style(default_style, root)
     self._style = {
         default = default_style,
         current = {},
@@ -99,6 +99,7 @@ local function set_value(self, property_name, property, value)
         self._style.current[property_name] = value
         self:emit_signal("property::" .. property_name, value)
         if property.property then
+            assert(self._style.root)
             local widget = property.id
                 and self._style.root:get_children_by_id(property.id)[1]
                 or self._style.root

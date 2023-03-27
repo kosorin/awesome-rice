@@ -213,7 +213,7 @@ function M.new(args)
         }, function(trigger) self:move(trigger.direction) end),
     }
 
-    self:initialize_style(self.widget, beautiful.calendar_popup.default_style)
+    self:initialize_style(beautiful.calendar_popup.default_style, self.widget)
 
     self:apply_style(args)
 

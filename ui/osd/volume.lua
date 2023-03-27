@@ -191,7 +191,7 @@ function M.new()
         binding.awful({}, { btn.left }, function() self:hide() end),
     }
 
-    self:initialize_style(self.widget, beautiful.volume_osd.default_style)
+    self:initialize_style(beautiful.volume_osd.default_style, self.widget)
 
     capi.awesome.connect_signal("volume::update", function(data) self:try_show(data) end)
 

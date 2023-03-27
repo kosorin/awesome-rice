@@ -957,7 +957,7 @@ function M.new(args, is_submenu)
             }
     end
 
-    self:initialize_style(self.widget, beautiful.mebox.default_style)
+    self:initialize_style(beautiful.mebox.default_style, self.widget)
 
     self:apply_style(args)
 

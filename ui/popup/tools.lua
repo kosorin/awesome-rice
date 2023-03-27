@@ -87,7 +87,7 @@ function M.new(args)
 
     gtable.crush(self, M.object, true)
 
-    self:initialize_style(self.widget, beautiful.tools_popup.default_style)
+    self:initialize_style(beautiful.tools_popup.default_style, self.widget)
 
     self:apply_style(args)
 

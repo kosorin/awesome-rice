@@ -1101,7 +1101,7 @@ function M.new(args)
     self._private.source_binding_tree = utree.new()
     self._private.include_awesome_bindings = args.include_awesome_bindings ~= false
 
-    self:initialize_style(self.widget, beautiful.bindbox.default_style)
+    self:initialize_style(beautiful.bindbox.default_style, self.widget)
 
     self:apply_style(args)
 
