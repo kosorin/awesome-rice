@@ -102,7 +102,7 @@ end
 local function update_opacity(self)
     local dim_opacity = 0.25
     local show_graph = self._private.show_graph ~= self._private.hover_widget
-    self._private.graph_container.opacity = show_graph and 1 or dim_opacity
+    self.graph_container.opacity = show_graph and 1 or dim_opacity
     for _, w in pairs(self._private.widgets) do
         w.opacity = not show_graph and 1 or dim_opacity
     end
@@ -127,7 +127,7 @@ function network_widget:set_graph_offset(offset)
     elseif offset > total_graph_size then
         offset = total_graph_size
     end
-    self._private.graph_container.right = -offset
+    self.graph_container.right = -offset
     self._private.graph_offset = offset
 end
 
@@ -146,6 +146,32 @@ function network_widget.new(wibar)
             right = beautiful.capsule.default_style.margins.right,
             bottom = beautiful.wibar.paddings.bottom,
             left = beautiful.capsule.default_style.margins.left,
+        },
+        nil, -- Content placeholder
+        {
+            id = "graph_container",
+            layout = wibox.container.margin,
+            {
+                layout = wibox.container.mirror,
+                reflection = { horizontal = true },
+                {
+                    id = "#graph",
+                    widget = wibox.widget.graph,
+                    capacity = math.floor(900 / network_service.config.interval), -- 900 ~ 15 minutes
+                    background_color = tcolor.transparent,
+                    group_colors = {
+                        beautiful.palette.blue_bright,
+                        beautiful.palette.red_bright,
+                    },
+                    nan_indication = true,
+                    nan_color = beautiful.palette.red,
+                    step_width = 2,
+                    step_spacing = 0,
+                    min_value = -max_upload_speed,
+                    max_value = max_download_speed,
+                    scale = true,
+                },
+            },
         },
     }
 
@@ -204,33 +230,7 @@ function network_widget.new(wibar)
         },
     }
 
-    self._private.graph_container = wibox.widget {
-        layout = wibox.container.margin,
-        {
-            layout = wibox.container.mirror,
-            reflection = { horizontal = true },
-            {
-                id = "#graph",
-                widget = wibox.widget.graph,
-                capacity = math.floor(900 / network_service.config.interval), -- 900 ~ 15 minutes
-                background_color = tcolor.transparent,
-                group_colors = {
-                    beautiful.palette.blue_bright,
-                    beautiful.palette.red_bright,
-                },
-                nan_indication = true,
-                nan_color = beautiful.palette.red,
-                step_width = 2,
-                step_spacing = 0,
-                min_value = -max_upload_speed,
-                max_value = max_download_speed,
-                scale = true,
-            },
-        },
-    }
-    self._private.graph_widget = self._private.graph_container:get_children_by_id("#graph")[1]
-    self._private.layout:get_children_by_id("#background_content")[1]
-        :insert(1, self._private.graph_container)
+    self._private.graph_widget = self:get_children_by_id("#graph")[1]
 
     self._private.menu = mebox {
         item_width = dpi(136),

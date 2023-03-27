@@ -272,8 +272,7 @@ local function initialize_content_container(self)
         self._private.content_container:connect_signal("mouse::leave", function() on_enter(false) end)
     end
 
-    self._private.content_container._private.layout:get_children_by_id("#background_content")[1]
-        :insert(1, self._private.playback_bar)
+    self._private.content_container:set_background_widget(self._private.playback_bar)
 
     set_playback_position_ratio(self, 0)
     set_playback_time(self, 0, 0)

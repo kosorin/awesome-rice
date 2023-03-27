@@ -5,14 +5,25 @@ local gtable = require("gears.table")
 
 ---@alias style table<string, any>
 
----@class style_property
----@field proxy? boolean
----@field id? string
----@field property? string
+---@class style_property.base
 ---@field fallback? any
 ---@field convert? fun(value: any): any
+
+---@class style_property.proxy : style_property.base
+---@field proxy true
+
+---@class style_property.custom : style_property.base
 ---@field emit_layout_changed? boolean
 ---@field emit_redraw_needed? boolean
+
+---@class style_property.child
+---@field id? string
+---@field property string
+
+---@alias style_property
+---| style_property.proxy
+---| style_property.custom
+---| style_property.child
 
 ---@alias style_properties table<string, style_property>
 
