@@ -214,11 +214,7 @@ local function place(menu, args)
     local border_width = menu.border_width
     local max_width = bounds.width - 2 * border_width
     local max_height = bounds.height - 2 * border_width
-    local width, height = menu._private.layout_container:fit({
-        screen = screen,
-        dpi = screen.dpi,
-        drawable = menu._drawable,
-    }, max_width, max_height)
+    local width, height = base.fit_widget(menu._private.layout_container, { dpi = screen.dpi }, menu._private.layout_container, max_width, max_height)
 
     menu.width = math.max(1, width)
     menu.height = math.max(1, height)
