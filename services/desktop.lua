@@ -18,7 +18,7 @@ local gtable = require("gears.table")
 local gfilesystem = require("gears.filesystem")
 local gpcall = require("gears.protected_call").call
 local config = require("config")
-local theme = require("theme.theme")
+local tmanager = require("theme.manager")
 local lgi = require("lgi")
 local gio = lgi.Gio
 local glib = lgi.GLib
@@ -195,7 +195,7 @@ function M.get_icon_lookup_paths_uncached()
 
     local icon_lookup_path = {}
     local theme_priority = { "hicolor" }
-    if theme.icon_theme then table.insert(theme_priority, 1, theme.icon_theme) end
+    if tmanager._beautiful.icon_theme then table.insert(theme_priority, 1, tmanager._beautiful.icon_theme) end
 
     local paths = add_with_dir({}, glib.get_home_dir(), ".icons")
     add_with_dir(paths, {

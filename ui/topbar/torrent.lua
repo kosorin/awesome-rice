@@ -14,7 +14,7 @@ local wibox = require("wibox")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
-local beautiful = require("theme.theme")
+local beautiful = require("theme.manager")._beautiful
 local torrent_service = require("services.torrent")
 local dpi = Dpi
 local humanizer = require("utils.humanizer")
@@ -127,9 +127,9 @@ function torrent_widget.new(wibar)
         widget = capsule,
         margins = hui.thickness {
             top = beautiful.wibar.paddings.top,
-            right = beautiful.capsule.default_style.margins.right,
+            right = beautiful.capsule.default_style.default.margins.right,
             bottom = beautiful.wibar.paddings.bottom,
-            left = beautiful.capsule.default_style.margins.left,
+            left = beautiful.capsule.default_style.default.margins.left,
         },
         {
             layout = wibox.layout.fixed.horizontal,

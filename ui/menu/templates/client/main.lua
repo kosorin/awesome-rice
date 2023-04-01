@@ -1,5 +1,5 @@
 local tostring = tostring
-local beautiful = require("theme.theme")
+local beautiful = require("theme.manager")._beautiful
 local dpi = Dpi
 local mebox = require("widget.mebox")
 local aspawn = require("awful.spawn")

@@ -8,7 +8,7 @@ local math = math
 local table = table
 local string = string
 local awful = require("awful")
-local beautiful = require("theme.theme")
+local beautiful = require("theme.manager")._beautiful
 local gtable = require("gears.table")
 local gmatcher = require("gears.matcher")
 local wibox = require("wibox")
@@ -17,7 +17,7 @@ local mod = pbinding.modifier
 local btn = pbinding.button
 local utree = require("utils.tree")
 local capsule = require("widget.capsule")
-local noice = require("theme.style")
+local noice = require("theme.stylable")
 local pango = require("utils.pango")
 local ui_controller = require("ui.controller")
 
@@ -160,42 +160,46 @@ M.object = {}
 ---@field source_binding_tree Tree
 ---@field include_awesome_bindings boolean
 
-noice.define_style(M.object, {
-    bg = { proxy = true },
-    fg = { proxy = true },
-    border_color = { proxy = true },
-    border_width = { proxy = true },
-    shape = { proxy = true },
-    placement = { proxy = true },
-    font = {},
-    paddings = { id = "#padding", property = "margins" },
-    page_paddings = { id = "#page_container_border", property = "margins" },
-    page_width = {},
-    page_height = {},
-    page_columns = {},
-    group_spacing = {},
-    item_spacing = {},
-    trigger_bg = {},
-    trigger_bg_alpha = {},
-    trigger_fg = {},
-    group_bg = {},
-    group_fg = {},
-    group_ruled_bg = {},
-    group_ruled_fg = {},
-    find_dim_bg = {},
-    find_dim_fg = {},
-    find_highlight_bg = {},
-    find_highlight_fg = {},
-    group_path_separator_markup = {},
-    slash_separator_markup = {},
-    plus_separator_markup = {},
-    range_separator_markup = {},
-    status_style = { id = "#status_container", property = "style" }, -- TODO: Fix me - capsule:set_style() no longer exists
-    status_spacing = { id = "#status_bindings", property = "spacing" },
-    find_placeholder_fg = { id = "#find_placeholder", property = "fg" },
-    find_cursor_bg = {},
-    find_cursor_fg = {},
-})
+noice.define {
+    object = M.object,
+    name = "bindbox",
+    properties = {
+        bg = { proxy = true },
+        fg = { proxy = true },
+        border_color = { proxy = true },
+        border_width = { proxy = true },
+        shape = { proxy = true },
+        placement = { proxy = true },
+        font = {},
+        paddings = { id = "#padding", property = "margins" },
+        page_paddings = { id = "#page_container_border", property = "margins" },
+        page_width = {},
+        page_height = {},
+        page_columns = {},
+        group_spacing = {},
+        item_spacing = {},
+        trigger_bg = {},
+        trigger_bg_alpha = {},
+        trigger_fg = {},
+        group_bg = {},
+        group_fg = {},
+        group_ruled_bg = {},
+        group_ruled_fg = {},
+        find_dim_bg = {},
+        find_dim_fg = {},
+        find_highlight_bg = {},
+        find_highlight_fg = {},
+        group_path_separator_markup = {},
+        slash_separator_markup = {},
+        plus_separator_markup = {},
+        range_separator_markup = {},
+        status_style = { id = "#status_container", property = "style" }, -- TODO: Fix me - capsule:set_style() no longer exists
+        status_spacing = { id = "#status_bindings", property = "spacing" },
+        find_placeholder_fg = { id = "#find_placeholder", property = "fg" },
+        find_cursor_bg = {},
+        find_cursor_fg = {},
+    },
+}
 
 ---@param a Node
 ---@param b Node
@@ -1097,14 +1101,11 @@ function M.new(args)
     } --[[@as Bindbox]]
 
     gtable.crush(self, M.object, true)
+    noice.initialize(self, beautiful.bindbox.default_style, self.widget)
 
     self._private.matcher = gmatcher()
     self._private.source_binding_tree = utree.new()
     self._private.include_awesome_bindings = args.include_awesome_bindings ~= false
-
-    self:initialize_style(beautiful.bindbox.default_style, self.widget)
-
-    self:apply_style(args)
 
     ---@param id string
     ---@param triggers BindingTrigger.new.args

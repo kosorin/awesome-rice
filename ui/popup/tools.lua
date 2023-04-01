@@ -5,10 +5,10 @@ local tcolor = require("utils.color")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
-local beautiful = require("theme.theme")
+local beautiful = require("theme.manager")._beautiful
 local dpi = Dpi
 local capsule = require("widget.capsule")
-local noice = require("theme.style")
+local noice = require("theme.stylable")
 local config = require("config")
 local redshift_widget = require("ui.topbar.redshift")
 local ui_controller = require("ui.controller")
@@ -30,15 +30,19 @@ end
 M.object = {}
 ---@class ToolsPopup.private
 
-noice.define_style(M.object, {
-    bg = { proxy = true },
-    fg = { proxy = true },
-    border_color = { proxy = true },
-    border_width = { proxy = true },
-    shape = { proxy = true },
-    placement = { proxy = true },
-    paddings = { property = "paddings" },
-})
+noice.define {
+    object = M.object,
+    name = "tools_popup",
+    properties = {
+        bg = { proxy = true },
+        fg = { proxy = true },
+        border_color = { proxy = true },
+        border_width = { proxy = true },
+        shape = { proxy = true },
+        placement = { proxy = true },
+        paddings = { property = "margins" },
+    },
+}
 
 function M.object:show()
     if self.visible or not ui_controller.enter(self) then
@@ -86,10 +90,7 @@ function M.new(args)
     } --[[@as ToolsPopup]]
 
     gtable.crush(self, M.object, true)
-
-    self:initialize_style(beautiful.tools_popup.default_style, self.widget)
-
-    self:apply_style(args)
+    noice.initialize(self, nil, self.widget)
 
     local container = self.widget:get_children_by_id("#container")[1] --[[@as wibox.layout]]
     if config.features.redshift_widget then

@@ -1,6 +1,6 @@
 local awful = require("awful")
 local wibox = require("wibox")
-local beautiful = require("theme.theme")
+local beautiful = require("theme.manager")._beautiful
 local dpi = Dpi
 local capsule = require("widget.capsule")
 local pango = require("utils.pango")

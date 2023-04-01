@@ -1,5 +1,5 @@
 local capi = Capi
-local beautiful = require("theme.theme")
+local beautiful = require("theme.manager")._beautiful
 local wibox = require("wibox")
 local dpi = Dpi
 local capsule = require("widget.capsule")
@@ -20,9 +20,9 @@ function systray.new(wibar)
         enable_overlay = false,
         margins = hui.thickness {
             top = beautiful.wibar.paddings.top,
-            right = beautiful.capsule.default_style.margins.right,
+            right = beautiful.capsule.default_style.default.margins.right,
             bottom = beautiful.wibar.paddings.bottom,
-            left = beautiful.capsule.default_style.margins.left,
+            left = beautiful.capsule.default_style.default.margins.left,
         },
         paddings = hui.thickness { dpi(4), dpi(10) },
         wibox.widget.systray(),

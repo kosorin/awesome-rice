@@ -2,7 +2,7 @@ local capi = Capi
 local setmetatable = setmetatable
 local awful = require("awful")
 local wibox = require("wibox")
-local beautiful = require("theme.theme")
+local beautiful = require("theme.manager")._beautiful
 local config = require("config")
 local binding = require("io.binding")
 local mod = binding.modifier
@@ -37,9 +37,9 @@ function power_widget.new(wibar)
             bottom = beautiful.wibar.paddings.bottom,
         },
         paddings = hui.thickness {
-            beautiful.capsule.default_style.paddings.top,
+            beautiful.capsule.default_style.default.paddings.top,
             dpi(10),
-            beautiful.capsule.default_style.paddings.bottom,
+            beautiful.capsule.default_style.default.paddings.bottom,
         },
         {
             layout = wibox.layout.stack,

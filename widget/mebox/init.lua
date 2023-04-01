@@ -5,7 +5,7 @@ local setmetatable = setmetatable
 local ipairs = ipairs
 local math = math
 local awful = require("awful")
-local beautiful = require("theme.theme")
+local beautiful = require("theme.manager")._beautiful
 local gtable = require("gears.table")
 local grectangle = require("gears.geometry").rectangle
 local wibox = require("wibox")
@@ -15,7 +15,7 @@ local mod = binding.modifier
 local btn = binding.button
 local widget_helper = require("utils.widget")
 local gmath = require("gears.math")
-local noice = require("theme.style")
+local noice = require("theme.stylable")
 local templates = require("widget.mebox.templates")
 local ui_controller = require("ui.controller")
 
@@ -107,21 +107,25 @@ M.object = {}
 ---@field separator_template widget_template
 ---@field header_template widget_template
 
-noice.define_style(M.object, {
-    bg = { proxy = true },
-    fg = { proxy = true },
-    border_color = { proxy = true },
-    border_width = { proxy = true },
-    shape = { proxy = true },
-    paddings = { id = "#layout_container", property = "margins" },
-    item_width = {},
-    item_height = {},
-    placement = {},
-    placement_bounding_args = {},
-    active_opacity = {},
-    inactive_opacity = {},
-    submenu_offset = {},
-})
+noice.define {
+    object = M.object,
+    name = "mebox",
+    properties = {
+        bg = { proxy = true },
+        fg = { proxy = true },
+        border_color = { proxy = true },
+        border_width = { proxy = true },
+        shape = { proxy = true },
+        paddings = { id = "#layout_container", property = "margins" },
+        item_width = {},
+        item_height = {},
+        placement = {},
+        placement_bounding_args = {},
+        active_opacity = {},
+        inactive_opacity = {},
+        submenu_offset = {},
+    },
+}
 
 ---@param menu Mebox
 ---@return MeboxItem
@@ -877,6 +881,7 @@ function M.new(args, is_submenu)
     } --[[@as Mebox]]
 
     gtable.crush(self, M.object, true)
+    noice.initialize(self, nil, self.widget)
 
     self._private.submenu_cache = args.cache_submenus ~= false and {} or nil
     self._private.items_source = args.items_source or args
@@ -952,10 +957,6 @@ function M.new(args, is_submenu)
                 },
             }
     end
-
-    self:initialize_style(beautiful.mebox.default_style, self.widget)
-
-    self:apply_style(args)
 
     return self
 end

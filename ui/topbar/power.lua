@@ -3,7 +3,7 @@ local tonumber = tonumber
 local maxinteger = math.maxinteger
 local awful = require("awful")
 local wibox = require("wibox")
-local beautiful = require("theme.theme")
+local beautiful = require("theme.manager")._beautiful
 local config = require("config")
 local binding = require("io.binding")
 local pango = require("utils.pango")
@@ -68,12 +68,12 @@ function power_widget.new(wibar)
             top = beautiful.wibar.paddings.top,
             right = beautiful.wibar.paddings.right,
             bottom = beautiful.wibar.paddings.bottom,
-            left = beautiful.capsule.default_style.margins.left,
+            left = beautiful.capsule.default_style.default.margins.left,
         },
         paddings = hui.thickness {
-            top = beautiful.capsule.default_style.paddings.top,
+            top = beautiful.capsule.default_style.default.paddings.top,
             right = dpi(10),
-            bottom = beautiful.capsule.default_style.paddings.bottom,
+            bottom = beautiful.capsule.default_style.default.paddings.bottom,
             left = dpi(10),
         },
         {

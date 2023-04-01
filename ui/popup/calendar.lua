@@ -1,18 +1,16 @@
 local os = os
-local awful = require("awful")
 local wibox = require("wibox")
 local gtable = require("gears.table")
-local tcolor = require("utils.color")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
-local beautiful = require("theme.theme")
+local beautiful = require("theme.manager")._beautiful
 local dpi = Dpi
 local capsule = require("widget.capsule")
-local noice = require("theme.style")
+local popup = require("widget.popup")
+local noice = require("theme.stylable")
 local config = require("config")
 local css = require("utils.css")
-local ui_controller = require("ui.controller")
 
 
 ---@param time? integer
@@ -31,48 +29,19 @@ function M.mt:__call(...)
 end
 
 
----@class CalendarPopup : awful.popup, stylable
+---@class CalendarPopup : Popup
 ---@field package _private CalendarPopup.private
----Style properties:
----@field paddings thickness
----@field embed function
 M.object = {}
 ---@class CalendarPopup.private
 ---@field calendar_widget wibox.widget.calendar
 
-noice.define_style(M.object, {
-    bg = { proxy = true },
-    fg = { proxy = true },
-    border_color = { proxy = true },
-    border_width = { proxy = true },
-    shape = { proxy = true },
-    placement = { proxy = true },
-    paddings = { property = "paddings" },
-    embed = { id = "#calendar", property = "fn_embed" },
-})
-
-function M.object:show()
-    if self.visible or not ui_controller.enter(self) then
-        return
-    end
-
-    self:today()
-
-    self.visible = true
-end
-
-function M.object:hide()
-    self.visible = false
-    ui_controller.leave(self)
-end
-
-function M.object:toggle()
-    if self.visible then
-        self:hide()
-    else
-        self:show()
-    end
-end
+noice.define {
+    object = M.object,
+    name = "calendar_popup",
+    properties = {
+        embed = { id = "#calendar", property = "fn_embed" },
+    },
+}
 
 ---@param self CalendarPopup
 ---@param year integer|string
@@ -86,6 +55,17 @@ local function set_year_month(self, year, month)
     local today = now()
 
     self:set_date(date, today)
+end
+
+---@return osdate|nil
+function M.object:get_date()
+    return self._private.calendar_widget:get_date()
+end
+
+---@param date? osdate
+---@param focus_date? osdate
+function M.object:set_date(date, focus_date)
+    self._private.calendar_widget:set_date(date, focus_date)
 end
 
 function M.object:refresh()
@@ -104,19 +84,8 @@ function M.object:move(direction)
     set_year_month(self, date.year, date.month + direction)
 end
 
----@return osdate|nil
-function M.object:get_date()
-    return self._private.calendar_widget:get_date()
-end
 
----@param date? osdate
----@param focus_date? osdate
-function M.object:set_date(date, focus_date)
-    self._private.calendar_widget:set_date(date, focus_date)
-end
-
-
----@class CalendarPopup.new.args
+---@class CalendarPopup.new.args : Popup.new.args
 ---@field date? osdate
 
 ---@param args? CalendarPopup.new.args
@@ -124,35 +93,32 @@ end
 function M.new(args)
     args = args or {}
 
-    local self
-    self = awful.popup {
-        type = "utility",
-        ontop = true,
-        visible = false,
-        widget = {
-            widget = capsule,
-            enable_overlay = false,
-            bg = tcolor.transparent,
+    local self = popup.new(args) --[[@as CalendarPopup]]
+
+    local widget = wibox.widget {
+        layout = wibox.layout.fixed.vertical,
+        spacing = dpi(16),
+        {
+            layout = wibox.layout.stack,
             {
-                layout = wibox.layout.fixed.vertical,
-                spacing = dpi(16),
+                id = "#calendar",
+                widget = wibox.widget.calendar.month,
+                font = beautiful.build_font(),
+                fill_month = true,
+                week_numbers = true,
+                long_weekdays = true,
+                start_sunday = false,
+            },
+            {
+                layout = wibox.container.place,
+                valign = "top",
+                halign = "left",
                 {
-                    layout = wibox.layout.stack,
-                    {
-                        id = "#calendar",
-                        widget = wibox.widget.calendar.month,
-                        font = beautiful.build_font(),
-                        fill_month = true,
-                        week_numbers = true,
-                        long_weekdays = true,
-                        start_sunday = false,
+                    widget = capsule,
+                    buttons = binding.awful_buttons {
+                        binding.awful({}, { btn.left }, function() self:move(-1) end),
                     },
                     {
-                        layout = wibox.container.place,
-                        valign = "top",
-                        halign = "left",
-                        {
-                            widget = capsule,
                             buttons = binding.awful_buttons {
                                 binding.awful({}, { btn.left }, function() self:move(-1) end),
                             },
@@ -186,38 +152,37 @@ function M.new(args)
                         },
                     },
                 },
-                {
-                    widget = capsule,
-                    buttons = binding.awful_buttons {
-                        binding.awful({}, { btn.left }, function() self:today() end),
-                    },
-                    {
-                        widget = wibox.widget.textbox,
-                        text = "Today",
-                        halign = "center",
-                    },
-                },
             },
         },
-    } --[[@as CalendarPopup]]
+        {
+            widget = capsule,
+            buttons = binding.awful_buttons {
+                binding.awful({}, { btn.left }, function() self:today() end),
+            },
+            {
+                widget = wibox.widget.textbox,
+                text = "today",
+                halign = "center",
+            },
+        },
+    }
 
     gtable.crush(self, M.object, true)
+    noice.initialize(self, nil, widget)
 
-    self._private.calendar_widget = self.widget:get_children_by_id("#calendar")[1] --[[@as wibox.widget.calendar]]
+    self._private.calendar_widget = widget:get_children_by_id("#calendar")[1] --[[@as wibox.widget.calendar]]
 
-    self.buttons = binding.awful_buttons {
+    self:set_date(args.date or now())
+
+    self:set_widget(widget)
+
+    self:set_buttons(binding.awful_buttons {
         binding.awful({}, { btn.middle }, function() self:today() end),
         binding.awful({}, {
             { trigger = btn.wheel_up, direction = -1 },
             { trigger = btn.wheel_down, direction = 1 },
         }, function(trigger) self:move(trigger.direction) end),
-    }
-
-    self:initialize_style(beautiful.calendar_popup.default_style, self.widget)
-
-    self:apply_style(args)
-
-    self:set_date(args.date or now())
+    })
 
     return self
 end

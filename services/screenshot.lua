@@ -7,7 +7,7 @@ end
 
 local format = string.format
 local awful = require("awful")
-local beautiful = require("theme.theme")
+local beautiful = require("theme.manager")._beautiful
 local tcolor = require("utils.color")
 
 

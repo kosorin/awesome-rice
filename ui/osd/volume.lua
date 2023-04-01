@@ -6,16 +6,20 @@ local tcolor = require("utils.color")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
-local beautiful = require("theme.theme")
+local beautiful = require("theme.manager")._beautiful
 local dpi = Dpi
+local aplacement = require("awful.placement")
 local gshape = require("gears.shape")
 local gtable = require("gears.table")
+local gcolor = require("gears.color")
 local capsule = require("widget.capsule")
 local pango = require("utils.pango")
 local css = require("utils.css")
 local config = require("config")
-local htable = require("utils.table")
-local noice = require("theme.style")
+local uui = require("utils.ui")
+local noice = require("theme.stylable")
+local popup = require("widget.popup")
+local progressbar = require("widget.progressbar")
 
 
 ---@class VolumeOsd.module
@@ -28,44 +32,43 @@ local M = {}
 ---@field muted boolean
 ---@field skip_osd? boolean
 
----@class VolumeOsd : awful.popup, stylable
+---@class VolumeOsd : Popup
 ---@field package _private VolumeOsd.private
----Style properties:
----@field paddings thickness
 M.object = {}
----@class VolumeOsd.private
+---@class VolumeOsd.private : Popup.private
 ---@field timer gears.timer
 ---@field data VolumeOsd.data
 
-noice.define_style(M.object, {
-    bg = { proxy = true },
-    fg = { proxy = true },
-    border_color = { proxy = true },
-    border_width = { proxy = true },
-    shape = { proxy = true },
-    placement = { proxy = true },
-    paddings = { id = "#paddings", property = "margins" },
-})
+noice.define {
+    object = M.object,
+    name = "volume_osd",
+    properties = {
+        spacing = { property = "spacing" },
+        bar_style = { id = "#bar", property = "style" },
+        font = { id = "#text", property = "font" },
+    },
+}
 
 do
-    local styles = beautiful.volume_osd.styles
     local text_format = "%2d" .. pango.thin_space .. "%%"
     local error_text = "--" .. pango.thin_space .. "%"
 
     function M.object:refresh()
         local data = self._private.data
 
-        local style = (data.muted and styles.muted)
-            or (data.is_set and data.volume > 100 and styles.boosted)
-            or styles.normal
-        self:apply_style(style)
+        -- TODO:
+        -- self:set_states {
+        --     volume = (data.muted and "muted")
+        --         or (data.is_set and data.volume > 100 and "boosted")
+        --         or false,
+        -- }
 
         local text = data.is_set and string.format(text_format, data.volume) or error_text
-        local text_widget = self.widget:get_children_by_id("#text")[1] --[[@as wibox.widget.textbox]]
+        local text_widget = self:get_children_by_id("#text")[1] --[[@as wibox.widget.textbox]]
         text_widget:set_markup(text)
 
-        local bar_fg = style.fg
-        local bar_bg = beautiful.get_progressbar_bg(style.fg)
+        local bar_fg = gcolor.ensure_pango_color(self._style.current.bar_fg)
+        local bar_bg = gcolor.ensure_pango_color(self._style.current.bar_bg)
         local wave1_fill = (not data.muted and data.volume <= 0) and bar_bg or bar_fg
         local wave2_fill = (not data.muted and data.volume <= 30) and bar_bg or bar_fg
         local wave3_fill = (not data.muted and data.volume <= 70) and bar_bg or bar_fg
@@ -80,13 +83,11 @@ do
                 stroke = bar_fg,
             },
         }
-        local icon_widget = self.widget:get_children_by_id("#icon")[1]
+        local icon_widget = self:get_children_by_id("#icon")[1] --[[@as wibox.widget.imagebox]]
         icon_widget:set_stylesheet(icon_stylesheet)
 
-        local bar_widget = self.widget:get_children_by_id("#bar")[1]
+        local bar_widget = self:get_children_by_id("#bar")[1] --[[@as wibox.widget.progressbar]]
         bar_widget:set_value(data.volume)
-        bar_widget:set_color(bar_fg)
-        bar_widget:set_background_color(bar_bg)
     end
 end
 
@@ -105,9 +106,9 @@ function M.object:update(data)
     self:refresh()
 end
 
+---@override
 function M.object:hide()
-    self.visible = false
-    self.screen = nil
+    popup.object.hide(self)
 
     self._private.timer:stop()
 end
@@ -118,65 +119,43 @@ function M.object:try_show(data)
         return
     end
 
-    local screen = awful.screen.focused()
-    if not screen then
-        return
-    end
+    self._private.timer:again()
 
     self:update(data)
-
-    self.screen = screen
-    self.visible = true
-
-    self._private.timer:again()
+    self:show()
 end
 
 
 ---@return VolumeOsd
 function M.new()
-    local self = awful.popup {
-        ontop = true,
-        visible = false,
+    local self = popup.new {
+        placement = beautiful.volume_osd.placement,
         widget = {
-            layout = wibox.container.constraint,
-            strategy = "exact",
-            width = dpi(360),
-            height = dpi(84),
+            layout = wibox.layout.fixed.horizontal,
             {
-                id = "#paddings",
-                widget = wibox.container.margin,
+                id = "#icon",
+                widget = wibox.widget.imagebox,
+                resize = true,
+                image = config.places.theme .. "/icons/volume.svg",
+            },
+            {
+                id = "#text",
+                widget = wibox.widget.textbox,
+            },
+            {
+                layout = wibox.container.place,
+                valign = "center",
                 {
-                    layout = wibox.layout.fixed.horizontal,
-                    spacing = dpi(16),
-                    {
-                        id = "#icon",
-                        widget = wibox.widget.imagebox,
-                        resize = true,
-                        image = config.places.theme .. "/icons/volume.svg",
-                    },
-                    {
-                        id = "#text",
-                        widget = wibox.widget.textbox,
-                        font = beautiful.build_font { size_factor = 1.6 },
-                    },
-                    {
-                        layout = wibox.container.place,
-                        valign = "center",
-                        {
-                            id = "#bar",
-                            widget = wibox.widget.progressbar,
-                            shape = function(cr, width, height) gshape.rounded_rect(cr, width, height, dpi(6)) end,
-                            bar_shape = function(cr, width, height) gshape.rounded_rect(cr, width, height, dpi(6)) end,
-                            max_value = 100,
-                            forced_height = dpi(24),
-                        },
-                    },
+                    id = "#bar",
+                    widget = progressbar,
+                    max_value = 100,
                 },
             },
         },
     } --[[@as VolumeOsd]]
 
     gtable.crush(self, M.object, true)
+    noice.initialize(self, nil, self:get_widget())
 
     self._private.data = {}
 
@@ -187,15 +166,13 @@ function M.new()
         callback = function() self:hide() end,
     }
 
-    self.buttons = binding.awful_buttons {
-        binding.awful({}, { btn.left }, function() self:hide() end),
-    }
-
-    self:initialize_style(beautiful.volume_osd.default_style, self.widget)
-
     capi.awesome.connect_signal("volume::update", function(data) self:try_show(data) end)
 
     self:update()
+
+    self:set_buttons(binding.awful_buttons {
+        binding.awful({}, btn.any, function() self:hide() end),
+    })
 
     return self
 end

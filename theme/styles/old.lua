@@ -14,7 +14,7 @@ local hwidget = require("utils.widget")
 local css = require("utils.css")
 local pango = require("utils.pango")
 local config = require("config")
-local noice = require("theme.style")
+local Nil = require("theme.nil")
 
 
 ---@class Theme
@@ -170,47 +170,51 @@ theme.capsule = {
 }
 
 theme.capsule.default_style = {
-    hover_overlay = hcolor.white .. "10",
-    press_overlay = hcolor.white .. "10",
-    bg = theme.common.bg_110,
-    fg = theme.common.fg,
-    border_color = theme.common.bg_130,
-    border_width = 0,
-    shape = function(cr, width, height)
-        gshape.rounded_rect(cr, width, height, theme.capsule.border_radius)
-    end,
-    margins = hui.thickness { 0 },
-    paddings = hui.thickness { dpi(6), dpi(14) },
+    default = {
+        bg = theme.common.bg_110,
+        fg = theme.common.fg,
+        border_color = theme.common.bg_130,
+        border_width = 0,
+        shape = function(cr, width, height)
+            gshape.rounded_rect(cr, width, height, theme.capsule.border_radius)
+        end,
+        margins = hui.thickness { 0 },
+        paddings = hui.thickness { dpi(6), dpi(14) },
+        highlight = Nil,
+    },
+    precedence = { "mouse" },
+    mouse = {
+        states = {
+            mouse_over = {
+                highlight = hcolor.white .. "10",
+            },
+            button_pressed = {
+                highlight = hcolor.white .. "20",
+            },
+        },
+    },
 }
 
 theme.capsule.styles = {
     normal = {
-        hover_overlay = noice.value.Default,
-        press_overlay = noice.value.Default,
         bg = theme.common.bg_110,
         fg = theme.common.fg,
         border_color = theme.common.bg_130,
         border_width = 0,
     },
     disabled = {
-        hover_overlay = noice.value.Default,
-        press_overlay = noice.value.Default,
         bg = theme.common.bg_105,
         fg = theme.common.fg_50,
         border_color = theme.common.bg_115,
         border_width = 0,
     },
     selected = {
-        hover_overlay = noice.value.Default,
-        press_overlay = noice.value.Default,
         bg = theme.common.bg_125,
         fg = theme.common.fg_bright,
         border_color = theme.common.bg_145,
         border_width = dpi(1),
     },
     urgent = {
-        hover_overlay = noice.value.Default,
-        press_overlay = noice.value.Default,
         bg = theme.palette.red_66,
         fg = theme.common.fg_bright,
         border_color = theme.palette.red,
@@ -222,8 +226,6 @@ theme.capsule.styles.palette = {}
 do
     local function generate_capsule_color_style(color)
         return {
-            hover_overlay = noice.value.Default,
-            press_overlay = noice.value.Default,
             bg = theme.palette[color .. "_33"],
             fg = theme.palette[color .. "_bright"],
             border_color = theme.palette[color .. "_66"],
@@ -243,15 +245,19 @@ theme.popup = {
 }
 
 theme.popup.default_style = {
-    bg = theme.common.bg,
-    fg = theme.common.fg,
-    border_color = theme.common.bg_bright,
-    border_width = dpi(1),
-    shape = function(cr, width, height)
-        gshape.rounded_rect(cr, width, height, main_border_radius)
-    end,
-    placement = aplacement.under_mouse,
-    paddings = hui.thickness { dpi(20) },
+    default = {
+        width = Nil,
+        height = Nil,
+        opacity = 1,
+        bg = theme.common.bg,
+        fg = theme.common.fg,
+        border_color = theme.common.bg_bright,
+        border_width = dpi(1),
+        shape = function(cr, width, height)
+            gshape.rounded_rect(cr, width, height, main_border_radius)
+        end,
+        paddings = hui.thickness { dpi(20) },
+    },
 }
 
 ----------------------------------------------------------------------------------------------------
@@ -332,68 +338,72 @@ theme.mebox = {
     },
 }
 
-theme.mebox.default_style = setmetatable({
-    placement_bounding_args = {
-        honor_workarea = true,
-        honor_padding = false,
-        margins = theme.popup.margins,
+theme.mebox.default_style = {
+    default = {
+        placement_bounding_args = {
+            honor_workarea = true,
+            honor_padding = false,
+            margins = theme.popup.margins,
+        },
+        placement = false,
+        submenu_offset = dpi(4),
+        active_opacity = 1,
+        inactive_opacity = 1,
+        paddings = hui.thickness { dpi(8) },
+        item_width = dpi(128),
+        item_height = dpi(36),
     },
-    placement = false,
-    submenu_offset = dpi(4),
-    active_opacity = 1,
-    inactive_opacity = 1,
-    paddings = hui.thickness { dpi(8) },
-    item_width = dpi(128),
-    item_height = dpi(36),
-}, { __index = theme.popup.default_style })
+}
 
 ----------------------------------------------------------------------------------------------------
 
 theme.bindbox = {}
 
-theme.bindbox.default_style = setmetatable({
-    bg = hcolor.change(theme.common.bg, { alpha = 0.85 }),
-    font = theme.build_font(),
-    placement = function(d)
-        aplacement.centered(d, {
-            honor_workarea = true,
-            honor_padding = false,
-        })
-    end,
-    page_paddings = hui.thickness { dpi(8), bottom = dpi(16) },
-    page_width = dpi(1400),
-    page_height = dpi(1000),
-    page_columns = 2,
-    group_spacing = dpi(16),
-    item_spacing = dpi(8),
-    trigger_bg = theme.common.fg,
-    trigger_bg_alpha = "20%",
-    trigger_fg = theme.common.fg,
-    group_bg = theme.common.primary_50,
-    group_fg = theme.common.fg_bright,
-    group_ruled_bg = theme.common.urgent_50,
-    group_ruled_fg = theme.common.fg_bright,
-    find_dim_bg = nil,
-    find_dim_fg = theme.common.fg_66,
-    find_highlight_bg = nil,
-    find_highlight_fg = theme.common.urgent_bright,
-    group_path_separator_markup = pango.span { fgalpha = "50%", "  " },
-    slash_separator_markup = pango.span { fgalpha = "50%", size = "smaller", " / " },
-    plus_separator_markup = pango.span { fgalpha = "50%", "+" },
-    range_separator_markup = pango.span { fgalpha = "50%", ".." },
-    status_style = {
-        -- TODO: Fix me - capsule:set_style() no longer exists
-        bg = theme.palette.black_50,
-        fg = theme.common.fg,
-        border_color = theme.palette.black_115,
-        border_width = dpi(1),
-        paddings = hui.thickness { dpi(12), dpi(16) },
+theme.bindbox.default_style = {
+    default = {
+        bg = hcolor.change(theme.common.bg, { alpha = 0.85 }),
+        font = theme.build_font(),
+        placement = function(d)
+            aplacement.centered(d, {
+                honor_workarea = true,
+                honor_padding = false,
+            })
+        end,
+        page_paddings = hui.thickness { dpi(8), bottom = dpi(16) },
+        page_width = dpi(1400),
+        page_height = dpi(1000),
+        page_columns = 2,
+        group_spacing = dpi(16),
+        item_spacing = dpi(8),
+        trigger_bg = theme.common.fg,
+        trigger_bg_alpha = "20%",
+        trigger_fg = theme.common.fg,
+        group_bg = theme.common.primary_50,
+        group_fg = theme.common.fg_bright,
+        group_ruled_bg = theme.common.urgent_50,
+        group_ruled_fg = theme.common.fg_bright,
+        find_dim_bg = nil,
+        find_dim_fg = theme.common.fg_66,
+        find_highlight_bg = nil,
+        find_highlight_fg = theme.common.urgent_bright,
+        group_path_separator_markup = pango.span { fgalpha = "50%", "  " },
+        slash_separator_markup = pango.span { fgalpha = "50%", size = "smaller", " / " },
+        plus_separator_markup = pango.span { fgalpha = "50%", "+" },
+        range_separator_markup = pango.span { fgalpha = "50%", ".." },
+        status_style = {
+            -- TODO: Fix me - capsule:set_style() no longer exists
+            bg = theme.palette.black_50,
+            fg = theme.common.fg,
+            border_color = theme.palette.black_115,
+            border_width = dpi(1),
+            paddings = hui.thickness { dpi(12), dpi(16) },
+        },
+        status_spacing = dpi(24),
+        find_placeholder_fg = theme.common.fg_66,
+        find_cursor_bg = theme.common.secondary_66,
+        find_cursor_fg = theme.common.fg_bright,
     },
-    status_spacing = dpi(24),
-    find_placeholder_fg = theme.common.fg_66,
-    find_cursor_bg = theme.common.secondary_66,
-    find_cursor_fg = theme.common.fg_bright,
-}, { __index = theme.popup.default_style })
+}
 
 ----------------------------------------------------------------------------------------------------
 
@@ -415,49 +425,65 @@ theme.media_player.content_styles = {
 ----------------------------------------------------------------------------------------------------
 
 theme.volume_osd = {
-    default_style = setmetatable({
-        bg = theme.common.bg,
-        fg = theme.common.fg,
-        border_color = theme.common.bg_bright,
-        border_width = dpi(1),
-        placement = function(d)
-            aplacement.top(d, {
-                honor_workarea = true,
-                margins = hui.thickness { dpi(32) },
-            })
-        end,
-        paddings = hui.thickness { dpi(16), dpi(32) },
-    }, { __index = theme.popup.default_style }),
-}
-
-theme.volume_osd.styles = {
-    normal = {
-        bg = theme.volume_osd.default_style.bg,
-        fg = theme.volume_osd.default_style.fg,
-        border_color = theme.volume_osd.default_style.border_color,
+    default_style = {
+        default = {
+            width = dpi(320),
+            height = dpi(80),
+            bg = theme.common.bg,
+            fg = theme.common.fg,
+            border_color = theme.common.bg_bright,
+            border_width = dpi(1),
+            paddings = hui.thickness { dpi(24), dpi(32) },
+            spacing = dpi(16),
+            bar_style = {
+                color = theme.common.fg,
+                background_color = theme.get_progressbar_bg(theme.common.fg),
+                margins = hui.thickness { 4, 0 },
+                shape = function(cr, width, height) gshape.rounded_rect(cr, width, height, dpi(6)) end,
+                bar_shape = function(cr, width, height) gshape.rounded_rect(cr, width, height, dpi(6)) end,
+            },
+            font = theme.build_font { size_factor = 1.6 },
+        },
+        precedence = { "volume" },
+        volume = {
+            states = {
+                boosted = {
+                    bg = theme.capsule.styles.palette.yellow.bg,
+                    fg = theme.capsule.styles.palette.yellow.fg,
+                    border_color = theme.capsule.styles.palette.yellow.border_color,
+                    bar_style = {
+                        color = theme.capsule.styles.palette.yellow.fg,
+                        background_color = theme.get_progressbar_bg(theme.capsule.styles.palette.yellow.fg),
+                    },
+                },
+                muted = {
+                    fg = theme.common.fg_50,
+                    bar_style = {
+                        color = theme.common.fg_50,
+                        background_color = theme.get_progressbar_bg(theme.common.fg_50),
+                    },
+                },
+            },
+        },
     },
-    boosted = {
-        bg = theme.capsule.styles.palette.yellow.bg,
-        fg = theme.capsule.styles.palette.yellow.fg,
-        border_color = theme.capsule.styles.palette.yellow.border_color,
-    },
-    muted = {
-        bg = theme.volume_osd.default_style.bg,
-        fg = theme.common.fg_50,
-        border_color = theme.volume_osd.default_style.border_color,
-    },
+    placement = function(d)
+        aplacement.top(d, {
+            honor_workarea = true,
+            margins = hui.thickness { dpi(32) },
+        })
+    end,
 }
 
 ----------------------------------------------------------------------------------------------------
 
 theme.tools_popup = {
-    default_style = setmetatable({}, { __index = theme.popup.default_style }),
+    default_style = {},
 }
 
 ----------------------------------------------------------------------------------------------------
 
 theme.calendar_popup = {
-    default_style = setmetatable({}, { __index = theme.popup.default_style }),
+    default_style = {},
 }
 
 do
@@ -842,7 +868,7 @@ theme.application = {
 ----------------------------------------------------------------------------------------------------
 
 theme.systray = {
-    bg = theme.capsule.default_style.bg,
+    bg = theme.capsule.default_style.default.bg,
     spacing = dpi(12),
 }
 
@@ -863,5 +889,157 @@ theme.snap = {
 }
 
 ----------------------------------------------------------------------------------------------------
+
+---@type style_sheet.source
+theme.style_sheet = {
+    {
+        "capsule",
+        bg = theme.common.bg_110,
+        fg = theme.common.fg,
+        border_color = theme.common.bg_130,
+        border_width = 0,
+        shape = function(cr, width, height)
+            gshape.rounded_rect(cr, width, height, theme.capsule.border_radius)
+        end,
+        margins = hui.thickness { 0 },
+        paddings = hui.thickness { dpi(6), dpi(14) },
+        highlight = Nil,
+    },
+    {
+        "capsule:hover",
+        highlight = hcolor.white .. "10",
+    },
+    {
+        "capsule:active",
+        highlight = hcolor.white .. "20",
+    },
+    {
+        "capsule.foobar",
+        bg = theme.palette.orange_66,
+        border_color = theme.palette.orange_bright,
+        border_width = 1,
+        shape = gshape.arrow,
+    },
+    {
+        ".foobar",
+        border_width = 5,
+    },
+    {
+        ".volume_osd",
+        width = dpi(320),
+        height = dpi(80),
+        bg = theme.common.bg,
+        fg = theme.common.fg,
+        border_color = theme.common.bg_bright,
+        border_width = dpi(1),
+        paddings = hui.thickness { dpi(24), dpi(32) },
+        spacing = dpi(16),
+        font = theme.build_font { size_factor = 1.6 },
+    },
+    {
+        "bar.volume_osd",
+        color = theme.common.fg,
+        background_color = theme.get_progressbar_bg(theme.common.fg),
+        margins = hui.thickness { 4, 0 },
+        shape = function(cr, width, height) gshape.rounded_rect(cr, width, height, dpi(6)) end,
+        bar_shape = function(cr, width, height) gshape.rounded_rect(cr, width, height, dpi(6)) end,
+    },
+}
+
+theme.beautiful =
+{
+    ----------------------------------------------------------------------------------------------------
+    useless_gap = theme.gap,
+    ----------------------------------------------------------------------------------------------------
+    font = theme.build_font(),
+    ----------------------------------------------------------------------------------------------------
+    border_width = theme.client.normal.border_width,
+    bg_normal = theme.client.normal.bg,
+    fg_normal = theme.client.normal.fg,
+    border_color_normal = theme.client.normal.border_color,
+    border_width_normal = theme.client.normal.border_width,
+    titlebar_bg_normal = theme.client.normal.bg,
+    titlebar_fg_normal = theme.client.normal.fg,
+    bg_focus = theme.client.active.bg,
+    fg_focus = theme.client.active.fg,
+    border_color_active = theme.client.active.border_color,
+    border_width_active = theme.client.active.border_width,
+    titlebar_bg_focus = theme.client.active.bg,
+    titlebar_fg_focus = theme.client.active.fg,
+    bg_urgent = theme.client.urgent.bg,
+    fg_urgent = theme.client.urgent.fg,
+    border_color_urgent = theme.client.urgent.border_color,
+    border_width_urgent = theme.client.urgent.border_width,
+    titlebar_bg_urgent = theme.client.urgent.bg,
+    titlebar_fg_urgent = theme.client.urgent.fg,
+    ----------------------------------------------------------------------------------------------------
+    bg_systray = theme.systray.bg,
+    systray_icon_spacing = theme.systray.spacing,
+    ----------------------------------------------------------------------------------------------------
+    snapper_gap = theme.snap.gap,
+    snap_bg = theme.snap.edge.bg,
+    snap_border_width = theme.snap.edge.border_width,
+    snap_shape = theme.snap.edge.shape,
+    ----------------------------------------------------------------------------------------------------
+    wibar_bg = theme.wibar.bg,
+    wibar_height = theme.wibar.height,
+    ----------------------------------------------------------------------------------------------------
+    taglist_bg_occupied = theme.taglist.item.normal.bg,
+    taglist_fg_occupied = theme.taglist.item.normal.fg,
+    taglist_shape_border_color = theme.taglist.item.normal.border_color,
+    taglist_shape_border_width = theme.taglist.item.normal.border_width,
+    taglist_bg_focus = theme.taglist.item.active.bg,
+    taglist_fg_focus = theme.taglist.item.active.fg,
+    taglist_shape_border_color_focus = theme.taglist.item.active.border_color,
+    taglist_shape_border_width_focus = theme.taglist.item.active.border_width,
+    taglist_bg_urgent = theme.taglist.item.urgent.bg,
+    taglist_fg_urgent = theme.taglist.item.urgent.fg,
+    taglist_shape_border_color_urgent = theme.taglist.item.urgent.border_color,
+    taglist_shape_border_width_urgent = theme.taglist.item.urgent.border_width,
+    taglist_bg_empty = theme.taglist.item.empty.bg,
+    taglist_fg_empty = theme.taglist.item.empty.fg,
+    taglist_shape_border_color_empty = theme.taglist.item.empty.border_color,
+    taglist_shape_border_width_empty = theme.taglist.item.empty.border_width,
+    taglist_bg_volatile = theme.taglist.item.volatile.bg,
+    taglist_fg_volatile = theme.taglist.item.volatile.fg,
+    taglist_shape_border_color_volatile = theme.taglist.item.volatile.border_color,
+    taglist_shape_border_width_volatile = theme.taglist.item.volatile.border_width,
+    ----------------------------------------------------------------------------------------------------
+    tasklist_bg_normal = theme.clientlist.item.normal.bg,
+    tasklist_fg_normal = theme.clientlist.item.normal.fg,
+    tasklist_shape_border_color = theme.clientlist.item.normal.border_color,
+    tasklist_shape_border_width = theme.clientlist.item.normal.border_width,
+    tasklist_bg_focus = theme.clientlist.item.active.bg,
+    tasklist_fg_focus = theme.clientlist.item.active.fg,
+    tasklist_shape_border_color_focus = theme.clientlist.item.active.border_color,
+    tasklist_shape_border_width_focus = theme.clientlist.item.active.border_width,
+    tasklist_bg_urgent = theme.clientlist.item.urgent.bg,
+    tasklist_fg_urgent = theme.clientlist.item.urgent.fg,
+    tasklist_shape_border_color_urgent = theme.clientlist.item.urgent.border_color,
+    tasklist_shape_border_width_urgent = theme.clientlist.item.urgent.border_width,
+    tasklist_bg_minimize = theme.clientlist.item.minimized.bg,
+    tasklist_fg_minimize = theme.clientlist.item.minimized.fg,
+    tasklist_shape_border_color_minimized = theme.clientlist.item.minimized.border_color,
+    tasklist_shape_border_width_minimized = theme.clientlist.item.minimized.border_width,
+    tasklist_plain_task_name = not theme.clientlist.enable_glyphs,
+    tasklist_sticky = theme.clientlist.glyphs.sticky,
+    tasklist_ontop = theme.clientlist.glyphs.ontop,
+    tasklist_above = theme.clientlist.glyphs.above,
+    tasklist_below = theme.clientlist.glyphs.below,
+    tasklist_floating = theme.clientlist.glyphs.floating,
+    tasklist_maximized = theme.clientlist.glyphs.maximized,
+    tasklist_maximized_horizontal = theme.clientlist.glyphs.maximized_horizontal,
+    tasklist_maximized_vertical = theme.clientlist.glyphs.maximized_vertical,
+    tasklist_minimized = theme.clientlist.glyphs.minimized,
+    ----------------------------------------------------------------------------------------------------
+    notification_width = dpi(400),
+    notification_spacing = dpi(16),
+    notification_margin = dpi(8),
+    notification_border_width = theme.client.normal.border_width,
+    notification_shape = function(cr, width, height)
+        gshape.rounded_rect(cr, width, height, dpi(8))
+    end,
+    ----------------------------------------------------------------------------------------------------
+}
 
 return theme

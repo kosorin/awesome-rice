@@ -6,7 +6,7 @@ local config = require("config")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
-local beautiful = require("theme.theme")
+local beautiful = require("theme.manager")._beautiful
 local volume_service = require("services.volume")
 local dpi = Dpi
 local gshape = require("gears.shape")
@@ -104,9 +104,9 @@ function volume_widget.new(wibar)
         widget = capsule,
         margins = hui.thickness {
             top = beautiful.wibar.paddings.top,
-            right = beautiful.capsule.default_style.margins.right,
+            right = beautiful.capsule.default_style.default.margins.right,
             bottom = beautiful.wibar.paddings.bottom,
-            left = beautiful.capsule.default_style.margins.left,
+            left = beautiful.capsule.default_style.default.margins.left,
         },
         {
             layout = wibox.layout.fixed.horizontal,

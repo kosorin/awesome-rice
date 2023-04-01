@@ -1,5 +1,5 @@
 local ipairs = ipairs
-local beautiful = require("theme.theme")
+local beautiful = require("theme.manager")._beautiful
 local dpi = Dpi
 local mebox = require("widget.mebox")
 local gtable = require("gears.table")

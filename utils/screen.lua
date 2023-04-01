@@ -1,3 +1,4 @@
+local capi = Capi
 local ipairs = ipairs
 
 
@@ -17,4 +18,12 @@ function M.clients_to_tag(screen, tag)
     end
 end
 
-return M
+local mt = {}
+
+---@param screen? iscreen
+---@return screen|nil
+function mt.__call(_, screen)
+    return screen and capi.screen[screen]
+end
+
+return setmetatable(M, mt)

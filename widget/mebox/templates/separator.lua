@@ -1,4 +1,4 @@
-local beautiful = require("theme.theme")
+local beautiful = require("theme.manager")._beautiful
 local wibox = require("wibox")
 local dpi = Dpi
 

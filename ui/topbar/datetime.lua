@@ -5,7 +5,7 @@ local config = require("config")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
-local beautiful = require("theme.theme")
+local beautiful = require("theme.manager")._beautiful
 local gshape = require("gears.shape")
 local calendar_popup = require("ui.popup.calendar")
 local dpi = Dpi
@@ -212,7 +212,7 @@ function datetime_widget.new(wibar)
                 top = beautiful.wibar.paddings.top,
                 right = 0,
                 bottom = beautiful.wibar.paddings.bottom,
-                left = beautiful.capsule.default_style.margins.left,
+                left = beautiful.capsule.default_style.default.margins.left,
             },
             shape = function(cr, width, height)
                 gshape.partially_rounded_rect(cr, width, height, true, false, false, true, beautiful.capsule.border_radius)
@@ -223,7 +223,7 @@ function datetime_widget.new(wibar)
             widget = capsule,
             margins = hui.thickness {
                 top = beautiful.wibar.paddings.top,
-                right = beautiful.capsule.default_style.margins.right,
+                right = beautiful.capsule.default_style.default.margins.right,
                 bottom = beautiful.wibar.paddings.bottom,
                 left = 0,
             },

@@ -6,7 +6,7 @@ local tcolor = require("utils.color")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
-local beautiful = require("theme.theme")
+local beautiful = require("theme.manager")._beautiful
 local weather_service = require("services.weather")
 local widget_helper = require("utils.widget")
 local hui = require("utils.ui")
@@ -376,7 +376,7 @@ local function new(parent, data_widget_factory, args)
         anchor = args.placement or "middle",
         width = args.width or dpi(320),
         height = args.height or dpi(592),
-        bg = args.bg or beautiful.popup.default_style.bg,
+        bg = args.bg or beautiful.popup.default_style.default.bg,
         opacity = args.opacity or 1,
         border_width = args.border_width or dpi(1),
         border_color = args.border_color or beautiful.common.primary_66,

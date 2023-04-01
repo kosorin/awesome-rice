@@ -1,6 +1,6 @@
 local tostring = tostring
 local wibox = require("wibox")
-local beautiful = require("theme.theme")
+local beautiful = require("theme.manager")._beautiful
 local dpi = Dpi
 local mebox = require("widget.mebox")
 local binding = require("io.binding")

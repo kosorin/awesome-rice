@@ -6,7 +6,7 @@ local config = require("config")
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
-local beautiful = require("theme.theme")
+local beautiful = require("theme.manager")._beautiful
 local gshape = require("gears.shape")
 local dpi = Dpi
 local aspawn = require("awful.spawn")
@@ -481,7 +481,7 @@ function M.new(wibar)
                     id = "#previous",
                     widget = capsule,
                     margins = hui.thickness { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
-                    paddings = hui.thickness { dpi(6), left = beautiful.capsule.default_style.paddings.left },
+                    paddings = hui.thickness { dpi(6), left = beautiful.capsule.default_style.default.paddings.left },
                     shape = false,
                     buttons = binding.awful_buttons {
                         binding.awful({}, btn.left, function() media_player:previous() end),
@@ -498,8 +498,8 @@ function M.new(wibar)
                     margins = hui.thickness { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
                     paddings = hui.thickness {
                         dpi(6),
-                        left = beautiful.capsule.default_style.paddings.left,
-                        right = beautiful.capsule.default_style.paddings.right,
+                        left = beautiful.capsule.default_style.default.paddings.left,
+                        right = beautiful.capsule.default_style.default.paddings.right,
                     },
                     shape = false,
                     buttons = binding.awful_buttons {
@@ -514,7 +514,7 @@ function M.new(wibar)
                     id = "#next",
                     widget = capsule,
                     margins = hui.thickness { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
-                    paddings = hui.thickness { dpi(6), right = beautiful.capsule.default_style.paddings.right },
+                    paddings = hui.thickness { dpi(6), right = beautiful.capsule.default_style.default.paddings.right },
                     shape = right_shape,
                     buttons = binding.awful_buttons {
                         binding.awful({}, btn.left, function() media_player:next() end),
