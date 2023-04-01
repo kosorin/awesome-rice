@@ -103,6 +103,8 @@ M.object = {}
 ---@field mouse_move_show_submenu boolean
 ---@field keygrabber_auto boolean
 ---@field keygrabber awful.keygrabber
+---@field mousegrabber? fun(status: mouse.status): boolean
+---@field mousegrabber_buttons? table<button, boolean>
 ---@field item_template widget_template
 ---@field separator_template widget_template
 ---@field header_template widget_template
@@ -459,6 +461,9 @@ function M.object:hide(context)
         self._private.on_hide(self)
     end
 
+    if self._private.mousegrabber then
+        capi.mousegrabber.stop()
+    end
     if self._private.keygrabber_auto and self._private.keygrabber then
         self._private.keygrabber:stop()
     end
@@ -512,7 +517,8 @@ local function add_items(self, args, context)
             item_widget.buttons = item.buttons_builder
                 and item.buttons_builder(item, self, click_action)
                 or binding.awful_buttons {
-                    binding.awful({}, btn.left, click_action),
+                    binding.awful({}, btn.left, nil, click_action),
+                    binding.awful({}, btn.right, nil, click_action),
                 }
 
             item_widget:connect_signal("mouse::enter", function()
@@ -592,6 +598,10 @@ function M.object:show(args, context)
 
     if self._private.keygrabber_auto and self._private.keygrabber then
         self._private.keygrabber:start()
+    end
+    if self._private.mousegrabber then
+        self._private.mousegrabber_buttons = {}
+        capi.mousegrabber.run(self._private.mousegrabber, nil)
     end
 
     self._private.selected_index = args.selected_index
@@ -876,6 +886,8 @@ function M.new(args, is_submenu)
         },
     } --[[@as Mebox]]
 
+    self.drawin.ignore_mousegrabber = true
+
     gtable.crush(self, M.object, true)
 
     self._private.submenu_cache = args.cache_submenus ~= false and {} or nil
@@ -897,7 +909,7 @@ function M.new(args, is_submenu)
     self.buttons = type(args.buttons_builder) == "function"
         and args.buttons_builder(self)
         or binding.awful_buttons {
-            binding.awful({}, btn.right, function() self:hide() end),
+            -- binding.awful({}, btn.right, function() self:hide() end),
         }
 
     if not is_submenu then
@@ -951,6 +963,22 @@ function M.new(args, is_submenu)
                     end),
                 },
             }
+
+        self._private.mousegrabber = function(status)
+            -- Dump(status)
+            local buttons = self._private.mousegrabber_buttons
+            if buttons then
+                for button, pressed in ipairs(status.buttons) do
+                    if buttons[button] ~= nil and buttons[button] ~= pressed and not pressed then
+                        -- self:hide_all()
+                        break
+                    else
+                        buttons[button] = pressed
+                    end
+                end
+            end
+            return true
+        end
     end
 
     self:initialize_style(beautiful.mebox.default_style, self.widget)

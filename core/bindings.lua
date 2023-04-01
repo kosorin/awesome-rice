@@ -15,6 +15,7 @@ local mebox = require("widget.mebox")
 local bindbox = require("widget.bindbox")
 local config = require("config")
 local hclient = require("utils.client")
+local ui_controller = require("ui.controller")
 
 
 -- Available keys with `super` modifier: gstpzxcv jlyiok
@@ -56,6 +57,32 @@ main_bindbox:add_groups {
 capi.awesome.connect_signal("main_bindbox::show", function()
     main_bindbox:show()
 end)
+
+
+do
+    local can_close = false
+    awful.mouse.append_mousegrabber_bindings(binding.awful_buttons {
+        binding.awful({}, { btn.left, btn.right },
+            function()
+                can_close = true
+            end,
+            function()
+                if not can_close then
+                    return
+                end
+                can_close = false
+
+                local wibox = ui_controller.current.instance
+                if wibox then
+                    if wibox.hide then
+                        wibox:hide()
+                    else
+                        wibox.visible = false
+                    end
+                end
+            end),
+    })
+end
 
 
 binding.add_global_range {

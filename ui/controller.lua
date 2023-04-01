@@ -13,13 +13,21 @@ end
 ---@param wibox wibox
 ---@return boolean
 function M.enter(wibox)
+    local enable = false
+
     local c = M.current
     if c.instance then
-        return c.instance == wibox
+        enable = c.instance == wibox
     else
         c.instance = wibox
-        return true
+        enable = true
     end
+
+    if enable and wibox then
+        wibox.drawin.ignore_mousegrabber = true
+    end
+
+    return enable
 end
 
 return M
