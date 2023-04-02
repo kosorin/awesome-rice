@@ -1855,6 +1855,23 @@ do
     end
 end
 
+function placement.client_move(d, args)
+    args = add_context(args, "client_move")
+    d = d or capi.client.focus
+
+    local mouse_coords = capi.mouse.coords()
+    local ngeo = geometry_common(d, args)
+    local relative_offset = args.relative_offset or {}
+
+    ngeo.x = math.floor(mouse_coords.x - ((relative_offset.x or 0) * ngeo.width))
+    ngeo.y = math.floor(mouse_coords.y - ((relative_offset.y or 0) * ngeo.height))
+
+    remove_border(d, args, ngeo)
+    geometry_common(d, args, ngeo)
+
+    return fix_new_geometry(ngeo, args, true)
+end
+
 return placement
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

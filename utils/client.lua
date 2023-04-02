@@ -296,16 +296,16 @@ function M.mouse_move(client)
         return
     end
 
-    local coords = capi.mouse.coords()
-    local geometry = aplacement.centered(capi.mouse, { parent = client, pretend = true })
-    local offset = {
-        x = geometry.x - coords.x,
-        y = geometry.y - coords.y,
+    local mouse_coords = capi.mouse.coords()
+    local geometry = client:geometry()
+    local relative_offset = {
+        x = geometry.width < 1 and 0 or ((mouse_coords.x - geometry.x) / geometry.width),
+        y = geometry.height < 1 and 0 or ((mouse_coords.y - geometry.y) / geometry.height),
     }
 
     mresize(client, "mouse.move", {
-        placement = aplacement.under_mouse,
-        offset = offset,
+        placement = aplacement.client_move,
+        relative_offset = relative_offset,
     })
 end
 
