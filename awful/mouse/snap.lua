@@ -6,6 +6,7 @@
 -- @submodule mouse
 ---------------------------------------------------------------------------
 
+local sfind     = string.find
 local aclient   = require("awful.client")
 local resize    = require("awful.mouse.resize")
 local aplace    = require("awful.placement")
@@ -103,6 +104,23 @@ local function detect_screen_edges(c, snap)
     return v, h
 end
 
+local function get_snap_margins(snap, snapper_gap)
+    local margins = snap and snapper_gap or 0
+    if margins > 0 then
+        margins = {
+            left = margins * 2,
+            right = margins * 2,
+            top = margins * 2,
+            bottom = margins * 2,
+        }
+        if sfind(snap, "left", nil, true) then margins.right = margins.right / 2 end
+        if sfind(snap, "right", nil, true) then margins.left = margins.left / 2 end
+        if sfind(snap, "top", nil, true) then margins.bottom = margins.bottom / 2 end
+        if sfind(snap, "bottom", nil, true) then margins.top = margins.top / 2 end
+    end
+    return margins
+end
+
 local current_snap, current_axis = nil
 
 local function detect_areasnap(c, distance)
@@ -126,16 +144,19 @@ local function detect_areasnap(c, distance)
         or nil
 
     -- Show the expected geometry outline
-    show_placeholder(
-        current_snap and build_placement(current_snap, current_axis)(c, {
-            to_percent     = 0.5,
-            honor_workarea = true,
-            honor_padding  = true,
-            pretend        = true,
-            margins         = beautiful.snapper_gap
-        }) or nil
-    )
+    local geo = current_snap and build_placement(current_snap, current_axis)(c, {
+        to_percent     = 0.5,
+        honor_workarea = true,
+        honor_padding  = true,
+        pretend        = true,
+        margins        = get_snap_margins(current_snap, beautiful.snapper_gap),
+    }) or nil
+    if geo then
+        geo.width = geo.width + 2 * c.border_width
+        geo.height = geo.height + 2 * c.border_width
+    end
 
+    show_placeholder(geo)
 end
 
 local function apply_areasnap(c, args)
@@ -152,7 +173,7 @@ local function apply_areasnap(c, args)
         store_geometry = true,
         context        = "snap",
         honor_padding  = true,
-        margins        = beautiful.snapper_gap
+        margins        = get_snap_margins(current_snap, beautiful.snapper_gap),
     })
 end
 
