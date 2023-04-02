@@ -849,7 +849,7 @@ theme.systray = {
 ----------------------------------------------------------------------------------------------------
 
 theme.snap = {
-    gap = theme.gap * 2,
+    gap = theme.gap,
     distance = dpi(16),
     edge = {
         distance = dpi(4),
