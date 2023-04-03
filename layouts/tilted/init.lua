@@ -5,6 +5,7 @@ local find = string.find
 local aclient = require("awful.client")
 local amouse = require("awful.mouse")
 local alayout = require("awful.layout")
+local uui = require("utils.ui")
 
 
 local tilted = {
@@ -53,24 +54,6 @@ local function get_decoration_size(client, useless_gap)
     decoration_size.width = decoration_size.width + border_width
     decoration_size.height = decoration_size.height + border_width
     return decoration_size
-end
-
-local function apply_padding(workarea, padding)
-    return padding and {
-            x = workarea.x + padding.left,
-            y = workarea.y + padding.top,
-            width = workarea.width - padding.left - padding.right,
-            height = workarea.height - padding.top - padding.bottom,
-        } or workarea
-end
-
-local function inflate(geometry, size)
-    return {
-        x = geometry.x - size,
-        y = geometry.y - size,
-        width = geometry.width + (2 * size),
-        height = geometry.height + (2 * size),
-    }
 end
 
 function tilted.object:resize(screen, tag, client, corner)
@@ -141,10 +124,10 @@ function tilted.object:resize(screen, tag, client, corner)
     end
 
     local full_workarea = parameters.workarea
-    local workarea = apply_padding(full_workarea, layout_descriptor.allow_padding and layout_descriptor.padding[self])
+    local workarea = uui.shrink(full_workarea, layout_descriptor.allow_padding and layout_descriptor.padding[self] or nil)
     local useless_gap = parameters.useless_gap
 
-    local initial_geometry = inflate(client:geometry(), client.border_width + useless_gap)
+    local initial_geometry = uui.inflate(client:geometry(), client.border_width + useless_gap)
     initial_geometry = {
         x = initial_geometry.x,
         y = initial_geometry.y,
@@ -439,7 +422,7 @@ function tilted.object:arrange(parameters)
         }
     end
 
-    local workarea = apply_padding(full_workarea, layout_descriptor.allow_padding and layout_descriptor.padding[self])
+    local workarea = uui.shrink(full_workarea, layout_descriptor.allow_padding and layout_descriptor.padding[self] or nil)
     local useless_gap = parameters.useless_gap
 
     local width = workarea[oi.width]

@@ -854,15 +854,12 @@ theme.snap = {
     edge = {
         distance = dpi(4),
         bg = "#ff0000",
-        border_width = 6, -- no dpi required
+        border_width = dpi(6),
+        shape = function(cr, width, height)
+            gshape.rounded_rect(cr, width, height, client_border_radius)
+        end,
     },
 }
-
-function theme.snap.edge.shape(cr, width, height)
-    local bw = theme.snap.edge.border_width
-    cr:translate(bw, bw)
-    gshape.rounded_rect(cr, width - 2 * bw, height - 2 * bw, client_border_radius)
-end
 
 ----------------------------------------------------------------------------------------------------
 

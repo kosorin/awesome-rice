@@ -1,19 +1,114 @@
+local rawget = rawget
+local rawset = rawset
+local setmetatable = setmetatable
+local getmetatable = getmetatable
 local type = type
+local format = string.format
 
 
 local M = {}
 
+---@class thickness : { top: number, right: number, bottom: number, left: number }
+---@operator add(thickness_value): thickness
+---@operator sub(thickness_value): thickness
+---@operator mul(thickness_value): thickness
+---@operator div(thickness_value): thickness
+---@operator idiv(thickness_value): thickness
+---@operator unm(): thickness
+
+local thickness_mt = {
+    __index = function(self, key)
+        if key == 1 then
+            local value = rawget(self, "top")
+            rawset(self, 1, value)
+            return value
+        elseif key == 2 then
+            local value = rawget(self, "right")
+            rawset(self, 2, value)
+            return value
+        elseif key == 3 then
+            local value = rawget(self, "bottom")
+            rawset(self, 3, value)
+            return value
+        elseif key == 4 then
+            local value = rawget(self, "left")
+            rawset(self, 4, value)
+            return value
+        end
+    end,
+    __newindex = function()
+        error("thickness is readonly")
+    end,
+    __tostring = function(self)
+        return format("thickness { top=%d, right=%d, bottom=%d, left=%d }", self.top, self.right, self.bottom, self.left)
+    end,
+}
+
+thickness_mt.__add = function(self, other)
+    other = M.thickness(other)
+    return setmetatable({
+        top = self.top + other.top,
+        right = self.right + other.right,
+        bottom = self.bottom + other.bottom,
+        left = self.left + other.left,
+    }, thickness_mt)
+end
+thickness_mt.__sub = function(self, other)
+    other = M.thickness(other)
+    return setmetatable({
+        top = self.top - other.top,
+        right = self.right - other.right,
+        bottom = self.bottom - other.bottom,
+        left = self.left - other.left,
+    }, thickness_mt)
+end
+thickness_mt.__mul = function(self, other)
+    other = M.thickness(other)
+    return setmetatable({
+        top = self.top * other.top,
+        right = self.right * other.right,
+        bottom = self.bottom * other.bottom,
+        left = self.left * other.left,
+    }, thickness_mt)
+end
+thickness_mt.__div = function(self, other)
+    other = M.thickness(other)
+    return setmetatable({
+        top = self.top / other.top,
+        right = self.right / other.right,
+        bottom = self.bottom / other.bottom,
+        left = self.left / other.left,
+    }, thickness_mt)
+end
+thickness_mt.__idiv = function(self, other)
+    other = M.thickness(other)
+    return setmetatable({
+        top = self.top // other.top,
+        right = self.right // other.right,
+        bottom = self.bottom // other.bottom,
+        left = self.left // other.left,
+    }, thickness_mt)
+end
+thickness_mt.__unm = function(self)
+    return setmetatable({
+        top = -self.top,
+        right = -self.right,
+        bottom = -self.bottom,
+        left = -self.left,
+    }, thickness_mt)
+end
+
 ---@alias thickness_value number|number[]|thickness
 
 ---@param value? thickness_value
----@return thickness|nil # Returns the same table instance (i.e. the `value` parameter).
+---@return thickness # Returns the same table instance (i.e. the `value` parameter).
 function M.thickness(value)
     if not value then
-        return nil
+        return M.zero_thickness
     end
 
     if type(value) == "table" then
-        if value.is_thickness then
+        if getmetatable(value) == thickness_mt then
             return value
         end
 
@@ -50,27 +145,37 @@ function M.thickness(value)
         value.right = value.right or right or 0
         value.bottom = value.bottom or bottom or 0
         value.left = value.left or left or 0
-        value[1] = value.top
-        value[2] = value.right
-        value[3] = value.bottom
-        value[4] = value.left
-        value.is_thickness = true
-        return value
+        return setmetatable(value, thickness_mt)
     else
-        return {
+        return setmetatable({
             top = value,
             right = value,
             bottom = value,
             left = value,
-            [1] = value,
-            [2] = value,
-            [3] = value,
-            [4] = value,
-            is_thickness = true,
-        }
+        }, thickness_mt)
     end
 end
 
 M.zero_thickness = M.thickness(0)
+
+---@param geometry geometry
+---@param thickness? thickness_value
+---@return geometry
+function M.inflate(geometry, thickness)
+    thickness = M.thickness(thickness)
+    return thickness and {
+            x = geometry.x - thickness.left,
+            y = geometry.y - thickness.top,
+            width = geometry.width + thickness.left + thickness.right,
+            height = geometry.height + thickness.top + thickness.bottom,
+        } or geometry
+end
+
+---@param geometry geometry
+---@param thickness? thickness_value
+---@return geometry
+function M.shrink(geometry, thickness)
+    return M.inflate(geometry, -M.thickness(thickness))
+end
 
 return M

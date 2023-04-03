@@ -298,9 +298,11 @@ function M.mouse_move(client)
 
     local mouse_coords = capi.mouse.coords()
     local geometry = client:geometry()
+    local bw = client.border_width
+
     local relative_offset = {
-        x = geometry.width < 1 and 0 or ((mouse_coords.x - geometry.x) / geometry.width),
-        y = geometry.height < 1 and 0 or ((mouse_coords.y - geometry.y) / geometry.height),
+        x = geometry.width < 1 and 0 or ((mouse_coords.x - geometry.x) / (geometry.width + 2 * bw)),
+        y = geometry.height < 1 and 0 or ((mouse_coords.y - geometry.y) / (geometry.height + 2 * bw)),
     }
 
     mresize(client, "mouse.move", {
