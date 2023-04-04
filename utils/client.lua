@@ -3,7 +3,7 @@ local ipairs = ipairs
 local math = math
 local aclient = require("awful.client")
 local alayout = require("awful.layout")
-local mresize = require("awful.mouse.resize")
+local amresize = require("awful.mouse.resize")
 local aplacement = require("awful.placement")
 local grectangle = require("gears.geometry").rectangle
 
@@ -305,7 +305,7 @@ function M.mouse_move(client)
         y = geometry.height < 1 and 0 or ((mouse_coords.y - geometry.y) / (geometry.height + 2 * bw)),
     }
 
-    mresize(client, "mouse.move", {
+    amresize(client, "mouse.move", {
         placement = aplacement.client_move,
         relative_offset = relative_offset,
     })
@@ -340,7 +340,7 @@ function M.mouse_resize(client)
     local coords = capi.mouse.coords()
     local corner = M.get_resize_corner(client, coords)
 
-    mresize(client, "mouse.resize", {
+    amresize(client, "mouse.resize", {
         placement = aplacement.resize_to_mouse,
         corner = corner,
         include_sides = true,

@@ -1,32 +1,29 @@
----------------------------------------------------------------------------
---- Mouse snapping related functions
---
--- @author Julien Danjou &lt;julien@danjou.info&gt;
--- @copyright 2008 Julien Danjou
--- @copyright 2023 David Kosorin
--- @submodule mouse
----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+---Mouse snapping related functions
+---@author Julien Danjou &lt;julien@danjou.info&gt;
+---@copyright 2008 Julien Danjou
+---@copyright 2023 David Kosorin
+---@submodule mouse
+--------------------------------------------------------------------------------
 
 local capi = Capi
 local abs = math.abs
 local alayout = require("awful.layout")
-local amresize = require("awful.mouse.resize")
 local aplacement = require("awful.placement")
-local gcolor = require("gears.color")
 local gshape = require("gears.shape")
 local wibox = require("wibox")
 local cairo = require("lgi").cairo
 local beautiful = require("theme.theme")
 local uui = require("utils.ui")
-local ucolor = require("utils.color")
 
+local M = {}
 
-local placement_context = "edge_snap"
+local stored_geometries = setmetatable({}, { __mode = "k" })
 
 ---@type wibox|nil
 local preview_wibox = nil
 
----@type { edge?: edge|corner, placement?: (fun(client: client, preview?: boolean): geometry) }
+---@type { edge?: edge|corner, placement?: (fun(client: client): geometry) }
 local current_state = {}
 
 ---@param geo geometry
@@ -140,11 +137,9 @@ local function update(client)
             local placement = edge and (aplacement.scale
                 + aplacement[edge]
                 + (axis and aplacement["maximize_" .. axis] or nil))
-            current_state.placement = function(c, preview)
+            current_state.placement = function(c)
                 return placement(c, {
-                    pretend = preview,
-                    store_geometry = not preview,
-                    context = placement_context,
+                    pretend = true,
                     to_percent = 0.5,
                     honor_workarea = true,
                     honor_padding = true,
@@ -159,9 +154,8 @@ local function update(client)
     return changed
 end
 
-
 ---@param client client
-local function detect(client)
+function M.detect(client)
     if (not client.floating) and alayout.get(client.screen) ~= alayout.suit.floating then
         return
     end
@@ -171,31 +165,39 @@ local function detect(client)
     end
 
     local placement = current_state.placement
-    local geo = placement and placement(client, true)
+    local geo = placement and placement(client)
     show_preview(client, geo)
+end
+
+---@param client client
+function M.store(client)
+    stored_geometries[client] = client:geometry()
+end
+
+---@param client client
+---@return geometry|nil
+function M.try_restore(client)
+    local geo = stored_geometries[client]
+    stored_geometries[client] = nil
+    return geo
 end
 
 ---@param client client
 ---@param args awful.placement.args.common
 ---@return geometry|nil
-local function apply(client, args)
-    if not current_state.placement then
-        return nil
+function M.apply(client, args)
+    local placement = current_state.placement
+    if not placement then
+        return
     end
 
-    -- Remove the move offset
     args.offset = {}
 
     preview_wibox.visible = false
 
-    return current_state.placement(client, false)
+    M.store(client)
+
+    return placement(client)
 end
 
-amresize.add_move_callback(function(client, geo, args)
-    aplacement.restore(client, { context = placement_context, clear_stored_geometry = true })
-    detect(client)
-end, "mouse.move")
-
-amresize.add_leave_callback(function(client, geo, args)
-    return apply(client, args)
-end, "mouse.move")
+return M

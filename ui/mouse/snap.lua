@@ -1,151 +1,225 @@
----------------------------------------------------------------------------
---- Mouse snapping related functions
---
--- @author Julien Danjou &lt;julien@danjou.info&gt;
--- @copyright 2008 Julien Danjou
--- @copyright 2023 David Kosorin
--- @submodule mouse
----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+---Mouse snapping related functions
+---@author Julien Danjou &lt;julien@danjou.info&gt;
+---@copyright 2008 Julien Danjou
+---@copyright 2023 David Kosorin
+---@submodule mouse
+--------------------------------------------------------------------------------
 
 local capi = Capi
-local abs = math.abs
 local ipairs = ipairs
+local sfind = string.find
 local aclient = require("awful.client")
-local mresize = require("awful.mouse.resize")
 local beautiful = require("theme.theme")
 local uui = require("utils.ui")
 
 local M = {}
 
----@param g geometry
----@param og geometry
----@param distance number
+---@param func fun(geometry: geometry, thickness: thickness_value): geometry
+---@param client client
+---@param geometry geometry
+---@param gap thickness
 ---@return geometry
-local function snap_outside(g, og, distance)
-    if g.x < distance + og.x + og.width and g.x > og.x + og.width then
-        g.x = og.x + og.width
-    elseif g.x + g.width < og.x and g.x + g.width > og.x - distance then
-        g.x = og.x - g.width
-    end
-    if g.y < distance + og.y + og.height and g.y > og.y + og.height then
-        g.y = og.y + og.height
-    elseif g.y + g.height < og.y and g.y + g.height > og.y - distance then
-        g.y = og.y - g.height
-    end
-    return g
+local function fix_client_geometry(func, client, geometry, gap)
+    return func(geometry, gap + { right = 2 * client.border_width, bottom = 2 * client.border_width })
 end
 
----@param g geometry
----@param og geometry
----@param distance number
----@return geometry
----@return "none"|edge
-local function snap_inside(g, og, distance)
-    local edgev = "none"
-    local edgeh = "none"
+-- Move
+do
+    ---@param g geometry
+    ---@param og geometry
+    ---@param distance number
+    ---@return geometry
+    local function snap_inside(g, og, distance)
+        local diff
 
-    if abs(g.x) < distance + og.x and g.x > og.x then
-        edgev = "left"
-        g.x = og.x
-    elseif abs((og.x + og.width) - (g.x + g.width)) < distance then
-        edgev = "right"
-        g.x = og.x + og.width - g.width
-    end
-    if abs(g.y) < distance + og.y and g.y > og.y then
-        edgeh = "top"
-        g.y = og.y
-    elseif abs((og.y + og.height) - (g.y + g.height)) < distance then
-        edgeh = "bottom"
-        g.y = og.y + og.height - g.height
-    end
-
-    -- What is the dominant dimension?
-    if g.width > g.height then
-        return g, edgeh
-    else
-        return g, edgev
-    end
-end
-
----Snap a client to the closest client or screen edge.
----@param client? client # The client to snap. Default: `client.focus`
----@param x integer # The client x coordinate.
----@param y integer # The client y coordinate.
----@param fixed_x? boolean # True if the client isn't allowed to move in the x direction.
----@param fixed_y? boolean # True if the client isn't allowed to move in the y direction.
----@return geometry|nil # The new geometry.
-function M.snap(client, x, y, fixed_x, fixed_y)
-    client = client or capi.client.focus
-    if not client then
-        return nil
-    end
-
-    local geo = client:geometry()
-    local bw = client.border_width
-
-    local distance = beautiful.snap.distance or 10
-    local gap = uui.thickness(beautiful.snap.gap or 5)
-
-    local bounds = uui.inflate({
-        x = (x or geo.x),
-        y = (y or geo.y),
-        width = geo.width + 2 * bw,
-        height = geo.height + 2 * bw,
-    }, gap)
-
-    local edge
-    bounds, edge = snap_inside(bounds, uui.shrink(client.screen.geometry, gap), distance)
-    bounds = snap_inside(bounds, uui.shrink(client.screen.tiling_area, gap), distance)
-
-    -- Allow certain windows to snap to the edge of the workarea.
-    -- Only allow docking to workarea for consistency/to avoid problems.
-    if client.dockable then
-        local struts = uui.thickness(0)
-        if edge ~= "none" and client.floating then
-            if edge == "left" or edge == "right" then
-                struts[edge] = bounds.width
-            elseif edge == "top" or edge == "bottom" then
-                struts[edge] = bounds.height
+        diff = g.x - og.x
+        if 0 < diff and diff < distance then
+            g.x = g.x - diff
+        else
+            diff = (og.x + og.width) - (g.x + g.width)
+            if 0 < diff and diff < distance then
+                g.x = g.x + diff
             end
         end
-        client:struts(struts)
-    end
 
-    for _, other in ipairs(aclient.visible(client.screen)) do
-        if other ~= client then
-            local other_geo = other:geometry()
-
-            other_geo = uui.inflate({
-                x = other_geo.x,
-                y = other_geo.y,
-                width = other_geo.width + 2 * bw,
-                height = other_geo.height + 2 * bw,
-            }, gap)
-
-            bounds = snap_outside(bounds, other_geo, distance)
+        diff = g.y - og.y
+        if 0 < diff and diff < distance then
+            g.y = g.y - diff
+        else
+            diff = (og.y + og.height) - (g.y + g.height)
+            if 0 < diff and diff < distance then
+                g.y = g.y + diff
+            end
         end
+
+        return g
     end
 
-    bounds = uui.shrink({
-        x = bounds.x,
-        y = bounds.y,
-        width = bounds.width - 2 * bw,
-        height = bounds.height - 2 * bw,
-    }, gap)
+    ---@param g geometry
+    ---@param og geometry
+    ---@param distance number
+    ---@return geometry
+    local function snap_outside(g, og, distance)
+        local diff
 
-    -- It's easiest to undo changes afterwards if they're not allowed
-    if fixed_x then
-        bounds.x = geo.x
-    end
-    if fixed_y then
-        bounds.y = geo.y
+        diff = g.x - (og.x + og.width)
+        if 0 < diff and diff < distance then
+            g.x = g.x - diff
+        else
+            diff = og.x - (g.x + g.width)
+            if 0 < diff and diff < distance then
+                g.x = g.x + diff
+            end
+        end
+
+        diff = g.y - (og.y + og.height)
+        if 0 < diff and diff < distance then
+            g.y = g.y - diff
+        else
+            diff = og.y - (g.y + g.height)
+            if 0 < diff and diff < distance then
+                g.y = g.y + diff
+            end
+        end
+
+        return g
     end
 
-    return bounds
+    ---Snap a client to the closest client or screen edge.
+    ---@param client? client # The client to snap. Default: `client.focus`
+    ---@param geo? geometry # The geometry.
+    ---@return geometry|nil # The new geometry.
+    function M.move(client, geo)
+        client = client or capi.client.focus
+        if not client then
+            return
+        end
+
+        local distance = beautiful.snap.distance or 10
+        local gap = uui.thickness(beautiful.snap.gap or 5)
+
+        geo = fix_client_geometry(uui.inflate, client, geo or client:geometry(), gap)
+
+        geo = snap_inside(geo, uui.shrink(client.screen.geometry, gap), distance)
+        geo = snap_inside(geo, uui.shrink(client.screen.tiling_area, gap), distance)
+
+        for _, other in ipairs(aclient.visible(client.screen)) do
+            if other ~= client then
+                local other_geo = fix_client_geometry(uui.inflate, other, other:geometry(), gap)
+                geo = snap_inside(geo, other_geo, distance)
+                geo = snap_outside(geo, other_geo, distance)
+            end
+        end
+
+        return fix_client_geometry(uui.shrink, client, geo, gap)
+    end
 end
 
-mresize.add_move_callback(function(client, geo, args)
-    return M.snap(client, geo.x, geo.y)
-end, "mouse.move")
+-- Resize
+do
+    ---@param g geometry
+    ---@param og geometry
+    ---@param distance number
+    ---@param origin edge|corner
+    ---@return geometry
+    local function snap_inside(g, og, distance, origin)
+        if sfind(origin, "left", nil, true) then
+            local diff = g.x - og.x
+            if 0 < diff and diff < distance then
+                g.x = og.x
+                g.width = g.width + diff
+            end
+        elseif sfind(origin, "right", nil, true) then
+            local diff = (og.x + og.width) - (g.x + g.width)
+            if 0 < diff and diff < distance then
+                g.width = g.width + diff
+            end
+        end
+        if sfind(origin, "top", nil, true) then
+            local diff = g.y - og.y
+            if 0 < diff and diff < distance then
+                g.y = og.y
+                g.height = g.height + diff
+            end
+        elseif sfind(origin, "bottom", nil, true) then
+            local diff = (og.y + og.height) - (g.y + g.height)
+            if 0 < diff and diff < distance then
+                g.height = g.height + diff
+            end
+        end
+        return g
+    end
+
+    ---@param g geometry
+    ---@param og geometry
+    ---@param distance number
+    ---@param origin edge|corner
+    ---@return geometry
+    local function snap_outside(g, og, distance, origin)
+        if sfind(origin, "left", nil, true) then
+            local diff = g.x - (og.x + og.width)
+            if 0 < diff and diff < distance then
+                g.x = g.x - diff
+                g.width = g.width + diff
+            end
+        elseif sfind(origin, "right", nil, true) then
+            local diff = og.x - (g.x + g.width)
+            if 0 < diff and diff < distance then
+                g.width = g.width + diff
+            end
+        end
+        if sfind(origin, "top", nil, true) then
+            local diff = g.y - (og.y + og.height)
+            if 0 < diff and diff < distance then
+                g.y = g.y - diff
+                g.height = g.height + diff
+            end
+        elseif sfind(origin, "bottom", nil, true) then
+            local diff = og.y - (g.y + g.height)
+            if 0 < diff and diff < distance then
+                g.height = g.height + diff
+            end
+        end
+        return g
+    end
+
+    ---Snap a client to the closest client or screen edge.
+    ---@param client? client # The client to snap. Default: `client.focus`
+    ---@param geo? geometry # The geometry.
+    ---@param origin? edge|corner
+    ---@return geometry|nil # The new geometry.
+    function M.resize(client, geo, origin)
+        client = client or capi.client.focus
+        if not client then
+            return
+        end
+        if not origin then
+            return
+        end
+
+        local original_geo = geo or client:geometry()
+
+        local distance = beautiful.snap.distance or 10
+        local gap = uui.thickness(beautiful.snap.gap or 5)
+
+        geo = fix_client_geometry(uui.inflate, client, original_geo, gap)
+
+        geo = snap_inside(geo, uui.shrink(client.screen.geometry, gap), distance, origin)
+        geo = snap_inside(geo, uui.shrink(client.screen.tiling_area, gap), distance, origin)
+
+        for _, other in ipairs(aclient.visible(client.screen)) do
+            if other ~= client then
+                local other_geo = fix_client_geometry(uui.inflate, other, other:geometry(), gap)
+                geo = snap_inside(geo, other_geo, distance, origin)
+                geo = snap_outside(geo, other_geo, distance, origin)
+            end
+        end
+
+        geo = fix_client_geometry(uui.shrink, client, geo, gap)
+
+        return geo
+    end
+end
 
 return M

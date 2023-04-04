@@ -92,8 +92,11 @@ local function get_layout_geometry(self, width, height, include_paddings, includ
     return x1, y2, w, h, ew, eh
 end
 
--- Prepare drawing the children of this widget
-function M.object:before_draw_children(context, cr, width, height)
+---@param _ widget_context
+---@param cr cairo_context
+---@param width number
+---@param height number
+function M.object:before_draw_children(_, cr, width, height)
     local bw = self._style.current.border_width or 0
     local shape = self._style.current.shape or (bw > 0 and gshape.rectangle or nil)
     if shape then
@@ -131,7 +134,10 @@ function M.object:before_draw_children(context, cr, width, height)
     end
 end
 
--- Draw the border
+---@param _ widget_context
+---@param cr cairo_context
+---@param width number
+---@param height number
 function M.object:after_draw_children(_, cr, width, height)
     local bw = self._style.current.border_width or 0
     local shape = self._style.current.shape or (bw > 0 and gshape.rectangle or nil)
