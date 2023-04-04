@@ -599,7 +599,7 @@ theme.clientlist.item = {
 
 ----------------------------------------------------------------------------------------------------
 
-local client_border_width = dpi(3)
+local client_border_width = dpi(1)
 local client_border_radius = main_border_radius
 
 theme.client = {
@@ -852,9 +852,10 @@ theme.snap = {
     gap = theme.gap,
     distance = dpi(16),
     edge = {
-        distance = dpi(4),
-        bg = "#ff0000",
-        border_width = dpi(6),
+        distance = dpi(8),
+        bg = theme.common.fg .. "33",
+        border_color = nil,
+        border_width = 0,
         shape = function(cr, width, height)
             gshape.rounded_rect(cr, width, height, client_border_radius)
         end,

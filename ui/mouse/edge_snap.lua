@@ -18,6 +18,7 @@ local wibox = require("wibox")
 local cairo = require("lgi").cairo
 local beautiful = require("theme.theme")
 local uui = require("utils.ui")
+local ucolor = require("utils.color")
 
 
 local placement_context = "edge_snap"
@@ -29,9 +30,10 @@ local preview_wibox = nil
 local current_state = {}
 
 ---@param geo geometry
-local function draw_preview(geo)
-    local shape = beautiful.snap.edge.shape or gshape.rectangle
-    local border_width = beautiful.snap.edge.border_width or 5
+---@param shape shape
+---@param border_width number
+local function draw_border_preview(geo, shape, border_width)
+    ---@cast shape -false
 
     local img = cairo.ImageSurface(cairo.Format.A1, geo.width + border_width, geo.height + border_width)
     local cr = cairo.Context(img)
@@ -51,8 +53,9 @@ local function draw_preview(geo)
     img:finish()
 end
 
+---@param client client
 ---@param geo? geometry
-local function show_preview(geo)
+local function show_preview(client, geo)
     if not geo then
         if preview_wibox then
             preview_wibox.visible = false
@@ -60,14 +63,32 @@ local function show_preview(geo)
         return
     end
 
+    local bg = beautiful.snap.edge.bg and (beautiful.snap.edge.bg or "#ffffff33")
+    local border_color = beautiful.snap.edge.border_color or "#ff0000"
+    local border_width = beautiful.snap.edge.border_width or 5
+    local shape = beautiful.snap.edge.shape or gshape.rectangle
+
     preview_wibox = preview_wibox or wibox {
         ontop = true,
-        bg = gcolor(beautiful.snap.edge.bg or "#ff0000"),
+        bg = bg and bg or border_color,
+        border_color = bg and border_color or nil,
+        border_width = bg and border_width or 0,
+        shape = shape,
     }
+
+    if bg then
+        geo.width = geo.width + 2 * (client.border_width - border_width)
+        geo.height = geo.height + 2 * (client.border_width - border_width)
+    else
+        geo.width = geo.width + 2 * client.border_width
+        geo.height = geo.height + 2 * client.border_width
+    end
 
     preview_wibox:geometry(geo)
 
-    draw_preview(geo)
+    if not bg then
+        draw_border_preview(geo, shape, border_width)
+    end
 
     preview_wibox.visible = true
 end
@@ -149,13 +170,9 @@ local function detect(client)
         return
     end
 
-    local geo
-    if current_state.placement then
-        geo = current_state.placement(client, true)
-        geo.width = geo.width + 2 * client.border_width
-        geo.height = geo.height + 2 * client.border_width
-    end
-    show_preview(geo)
+    local placement = current_state.placement
+    local geo = placement and placement(client, true)
+    show_preview(client, geo)
 end
 
 ---@param client client
