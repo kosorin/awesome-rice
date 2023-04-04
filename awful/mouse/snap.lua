@@ -1,1 +1,1 @@
-return {} -- Moved to ui/snap.lua, must be empty to override default implementation!
+return {} -- Must be empty to override default implementation!
