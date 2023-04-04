@@ -612,7 +612,7 @@ theme.client = {
     active = {
         bg = theme.common.bg,
         fg = theme.common.fg_bright,
-        border_color = theme.common.primary,
+        border_color = theme.common.primary_bright,
         border_width = client_border_width,
     },
     urgent = {
