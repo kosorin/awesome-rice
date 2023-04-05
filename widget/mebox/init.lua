@@ -201,6 +201,7 @@ end
 
 ---@param menu Mebox
 ---@param args? Mebox.show.args
+---@return screen
 local function place(menu, args)
     args = args or {}
 
@@ -231,6 +232,8 @@ local function place(menu, args)
         or menu.placement
         or M.placement.default
     placement(menu, placement_args)
+
+    return screen
 end
 
 ---@param item MeboxItem
@@ -439,6 +442,12 @@ function M.object:hide(context)
     end
     context = context or {}
 
+    if not self._private.parent then
+        for _, s in ipairs(capi.screen) do
+            s.hide_fswibox()
+        end
+    end
+
     hide_active_submenu(self)
 
     local parent = self._private.parent
@@ -602,6 +611,12 @@ function M.object:show(args, context)
     end
 
     place(self, args)
+
+    for _, s in ipairs(capi.screen) do
+        s.show_fswibox(function()
+            self:hide()
+        end)
+    end
 
     self.visible = true
 end
