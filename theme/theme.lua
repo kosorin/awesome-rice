@@ -34,8 +34,8 @@ theme.icon_theme = "Archdroid-Amber"
 
 ----------------------------------------------------------------------------------------------------
 
-theme.font_name = "JetBrainsMono Nerd Font"
-theme.font_size = 11
+theme.font_name = "FantasqueSansMono Nerd Font"
+theme.font_size = 12
 
 -- TODO: Move to the utils?
 ---@param args? { name?: string, size?: number, size_factor?: number, style?: string|string[] }
