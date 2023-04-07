@@ -578,7 +578,8 @@ local function build_pages(self, data, width, height, filter_highlighted)
     width = math.floor(width / self.page_columns) - ((self.page_columns - 1) * self.group_spacing)
     height = height
 
-    local max_description_width = width - data.max_trigger_width - self.item_spacing
+    local description_offset = math.ceil(self.item_spacing * 1.6)
+    local max_description_width = width - data.max_trigger_width - description_offset
 
     -- It's useless to have too narrow description column,
     -- so set the minimum width according to the width of the "foobar" text
@@ -635,7 +636,7 @@ local function build_pages(self, data, width, height, filter_highlighted)
                 valign = "top",
                 markup = group.markup,
                 point = {
-                    x = offset_x + data.max_trigger_width + self.item_spacing,
+                    x = offset_x + data.max_trigger_width + description_offset,
                     y = offset_y,
                     width = max_description_width,
                     height = group.size.height,
@@ -682,7 +683,7 @@ local function build_pages(self, data, width, height, filter_highlighted)
                         valign = "top",
                         markup = item.description.highlighted or item.description.markup,
                         point = {
-                            x = offset_x + data.max_trigger_width + self.item_spacing,
+                            x = offset_x + data.max_trigger_width + description_offset,
                             y = offset_y,
                             width = max_description_width,
                         },
