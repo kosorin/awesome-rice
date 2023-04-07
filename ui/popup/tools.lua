@@ -23,7 +23,7 @@ function M.mt:__call(...)
 end
 
 
----@class ToolsPopup : awful.popup, stylable
+---@class ToolsPopup : Popup, awful.popup, stylable
 ---@field package _private ToolsPopup.private
 ---Style properties:
 ---@field paddings thickness
@@ -41,15 +41,13 @@ noice.define_style(M.object, {
 })
 
 function M.object:show()
-    if self.visible or not ui_controller.enter(self) then
+    if self.visible then
         return
     end
-
-    self.visible = true
+    ui_controller.enter(self)
 end
 
 function M.object:hide()
-    self.visible = false
     ui_controller.leave(self)
 end
 

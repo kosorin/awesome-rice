@@ -120,7 +120,7 @@ end
 ---@field max_description_width number -- also used for group header
 ---@field [integer] Bindbox.data.group
 
----@class Bindbox : awful.popup, stylable
+---@class Bindbox : Popup, awful.popup, stylable
 ---@field package _private Bindbox.private
 ---Style properties:
 ---@field font unknown
@@ -975,7 +975,6 @@ function M.object:hide()
 
     stop_find(self)
 
-    self.visible = false
     ui_controller.leave(self)
 end
 
@@ -985,7 +984,7 @@ end
 
 ---@param args? Bindbox.show.args
 function M.object:show(args)
-    if self.visible or not ui_controller.enter(self) then
+    if self.visible then
         return
     end
 
@@ -1003,7 +1002,7 @@ function M.object:show(args)
 
     start_find(self, data)
 
-    self.visible = true
+    ui_controller.enter(self)
 end
 
 ---@param args? Bindbox.show.args

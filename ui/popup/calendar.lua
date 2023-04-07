@@ -31,7 +31,7 @@ function M.mt:__call(...)
 end
 
 
----@class CalendarPopup : awful.popup, stylable
+---@class CalendarPopup : Popup, awful.popup, stylable
 ---@field package _private CalendarPopup.private
 ---Style properties:
 ---@field paddings thickness
@@ -52,17 +52,16 @@ noice.define_style(M.object, {
 })
 
 function M.object:show()
-    if self.visible or not ui_controller.enter(self) then
+    if self.visible then
         return
     end
 
     self:today()
 
-    self.visible = true
+    ui_controller.enter(self)
 end
 
 function M.object:hide()
-    self.visible = false
     ui_controller.leave(self)
 end
 
