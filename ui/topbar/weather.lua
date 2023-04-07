@@ -188,7 +188,7 @@ function weather_widget.new(wibar)
         item_width = dpi(180),
         placement = beautiful.wibar.build_placement(self, self._private.wibar),
         {
-            text = "open dashboard",
+            text = "Open Dashboard",
             icon = config.places.theme .. "/icons/open-in-new.svg",
             icon_color = beautiful.palette.gray,
             callback = function()
@@ -201,7 +201,7 @@ function weather_widget.new(wibar)
         },
         mebox.separator,
         {
-            text = "refresh",
+            text = "Refresh",
             icon = config.places.theme .. "/icons/refresh.svg",
             icon_color = beautiful.palette.gray,
             callback = function()

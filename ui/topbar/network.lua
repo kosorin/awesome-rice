@@ -45,15 +45,15 @@ local styles = {
     connected = setmetatable({
     }, { __index = beautiful.capsule.styles.normal }),
     disconnected = setmetatable({
-        text = "disconnected",
+        text = "Disconnected",
         icon = "lan-disconnect",
     }, { __index = beautiful.capsule.styles.palette.yellow }),
     error = setmetatable({
-        text = "error",
+        text = "Error",
         icon = "lan-disconnect",
     }, { __index = beautiful.capsule.styles.palette.red }),
     loading = setmetatable({
-        text = "loading",
+        text = "Loading",
         icon = "lan-pending",
     }, { __index = beautiful.capsule.styles.disabled }),
 }
@@ -236,7 +236,7 @@ function network_widget.new(wibar)
         item_width = dpi(136),
         placement = beautiful.wibar.build_placement(self, self._private.wibar),
         {
-            text = "graph",
+            text = "Graph",
             icon = config.places.theme .. "/icons/chart-line.svg",
             icon_color = beautiful.palette.gray,
             on_show = function(item) item.checked = not not self._private.show_graph end,

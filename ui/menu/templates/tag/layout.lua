@@ -7,6 +7,7 @@ local pango = require("utils.pango")
 local hui = require("utils.ui")
 local css = require("utils.css")
 local common = require("ui.menu.templates.tag._common")
+local core_layouts = require("core.layouts")
 
 
 local M = {}
@@ -153,7 +154,7 @@ function M.new()
                 local checked = tag.layout == layout
 
                 items[i] = {
-                    text = name,
+                    text = core_layouts.name[name] or name,
                     icon = icon,
                     checked = checked,
                     callback = function() tag.layout = layout end,

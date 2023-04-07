@@ -99,7 +99,7 @@ function M.new()
             mebox.separator,
             {
                 width = dpi(100),
-                text = "reset",
+                text = "Reset",
                 icon = config.places.theme .. "/icons/arrow-u-left-top.svg",
                 icon_color = beautiful.palette.gray,
                 callback = function(item, menu)

@@ -67,13 +67,13 @@ function M.new()
                 end,
                 items_source = {
                     {
-                        text = "yes, " .. text,
+                        text = "Yes, " .. text,
                         icon = icon,
                         icon_color = icon_color,
                         callback = callback,
                     },
                     {
-                        text = "no, cancel",
+                        text = "No, Cancel",
                         callback = function(item, menu, context)
                             menu:hide({ select_parent = context.source ~= "mouse" })
                             return false
@@ -89,20 +89,20 @@ function M.new()
     local args = {
         item_width = dpi(200),
         items_source = {
-            mebox.header("power"),
-            confirmation_item("shut down", config.places.theme .. "/icons/power.svg", beautiful.palette.red, power_service.shutdown),
-            confirmation_item("reboot", config.places.theme .. "/icons/restart.svg", beautiful.palette.yellow, power_service.reboot),
-            confirmation_item("suspend", config.places.theme .. "/icons/sleep.svg", beautiful.palette.magenta, power_service.suspend),
-            mebox.header("session"),
-            confirmation_item("log out", config.places.theme .. "/icons/exit-run.svg", beautiful.palette.green, power_service.kill_session),
+            mebox.header("Power"),
+            confirmation_item("Shut Down", config.places.theme .. "/icons/power.svg", beautiful.palette.red, power_service.shutdown),
+            confirmation_item("Reboot", config.places.theme .. "/icons/restart.svg", beautiful.palette.yellow, power_service.reboot),
+            confirmation_item("Suspend", config.places.theme .. "/icons/sleep.svg", beautiful.palette.magenta, power_service.suspend),
+            mebox.header("Session"),
+            confirmation_item("Log Out", config.places.theme .. "/icons/exit-run.svg", beautiful.palette.green, power_service.kill_session),
             {
-                text = "lock session",
+                text = "Lock Session",
                 icon = config.places.theme .. "/icons/lock.svg",
                 icon_color = beautiful.palette.gray,
                 callback = power_service.lock_session,
             },
             mebox.separator,
-            mebox.header("shut down timer"),
+            mebox.header("Shut Down Timer"),
             {
                 icon = config.places.theme .. "/icons/power.svg",
                 submenu = timer_menu_template.shared,
@@ -130,7 +130,7 @@ function M.new()
                                 or beautiful.capsule.styles.palette.orange
                             item.icon_color = item.style.fg
                         else
-                            item.text = "not scheduled"
+                            item.text = "Not Scheduled"
                             item.style = nil
                             item.icon_color = beautiful.palette.orange
                         end
@@ -139,7 +139,7 @@ function M.new()
             },
             mebox.separator,
             {
-                text = "awesome",
+                text = "Awesome",
                 icon = config.places.theme .. "/icons/awesomewm.svg",
                 icon_color = beautiful.palette.blue,
                 submenu = {
@@ -147,13 +147,13 @@ function M.new()
                     border_color = beautiful.common.urgent_bright,
                     items_source = {
                         {
-                            text = "restart",
+                            text = "Restart",
                             icon = config.places.theme .. "/icons/restart.svg",
                             icon_color = beautiful.palette.orange,
                             callback = function() capi.awesome.restart() end,
                         },
                         {
-                            text = "quit",
+                            text = "Quit",
                             icon = config.places.theme .. "/icons/exit-run.svg",
                             icon_color = beautiful.palette.red,
                             callback = function() capi.awesome.quit() end,
@@ -162,7 +162,7 @@ function M.new()
                 },
             },
             mebox.separator,
-            mebox.header("uptime"),
+            mebox.header("Uptime"),
             {
                 enabled = false,
                 opacity = 1,

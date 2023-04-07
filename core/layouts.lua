@@ -11,6 +11,12 @@ local layouts = {
         max = suit.max,
         fullscreen = suit.max.fullscreen,
     },
+    name = {
+        tile = "Tiling",
+        floating = "Floating",
+        max = "Maximize",
+        fullscreen = "Fullscreen",
+    },
 }
 
 capi.tag.connect_signal("request::default_layouts", function()

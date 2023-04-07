@@ -193,7 +193,7 @@ function M.new(args)
                     },
                     {
                         widget = wibox.widget.textbox,
-                        text = "today",
+                        text = "Today",
                         halign = "center",
                     },
                 },

@@ -22,7 +22,7 @@ function M.new()
             local items = {
                 {
                     flex = true,
-                    text = "restore",
+                    text = "Restore",
                     icon = config.places.theme .. "/icons/shuffle-variant.svg",
                     icon_color = beautiful.palette.gray,
                     callback = function()
@@ -51,7 +51,7 @@ function M.new()
 
             insert(items, {
                 flex = true,
-                text = "open directory",
+                text = "Open Directory",
                 icon = config.places.theme .. "/icons/folder-image.svg",
                 icon_color = beautiful.palette.blue,
                 callback = function()

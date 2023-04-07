@@ -65,7 +65,7 @@ function torrent_widget:refresh()
 
     if response.success == nil then
         style = styles.loading
-        text = "loading"
+        text = "Loading"
         icon = "pirate"
     elseif response.success then
         local data = response.data
@@ -76,19 +76,19 @@ function torrent_widget:refresh()
             style = data.any_unknown_eta and styles.leeching_missing or styles.leeching
             text = eta >= 0
                 and humanizer.relative_time(eta, time_args)
-                or "missing"
+                or "Missing"
         elseif data.status == torrent_service.status_codes.idle then
             style = incomplete and styles.incomplete or styles.idle
-            text = "idle"
+            text = "Idle"
         elseif data.status == torrent_service.status_codes.seeding then
             style = incomplete and styles.incomplete or styles.seeding
-            text = "seeding"
+            text = "Seeding"
         elseif data.status == torrent_service.status_codes.verifying then
             style = incomplete and styles.incomplete or styles.verifying
-            text = "verifying"
+            text = "Verifying"
         else
             style = styles.unknown_status
-            text = format("status:%s", pango.escape(tostring(data.status) or "-"))
+            text = format("Status:%s", pango.escape(tostring(data.status) or "-"))
         end
 
         local info_parts = {}
@@ -106,7 +106,7 @@ function torrent_widget:refresh()
         icon = data.alternative_speed_enabled and "speedometer-slow" or "speedometer"
     else
         style = styles.error
-        text = "error"
+        text = "Error"
         icon = "pirate"
     end
 
@@ -154,38 +154,38 @@ function torrent_widget.new(wibar)
         item_width = dpi(300),
         placement = beautiful.wibar.build_placement(self, self._private.wibar),
         {
-            text = "open transmission",
+            text = "Open Transmission",
             icon = config.places.theme .. "/icons/open-in-new.svg",
             icon_color = beautiful.palette.gray,
             callback = function() awful.spawn.spawn(config.commands.open("http://localhost:9091/transmission/web/")) end,
         },
         {
-            text = "open sonarr",
+            text = "Open Sonarr",
             icon = config.places.theme .. "/icons/open-in-new.svg",
             icon_color = beautiful.palette.gray,
             callback = function() awful.spawn.spawn(config.commands.open("http://localhost:8989/")) end,
         },
         {
-            text = "open radarr",
+            text = "Open Radarr",
             icon = config.places.theme .. "/icons/open-in-new.svg",
             icon_color = beautiful.palette.gray,
             callback = function() awful.spawn.spawn(config.commands.open("http://localhost:7878/")) end,
         },
         mebox.separator,
         {
-            text = "start all",
+            text = "Start All",
             icon = config.places.theme .. "/icons/play.svg",
             icon_color = beautiful.palette.green,
             callback = function() torrent_service.start() end,
         },
         {
-            text = "pause all",
+            text = "Pause All",
             icon = config.places.theme .. "/icons/pause.svg",
             icon_color = beautiful.palette.blue,
             callback = function() torrent_service.stop() end,
         },
         {
-            text = "alternative speed limit",
+            text = "Alternative Speed Limit",
             icon = config.places.theme .. "/icons/tortoise.svg",
             icon_color = beautiful.palette.gray,
             on_show = function(item) item.checked = not not torrent_service.last_response.data.alternative_speed_enabled end,
@@ -193,7 +193,7 @@ function torrent_widget.new(wibar)
         },
         mebox.separator,
         {
-            text = "refresh",
+            text = "Refresh",
             icon = config.places.theme .. "/icons/refresh.svg",
             icon_color = beautiful.palette.gray,
             callback = function() torrent_service.update() end,

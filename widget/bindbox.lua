@@ -1117,9 +1117,9 @@ function M.new(args)
         self.widget:get_children_by_id(id)[1] --[[@as wibox.widget.textbox]]:set_markup(markup)
     end
 
-    set_binding_hint("#binding_hide", "Escape", "close")
-    set_binding_hint("#binding_next_page", { btn.wheel_down, "Down", "Next" }, "next page")
-    set_binding_hint("#binding_previous_page", { btn.wheel_up, "Up", "Prior" }, "previous page")
+    set_binding_hint("#binding_hide", "Escape", "Close")
+    set_binding_hint("#binding_next_page", { btn.wheel_down, "Down", "Next" }, "Next Page")
+    set_binding_hint("#binding_previous_page", { btn.wheel_up, "Up", "Prior" }, "Previous Page")
 
     return self
 end

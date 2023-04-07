@@ -117,7 +117,7 @@ function M.new(default_timeout)
         items_source = {
             {
                 layout_add = function(layout, item_widget) layout:insert(1, item_widget) end,
-                text = "start",
+                text = "Start",
                 icon = config.places.theme .. "/icons/play.svg",
                 icon_color = beautiful.palette.green,
                 callback = function()
@@ -127,7 +127,7 @@ function M.new(default_timeout)
             {
                 layout_add = function(layout, item_widget) layout:insert(2, item_widget) end,
                 enabled = false,
-                text = "stop",
+                text = "Stop",
                 icon = config.places.theme .. "/icons/stop.svg",
                 icon_color = beautiful.palette.red,
                 callback = function()

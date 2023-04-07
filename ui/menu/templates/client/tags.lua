@@ -23,7 +23,7 @@ function M.new()
 
             ---@type MeboxItem.args[]
             local items = {
-                common.build_simple_toggle("sticky", "sticky", nil, "/icons/pin.svg", beautiful.palette.white),
+                common.build_simple_toggle("Sticky", "sticky", nil, "/icons/pin.svg", beautiful.palette.white),
             }
 
             if #screen_tags > 0 then

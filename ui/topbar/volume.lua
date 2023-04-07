@@ -148,13 +148,13 @@ function volume_widget.new(wibar)
         item_width = dpi(180),
         placement = beautiful.wibar.build_placement(self, self._private.wibar),
         {
-            text = "open mixer",
+            text = "Open Mixer",
             icon = config.places.theme .. "/icons/tune.svg",
             icon_color = beautiful.palette.orange,
             callback = function() self:show_tools(config.apps.mixer) end,
         },
         {
-            text = "open bluetooth",
+            text = "Open Bluetooth",
             icon = config.places.theme .. "/icons/bluetooth-settings.svg",
             icon_color = beautiful.palette.blue,
             callback = function() self:show_tools(config.apps.bluetooth_control) end,

@@ -96,7 +96,7 @@ local function generate_menu(desktop_files)
 
     table.insert(root_menu.items_source, mebox.separator)
     table.insert(root_menu.items_source, {
-        text = "reload",
+        text = "Reload",
         icon = config.places.theme .. "/icons/refresh.svg",
         icon_color = beautiful.palette.gray,
         callback = function() desktop_utils.load_desktop_files() end,

@@ -13,49 +13,49 @@ local main_menu
 local menu_items = {}
 
 table.insert(menu_items, {
-    text = "terminal",
+    text = "Terminal",
     icon = config.places.theme .. "/icons/console-line.svg",
     icon_color = beautiful.palette.gray,
     callback = function() awful.spawn(config.apps.terminal) end,
 })
 table.insert(menu_items, {
-    text = "file manager",
+    text = "File Manager",
     icon = config.places.theme .. "/icons/folder.svg",
     icon_color = beautiful.palette.yellow,
     callback = function() awful.spawn(config.apps.file_manager) end,
 })
 table.insert(menu_items, {
-    text = "text editor",
+    text = "Text Editor",
     icon = config.places.theme .. "/icons/file-document-edit.svg",
     icon_color = beautiful.palette.white,
     callback = function() awful.spawn(config.apps.editor) end,
 })
 table.insert(menu_items, {
-    text = "web browser",
+    text = "Web Browser",
     icon = config.places.theme .. "/icons/web.svg",
     icon_color = beautiful.palette.blue,
     callback = function() awful.spawn(config.apps.browser) end,
 })
 table.insert(menu_items, {
-    text = "calculator",
+    text = "Calculator",
     icon = config.places.theme .. "/icons/calculator.svg",
     icon_color = beautiful.palette.magenta,
     callback = function() awful.spawn(config.apps.calculator) end,
 })
 table.insert(menu_items, {
-    text = "music player",
+    text = "Music Player",
     icon = config.places.theme .. "/icons/music.svg",
     icon_color = beautiful.palette.green,
     callback = function() awful.spawn(config.apps.music_player) end,
 })
 table.insert(menu_items, {
-    text = "video player",
+    text = "Video Player",
     icon = config.places.theme .. "/icons/video.svg",
     icon_color = beautiful.palette.red,
     callback = function() awful.spawn(config.apps.video_player) end,
 })
 table.insert(menu_items, {
-    text = "applications",
+    text = "Applications",
     icon = config.places.theme .. "/icons/apps.svg",
     icon_color = beautiful.palette.orange,
     cache_submenu = false,
@@ -65,7 +65,7 @@ table.insert(menu_items, {
 if config.features.wallpaper_menu then
     table.insert(menu_items, mebox.separator)
     table.insert(menu_items, {
-        text = "wallpaper",
+        text = "Wallpaper",
         icon = config.places.theme .. "/icons/image-size-select-actual.svg",
         icon_color = beautiful.palette.green,
         submenu = menu_templates.wallpaper.shared,
@@ -74,14 +74,14 @@ end
 
 table.insert(menu_items, mebox.separator)
 table.insert(menu_items, {
-    text = "shortcuts",
+    text = "Shortcuts",
     icon = config.places.theme .. "/icons/apple-keyboard-command.svg",
     icon_color = beautiful.palette.blue,
     callback = function() capi.awesome.emit_signal("main_bindbox::show") end,
 })
 table.insert(menu_items, mebox.separator)
 table.insert(menu_items, {
-    text = "exit",
+    text = "Exit",
     icon = config.places.theme .. "/icons/power.svg",
     icon_color = beautiful.palette.red,
     submenu = menu_templates.power.shared,

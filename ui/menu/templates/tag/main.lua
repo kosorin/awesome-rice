@@ -25,9 +25,9 @@ function M.new()
 
             local items = {}
 
-            insert(items, mebox.header("client"))
+            insert(items, mebox.header("Client"))
             insert(items, {
-                text = "move here",
+                text = "Move Here",
                 icon = config.places.theme .. "/icons/arrow-down-right-bold.svg",
                 icon_color = beautiful.palette.gray,
                 callback = function()
@@ -38,35 +38,35 @@ function M.new()
                 end,
             })
             insert(items, {
-                text = "move all here",
+                text = "Move All Here",
                 icon = config.places.theme .. "/icons/arrow-down-right-bold.svg",
                 icon_color = beautiful.palette.gray,
                 callback = function() screen_helper.clients_to_tag(tag.screen, tag) end,
             })
             insert(items, mebox.separator)
 
-            insert(items, mebox.header("tag"))
+            insert(items, mebox.header("Tag"))
             if taglist then
                 insert(items, {
-                    text = "rename",
+                    text = "Rename",
                     icon = config.places.theme .. "/icons/rename.svg",
                     icon_color = beautiful.palette.green,
                     callback = function() taglist:rename_tag_inline(tag) end,
                 })
             end
             insert(items, {
-                text = "layout",
+                text = "Layout",
                 icon = config.places.theme .. "/icons/view-grid.svg",
                 icon_color = beautiful.palette.blue,
                 submenu = layout_menu_template.shared,
             })
             insert(items, mebox.separator)
 
-            insert(items, common.build_simple_toggle("volatile", "volatile", nil, "/icons/delete-clock.svg", beautiful.palette.gray))
+            insert(items, common.build_simple_toggle("Volatile", "volatile", nil, "/icons/delete-clock.svg", beautiful.palette.gray))
             insert(items, mebox.separator)
 
             insert(items, {
-                text = "delete",
+                text = "Delete",
                 icon = config.places.theme .. "/icons/delete-forever.svg",
                 icon_color = beautiful.palette.red,
                 callback = function()
