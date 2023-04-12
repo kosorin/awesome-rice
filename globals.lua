@@ -1,5 +1,3 @@
-DEBUG = (os.getenv("DEBUG") or "") ~= ""
-
 Capi = {
     ---@diagnostic disable: undefined-global
     awesome = awesome,
