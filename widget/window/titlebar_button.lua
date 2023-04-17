@@ -12,8 +12,8 @@ local uui = require("utils.ui")
 local binding = require("io.binding")
 
 
----@class Capsule.module
----@operator call: Capsule
+---@class TitlebarButton.module
+---@operator call: TitlebarButton
 local M = { mt = {} }
 
 function M.mt:__call(...)
@@ -21,31 +21,31 @@ function M.mt:__call(...)
 end
 
 
----@class Capsule : wibox.container, stylable
----@field package _private Capsule.private
+---@class TitlebarButton : wibox.container, stylable
+---@field package _private TitlebarButton.private
 ---@field package _style stylable.data
 ---
----@field get_bg fun(self: Capsule): lgi.cairo.Pattern
----@field get_fg fun(self: Capsule): lgi.cairo.Pattern
----@field get_border_color fun(self: Capsule): lgi.cairo.Pattern
----@field get_border_width fun(self: Capsule): number
----@field get_shape fun(self: Capsule): shape|nil
----@field get_margins fun(self: Capsule): thickness
----@field get_paddings fun(self: Capsule): thickness
----@field get_hover_overlay fun(self: Capsule): lgi.cairo.Pattern
----@field get_press_overlay fun(self: Capsule): lgi.cairo.Pattern
+---@field get_bg fun(self: TitlebarButton): lgi.cairo.Pattern
+---@field get_fg fun(self: TitlebarButton): lgi.cairo.Pattern
+---@field get_border_color fun(self: TitlebarButton): lgi.cairo.Pattern
+---@field get_border_width fun(self: TitlebarButton): number
+---@field get_shape fun(self: TitlebarButton): shape|nil
+---@field get_margins fun(self: TitlebarButton): thickness
+---@field get_paddings fun(self: TitlebarButton): thickness
+---@field get_hover_overlay fun(self: TitlebarButton): lgi.cairo.Pattern
+---@field get_press_overlay fun(self: TitlebarButton): lgi.cairo.Pattern
 ---
----@field set_bg fun(self: Capsule, bg: color)
----@field set_fg fun(self: Capsule, fg: color)
----@field set_border_color fun(self: Capsule, border_color: color)
----@field set_border_width fun(self: Capsule, border_width: number)
----@field set_shape fun(self: Capsule, shape?: shape)
----@field set_margins fun(self: Capsule, margins: thickness_value)
----@field set_paddings fun(self: Capsule, paddings: thickness_value)
----@field set_hover_overlay fun(self: Capsule, hover_overlay: color)
----@field set_press_overlay fun(self: Capsule, press_overlay: color)
-M.object = { allow_empty_widget = true }
----@class Capsule.private : wibox.widget.base.private
+---@field set_bg fun(self: TitlebarButton, bg: color)
+---@field set_fg fun(self: TitlebarButton, fg: color)
+---@field set_border_color fun(self: TitlebarButton, border_color: color)
+---@field set_border_width fun(self: TitlebarButton, border_width: number)
+---@field set_shape fun(self: TitlebarButton, shape?: shape)
+---@field set_margins fun(self: TitlebarButton, margins: thickness_value)
+---@field set_paddings fun(self: TitlebarButton, paddings: thickness_value)
+---@field set_hover_overlay fun(self: TitlebarButton, hover_overlay: color)
+---@field set_press_overlay fun(self: TitlebarButton, press_overlay: color)
+M.object = {}
+---@class TitlebarButton.private : wibox.widget.base.private
 ---@field widget? wibox.widget.base
 ---@field background_widget? wibox.widget.base
 ---@field enable_overlay boolean
@@ -71,7 +71,7 @@ local function dispose_pattern(pattern)
     end
 end
 
----@param self Capsule
+---@param self TitlebarButton
 ---@param include_paddings boolean
 ---@param include_border boolean
 local function get_layout_geometry(self, width, height, include_paddings, include_border)
@@ -303,7 +303,7 @@ function M.object:set_enable_overlay(enable)
     self:emit_signal("widget::redraw_needed")
 end
 
----@param self Capsule
+---@param self TitlebarButton
 ---@param value boolean
 local function set_hover_overlay(self, value)
     if self._private.hover_overlay == value then
@@ -315,7 +315,7 @@ local function set_hover_overlay(self, value)
     end
 end
 
----@param self Capsule
+---@param self TitlebarButton
 ---@param value boolean
 local function set_press_overlay(self, value)
     if self._private.press_overlay == value then
@@ -327,16 +327,16 @@ local function set_press_overlay(self, value)
     end
 end
 
----@class Capsule.new.args
+---@class TitlebarButton.new.args
 ---@field widget? widget_value
 ---@field enable_overlay? boolean
 
----@param args? Capsule.new.args
----@return Capsule
+---@param args? TitlebarButton.new.args
+---@return TitlebarButton
 function M.new(args)
     args = args or {}
 
-    local self = base.make_widget(nil, nil, { enable_properties = true }) --[[@as Capsule]]
+    local self = base.make_widget(nil, nil, { enable_properties = true }) --[[@as TitlebarButton]]
 
     gtable.crush(self, M.object, true)
 
@@ -380,7 +380,7 @@ function M.new(args)
     end)
 
 
-    self:initialize_style(beautiful.capsule.default_style)
+    self:initialize_style(beautiful.titlebarbutton.default_style)
 
     self:apply_style(args)
 

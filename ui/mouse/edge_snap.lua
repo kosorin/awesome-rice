@@ -15,6 +15,8 @@ local wibox = require("wibox")
 local cairo = require("lgi").cairo
 local beautiful = require("theme.theme")
 local uui = require("utils.ui")
+local wborder = require("widget.window.window_border")
+local dpi = Dpi
 
 local M = {}
 
@@ -71,6 +73,43 @@ local function show_preview(client, geo)
         border_color = bg and border_color or nil,
         border_width = bg and border_width or 0,
         shape = shape,
+        widget = {
+            layout = wibox.layout.align.vertical,
+            {
+                layout = wborder,
+                position = "top",
+                corners = true,
+                forced_height = dpi(5),
+                inner_width = dpi(3),
+                inner_color = beautiful.palette.red_bright,
+            },
+            {
+                layout = wibox.layout.align.horizontal,
+                {
+                    layout = wborder,
+                    position = "left",
+                    forced_width = dpi(5),
+                    inner_width = dpi(3),
+                    inner_color = beautiful.palette.red_bright,
+                },
+                nil,
+                {
+                    layout = wborder,
+                    position = "right",
+                    forced_width = dpi(5),
+                    inner_width = dpi(3),
+                    inner_color = beautiful.palette.red_bright,
+                },
+            },
+            {
+                layout = wborder,
+                position = "bottom",
+                corners = true,
+                forced_height = dpi(5),
+                inner_width = dpi(3),
+                inner_color = beautiful.palette.red_bright,
+            },
+        },
     }
 
     if bg then

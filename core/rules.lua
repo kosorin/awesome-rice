@@ -70,15 +70,16 @@ end, { "awful.spawn", "awful.rules" }, {})
 
 
 ruled.client.connect_signal("request::rules", function()
+    ----------------------------------------------------------------------------------------------------
     ruled.client.append_rule {
         id = "global",
         rule = {},
         properties = {
             screen = awful.screen.preferred,
             focus = awful.client.focus.filter,
-            titlebars_enabled = DEBUG,
+            titlebars_enabled = true,
+            titlebars_type = "border",
             raise = true,
-            shape = beautiful.client.shape,
         },
         callback = function(client)
             awful.client.setslave(client)
@@ -103,7 +104,7 @@ ruled.client.connect_signal("request::rules", function()
         },
     }
     ruled.client.append_rule {
-        id = "picture-in-picture",
+        id = "picture_in_picture",
         rule_any = {
             name = {
                 "Picture in picture",
@@ -123,15 +124,28 @@ ruled.client.connect_signal("request::rules", function()
         },
     }
     ruled.client.append_rule {
+        id = "size_hints",
+        rule_any = {
+            class = {
+                "XTerm",
+            },
+        },
+        properties = {
+            size_hints_honor = false,
+        },
+    }
+    ----------------------------------------------------------------------------------------------------
+    ruled.client.append_rule {
         rule = {
             class = "SpeedCrunch",
         },
         properties = {
             floating = true,
             ontop = true,
-            titlebars_enabled = true,
+            titlebars_type = "window",
         },
     }
+    ----------------------------------------------------------------------------------------------------
     ruled.client.append_rule {
         rule = {
             class = "1Password",
@@ -141,6 +155,83 @@ ruled.client.connect_signal("request::rules", function()
             skip_taskbar = true,
         },
     }
+    ----------------------------------------------------------------------------------------------------
+    ruled.client.append_rule {
+        rule = {
+            class = "jetbrains-rider",
+        },
+        properties = {
+            shape = false,
+        },
+    }
+    ruled.client.append_rule {
+        rule = {
+            class = "jetbrains-rider",
+            name = "^splash$",
+        },
+        properties = {
+            floating = true,
+            skip_taskbar = true,
+            placement = awful.placement.centered,
+        },
+    }
+    ruled.client.append_rule {
+        rule = {
+            class = "jetbrains-rider",
+            name = "^Welcome to JetBrains Rider$",
+        },
+        properties = {
+            floating = true,
+            titlebars_type = "window",
+        },
+    }
+    ruled.client.append_rule {
+        rule = {
+            class = "jetbrains-rider",
+            type = "dialog",
+        },
+        properties = {
+            floating = true,
+            titlebars_type = "window",
+        },
+    }
+    ----------------------------------------------------------------------------------------------------
+    ruled.client.append_rule {
+        rule = {
+            class = "^unityhub$",
+        },
+        properties = {
+            floating = true,
+            titlebars_type = "window",
+        },
+    }
+    ruled.client.append_rule {
+        rule = {
+            class = "^Unity$",
+        },
+        except = {
+            name = "^Unity - ",
+        },
+        properties = {
+            floating = true,
+            titlebars_type = "toolbox",
+            border_width = dpi(1),
+            shape = false,
+        },
+    }
+    ruled.client.append_rule {
+        rule = {
+            class = "^Unity$",
+            name = "^Unity - ",
+        },
+        properties = {
+            floating = false,
+            titlebars_type = "border",
+            border_width = dpi(1),
+            shape = false,
+        },
+    }
+    ----------------------------------------------------------------------------------------------------
     ruled.client.append_rule {
         rule = {
             class = "qr_code_clipboard",
@@ -175,17 +266,7 @@ ruled.client.connect_signal("request::rules", function()
             },
         },
     }
-    ruled.client.append_rule {
-        rule = {
-            class = "jetbrains-rider",
-            name = "^splash$",
-        },
-        properties = {
-            floating = true,
-            placement = awful.placement.centered,
-            skip_taskbar = true,
-        },
-    }
+    ----------------------------------------------------------------------------------------------------
     ruled.client.append_rule {
         rule = {
             class = "Dragon-drop",
@@ -199,6 +280,7 @@ ruled.client.connect_signal("request::rules", function()
             border_color = beautiful.common.secondary_bright,
         },
     }
+    ----------------------------------------------------------------------------------------------------
     ruled.client.append_rule {
         rule = {
             class = "Xephyr",
@@ -207,12 +289,5 @@ ruled.client.connect_signal("request::rules", function()
             floating = false,
         },
     }
-    ruled.client.append_rule {
-        rule = {
-            class = "XTerm",
-        },
-        properties = {
-            size_hints_honor = false,
-        },
-    }
+    ----------------------------------------------------------------------------------------------------
 end)

@@ -22,10 +22,6 @@ local theme = {}
 
 ----------------------------------------------------------------------------------------------------
 
-local main_border_radius = dpi(16)
-
-----------------------------------------------------------------------------------------------------
-
 theme.gap = dpi(6)
 
 ----------------------------------------------------------------------------------------------------
@@ -248,7 +244,7 @@ theme.popup.default_style = {
     border_color = theme.common.bg_bright,
     border_width = dpi(1),
     shape = function(cr, width, height)
-        gshape.rounded_rect(cr, width, height, main_border_radius)
+        gshape.rounded_rect(cr, width, height, dpi(12))
     end,
     placement = aplacement.under_mouse,
     paddings = hui.thickness { dpi(20) },
@@ -599,33 +595,41 @@ theme.clientlist.item = {
 
 ----------------------------------------------------------------------------------------------------
 
-local client_border_width = dpi(1)
-local client_border_radius = main_border_radius
-
 theme.client = {
+    shape = nil,
     normal = {
         bg = theme.common.bg_66,
         fg = theme.common.fg,
         border_color = theme.common.bg_140,
-        border_width = client_border_width,
+        border_width = dpi(0),
     },
     active = {
         bg = theme.common.bg,
         fg = theme.common.fg_bright,
         border_color = theme.common.primary_bright,
-        border_width = client_border_width,
+        border_width = dpi(0),
     },
     urgent = {
         bg = theme.common.urgent_bright,
         fg = theme.common.fg_bright,
         border_color = theme.common.urgent_bright,
-        border_width = client_border_width,
+        border_width = dpi(0),
     },
 }
 
-function theme.client.shape(cr, width, height)
-    gshape.rounded_rect(cr, width, height, client_border_radius)
-end
+----------------------------------------------------------------------------------------------------
+
+theme.drawin_border = {}
+
+theme.drawin_border.default_style = {
+    bg = theme.common.bg,
+    fg = theme.common.fg,
+    outer_color = theme.common.bg,
+    outer_width = dpi(1),
+    inner_color = theme.common.fg,
+    inner_width = dpi(1),
+    paddings = hui.thickness(dpi(6)),
+}
 
 ----------------------------------------------------------------------------------------------------
 
@@ -633,11 +637,10 @@ do
     local button_shape = function(cr, width, height)
         gshape.rounded_rect(cr, width, height, dpi(3))
     end
-    local button_paddings = hui.thickness { dpi(5), dpi(5) }
-    local button_margins = hui.thickness { dpi(3), 0, dpi(7) }
+    local button_paddings = hui.thickness { dpi(4), dpi(4) }
     theme.titlebar = {
-        height = dpi(36),
-        paddings = hui.thickness { 0, dpi(12) },
+        height = dpi(32),
+        border_width = dpi(3),
         button = {
             opacity_normal = 0.5,
             opacity_focus = 1,
@@ -651,18 +654,16 @@ do
                     border_width = 0,
                     shape = button_shape,
                     paddings = button_paddings,
-                    margins = button_margins,
                 },
                 active = {
                     hover_overlay = hcolor.white .. "20",
                     press_overlay = hcolor.white .. "20",
-                    bg = theme.common.primary_50,
-                    fg = theme.common.fg_bright,
-                    border_color = theme.common.primary_75,
+                    bg = theme.common.primary,
+                    fg = theme.common.bg,
+                    border_color = theme.common.primary_bright,
                     border_width = 0,
                     shape = button_shape,
                     paddings = button_paddings,
-                    margins = button_margins,
                 },
                 close = {
                     hover_overlay = theme.common.urgent_bright,
@@ -672,7 +673,6 @@ do
                     border_width = 0,
                     shape = button_shape,
                     paddings = button_paddings,
-                    margins = button_margins,
                 },
             },
             icons = {
@@ -854,11 +854,9 @@ theme.snap = {
     edge = {
         distance = dpi(8),
         bg = theme.common.fg .. "33",
-        border_color = nil,
-        border_width = 0,
-        shape = function(cr, width, height)
-            gshape.rounded_rect(cr, width, height, client_border_radius)
-        end,
+        border_color = theme.common.bg,
+        border_width = dpi(1),
+        shape = nil,
     },
 }
 
