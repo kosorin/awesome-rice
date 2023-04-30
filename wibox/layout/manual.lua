@@ -12,9 +12,14 @@
 ---------------------------------------------------------------------------
 local gtable = require("gears.table")
 local base = require("wibox.widget.base")
+local noice = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
 local manual_layout = {}
+
+noice.register_element(manual_layout, "manual", "widget")
 
 --- Add some widgets to the given stack layout.
 --
@@ -241,6 +246,8 @@ local function new_manual(...)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 
     gtable.crush(ret, manual_layout, true)
+    stylable.initialize(ret, manual_layout)
+
     ret._private.widgets = {}
     ret._private.pos = {}
 

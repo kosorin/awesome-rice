@@ -34,8 +34,13 @@ local textbox = require("wibox.widget.textbox")
 local bgcontainer = require("wibox.container.background")
 local base = require("wibox.widget.base")
 local beautiful = require("beautiful")
+local noice = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
 
 local calendar = { mt = {} }
+
+noice.register_element(calendar, "calendar", "widget")
 
 local properties = { "date"        , "font"         , "spacing" , "week_numbers",
                      "start_sunday", "long_weekdays", "fn_embed", "flex_height",
@@ -390,6 +395,7 @@ local function get_calendar(type, date, font)
     local ct = bgcontainer()
     local ret = base.make_widget(ct, "calendar", {enable_properties = true})
     gtable.crush(ret, calendar, true)
+    stylable.initialize(ret, calendar)
 
     ret._private.type = type
     ret._private.container = ct

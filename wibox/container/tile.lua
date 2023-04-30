@@ -13,12 +13,37 @@ local place = require("wibox.container.place")
 local cairo = require("lgi").cairo
 local widget = require("wibox.widget")
 local gtable = require("gears.table")
+local noice = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
 
 local module = {mt = {}}
 
+local default_style = {
+    tiled = true,
+    horizontal_spacing = 0,
+    vertical_spacing = 0,
+    horizontal_crop = false,
+    vertical_crop = false,
+}
+
+noice.register_element(module, "tile", "place", default_style)
+
+for prop in pairs(default_style) do
+    module["set_" .. prop] = function(self, value)
+        if self:set_style_value(prop, value) then
+            self:emit_signal("widget::redraw_needed")
+            self:emit_signal("property::" .. prop, value)
+        end
+    end
+    module["get_" .. prop] = function(self)
+        return self:get_style_value(prop)
+    end
+end
+
 function module:draw(context, cr, width, height)
-    if not self._private.tiled then return end
     if not self._private.widget then return end
+    if not self:get_style_value("tiled") then return end
 
     local x, y, w, h = self:_layout(context, width, height)
 
@@ -135,35 +160,11 @@ end
 -- @property tiled
 -- @tparam[opt=true] boolean tiled
 
-local defaults = {
-    horizontal_spacing = 0,
-    vertical_spacing   = 0,
-    tiled              = true,
-    horizontal_crop    = false,
-    vertical_crop      = false,
-}
-
-for prop in pairs(defaults) do
-
-    module["set_"..prop] = function(self, value)
-        self._private[prop] = value
-        self:emit_signal("widget::redraw_needed", value)
-    end
-
-    module["get_"..prop] = function(self)
-        if self._private[prop] == nil then
-            return defaults[prop]
-        end
-
-        return self._private[prop]
-    end
-end
-
 local function new(_, args)
     args = args or {}
     local ret = place(args.widget, args.halign, args.valign)
     gtable.crush(ret, module, true)
-    ret._private.tiled = true
+    stylable.initialize(ret, module)
 
     local function redraw()
         ret:emit_signal("widget::redraw_needed")

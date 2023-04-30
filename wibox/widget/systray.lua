@@ -11,6 +11,9 @@ local wbase = require("wibox.widget.base")
 local drawable = require("wibox.drawable")
 local beautiful = require("beautiful")
 local gtable = require("gears.table")
+local noice = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
 local capi = {
     awesome = awesome,
     screen = screen
@@ -20,6 +23,8 @@ local error = error
 local abs = math.abs
 
 local systray = { mt = {} }
+
+noice.register_element(systray, "systray", "widget")
 
 local instance = nil
 local horizontal = true
@@ -226,6 +231,7 @@ local function new(revers)
     local ret = wbase.make_widget(nil, nil, {enable_properties = true})
 
     gtable.crush(ret, systray, true)
+    stylable.initialize(ret, systray)
 
     if revers then
         ret:set_reverse(true)

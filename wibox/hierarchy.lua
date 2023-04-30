@@ -132,11 +132,14 @@ function hierarchy_update(self, context, widget, width, height, region, matrix_t
     local old_children = self._children
     local layout_result = base.layout_widget(no_parent, context, widget, width, height)
     self._children = {}
-    for _, w in ipairs(layout_result or {}) do
+    for i, w in ipairs(layout_result or {}) do
         local r = table.remove(old_children, 1)
         if not r then
             r = hierarchy_new(self._redraw_callback, self._layout_callback, self._callback_arg)
             r._parent = self
+        end
+        if w._widget._stylable and not w._widget._stylable.ignore_hierarchy then
+            w._widget:set_parent_hierarchy(self, i)
         end
         hierarchy_update(r, context, w._widget, w._width, w._height, region, w._matrix, w._matrix * matrix_to_device)
         table.insert(self._children, r)

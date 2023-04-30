@@ -4,25 +4,30 @@ require("globals")
 
 require("config")
 
-require("theme.manager").load(require("theme.styles.default") --[[@as Theme]])
+local dark = true
+---@return Theme
+local function toggle_light_dark()
+    local theme = dark
+        and require("theme.styles.default")
+        or require("theme.styles.default_light")
+    dark = not dark
+    ---@diagnostic disable-next-line: return-type-mismatch
+    return theme
+end
 
--- require("core")
--- require("services")
--- require("ui")
-
--- ---@diagnostic disable: param-type-mismatch
--- collectgarbage("setpause", 110)
--- collectgarbage("setstepmul", 1000)
--- ---@diagnostic enable: param-type-mismatch
-
+require("theme.manager").load(toggle_light_dark())
 
 local awful = require("awful")
 local wibox = require("wibox")
+local gshape = require("gears.shape")
 local gtable = require("gears.table")
 local gtimer = require("gears.timer")
+local gears = require("gears")
+local gfilesystem = require("gears.filesystem")
 local binding = require("io.binding")
 local btn = binding.button
 local mod = binding.modifier
+local beautiful = require("theme.manager")._beautiful
 local stylable = require("theme.stylable")
 local manager = require("theme.manager")
 local pango = require("utils.pango")
@@ -30,284 +35,204 @@ local uui = require("utils.ui")
 local umouse = require("utils.mouse")
 
 
+awful.wibar {
+    position = "top",
+    widget = {
+        layout = wibox.container.background,
+        forced_height = 50,
+        wibox.widget.textbox("WIBAR A"),
+    },
+}
+
+awful.wibar {
+    position = "right",
+    height = 200,
+    widget = {
+        layout = wibox.container.background,
+        forced_width = 50,
+        wibox.widget.textbox("WIBAR C"),
+    },
+}
+
+awful.wibar {
+    position = "top",
+    stretch = false,
+    width = 200,
+    widget = {
+        layout = wibox.container.background,
+        forced_height = 50,
+        wibox.widget.textbox("WIBAR B"),
+    },
+}
+
 if true then
-    local pbar = wibox.widget.progressbar()
-    local popup = awful.popup {
-        x = 50,
-        y = 50,
-        bg = "#333333",
-        border_color = "#555555",
-        border_width = 1,
-        widget = {
+    -- return
+end
+
+local icon_path = gfilesystem.get_configuration_dir() .. "/theme/icons/calendar-month.svg"
+local icon = gears.color.recolor_image(icon_path, "#ff00ff")
+
+local w = wibox {
+    visible = true,
+    x = 50,
+    y = 50,
+    width = 500,
+    height = 1200,
+    -- bg = "#333300",
+    -- fg = "#aa00aa",
+    -- border_color = "#ffff00",
+    -- border_width = 2,
+    widget = {
+        sid = "fuu",
+        layout = wibox.container.margin,
+        {
             layout = wibox.container.constraint,
-            width = 500,
-            height = 500,
+            width = 400,
             {
-                layout = wibox.container.margin,
-                margins = 10,
+                layout = wibox.layout.fixed.vertical,
+                spacing = 20,
                 {
-                    layout = wibox.layout.fixed.vertical,
-                    spacing = 10,
-                    {
-                        widget = wibox.widget.textbox,
-                        text = "foo bar",
+                    id = "pfp",
+                    layout = wibox.container.constraint,
+                    buttons = {
+                        awful.button({}, 3, function()
+                            manager.load(toggle_light_dark())
+                        end),
                     },
                     {
-                        forced_height = 50,
-                        widget = pbar,
-                        value = 5,
-                        max_value = 12,
-                    },
-                    {
-                        widget = wibox.widget.textbox,
-                        text = "foo bar",
-                    },
-                    {
-                        forced_height = 50,
-                        widget = pbar,
-                        class = "test",
-                        value = 5,
-                        max_value = 12,
-                    },
-                    {
-                        widget = wibox.widget.textbox,
-                        text = "foo bar",
-                    },
-                    {
-                        forced_height = 50,
-                        widget = pbar,
-                        class = "test",
-                        value = 5,
-                        max_value = 12,
-                        color = "#00ff00",
-                    },
-                    {
-                        widget = wibox.widget.textbox,
-                        text = "foo bar",
-                    },
-                    {
-                        forced_height = 50,
-                        widget = pbar,
-                        class = "test powerline",
-                        value = 5,
-                        max_value = 12,
+                        layout = wibox.container.mirror,
+                        reflection = "horizontal",
+                        {
+                            sid = "profile",
+                            widget = wibox.widget.imagebox,
+                        },
                     },
                 },
-            },
-        },
-    }
-else
-    local capsule = require("widget.capsule")
-    local popup = require("widget.popup")
-    local fixed = require("widget.fixed")
-    local progressbar = require("widget.progressbar")
-
-    local button = {}
-
-    button.object = {}
-
-    stylable.define {
-        object = button.object,
-        name = "button",
-        properties = {
-            icon = { id = "#icon", property = "image" },
-            stylesheet = { id = "#icon", property = "stylesheet" },
-            text = { id = "#text", property = "markup" },
-        },
-    }
-
-    function button.new(args)
-        args = args or {}
-
-        local self = wibox.widget {
-            widget = capsule,
-            {
-                layout = wibox.layout.fixed.horizontal,
                 {
-                    id = "#icon",
-                    widget = wibox.widget.imagebox,
-                    resize = true,
+                    layout = wibox.container.place,
+                    halign = "right",
+                    {
+                        widget = wibox.widget.textbox,
+                        text = "foo bar place right",
+                    },
                 },
                 {
-                    id = "#text",
-                    widget = wibox.widget.textbox,
+                    widget = wibox.widget.separator,
+                    forced_height = 5,
                 },
-            },
-        } --[[@as Capsule]]
-
-        gtable.crush(self, button.object, true)
-        stylable.initialize(self)
-
-        return self
-    end
-
-    setmetatable(button, { __call = function(_, ...) return button.new(...) end })
-
-    ---@type Popup
-    local main_popup
-
-    main_popup = popup.new {
-        show = true,
-        widget = {
-            layout = wibox.container.constraint,
-            strategy = "exact",
-            width = 800,
-            height = 800,
-            {
-                layout = wibox.layout.align.vertical,
-                expand = "inside",
+                {
+                    id = "pfp_slider",
+                    widget = wibox.widget.slider { bar_active_color = beautiful.palette.yellow },
+                    forced_height = 30,
+                    bar_height = 20,
+                    value = 70,
+                    minimum = 20,
+                    maximum = 500,
+                },
                 {
                     layout = wibox.layout.fixed.horizontal,
                     spacing = 10,
+                    fill_space = true,
+                    wibox.widget.checkbox(false),
+                    wibox.widget.checkbox(true),
+                },
+                {
+                    forced_height = 50,
+                    widget = wibox.container.radialprogressbar(nil, 0, 10),
+                    value = 5,
+                },
+                {
+                    layout = wibox.container.rotate,
+                    direction = "east",
                     {
-                        widget = button,
-                        text = "Add item",
-                        buttons = binding.awful_buttons {
-                            binding.awful({}, btn.left, nil, function()
-                                local item_container = main_popup:get_children_by_id("item_container")[1]
-                                item_container:add(wibox.widget {
-                                    widget = capsule,
-                                    wibox.widget.textbox("foobar"),
-                                })
-                            end),
-                        },
-                    },
-                    {
-                        widget = button,
-                        text = "Brake it",
-                        buttons = binding.awful_buttons {
-                            binding.awful({}, btn.left, nil, function()
-                                for _, w in ipairs(main_popup:get_children_by_id("brake")) do
-                                    w.widget = wibox.widget {
-                                        widget = wibox.container.margin,
-                                        margins = 4,
-                                        w.widget,
-                                    }
-                                    -- pr(main_popup._private.wibox._drawable._widget_hierarchy, 0)
-                                end
-                            end),
-                            binding.awful({}, btn.right, nil, function()
-                                for _, w in ipairs(main_popup:get_children_by_id("brake")) do
-                                    w.widget = w.widget.widget
-                                    -- pr(main_popup._private.wibox._drawable._widget_hierarchy, 0)
-                                end
-                            end),
-                        },
-                    },
-                    {
-                        id = "toggle_button",
-                        widget = button,
-                        text = "Click me!",
-                        buttons = binding.awful_buttons {
-                            binding.awful({}, btn.left, nil, function()
-                                local widget = main_popup:get_children_by_id("toggle_button")[1]
-                                widget.checked = not widget.checked
-                                widget.text = "Click me again"
-                                widget.class = widget.checked and "foobar"
-                            end),
-                        },
-                    },
-                    {
-                        widget = button,
-                        text = "Tomorrow Night",
-                        buttons = binding.awful_buttons {
-                            binding.awful({}, btn.left, nil, function()
-                                manager.load(require("theme.styles.tomorrow_night") --[[@as Theme]])
-                            end),
-                        },
-                    },
-                    {
-                        widget = button,
-                        text = "Gruvbox",
-                        buttons = binding.awful_buttons {
-                            binding.awful({}, btn.left, nil, function()
-                                manager.load(require("theme.styles.gruvbox_dark") --[[@as Theme]])
-                            end),
+                        class = "arrow",
+                        widget = wibox.container.background,
+                        shape = gshape.arrow,
+                        bg = beautiful.palette.cyan,
+                        border_width = 4,
+                        {
+                            widget = wibox.container.margin,
+                            draw_empty = true,
+                            forced_width = 50,
                         },
                     },
                 },
                 {
-                    id = "item_container",
-                    layout = fixed.vertical,
-                    sid = "item_container",
-                    spacing = 10,
+                    forced_height = 50,
+                    widget = wibox.widget.progressbar,
+                    class = "test",
+                    value = 5,
+                    max_value = 12,
+                },
+                {
+                    widget = wibox.widget.textclock,
+                    class = "myclock",
+                    style = {
+                        halign = "right",
+                    },
+                },
+                {
+                    forced_height = 25,
+                    widget = wibox.widget.progressbar,
+                    class = "test",
+                    value = 5,
+                    max_value = 12,
+                    color = "#00ff00",
+                },
+                {
+                    layout = wibox.container.scroll.horizontal,
                     {
-                        id = "brake",
-                        widget = capsule,
-                        margins = { 0, top = 10 },
+                        layout = wibox.container.background,
+                        bg = beautiful.palette.green_66,
                         {
-                            id = "child",
-                            why = true,
-                            widget = capsule,
-                            margins = 20,
-                            class = "child",
-                            {
-                                widget = wibox.widget.textbox,
-                                text = "content",
-                            },
+                            widget = wibox.widget.textbox,
+                            text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc eget auctor ligula, sed pretium nulla.",
                         },
                     },
+                },
+                {
+                    layout = wibox.container.background,
+                    bg = beautiful.palette.cyan_66,
+                    fg = "#ff0000",
                     {
-                        id = "brake",
-                        widget = capsule,
+                        widget = wibox.container.tile,
+                        horizontal_spacing = 10,
+                        forced_height = 80,
                         {
-                            widget = capsule,
-                            margins = 20,
-                            {
-                                widget = wibox.widget.textbox,
-                                text = "content",
-                            },
+                            widget = wibox.widget.textbox,
+                            text = "tile",
                         },
                     },
+                },
+                {
+                    forced_height = 50,
+                    widget = wibox.widget.progressbar,
+                    class = "test powerline",
+                    value = 5,
+                    max_value = 12,
+                },
+                {
+                    widget = wibox.container.arcchart,
+                    values = { 10, 20, 36 },
+                    max_value = 100,
+                    forced_height = 100,
+                    colors = { "#660000", "#006600", "#000066" },
+                    bg = "#555555",
+                    paddings = 8,
+                    thickness = 10,
                     {
-                        id = "brake",
-                        widget = capsule,
-                        {
-                            widget = capsule,
-                            margins = 20,
-                            {
-                                widget = wibox.widget.textbox,
-                                text = "content",
-                            },
-                            {
-                                id = "#pb",
-                                widget = progressbar,
-                                max_value = 100,
-                            },
-                        },
-                    },
-                    {
-                        id = "brake",
-                        widget = capsule,
-                        class = "descendant",
-                        {
-                            widget = capsule,
-                            margins = 20,
-                            {
-                                widget = wibox.widget.textbox,
-                                text = "content",
-                            },
-                            {
-                                id = "#pb",
-                                widget = progressbar,
-                                max_value = 100,
-                            },
-                        },
+                        widget = wibox.widget.textbox,
+                        text = "archchart",
                     },
                 },
             },
         },
-    }
+    },
+}
 
-    for _, pb in ipairs(main_popup:get_children_by_id("#pb")) do
-        umouse.attach_slider {
-            widget = pb,
-            wibox = main_popup._private.wibox,
-            minimum = 0,
-            maximum = 100,
-            update = function(value)
-                pb.value = value
-            end,
-        }
-    end
-end
+local pfp = w.widget:get_children_by_id("pfp")[1] --[[@as wibox.container.constraint]]
+local pfp_slider = w.widget:get_children_by_id("pfp_slider")[1] --[[@as wibox.widget.slider]]
+
+pfp_slider:connect_signal("property::value", function(_, value)
+    pfp.height = value
+end)

@@ -1,24 +1,34 @@
 local setmetatable = setmetatable
-local assert = assert
+local assert, error = assert, error
 local rawset = rawset
 local type = type
-local pairs = pairs
+local pairs, ipairs = pairs, ipairs
 local gobject = require("gears.object")
 local gtable = require("gears.table")
 local gtimer = require("gears.timer")
 local style_sheet = require("theme.style_sheet")
 
+---@class style.property_descriptor
+---@field name string
+
+---@class style.element_info
+---@field module stylable
+---@field name string
+---@field parent? style.element_info
+---@field property_descriptors table<string, style.property_descriptor>
+---@field rule style_sheet.rule
+
 ---@class theme_manager : gears.object
----@field element_map table<string, { parents?: string[], rule: style_sheet.rule }>
+---@field element_info_map table<string, style.element_info>
 ---@field default_style_sheet style_sheet
 ---@field style_sheet style_sheet
 ---@field stylables table<stylable, boolean>
----@field requests? stylable[]
+---@field requests? table<stylable, boolean>
 ---@field _beautiful Theme # TODO: obsolete
 local M = gobject { enable_properties = false }
 
 gtable.crush(M, {
-    element_map = {},
+    element_info_map = {},
     default_style_sheet = style_sheet.new(),
     style_sheet = style_sheet.new(),
     stylables = setmetatable({}, { __mode = "k" }),
@@ -35,13 +45,13 @@ function M.load(theme)
     M.style_sheet = style_sheet.parse(theme.style_sheet)
 
     for stylable in pairs(M.stylables) do
-        M.apply_style(stylable)
+        M.process_request(stylable)
     end
 end
 
 ---@param context stylable.context
 ---@return style
-function M.get_style(context)
+function M.build_style(context)
     local style = {}
     M.default_style_sheet:enrich(style, context)
     if M.style_sheet then
@@ -50,92 +60,118 @@ function M.get_style(context)
     return style
 end
 
+---@private
 ---@param stylable stylable
-function M.apply_style(stylable)
-    local style = M.get_style(stylable._style.context)
-    stylable:apply_style(style)
+function M.process_request(stylable)
+    local style = M.build_style(stylable._stylable.context)
+    stylable:update_style(style)
 end
 
-function M.process_requests()
+---@private
+function M.process_pending_requests()
     if not M.requests then
         return
     end
 
-    for i = 1, #M.requests do
-        M.apply_style(M.requests[i])
+    for stylable in pairs(M.requests) do
+        M.process_request(stylable)
     end
 
     M.requests = nil
 end
 
 ---@param stylable stylable
----@param context? widget_context
-function M.request_style(stylable, context)
-    local style = M.get_style(stylable._style.context)
-    stylable:apply_style(style)
+---@param now? boolean
+function M.request_style(stylable, now)
+    if now then
+        M.process_request(stylable)
+        return
+    end
+
+    if not M.requests then
+        M.requests = setmetatable({}, { __mode = "k" })
+        gtimer.delayed_call(M.process_pending_requests)
+    end
+
+    M.requests[stylable] = true
 end
 
 ---@param stylable stylable
-function M.subscribe(stylable)
+function M.register_instance(stylable)
     M.stylables[stylable] = true
-    M.request_style(stylable, false)
 end
 
 ---@param stylable stylable
-function M.unsubscribe(stylable)
+function M.unregister_instance(stylable)
     M.stylables[stylable] = nil
 end
 
----@param selector style_sheet.selector
----@param parents string[]
-local function add_to_parents(selector, parents)
-    for i = 1, #parents do
-        local parent = assert(M.element_map[parents[i]])
-        parent.rule.selectors[#parent.rule.selectors + 1] = selector
-        add_to_parents(selector, parent.parents)
+---@param names string[]
+---@param descriptors? table<string, style.property_descriptor>
+---@return table<string, style.property_descriptor>
+local function intialize_property_descriptors(names, descriptors)
+    local result = {}
+    for _, name in ipairs(names) do
+        local descriptor = descriptors and descriptors[name] or {}
+
+        descriptor.name = name
+
+        result[name] = descriptor
     end
+    return result
 end
 
----@param module? table
----@param name string
----@param parents? string|string[] # TODO: Allow multiple parents?
----@param default_style? style
-function M.register_type(module, name, parents, default_style)
-    if type(parents) == "string" then
-        parents = { parents }
-    elseif not parents then
-        parents = {}
+---@param element_info style.element_info
+---@param parent? style.element_info
+local function add_to_parents(element_info, parent)
+    if not parent then
+        return
     end
-    ---@cast parents string[]
 
+    for property_name in pairs(element_info.property_descriptors) do
+        if parent.property_descriptors[property_name] then
+            error(("Property '%s.%s' already defined in '%s'."):format(element_info.name, property_name, parent.name))
+        end
+    end
+
+    local selector = element_info.rule.selectors[1]
+    parent.rule.selectors[#parent.rule.selectors + 1] = selector
+
+    add_to_parents(element_info, parent.parent)
+end
+
+---@param element_info style.element_info
+local function add_element_info(element_info)
+    add_to_parents(element_info, element_info.parent)
+    M.element_info_map[element_info.name] = element_info
+    M.default_style_sheet:add_rule(element_info.rule)
+end
+
+---@param module stylable
+---@param name string
+---@param parent? string
+---@param default_style? style
+---@param property_descriptors? table<string, style.property_descriptor>
+function M.register_element(module, name, parent, default_style, property_descriptors)
     default_style = default_style or {}
 
-    ---@type style_sheet.selector
-    local selector = { element = name }
+    local property_names = gtable.keys(default_style --[[@as table]])
+    property_descriptors = intialize_property_descriptors(property_names, property_descriptors)
 
-    ---@type style_sheet.rule
-    local rule = {
-        selectors = { selector },
-        declarations = default_style,
+    ---@type style.element_info
+    local element_info = {
+        module = module,
+        name = name,
+        parent = parent and assert(M.element_info_map[parent]) or nil,
+        property_descriptors = property_descriptors,
+        rule = {
+            selectors = { { element = name } },
+            declarations = default_style,
+        },
     }
+    rawset(module, "_stylable_element_info", element_info)
 
-    M.element_map[name] = {
-        parents = parents,
-        rule = rule,
-    }
-    add_to_parents(selector, parents)
-
-    M.default_style_sheet:add_rule(rule)
-
-    if module then
-        ---@type stylable.type_info
-        local type_info = {
-            name = name,
-            parents = parents,
-            default_style = default_style,
-        }
-        rawset(module, "_style_type_info", type_info)
-    end
+    add_element_info(element_info)
 end
 
 return M

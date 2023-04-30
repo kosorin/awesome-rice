@@ -18,8 +18,22 @@ local gtable = require("gears.table")
 local Pango = lgi.Pango
 local PangoCairo = lgi.PangoCairo
 local setmetatable = setmetatable
+local noice = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
 
 local textbox = { mt = {} }
+
+noice.register_element(textbox, "textbox", "widget", {
+    font = Nil,
+    ellipsize = "end",
+    wrap = "word_char",
+    valign = "center",
+    halign = "left",
+    line_spacing_factor = 1,
+    justify = false,
+    indent = 0,
+})
 
 --- Set the DPI of a Pango layout
 local function setup_dpi(box, dpi)
@@ -44,9 +58,10 @@ function textbox:draw(context, cr, width, height)
     cr:update_layout(self._private.layout)
     local _, logical = self._private.layout:get_pixel_extents()
     local offset = 0
-    if self._private.valign == "center" then
+    local valign = self:get_style_value("valign")
+    if valign == "center" then
         offset = (height - logical.height) / 2
-    elseif self._private.valign == "bottom" then
+    elseif valign == "bottom" then
         offset = height - logical.height
     end
     cr:move_to(0, offset)
@@ -253,17 +268,28 @@ end
 -- @propertyvalue "none"
 -- @propemits true false
 
+local valid_ellipsizes = {
+    none = "NONE",
+    start = "START",
+    middle = "MIDDLE",
+    ["end"] = "END",
+}
+
 function textbox:set_ellipsize(mode)
-    local allowed = { none = "NONE", start = "START", middle = "MIDDLE", ["end"] = "END" }
-    if allowed[mode] then
-        if self._private.layout:get_ellipsize() == allowed[mode] then
-            return
-        end
-        self._private.layout:set_ellipsize(allowed[mode])
+    local ellipsize = valid_ellipsizes[mode]
+    if not ellipsize then
+        ellipsize = valid_ellipsizes["end"]
+    end
+    if self:set_style_value("ellipsize", ellipsize) then
+        self._private.layout:set_ellipsize(ellipsize)
         self:emit_signal("widget::redraw_needed")
         self:emit_signal("widget::layout_changed")
         self:emit_signal("property::ellipsize", mode)
     end
+end
+
+function textbox:get_ellipsize()
+    return self:get_style_value("ellipsize")
 end
 
 --- Set a textbox wrap mode.
@@ -277,17 +303,27 @@ end
 -- @propertyvalue "word_char"
 -- @propemits true false
 
+local valid_wraps = {
+    word = "WORD",
+    char = "CHAR",
+    word_char = "WORD_CHAR"
+}
+
 function textbox:set_wrap(mode)
-    local allowed = { word = "WORD", char = "CHAR", word_char = "WORD_CHAR" }
-    if allowed[mode] then
-        if self._private.layout:get_wrap() == allowed[mode] then
-            return
-        end
-        self._private.layout:set_wrap(allowed[mode])
+    local wrap = valid_wraps[mode]
+    if not wrap then
+        wrap = valid_wraps["word_char"]
+    end
+    if self:set_style_value("wrap", wrap) then
+        self._private.layout:set_wrap(wrap)
         self:emit_signal("widget::redraw_needed")
         self:emit_signal("widget::layout_changed")
         self:emit_signal("property::wrap", mode)
     end
+end
+
+function textbox:get_wrap()
+    return self:get_style_value("wrap")
 end
 
 --- The vertical text alignment.
@@ -304,17 +340,25 @@ end
 -- @propertyvalue "bottom"
 -- @propemits true false
 
+local valid_valigns = {
+    top = true,
+    center = true,
+    bottom = true,
+}
+
 function textbox:set_valign(mode)
-    local allowed = { top = true, center = true, bottom = true }
-    if allowed[mode] then
-        if self._private.valign == mode then
-            return
-        end
-        self._private.valign = mode
+    if not valid_valigns[mode] then
+        mode = "center"
+    end
+    if self:set_style_value("valign", mode) then
         self:emit_signal("widget::redraw_needed")
         self:emit_signal("widget::layout_changed")
         self:emit_signal("property::valign", mode)
     end
+end
+
+function textbox:get_valign()
+    return self:get_style_value("valign")
 end
 
 --- The horizontal text alignment.
@@ -339,18 +383,28 @@ end
 -- @tparam[opt="left"] string align
 -- @propemits true false
 
+local valid_haligns = {
+    left = "LEFT",
+    center = "CENTER",
+    right = "RIGHT"
+}
+
 function textbox:set_halign(mode)
-    local allowed = { left = "LEFT", center = "CENTER", right = "RIGHT" }
-    if allowed[mode] then
-        if self._private.layout:get_alignment() == allowed[mode] then
-            return
-        end
-        self._private.layout:set_alignment(allowed[mode])
+    local alignment = valid_haligns[mode]
+    if not alignment then
+        alignment = valid_haligns["left"]
+    end
+    if self:set_style_value("halign", alignment) then
+        self._private.layout:set_alignment(alignment)
         self:emit_signal("widget::redraw_needed")
         self:emit_signal("widget::layout_changed")
-        self:emit_signal("property::align", mode)
         self:emit_signal("property::halign", mode)
+        self:emit_signal("property::align", mode)
     end
+end
+
+function textbox:get_halign()
+    return self:get_style_value("halign")
 end
 
 function textbox:set_align(mode)
@@ -408,18 +462,16 @@ end
 -- @usebeautiful beautiful.font The default font.
 
 function textbox:set_font(font)
-    if font == self._private.font then return end
-
-    self._private.font = font
-
-    self._private.layout:set_font_description(beautiful.get_font(font))
-    self:emit_signal("widget::redraw_needed")
-    self:emit_signal("widget::layout_changed")
-    self:emit_signal("property::font", font)
+    if self:set_style_value("font", font) then
+        self._private.layout:set_font_description(beautiful.get_font(font))
+        self:emit_signal("widget::redraw_needed")
+        self:emit_signal("widget::layout_changed")
+        self:emit_signal("property::font", font)
+    end
 end
 
 function textbox:get_font()
-    return self._private.font
+    return self:get_style_value("font")
 end
 
 --- Set the distance between the lines.
@@ -444,16 +496,17 @@ function textbox:set_line_spacing_factor(spacing)
             "Error your version of Pango is too old to support line_spacing"
         ))
     end
-
     spacing = spacing or 0
-    self._private.layout:set_line_spacing(spacing)
-    self:emit_signal("widget::redraw_needed")
-    self:emit_signal("widget::layout_changed")
-    self:emit_signal("property::line_spacing", spacing)
+    if self:set_style_value("line_spacing_factor", spacing) then
+        self._private.layout:set_line_spacing(spacing)
+        self:emit_signal("widget::redraw_needed")
+        self:emit_signal("widget::layout_changed")
+        self:emit_signal("property::line_spacing", spacing)
+    end
 end
 
 function textbox:get_line_spacing_factor()
-    return self._private.layout:get_line_spacing()
+    return self:get_style_value("line_spacing_factor")
 end
 
 --- Justify the text when there is more space.
@@ -465,14 +518,16 @@ end
 -- @propemits true false
 
 function textbox:set_justify(justify)
-    self._private.layout:set_justify(justify)
-    self:emit_signal("widget::redraw_needed")
-    self:emit_signal("widget::layout_changed")
-    self:emit_signal("property::justify", justify)
+    if self:set_style_value("justify", justify) then
+        self._private.layout:set_justify(justify)
+        self:emit_signal("widget::redraw_needed")
+        self:emit_signal("widget::layout_changed")
+        self:emit_signal("property::justify", justify)
+    end
 end
 
 function textbox:get_justify()
-    return self._private.layout:get_justify()
+    return self:get_style_value("justify")
 end
 
 --- How to indent text with multiple lines.
@@ -488,14 +543,16 @@ end
 -- @propemits true false
 
 function textbox:set_indent(indent)
-    self._private.layout:set_indent(Pango.units_from_double(indent))
-    self:emit_signal("widget::redraw_needed")
-    self:emit_signal("widget::layout_changed")
-    self:emit_signal("property::indent", indent)
+    if self:set_style_value("indent", indent) then
+        self._private.layout:set_indent(Pango.units_from_double(indent))
+        self:emit_signal("widget::redraw_needed")
+        self:emit_signal("widget::layout_changed")
+        self:emit_signal("property::indent", indent)
+    end
 end
 
 function textbox:get_indent()
-    return self._private.layout:get_indent()
+    return self:get_style_value("indent")
 end
 
 --- Create a new textbox.
@@ -505,19 +562,18 @@ end
 -- @treturn table A new textbox widget
 -- @constructorfct wibox.widget.textbox
 local function new(text, ignore_markup)
-    local ret = base.make_widget(nil, nil, {enable_properties = true})
-
-    gtable.crush(ret, textbox, true)
+    local ret = base.make_widget(nil, nil, { enable_properties = true })
 
     ret._private.dpi = -1
     ret._private.ctx = PangoCairo.font_map_get_default():create_context()
     ret._private.layout = Pango.Layout.new(ret._private.ctx)
-    ret._private.layout:set_font_description(beautiful.get_font(beautiful.font))
 
-    ret:set_ellipsize("end")
-    ret:set_wrap("word_char")
-    ret:set_valign("center")
-    ret:set_halign("left")
+    gtable.crush(ret, textbox, true)
+    stylable.initialize(ret, textbox)
+
+    ret:ignore_override(function()
+        ret:set_font(beautiful.font)
+    end)
 
     if text then
         if ignore_markup then

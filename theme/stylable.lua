@@ -1,9 +1,11 @@
+local pcall = pcall
 local setmetatable = setmetatable
 local rawget = rawget
 local rawset = rawset
 local assert = assert
 local type = type
 local pairs, ipairs = pairs, ipairs
+local protected_call = require("gears.protected_call")
 local gtable = require("gears.table")
 local manager = require("theme.manager")
 local Nil = require("theme.nil")
@@ -11,67 +13,118 @@ local Nil = require("theme.nil")
 
 local M = {}
 
----@class stylable.type_info
----@field name string
----@field parents string[]
----@field default_style style
+---@class stylable.property_changing_args
+---@field property stylable.property
+---@field value any
+---@field cancel? boolean
 
 ---@class stylable.context
 ---@field element string
 ---@field id? string
 ---@field classes table<string, boolean>
 ---@field pseudo_classes table<string, boolean>
----@field hierarchy { parent?: wibox.hierarchy, index?: integer }
+---@field hierarchy { root?: wibox, parent?: wibox.hierarchy, index?: integer }
+
+---@class stylable.property
+---@field name string
+---@field value any
+---@field empty boolean # If `true` then `value` should be `nil`
+---@field override boolean
+---@field descriptor? style.property_descriptor
 
 ---@class stylable.data
 ---@field context stylable.context
----@field override table<string, boolean>
----@field current table<string, any>
----@field style? style
+---@field properties table<string, stylable.property>
+---@field ignore_override integer
+---@field local_style? style
+---@field ignore_hierarchy? boolean # TODO
 
 ---@class stylable : gears.object, widget_container
----@field _style stylable.data
+---@field _stylable stylable.data
 M.stylable = {}
 
----@param self stylable
----@param property string
----@return any
-local function get_value(self, property)
-    return self._style.current[property]
+function M.stylable:ignore_override(callback)
+    if not callback then
+        return
+    end
+    self._stylable.ignore_override = self._stylable.ignore_override + 1
+    protected_call(callback)
+    self._stylable.ignore_override = self._stylable.ignore_override - 1
 end
 
----@param self stylable
----@param property string
+---@param name string
 ---@param value any
-local function set_value(self, property, value)
-    if value == Nil then
-        value = nil
+---@param equality_comparer? fun(a, b): boolean
+---@return boolean
+function M.stylable:set_style_value(name, value, equality_comparer)
+    local property = self._stylable.properties[name]
+    if not property then
+        return false
     end
-    self._style.current[property] = value
+
+    if self._stylable.ignore_override == 0 then
+        property.override = true
+    end
+
+    if not property.empty then
+        if equality_comparer then
+            if equality_comparer(property.value, value) then
+                return false
+            end
+        elseif property.value == value then
+            return false
+        end
+    end
+
+    -- if self._stylable.context.element == "wibar" then
+    -- print(("> [%s] %s.%s = %s"):format(self._stylable.context.id, self._stylable.context.element, name, value))
+    -- end
+    property.value = value
+    property.empty = false
+    return true
+end
+
+---@param name string
+---@return any
+function M.stylable:get_style_value(name)
+    local property = self._stylable.properties[name]
+    if not property or property.empty then
+        return nil
+    end
+
+    return property.value
+end
+
+function M.stylable:clear_local_style()
+    for _, property in pairs(self._stylable.properties) do
+        property.override = false
+    end
+
+    self._stylable.local_style = nil
+
+    self:request_style(true)
 end
 
 ---@param style? style
 function M.stylable:set_style(style)
-    if self._style.style == style then
+    if self._stylable.local_style == style then
         return
     end
 
-    self._style.style = style
+    self._stylable.local_style = style
 
-    self:emit_signal("widget::redraw_needed")
-    self:emit_signal("widget::layout_changed")
+    self:request_style()
 end
 
 ---@param id? string
 function M.stylable:set_sid(id)
-    if self._style.context.id == id then
+    if self._stylable.context.id == id then
         return
     end
 
-    self._style.context.id = id
+    self._stylable.context.id = id
 
-    self:emit_signal("widget::redraw_needed")
-    self:emit_signal("widget::layout_changed")
+    self:request_style()
 end
 
 ---@param class? string|string[]
@@ -113,10 +166,11 @@ end
 
 ---@param class? string|string[]
 function M.stylable:set_class(class)
-    if merge_classes(self._style.context.classes, parse_class(class)) then
-        self:emit_signal("widget::redraw_needed")
-        self:emit_signal("widget::layout_changed")
+    if not merge_classes(self._stylable.context.classes, parse_class(class)) then
+        return
     end
+
+    self:request_style()
 end
 
 ---@param pseudo_class string
@@ -128,83 +182,168 @@ function M.stylable:change_state(pseudo_class, state)
 
     state = state and true or nil
 
-    if self._style.context.pseudo_classes[pseudo_class] == state then
+    if self._stylable.context.pseudo_classes[pseudo_class] == state then
         return
     end
 
-    self._style.context.pseudo_classes[pseudo_class] = state
+    self._stylable.context.pseudo_classes[pseudo_class] = state
 
-    self:emit_signal("widget::redraw_needed")
-    self:emit_signal("widget::layout_changed")
+    self:request_style()
+end
+
+---@param root? wibox
+function M.stylable:set_hierarchy_root(root)
+    local context = self._stylable.context.hierarchy
+    if context.root == root then
+        return
+    end
+
+    context.root = root
+    context.parent = nil
+    context.index = nil
+
+    -- TODO: don't request if hierarchy doesn't changed
+    self:request_style()
 end
 
 ---@param parent? wibox.hierarchy
 ---@param index? integer
 function M.stylable:set_parent_hierarchy(parent, index)
-    local context = self._style.context.hierarchy
+    local context = self._stylable.context.hierarchy
     if context.parent == parent and context.index == index then
         return
     end
 
+    context.root = nil
     context.parent = parent
     context.index = index
 
     -- TODO: don't request if hierarchy doesn't changed
-    -- self:emit_signal("widget::redraw_needed")
-    -- self:emit_signal("widget::layout_changed")
+    self:request_style()
+end
+
+---@param self stylable
+---@param property stylable.property
+---@param value any
+local function update_property(self, property, value)
+    if not property or property.override or value == nil then
+        return
+    end
+
+    if value == Nil then
+        value = nil
+    end
+
+    ---@type stylable.property_changing_args
+    local args = {
+        property = property,
+        value = value,
+    }
+
+    self:emit_signal("style::update::" .. property.name, value, args)
+
+    if args.cancel then
+        return
+    end
+
+    local setter = self["set_" .. property.name]
+    if setter then
+        setter(self, args.value)
+    end
+end
+
+---@param self stylable
+---@param style style
+local function update_style_core(self, style)
+    self:ignore_override(function()
+        for name, value in pairs(style) do
+            update_property(self, self._stylable.properties[name], value)
+        end
+    end)
 end
 
 ---@param style? style
-function M.stylable:apply_style(style)
-    if not style then
-        style = self._style.style
-    elseif self._style.style then
-        for name, value in pairs(self._style.style) do
+function M.stylable:update_style(style)
+    style = style or {}
+
+    local local_style = self._stylable.local_style
+    if local_style then
+        for name, value in pairs(local_style) do
             style[name] = value
         end
     end
 
-    if style then
-        for name, value in pairs(style) do
-            if not self._style.override[name] then
-                set_value(self, name, value)
-            end
-        end
-    end
+    update_style_core(self, style)
 end
 
----@param context? widget_context
-function M.stylable:request_style(context)
-    manager.request_style(self, context)
+---@param now? boolean
+function M.stylable:request_style(now)
+    manager.request_style(self, now)
 end
 
----@param self stylable
-function M.initialize(self)
-    local _style = rawget(self, "_style")
-    if not _style then
-        gtable.crush(self, M.stylable, true)
-        ---@type stylable.data
-        _style = {
-            context = {
-                ---@diagnostic disable-next-line: assign-type-mismatch
-                element = nil,
-                id = nil,
-                classes = {},
-                pseudo_classes = {},
-                hierarchy = setmetatable({}, { __mode = "v" }),
-            },
-            override = {},
-            current = {},
-        }
-        rawset(self, "_style", _style)
+---@param name string
+---@return stylable.data
+local function new_data(name)
+    ---@type stylable.data
+    local data = {
+        context = {
+            element = name,
+            id = nil,
+            classes = {},
+            pseudo_classes = {},
+            hierarchy = setmetatable({}, { __mode = "v" }),
+        },
+        properties = {},
+        ignore_override = 0,
+        local_style = nil,
+    }
+    return data
+end
+
+---@param descriptor style.property_descriptor
+---@return stylable.property
+local function new_property(descriptor)
+    ---@type stylable.property
+    local property = {
+        name = descriptor.name,
+        value = nil,
+        empty = true,
+        override = false,
+        descriptor = descriptor,
+    }
+    return property
+end
+
+---@param module stylable
+---@param instance stylable
+---@return style.element_info
+function M.initialize(instance, module)
+    ---@type style.element_info
+    local element_info = assert(rawget(module, "_stylable_element_info"))
+
+    ---@type stylable.data
+    local _stylable = rawget(instance, "_stylable")
+
+    if element_info.parent then
+        assert(_stylable)
+        assert(_stylable.context.element == element_info.parent.name)
+        _stylable.context.element = element_info.name
+    else
+        assert(not _stylable)
+        _stylable = new_data(element_info.name)
+        rawset(instance, "_stylable", _stylable)
+        gtable.crush(instance, M.stylable, true)
     end
 
-    ---@type stylable.type_info
-    local type_info = assert(rawget(self, "_style_type_info"))
+    for name, descriptor in pairs(element_info.property_descriptors) do
+        _stylable.properties[name] = new_property(descriptor)
+    end
 
-    _style.context.element = type_info.name
+    update_style_core(instance, element_info.rule.declarations)
 
-    manager.subscribe(self)
+    manager.register_instance(instance)
+
+    return element_info
 end
 
 return M

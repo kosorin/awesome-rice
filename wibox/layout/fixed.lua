@@ -26,16 +26,41 @@
 ---------------------------------------------------------------------------
 
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
-local base   = require("wibox.widget.base")
-local table  = table
+local base = require("wibox.widget.base")
+local table = table
 local ipairs = ipairs
 local select = select
-local min    = math.min
-local max    = math.max
-local abs    = math.abs
+local min = math.min
+local max = math.max
+local abs = math.abs
 local gtable = require("gears.table")
+local noice = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
 
-local fixed  = {}
+local fixed = {}
+
+local default_style = {
+    fill_space = false,
+    reverse = false, -- TODO: implement in inherited types (flex, stack, ratio)
+    spacing = 0,
+    spacing_widget = Nil,
+    spacing_widget_on_top = false, -- TODO: Remove
+}
+
+noice.register_element(fixed, "fixed", "widget", default_style)
+
+for prop in pairs(default_style) do
+    fixed["set_" .. prop] = function(self, value)
+        if self:set_style_value(prop, value) then
+            self:emit_signal("widget::layout_changed")
+            self:emit_signal("property::" .. prop, value)
+        end
+    end
+    fixed["get_" .. prop] = function(self)
+        return self:get_style_value(prop)
+    end
+end
 
 -- Layout a fixed layout. Each widget gets just the space it asks for.
 -- @param context The context in which we are drawn.
@@ -43,14 +68,14 @@ local fixed  = {}
 -- @param height The available height.
 function fixed:layout(context, width, height)
     local widget_count = #self._private.widgets
-    local reverse = self._private.reverse
+    local reverse = self:get_style_value("reverse")
     local is_y = self._private.dir == "y"
     local is_x = not is_y
-    local spacing = self._private.spacing or 0
+    local spacing = self:get_style_value("spacing") or 0
     local abs_spacing = abs(spacing)
     local offset_spacing = min(0, spacing)
     local spacing_widget = spacing ~= 0 and self._private.spacing_widget or nil
-    local spacing_widget_on_top = self._private.spacing_widget_on_top
+    local spacing_widget_on_top = self:get_style_value("spacing_widget_on_top")
 
     local result = {}
     local x, y = 0, 0
@@ -166,7 +191,7 @@ function fixed:layout(context, width, height)
         empty = empty and zero
     end
 
-    if self._private.fill_space and last_widget_placement_info then
+    if self:get_style_value("fill_space") and last_widget_placement_info then
         if is_y then
             local h = height - y
             if h > 0 then
@@ -212,7 +237,6 @@ function fixed:add(...)
     end
     self:emit_signal("widget::layout_changed")
 end
-
 
 --- Remove a widget from the layout.
 --
@@ -350,6 +374,25 @@ function fixed:set(index, widget2)
     return true
 end
 
+--- Set the layout's fill_space property. If this property is true, the last
+-- widget will get all the space that is left. If this is false, the last widget
+-- won't be handled specially and there can be space left unused.
+-- @property fill_space
+-- @tparam[opt=false] boolean fill_space
+-- @propemits true false
+
+--- The amount of space inserted between the child widgets.
+--
+-- If a `spacing_widget` is defined, this value is used for its size.
+--
+--@DOC_wibox_layout_fixed_spacing_EXAMPLE@
+--
+-- @property spacing
+-- @tparam[opt=0] number spacing Spacing between widgets.
+-- @negativeallowed true
+-- @propemits true false
+-- @interface layout
+
 --- A widget to insert as a separator between child widgets.
 --
 -- If this property is a valid widget and `spacing` is greater than `0`, a
@@ -366,9 +409,11 @@ end
 -- @interface layout
 
 function fixed:set_spacing_widget(wdg)
-    self._private.spacing_widget = base.make_widget_from_value(wdg)
-    self:emit_signal("widget::layout_changed")
-    self:emit_signal("property::spacing_widget", wdg)
+    if self:set_style_value("spacing_widget", wdg) then
+        self._private.spacing_widget = base.make_widget_from_value(wdg)
+        self:emit_signal("widget::layout_changed")
+        self:emit_signal("property::spacing_widget", wdg)
+    end
 end
 
 --- Insert a new widget in the layout at position `index`.
@@ -406,10 +451,10 @@ function fixed:fit(context, orig_width, orig_height)
         return 0, 0
     end
 
-    local reverse = self._private.reverse
+    local reverse = self:get_style_value("reverse")
     local is_y = self._private.dir == "y"
     local is_x = not is_y
-    local spacing = self._private.spacing or 0
+    local spacing = self:get_style_value("spacing") or 0
     local abs_spacing = abs(spacing)
     local offset_spacing = min(0, spacing)
 
@@ -486,7 +531,7 @@ function fixed:fit(context, orig_width, orig_height)
 
     local size
 
-    if self._private.fill_space then
+    if self:get_style_value("fill_space") then
         size = is_y and orig_height or orig_width
     else
         size = is_y and y or x
@@ -502,35 +547,16 @@ end
 function fixed:reset()
     self._private.widgets = {}
     self:emit_signal("widget::layout_changed")
-    self:emit_signal("widget::reseted")
-    self:emit_signal("widget::reset")
-end
-
---- Set the layout's fill_space property. If this property is true, the last
--- widget will get all the space that is left. If this is false, the last widget
--- won't be handled specially and there can be space left unused.
--- @property fill_space
--- @tparam[opt=false] boolean fill_space
--- @propemits true false
-
-function fixed:fill_space(val)
-    if self._private.fill_space ~= val then
-        self._private.fill_space = not not val
-        self:emit_signal("widget::layout_changed")
-        self:emit_signal("property::fill_space", val)
-    end
 end
 
 local function get_layout(dir, widget1, ...)
     local ret = base.make_widget(nil, nil, { enable_properties = true })
 
     gtable.crush(ret, fixed, true)
+    stylable.initialize(ret, fixed)
 
     ret._private.dir = dir
     ret._private.widgets = {}
-    ret:set_spacing(0)
-    ret:set_spacing_widget_on_top(false)
-    ret:fill_space(false)
 
     if widget1 then
         ret:add(widget1, ...)
@@ -553,56 +579,6 @@ end
 -- @constructorfct wibox.layout.fixed.vertical
 function fixed.vertical(...)
     return get_layout("y", ...)
-end
-
---- The amount of space inserted between the child widgets.
---
--- If a `spacing_widget` is defined, this value is used for its size.
---
---@DOC_wibox_layout_fixed_spacing_EXAMPLE@
---
--- @property spacing
--- @tparam[opt=0] number spacing Spacing between widgets.
--- @negativeallowed true
--- @propemits true false
--- @interface layout
-
-function fixed:set_spacing(spacing)
-    if self._private.spacing ~= spacing then
-        self._private.spacing = spacing
-        self:emit_signal("widget::layout_changed")
-        self:emit_signal("property::spacing", spacing)
-    end
-end
-
-function fixed:get_spacing()
-    return self._private.spacing or 0
-end
-
-function fixed:set_spacing_widget_on_top(on_top)
-    on_top = not not on_top
-    if self._private.spacing_widget_on_top ~= on_top then
-        self._private.spacing_widget_on_top = on_top
-        self:emit_signal("widget::layout_changed")
-        self:emit_signal("property::spacing_widget_on_top", on_top)
-    end
-end
-
-function fixed:get_spacing_widget_on_top()
-    return self._private.spacing_widget_on_top
-end
-
-function fixed:set_reverse(reverse)
-    reverse = not not reverse
-    if self._private.reverse ~= reverse then
-        self._private.reverse = reverse
-        self:emit_signal("widget::layout_changed")
-        self:emit_signal("property::reverse", reverse)
-    end
-end
-
-function fixed:get_reverse()
-    return self._private.reverse
 end
 
 --@DOC_fixed_COMMON@

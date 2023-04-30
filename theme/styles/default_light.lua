@@ -23,23 +23,23 @@ local theme = {}
 ----------------------------------------------------------------------------------------------------
 
 theme.palette = setmetatable({
-    black          = "#1d1f21",
-    white          = "#c5c8c6",
-    red            = "#cc6666",
-    yellow         = "#f0c674",
-    green          = "#b5bd68",
-    cyan           = "#8abeb7",
-    blue           = "#81a2be",
-    magenta        = "#b294bb",
+    black          = "#3c4044",
+    white          = "#eaeaea",
+    red            = "#d54e53",
+    yellow         = "#e7c547",
+    green          = "#b9ca4a",
+    cyan           = "#70c0b1",
+    blue           = "#7aa6da",
+    magenta        = "#c397d8",
     --
-    black_bright   = "#3c4044",
-    white_bright   = "#eaeaea",
-    red_bright     = "#d54e53",
-    yellow_bright  = "#e7c547",
-    green_bright   = "#b9ca4a",
-    cyan_bright    = "#70c0b1",
-    blue_bright    = "#7aa6da",
-    magenta_bright = "#c397d8",
+    black_bright   = "#1d1f21",
+    white_bright   = "#c5c8c6",
+    red_bright     = "#cc6666",
+    yellow_bright  = "#f0c674",
+    green_bright   = "#b5bd68",
+    cyan_bright    = "#8abeb7",
+    blue_bright    = "#81a2be",
+    magenta_bright = "#b294bb",
 }, hcolor.palette_metatable)
 
 theme.color_names = {
@@ -54,10 +54,10 @@ theme.color_names = {
         "magenta",
     },
     common = {
-        bg        = "black",
-        fg        = "white",
-        primary   = "yellow",
-        secondary = "blue",
+        bg        = "white",
+        fg        = "black",
+        primary   = "blue",
+        secondary = "green",
         urgent    = "red",
     },
 }
@@ -74,12 +74,11 @@ end
 theme.style_sheet = {
     {
         "wibox",
-        "popup",
-        -- bg = theme.common.bg,
-        -- fg = theme.common.primary_bright,
+        bg = theme.common.bg,
+        fg = theme.common.primary_bright,
         border_color = theme.common.secondary,
-        border_width = 8,
-        -- shape = gshape.rounded_rect,
+        border_width = 4,
+        shape = gshape.rounded_rect,
     },
     {
         "progressbar",
@@ -193,25 +192,8 @@ theme.style_sheet = {
         font = "Iosevka 16",
     },
     {
-        "wibox > #fuu",
-        margins = 20,
-    },
-    {
         "wibox #profile",
-        height = 100,
-    },
-    {
-        "wibar",
-        border_width = 0,
-        shape = gshape.rounded_bar,
-        margins = 20,
-        bg = "#004444",
-        align = "bottom",
-    },
-    {
-        "wibar > background:hover",
-        fg = "#008800",
-        bg = "#000066",
+        height = 120,
     },
 }
 

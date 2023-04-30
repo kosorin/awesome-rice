@@ -51,17 +51,29 @@ local gtable = require("gears.table")
 local glib = require("lgi").GLib
 local DateTime = glib.DateTime
 local TimeZone = glib.TimeZone
+local noice = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
 
 local textclock = { mt = {} }
 
-local DateTime_new_now = DateTime.new_now
+local default_style = {
+    format = " %a %b %d, %H:%M ",
+    refresh = 60,
+    timezone = Nil,
+}
 
--- When $SOURCE_DATE_EPOCH and $SOURCE_DIRECTORY are both set, then this code is
--- most likely being run by the test runner. Ensure reproducible dates.
-local source_date_epoch = tonumber(os.getenv("SOURCE_DATE_EPOCH"))
-if source_date_epoch and os.getenv("SOURCE_DIRECTORY") then
-    DateTime_new_now = function()
-        return DateTime.new_from_unix_utc(source_date_epoch)
+noice.register_element(textclock, "textclock", "textbox", default_style)
+
+local DateTime_new_now = DateTime.new_now
+do
+    -- When $SOURCE_DATE_EPOCH and $SOURCE_DIRECTORY are both set, then this code is
+    -- most likely being run by the test runner. Ensure reproducible dates.
+    local source_date_epoch = tonumber(os.getenv("SOURCE_DATE_EPOCH"))
+    if source_date_epoch and os.getenv("SOURCE_DIRECTORY") then
+        DateTime_new_now = function()
+            return DateTime.new_from_unix_utc(source_date_epoch)
+        end
     end
 end
 
@@ -72,31 +84,12 @@ end
 -- @property format
 -- @tparam[opt=" %a %b %d %H:%M"] string format The new time format. This can contain pango markup.
 
-function textclock:set_format(format)
-    self._private.format = format
-    self:force_update()
-end
-
-function textclock:get_format()
-    return self._private.format
-end
-
 --- Set the clock's timezone.
 --
 -- e.g. "Z" for UTC, "±hh:mm" or "Europe/Amsterdam". See
 -- [GTimeZone](https://developer.gnome.org/glib/stable/glib-GTimeZone.html#g-time-zone-new).
 -- @property timezone
 -- @tparam[opt=TimeZone.new()] string timezone
-
-function textclock:set_timezone(tzid)
-    self._private.tzid = tzid
-    self._private.timezone = tzid and TimeZone.new(tzid)
-    self:force_update()
-end
-
-function textclock:get_timezone()
-    return self._private.tzid
-end
 
 --- Set the clock's refresh rate.
 --
@@ -105,21 +98,29 @@ end
 -- @propertyunit second
 -- @negativeallowed false
 
-function textclock:set_refresh(refresh)
-    self._private.refresh = refresh or self._private.refresh
-    self:force_update()
-end
-
-function textclock:get_refresh()
-    return self._private.refresh
-end
-
 --- Force a textclock to update now.
 --
 -- @noreturn
 -- @method force_update
 function textclock:force_update()
-    self._timer:emit_signal("timeout")
+    if self._private.timer then
+        self._private.timer:emit_signal("timeout")
+    end
+end
+
+for prop in pairs(default_style) do
+    textclock["set_" .. prop] = function(self, value)
+        if self:set_style_value(prop, value) then
+            if prop == "timezone" then
+                self._private.timezone = nil
+            end
+            self:force_update()
+            self:emit_signal("property::" .. prop, value)
+        end
+    end
+    textclock["get_" .. prop] = function(self)
+        return self:get_style_value(prop)
+    end
 end
 
 --- This lowers the timeout so that it occurs "correctly". For example, a timeout
@@ -137,28 +138,40 @@ end
 -- @constructorfct wibox.widget.textclock
 local function new(format, refresh, tzid)
     local w = textbox()
+
     gtable.crush(w, textclock, true)
+    stylable.initialize(w, textclock)
 
-    w._private.format = format or " %a %b %d, %H:%M "
-    w._private.refresh = refresh or 60
-    w._private.tzid = tzid
-    w._private.timezone = tzid and TimeZone.new(tzid)
-
-    function w._private.textclock_update_cb()
-        local str = DateTime_new_now(w._private.timezone or TimeZone.new_local()):format(w._private.format)
-        if str == nil then
-            require("gears.debug").print_warning("textclock: "
-                    .. "g_date_time_format() failed for format "
-                    .. "'" .. w._private.format .. "'")
-        end
-        w:set_markup(str)
-        w._timer.timeout = calc_timeout(w._private.refresh)
-        w._timer:again()
-        return true -- Continue the timer
+    if format then
+        w:set_format(format)
+    end
+    if refresh then
+        w:set_refresh(refresh)
+    end
+    if tzid then
+        w:set_timezone(tzid)
     end
 
-    w._timer = timer.weak_start_new(refresh, w._private.textclock_update_cb)
+    function w._private.textclock_update_cb()
+        local timezone = w:get_style_value("timezone")
+        w._private.timezone = w._private.timezone or (timezone and TimeZone.new(timezone) or TimeZone.new_local())
+        local now = DateTime_new_now(w._private.timezone)
+
+        local format = w:get_style_value("format")
+        local text = now:format(format)
+        if text == nil then
+            require("gears.debug").print_warning("textclock: g_date_time_format() failed for format '" .. format .. "'")
+        end
+        w:set_markup(text)
+
+        w._private.timer.timeout = calc_timeout(w:get_style_value("refresh"))
+        w._private.timer:again()
+        return true
+    end
+
+    w._private.timer = timer.weak_start_new(refresh, w._private.textclock_update_cb)
     w:force_update()
+
     return w
 end
 

@@ -31,6 +31,9 @@ local base = require("wibox.widget.base")
 local surface = require("gears.surface")
 local gtable = require("gears.table")
 local gdebug = require("gears.debug")
+local noice = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
 local setmetatable = setmetatable
 local type = type
 local math = math
@@ -47,6 +50,25 @@ do
 end
 
 local imagebox = { mt = {} }
+
+local default_style = {
+    image = Nil,
+    resize = true,
+    upscale = Nil,
+    downscale = Nil,
+    stylesheet = Nil,
+    dpi = Nil,
+    auto_dpi = Nil,
+    halign = "left",
+    valign = "top",
+    horizontal_fit_policy = "auto",
+    vertical_fit_policy = "auto",
+    max_scaling_factor = 0,
+    scaling_quality = "good",
+    clip_shape = Nil,
+}
+
+noice.register_element(imagebox, "imagebox", "widget", default_style)
 
 local rsvg_handle_cache = setmetatable({}, { __mode = 'k' })
 
@@ -126,16 +148,14 @@ end
 local function update_dpi(self, ctx)
     if not self._private.handle then return end
 
-    local dpi = self._private.auto_dpi and
-        ctx.dpi or
-        self._private.dpi or
-        nil
+    local dpi = (self:get_style_value("auto_dpi") and ctx.dpi)
+        or self:get_style_value("dpi")
+        or nil
 
-    local need_dpi = dpi and
-        self._private.last_dpi ~= dpi
+    local need_dpi = dpi and self._private.last_dpi ~= dpi
 
-    local need_style = self._private.handle.set_stylesheet and
-        self._private.stylesheet
+    local stylesheet = self:get_style_value("stylesheet")
+    local need_style = self._private.handle.set_stylesheet and stylesheet
 
     local old_size = self._private.default and self._private.default.width
 
@@ -147,19 +167,19 @@ local function update_dpi(self, ctx)
         end
     end
 
-    if need_style and self._private.cache.stylesheet ~= self._private.stylesheet then
-        self._private.handle:set_stylesheet(self._private.stylesheet)
+    if need_style and self._private.cache.stylesheet ~= stylesheet then
+        self._private.handle:set_stylesheet(stylesheet)
     end
 
     -- Reload the size.
-    if need_dpi or (need_style and self._private.stylesheet ~= self._private.last_stylesheet) then
+    if need_dpi or (need_style and stylesheet ~= self._private.last_stylesheet) then
         set_handle(self, self._private.handle, self._private.cache)
     end
 
     self._private.last_dpi = dpi
     self._private.cache.dpi = dpi
-    self._private.last_stylesheet = self._private.stylesheet
-    self._private.cache.stylesheet = self._private.stylesheet
+    self._private.last_stylesheet = stylesheet
+    self._private.cache.stylesheet = stylesheet
 
     -- This can happen in the constructor when `dpi` is set after `image`.
     if old_size and old_size ~= self._private.default.width then
@@ -182,7 +202,14 @@ function imagebox:draw(ctx, cr, width, height)
 
     local w, h = self._private.default.width, self._private.default.height
 
-    if self._private.resize then
+    local halign = self:get_style_value("halign")
+    local valign = self:get_style_value("valign")
+    local clip_shape = self:get_style_value("clip_shape")
+
+    local RsvgRect = Rsvg.Rectangle {x = 0, y = 0, width = w, height = h}
+    local svg_surf = cairo.ImageSurface(cairo.Format.ARGB32, w, h)
+
+    if self:get_style_value("resize") then
         -- That's for the "fit" policy.
         local aspects = {
             w = width / w,
@@ -190,14 +217,14 @@ function imagebox:draw(ctx, cr, width, height)
         }
 
         local policy = {
-            w = self._private.horizontal_fit_policy or "auto",
-            h = self._private.vertical_fit_policy or "auto"
+            w = self:get_style_value("horizontal_fit_policy") or "auto",
+            h = self:get_style_value("vertical_fit_policy") or "auto"
         }
 
         for _, aspect in ipairs {"w", "h"} do
-            if self._private.upscale == false and (w < width and h < height) then
+            if self:get_style_value("upscale") == false and (w < width and h < height) then
                 aspects[aspect] = 1
-            elseif self._private.downscale == false and (w >= width and h >= height) then
+            elseif self:get_style_value("downscale") == false and (w >= width and h >= height) then
                 aspects[aspect] = 1
             elseif policy[aspect] == "none" then
                 aspects[aspect] = 1
@@ -206,22 +233,22 @@ function imagebox:draw(ctx, cr, width, height)
             end
         end
 
-        if self._private.halign == "center" then
+        if halign == "center" then
             translate.x = math.floor((width - w*aspects.w)/2)
-        elseif self._private.halign == "right" then
+        elseif halign == "right" then
             translate.x = math.floor(width - (w*aspects.w))
         end
 
-        if self._private.valign == "center" then
+        if valign == "center" then
             translate.y = math.floor((height - h*aspects.h)/2)
-        elseif self._private.valign == "bottom" then
+        elseif valign == "bottom" then
             translate.y = math.floor(height - (h*aspects.h))
         end
 
         cr:translate(translate.x, translate.y)
 
         -- Before using the scale, make sure it is below the threshold.
-        local threshold, max_factor = self._private.max_scaling_factor, math.max(aspects.w, aspects.h)
+        local threshold, max_factor = self:get_style_value("max_scaling_factor"), math.max(aspects.w, aspects.h)
 
         if threshold and threshold > 0 and threshold < max_factor then
             aspects.w = (aspects.w*threshold)/max_factor
@@ -229,38 +256,46 @@ function imagebox:draw(ctx, cr, width, height)
         end
 
         -- Set the clip
-        if self._private.clip_shape then
-            cr:clip(self._private.clip_shape(cr, w*aspects.w, h*aspects.h, unpack(self._private.clip_args)))
+        if clip_shape then
+            cr:clip(clip_shape(cr, w*aspects.w, h*aspects.h))
         end
 
-        cr:scale(aspects.w, aspects.h)
+        -- cr:scale(aspects.w, aspects.h)
+        if self._private.handle then
+            RsvgRect = Rsvg.Rectangle {x = 0, y = 0, width = w*aspects.w, height = h*aspects.h }
+            svg_surf = cairo.ImageSurface(cairo.Format.ARGB32, w*aspects.w, h*aspects.h)
+        else
+            cr:scale(aspects.w, aspects.h)
+        end
     else
-        if self._private.halign == "center" then
+        if halign == "center" then
             translate.x = math.floor((width - w)/2)
-        elseif self._private.halign == "right" then
+        elseif halign == "right" then
             translate.x = math.floor(width - w)
         end
 
-        if self._private.valign == "center" then
+        if valign == "center" then
             translate.y = math.floor((height - h)/2)
-        elseif self._private.valign == "bottom" then
+        elseif valign == "bottom" then
             translate.y = math.floor(height - h)
         end
 
         cr:translate(translate.x, translate.y)
 
         -- Set the clip
-        if self._private.clip_shape then
-            cr:clip(self._private.clip_shape(cr, w, h, unpack(self._private.clip_args)))
+        if clip_shape then
+            cr:clip(clip_shape(cr, w, h))
         end
     end
 
     if self._private.handle then
-        self._private.handle:render_cairo(cr)
+        -- self._private.handle:render_cairo(cr)
+        cr:set_source_surface(svg_surf, 0, 0)
+        self._private.handle:render_document(cr, RsvgRect)
     else
         cr:set_source_surface(self._private.image, 0, 0)
 
-        local filter = self._private.scaling_quality
+        local filter = self:get_style_value("scaling_quality")
 
         if filter then
             cr:get_source():set_filter(cairo.Filter[filter:upper()])
@@ -278,15 +313,15 @@ function imagebox:fit(ctx, width, height)
 
     local w, h = self._private.default.width, self._private.default.height
 
-    if w <= width and h <= height and self._private.upscale == false then
+    if w <= width and h <= height and self:get_style_value("upscale") == false then
         return w, h
     end
 
-    if (w < width or h < height) and self._private.downscale == false then
+    if (w < width or h < height) and self:get_style_value("downscale") == false then
         return w, h
     end
 
-    if self._private.resize or w > width or h > height then
+    if self:get_style_value("resize") or w > width or h > height then
         local aspect = math.min(width / w, height / h)
         return w * aspect, h * aspect
     end
@@ -312,10 +347,13 @@ end
 -- @usage my_imagebox:set_image('/usr/share/icons/theme/my_icon.png')
 -- @see image
 function imagebox:set_image(image)
-    local setup_succeed
-
     -- Keep the original to prevent the cache from being GCed.
-    self._private.original_image = image
+    if not self:set_style_value("image", image) then
+        -- Nothing changed => true
+        return true
+    end
+
+    local setup_succeed
 
     if type(image) == "userdata" and not (Rsvg and Rsvg.Handle:is_type_of(image)) then
         -- This function is not documented to handle userdata objects, but
@@ -372,19 +410,11 @@ end
 -- A clip shape defines an area and dimensions to which the content should be
 -- trimmed.
 --
--- Additional parameters will be passed to the clip shape function.
---
 -- @tparam function|gears.shape clip_shape A `gears_shape` compatible shape function.
 -- @method set_clip_shape
 -- @hidden
 -- @see gears.shape
 -- @see clip_shape
-function imagebox:set_clip_shape(clip_shape, ...)
-    self._private.clip_shape = clip_shape
-    self._private.clip_args = {...}
-    self:emit_signal("widget::redraw_needed")
-    self:emit_signal("property::clip_shape", clip_shape)
-end
 
 --- Should the image be resized to fit into the available space?
 --
@@ -465,48 +495,6 @@ end
 -- @tparam[opt=false] boolean auto_dpi
 -- @propemits true false
 -- @see dpi
-
-for _, prop in ipairs {"stylesheet", "dpi", "auto_dpi"} do
-    imagebox["set_" .. prop] = function(self, value)
-        -- It will be set in :fit and :draw. The handle is shared
-        -- by multiple imagebox, so it cannot be set just once.
-        self._private[prop] = value
-
-        self:emit_signal("widget::redraw_needed")
-        self:emit_signal("widget::layout_changed")
-        self:emit_signal("property::" .. prop)
-    end
-end
-
-function imagebox:set_resize(allowed)
-    self._private.resize = allowed
-
-    if allowed then
-        self._private.downscale = true
-        self._private.upscale = true
-        self:emit_signal("property::downscale", allowed)
-        self:emit_signal("property::upscale", allowed)
-    end
-
-    self:emit_signal("widget::redraw_needed")
-    self:emit_signal("widget::layout_changed")
-    self:emit_signal("property::resize", allowed)
-end
-
-for _, prop in ipairs {"downscale", "upscale" } do
-    imagebox["set_" .. prop] = function(self, allowed)
-        self._private[prop] = allowed
-
-        if self._private.resize ~= (self._private.upscale or self._private.downscale) then
-            self._private.resize = self._private.upscale or self._private.downscale
-            self:emit_signal("property::resize", self._private.resize)
-        end
-
-        self:emit_signal("widget::redraw_needed")
-        self:emit_signal("widget::layout_changed")
-        self:emit_signal("property::"..prop, allowed)
-    end
-end
 
 --- Set the horizontal fit policy.
 --
@@ -622,36 +610,28 @@ end
 -- @see vertical_fit_policy
 -- @see max_scaling_factor
 
-local defaults = {
-    halign                = "left",
-    valign                = "top",
-    horizontal_fit_policy = "auto",
-    vertical_fit_policy   = "auto",
-    max_scaling_factor    = 0,
-    scaling_quality       = "good"
-}
-
-local function get_default(prop, value)
-    if value == nil then return defaults[prop] end
-
-    return value
+for _, prop in ipairs { "resize", "downscale", "upscale", "stylesheet", "dpi", "auto_dpi" } do
+    imagebox["set_" .. prop] = function(self, value)
+        if self:set_style_value(prop, value) then
+            self:emit_signal("widget::redraw_needed")
+            self:emit_signal("widget::layout_changed")
+            self:emit_signal("property::" .. prop, value)
+        end
+    end
+    imagebox["get_" .. prop] = function(self)
+        return self:get_style_value(prop)
+    end
 end
 
-for prop in pairs(defaults) do
-    imagebox["set_"..prop] = function(self, value)
-        if value == self._private[prop] then return end
-
-        self._private[prop] = get_default(prop, value)
-        self:emit_signal("widget::redraw_needed")
-        self:emit_signal("property::"..prop, self._private[prop])
-    end
-
-    imagebox["get_"..prop] = function(self)
-        if self._private[prop] == nil then
-            return defaults[prop]
+for _, prop in ipairs { "halign", "valign", "horizontal_fit_policy", "vertical_fit_policy", "max_scaling_factor", "scaling_quality", "clip_shape" } do
+    imagebox["set_" .. prop] = function(self, value)
+        if self:set_style_value(prop, value) then
+            self:emit_signal("widget::redraw_needed")
+            self:emit_signal("property::" .. prop, value)
         end
-
-        return self._private[prop]
+    end
+    imagebox["get_" .. prop] = function(self)
+        return self:get_style_value(prop)
     end
 end
 
@@ -665,30 +645,29 @@ end
 --
 -- The image can be a file, a cairo image surface, or an rsvg handle object
 -- (see the [image property](#image)).
---
--- Any additional arguments will be passed to the clip shape function.
 -- @tparam[opt] image image The image to display (may be `nil`).
 -- @tparam[opt] boolean resize_allowed If `false`, the image will be
 --   clipped, else it will be resized to fit into the available space.
 -- @tparam[opt] function clip_shape A `gears.shape` compatible function.
 -- @treturn wibox.widget.imagebox A new `wibox.widget.imagebox` widget instance.
 -- @constructorfct wibox.widget.imagebox
-local function new(image, resize_allowed, clip_shape, ...)
-    local ret = base.make_widget(nil, nil, {enable_properties = true})
+local function new(image, resize_allowed, clip_shape)
+    local ret = base.make_widget(nil, nil, { enable_properties = true })
 
     gtable.crush(ret, imagebox, true)
-    ret._private.resize = true
+    stylable.initialize(ret, imagebox)
 
     if image then
         ret:set_image(image)
     end
 
     if resize_allowed ~= nil then
-        ret.resize = resize_allowed
+        ret:set_resize(resize_allowed)
     end
 
-    ret._private.clip_shape = clip_shape
-    ret._private.clip_args = {...}
+    if clip_shape then
+        ret:set_clip_shape(clip_shape)
+    end
 
     return ret
 end

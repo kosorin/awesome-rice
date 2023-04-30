@@ -10,16 +10,19 @@ local capi = {
     drawin = drawin,
     root = root,
     awesome = awesome,
-    screen = screen
+    screen = screen,
 }
 local setmetatable = setmetatable
-local pairs = pairs
+local pairs, ipairs = pairs, ipairs
 local type = type
 local object = require("gears.object")
-local grect =  require("gears.geometry").rectangle
+local grect = require("gears.geometry").rectangle
 local beautiful = require("beautiful")
 local base = require("wibox.widget.base")
 local cairo = require("lgi").cairo
+local noice = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
 
 
 --- This provides widget box windows. Every wibox can also be used as if it were
@@ -38,6 +41,83 @@ local force_forward = {
     shape_input = true,
 }
 
+local default_style = {
+    bgimage = Nil,
+    bg = "#000022",
+    fg = "#0000ff",
+    shape = Nil,
+    border_color = "#008800",
+    border_width = 1,
+    opacity = 1,
+    visible = true,
+    ontop = false,
+    cursor = "left_ptr",
+    input_passthrough = false,
+}
+
+noice.register_element(wibox, "wibox", nil, default_style)
+
+for _, prop in ipairs { "bgimage", "bg", "fg" } do
+    wibox["set_" .. prop] = function(self, value)
+        if self:set_style_value(prop, value) then
+            self._drawable[prop] = value
+        end
+    end
+    wibox["get_" .. prop] = function(self)
+        return self:get_style_value(prop)
+    end
+end
+
+for _, prop in ipairs { "border_color", "border_width", "opacity" } do
+    wibox["set_" .. prop] = function(self, value)
+        if self:set_style_value(prop, value) then
+            self["_" .. prop] = value
+        end
+    end
+    wibox["get_" .. prop] = function(self)
+        return self:get_style_value(prop)
+    end
+end
+
+for _, prop in ipairs { "visible", "ontop", "cursor" } do
+    wibox["set_" .. prop] = function(self, value)
+        if self:set_style_value(prop, value) then
+            self.drawin[prop] = value
+        end
+    end
+    wibox["get_" .. prop] = function(self)
+        return self:get_style_value(prop)
+    end
+end
+
+function wibox:set_shape(shape)
+    if self:set_style_value("shape", shape) then
+        self:_apply_shape()
+        self:emit_signal("property::shape", shape)
+    end
+end
+
+function wibox:get_shape()
+    return self:get_style_value("shape")
+end
+
+function wibox:set_input_passthrough(value)
+    if self:set_style_value("input_passthrough", value) then
+        if not value then
+            self.shape_input = nil
+        else
+            local img = cairo.ImageSurface(cairo.Format.A1, 0, 0)
+            self.shape_input = img._native
+            img:finish()
+        end
+        self:emit_signal("property::input_passthrough", value)
+    end
+end
+
+function wibox:get_input_passthrough()
+    return self:get_style_value("input_passthrough")
+end
+
 --@DOC_wibox_COMMON@
 
 function wibox:set_widget(widget)
@@ -52,21 +132,6 @@ end
 
 wibox.setup = base.widget.setup
 
-function wibox:set_bg(c)
-    self._drawable:set_bg(c)
-    self:emit_signal("property::bg", c)
-end
-
-function wibox:set_bgimage(image, ...)
-    self._drawable:set_bgimage(image, ...)
-    self:emit_signal("property::bgimage", ...)
-end
-
-function wibox:set_fg(c)
-    self._drawable:set_fg(c)
-    self:emit_signal("property::fg", c)
-end
-
 function wibox:find_widgets(x, y)
     return self._drawable:find_widgets(x, y)
 end
@@ -80,22 +145,21 @@ end
 -- @treturn widget A new widget.
 -- @method to_widget
 function wibox:to_widget()
-    local bw = self.border_width or beautiful.border_width or 0
+    local bw = self:get_style_value("border_width") or beautiful.border_width or 0
     return wibox.widget {
+        widget        = wibox.container.background,
+        bg            = self:get_style_value("bg") or beautiful.bg_normal or "#ffffff",
+        fg            = self:get_style_value("fg") or beautiful.fg_normal or "#000000",
+        border_color  = self:get_style_value("border_color") or beautiful.border_color or "#000000",
+        border_width  = bw * 2,
+        shape         = self:get_style_value("shape"),
+        forced_width  = self:geometry().width + 2 * bw,
+        forced_height = self:geometry().height + 2 * bw,
         {
-            self:get_widget(),
+            widget  = wibox.container.margin,
             margins = bw,
-            widget  = wibox.container.margin
+            self:get_widget(),
         },
-        bg                 = self.bg or beautiful.bg_normal or "#ffffff",
-        fg                 = self.fg or beautiful.fg_normal or "#000000",
-        shape_border_color = self.border_color or beautiful.border_color or "#000000",
-        shape_border_width = bw*2,
-        shape_clip         = true,
-        shape              = self._shape,
-        forced_width       = self:geometry().width  + 2*bw,
-        forced_height      = self:geometry().height + 2*bw,
-        widget             = wibox.container.background
     }
 end
 
@@ -111,7 +175,7 @@ function wibox:save_to_svg(path, context)
 end
 
 function wibox:_apply_shape()
-    local shape = self._shape
+    local shape = self:get_style_value("shape")
 
     if not shape then
         self.shape_bounding = nil
@@ -120,14 +184,14 @@ function wibox:_apply_shape()
     end
 
     local geo = self:geometry()
-    local bw = self.border_width
+    local bw = self:get_style_value("border_width")
 
     -- First handle the bounding shape (things including the border)
-    local img = cairo.ImageSurface(cairo.Format.A1, geo.width + 2*bw, geo.height + 2*bw)
+    local img = cairo.ImageSurface(cairo.Format.A1, geo.width + 2 * bw, geo.height + 2 * bw)
     local cr = cairo.Context(img)
 
     -- We just draw the shape in its full size
-    shape(cr, geo.width + 2*bw, geo.height + 2*bw)
+    shape(cr, geo.width + 2 * bw, geo.height + 2 * bw)
     cr:set_operator(cairo.Operator.SOURCE)
     cr:fill()
     self.shape_bounding = img._native
@@ -141,44 +205,16 @@ function wibox:_apply_shape()
     -- it in its full size (the translate is to compensate for the smaller
     -- surface)
     cr:translate(-bw, -bw)
-    shape(cr, geo.width + 2*bw, geo.height + 2*bw)
+    shape(cr, geo.width + 2 * bw, geo.height + 2 * bw)
     cr:set_operator(cairo.Operator.SOURCE)
     cr:fill_preserve()
     -- Now we remove an area of width 'bw' again around the shape (We use 2*bw
     -- since half of that is on the outside and only half on the inside)
     cr:set_source_rgba(0, 0, 0, 0)
-    cr:set_line_width(2*bw)
+    cr:set_line_width(2 * bw)
     cr:stroke()
     self.shape_clip = img._native
     img:finish()
-end
-
-function wibox:set_shape(shape)
-    self._shape = shape
-    self:_apply_shape()
-    self:emit_signal("property::shape", shape)
-end
-
-function wibox:get_shape()
-    return self._shape
-end
-
-function wibox:set_input_passthrough(value)
-    rawset(self, "_input_passthrough", value)
-
-    if not value then
-        self.shape_input = nil
-    else
-        local img = cairo.ImageSurface(cairo.Format.A1, 0, 0)
-        self.shape_input = img._native
-        img:finish()
-    end
-
-    self:emit_signal("property::input_passthrough", value)
-end
-
-function wibox:get_input_passthrough()
-    return self._input_passthrough
 end
 
 function wibox:get_screen()
@@ -216,28 +252,15 @@ function wibox:get_children_by_id(name)
         --TODO v5: Remove this, it's `if` nearly dead code, keep the `elseif`
         return rawget(self, "_by_id")[name]
     elseif self._drawable.widget
-      and self._drawable.widget._private
-      and self._drawable.widget._private.by_id then
-          return self._drawable.widget._private.by_id[name]
+        and self._drawable.widget._private
+        and self._drawable.widget._private.by_id then
+        return self._drawable.widget._private.by_id[name]
     end
 
     return {}
 end
 
--- Proxy those properties to decorate their accessors with an extra flag to
--- define when they are set by the user. This allows to "manage" the value of
--- those properties internally until they are manually overridden.
-for _, prop in ipairs { "border_width", "border_color", "opacity" } do
-    wibox["get_"..prop] = function(self)
-        return self["_"..prop]
-    end
-    wibox["set_"..prop] = function(self, value)
-        self._private["_user_"..prop] = true
-        self["_"..prop] = value
-    end
-end
-
-for _, k in ipairs{ "struts", "geometry", "get_xproperty", "set_xproperty" } do
+for _, k in ipairs { "struts", "geometry", "get_xproperty", "set_xproperty" } do
     wibox[k] = function(self, ...)
         return self.drawin[k](self.drawin, ...)
     end
@@ -249,16 +272,16 @@ object.properties._legacy_accessors(wibox.object, "buttons", "_buttons", true, f
     ) or false
 end, true)
 
-local function setup_signals(w)
+local function setup_signals(self)
     local obj
     local function clone_signal(name)
         -- When "name" is emitted on wibox.drawin, also emit it on wibox
         obj:connect_signal(name, function(_, ...)
-            w:emit_signal(name, ...)
+            self:emit_signal(name, ...)
         end)
     end
 
-    obj = w.drawin
+    obj = self.drawin
     clone_signal("property::border_color")
     clone_signal("property::border_width")
     clone_signal("property::buttons")
@@ -276,7 +299,7 @@ local function setup_signals(w)
     clone_signal("property::shape_clip")
     clone_signal("property::shape_input")
 
-    obj = w._drawable
+    obj = self._drawable
     clone_signal("button::press")
     clone_signal("button::release")
     clone_signal("mouse::enter")
@@ -293,112 +316,116 @@ end
 
 local function new(args)
     args = args or {}
-    local ret = object()
-    local w = capi.drawin(args)
 
-    function w.get_wibox()
-        return ret
+    local self = object()
+
+    local drawin = capi.drawin(args)
+    self.drawin = drawin
+    function drawin.get_wibox()
+        return self
     end
 
-    ret.drawin = w
-    ret._drawable = wibox.drawable(w.drawable, { wibox = ret },
-        "wibox drawable (" .. object.modulename(3) .. ")")
-
-    function ret._drawable.get_wibox()
-        return ret
+    local drawable = wibox.drawable(drawin.drawable, { wibox = self }, "wibox drawable (" .. object.modulename(3) .. ")")
+    self._drawable = drawable
+    function drawable.get_wibox()
+        return self
     end
-
-    ret._drawable:_inform_visible(w.visible)
-    w:connect_signal("property::visible", function()
-        ret._drawable:_inform_visible(w.visible)
-    end)
 
     --TODO v5 deprecate this and use `wibox.object`.
     for k, v in pairs(wibox) do
-        if (not rawget(ret, k)) and type(v) == "function" then
-            ret[k] = v
+        if (not rawget(self, k)) and type(v) == "function" then
+            self[k] = v
         end
     end
 
-    setup_signals(ret)
-    ret.draw = ret._drawable.draw
-
-    -- Set the default background
-    ret:set_bg(args.bg or beautiful.bg_normal)
-    ret:set_fg(args.fg or beautiful.fg_normal)
+    setup_signals(self)
+    self:connect_signal("property::geometry", self._apply_shape)
+    self:connect_signal("property::border_width", self._apply_shape)
 
     -- Add __tostring method to metatable.
-    local mt = {}
-    local orig_string = tostring(ret)
-    mt.__tostring = function()
-        return string.format("wibox: %s (%s)",
-                             tostring(ret._drawable), orig_string)
-    end
-    ret = setmetatable(ret, mt)
-
-    -- Make sure the wibox is drawn at least once
-    ret.draw()
-
-    ret:connect_signal("property::geometry", ret._apply_shape)
-    ret:connect_signal("property::border_width", ret._apply_shape)
+    local orig_string = tostring(self)
 
     -- If a value is not found, look in the drawin
-    setmetatable(ret, {
-        __index = function(self, k)
-            if rawget(self, "get_"..k) then
-                return self["get_"..k](self)
+    setmetatable(self, {
+        __tostring = function()
+            return string.format("wibox: %s (%s)", tostring(drawable), orig_string)
+        end,
+        __index = function(t, k)
+            if rawget(t, "get_" .. k) then
+                return t["get_" .. k](t)
             else
-                return w[k]
+                return drawin[k]
             end
         end,
-        __newindex = function(self, k,v)
-            if rawget(self, "set_"..k) then
-                self["set_"..k](self, v)
-            elseif force_forward[k] or w[k] ~= nil then
-                w[k] = v
+        __newindex = function(t, k, v)
+            if rawget(t, "set_" .. k) then
+                t["set_" .. k](t, v)
+            elseif force_forward[k] or drawin[k] ~= nil then
+                drawin[k] = v
             else
-                rawset(self, k, v)
+                rawset(t, k, v)
             end
-        end
+        end,
     })
 
+    drawable:_inform_visible(drawin.visible)
+    drawin:connect_signal("property::visible", function()
+        drawable:_inform_visible(drawin.visible)
+    end)
+
+    stylable.initialize(self, wibox)
+
+    -- Make sure the wibox is drawn at least once
+    self.draw = drawable.draw
+    self.draw()
+
     -- Set other wibox specific arguments
+    if args.bg then
+        self:set_bg(args.bg)
+    end
+
+    if args.fg then
+        self:set_fg(args.fg)
+    end
+
     if args.bgimage then
-        ret:set_bgimage( args.bgimage )
-    end
-
-    if args.widget then
-        ret:set_widget ( args.widget  )
-    end
-
-    if args.screen then
-        ret:set_screen ( args.screen  )
+        self:set_bgimage(args.bgimage)
     end
 
     if args.shape then
-        ret.shape = args.shape
-    end
-
-    if args.border_width then
-        ret.border_width = args.border_width
+        self:set_shape(args.shape)
     end
 
     if args.border_color then
-        ret.border_color = args.border_color
+        self:set_border_color(args.border_color)
+    end
+
+    if args.border_width then
+        self:set_border_width(args.border_width)
     end
 
     if args.opacity then
-        ret.opacity = args.opacity
+        self:set_opacity(args.opacity)
     end
 
-    if args.input_passthrough then
-        ret.input_passthrough = args.input_passthrough
+    if args.input_passthrough ~= nil then
+        self:set_input_passthrough(args.input_passthrough)
+    end
+
+    if args.widget then
+        self:set_widget(args.widget)
+    end
+
+    if args.screen then
+        self:set_screen(args.screen)
     end
 
     -- Make sure all signals bubble up
-    ret:_connect_everything(wibox.emit_signal)
+    self:_connect_everything(wibox.emit_signal)
 
-    return ret
+    self:request_style()
+
+    return self
 end
 
 --- Redraw a wibox. You should never have to call this explicitely because it is

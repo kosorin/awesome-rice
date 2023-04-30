@@ -15,11 +15,18 @@ local tostring = tostring
 local base = require("wibox.widget.base")
 local matrix = require("gears.matrix")
 local gtable = require("gears.table")
+local noice = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
 
 local rotate = { mt = {} }
 
-local function transform(layout, width, height)
-    local dir = layout:get_direction()
+noice.register_element(rotate, "rotate", "widget", {
+    direction = "north",
+})
+
+local function transform(self, width, height)
+    local dir = self:get_style_value("direction")
     if dir == "east" or dir == "west" then
         return height, width
     end
@@ -32,7 +39,7 @@ function rotate:layout(_, width, height)
         return
     end
 
-    local dir = self:get_direction()
+    local dir = self:get_style_value("direction")
 
     local m = matrix.identity
     if dir == "west" then
@@ -87,7 +94,7 @@ end
 -- @noreturn
 -- @interface container
 function rotate:reset()
-    self._private.direction = nil
+    self:clear_local_style()
     self:set_widget(nil)
 end
 
@@ -102,26 +109,26 @@ end
 -- @propertyvalue "north"
 -- @propemits true false
 
+local valid_directions = {
+    north = true,
+    east = true,
+    south = true,
+    west = true,
+}
+
 function rotate:set_direction(dir)
-    local allowed = {
-        north = true,
-        east = true,
-        south = true,
-        west = true
-    }
-
-    if not allowed[dir] then
-        error("Invalid direction for rotate layout: " .. tostring(dir))
+    if not valid_directions[dir] then
+        dir = "north"
     end
-
-    self._private.direction = dir
-    self:emit_signal("widget::layout_changed")
-    self:emit_signal("property::direction")
+    if self:set_style_value("direction", dir) then
+        self:emit_signal("widget::layout_changed")
+        self:emit_signal("property::direction")
+    end
 end
 
 -- Get the direction of this rotating layout
 function rotate:get_direction()
-    return self._private.direction or "north"
+    return self:get_style_value("direction")
 end
 
 --- Returns a new rotate container.
@@ -137,9 +144,15 @@ local function new(widget, dir)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 
     gtable.crush(ret, rotate, true)
+    stylable.initialize(ret, rotate)
 
-    ret:set_widget(widget)
-    ret:set_direction(dir or "north")
+    if dir then
+        ret:set_direction(dir)
+    end
+
+    if widget then
+        ret:set_widget(widget)
+    end
 
     return ret
 end

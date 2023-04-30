@@ -25,8 +25,13 @@ local ipairs = ipairs
 local math = math
 local gtable = require("gears.table")
 local base = require("wibox.widget.base")
+local noice = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
 
 local grid = { mt = {} }
+
+noice.register_element(grid, "grid", "widget")
 
 local properties = {
                     "orientation", "superpose",
@@ -925,6 +930,7 @@ local function new(orientation)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 
     gtable.crush(ret, grid, true)
+    stylable.initialize(ret, grid)
 
     ret._private.orientation = dir
     ret._private.widgets = {}

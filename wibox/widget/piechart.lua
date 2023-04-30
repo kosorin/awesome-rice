@@ -16,11 +16,16 @@ local base      = require( "wibox.widget.base" )
 local beautiful = require( "beautiful"         )
 local gtable    = require( "gears.table"       )
 local pie       = require( "gears.shape"       ).pie
+local noice     = require( "theme.manager"     )
+local stylable  = require( "theme.stylable"    )
+local Nil       = require( "theme.nil"         )
 local unpack    = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
 local module = {}
 
 local piechart = {}
+
+noice.register_element(piechart, "piechart", "widget")
 
 local function draw_label(cr,angle,radius,center_x,center_y,text)
     local edge_x = center_x+(radius/2)*math.cos(angle)
@@ -263,6 +268,7 @@ local function new(data_list)
     })
 
     gtable.crush(ret, piechart)
+    stylable.initialize(ret, piechart)
 
     rawset(ret, "fit" , fit )
     rawset(ret, "draw", draw)

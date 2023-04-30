@@ -17,6 +17,11 @@ local gtable = require("gears.table")
 local beautiful = require("beautiful")
 local base = require("wibox.widget.base")
 local shape = require("gears.shape")
+local gthickness = require("gears.thickness")
+local noice = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
+
 local capi = {
     mouse        = mouse,
     mousegrabber = mousegrabber,
@@ -275,29 +280,44 @@ local slider = {mt={}}
 -- @param color
 
 
-local properties = {
+local default_style = {
     -- Handle
-    handle_shape         = shape.rectangle,
-    handle_color         = false,
-    handle_margins       = {},
-    handle_width         = false,
-    handle_border_width  = 0,
-    handle_border_color  = false,
+    handle_shape         = Nil,
+    handle_color         = "#aa0000",
+    handle_margins       = gthickness(),
+    handle_width         = 8,
+    handle_border_width  = 1,
+    handle_border_color  = "#ff0000",
     handle_cursor        = "fleur",
 
     -- Bar
-    bar_shape            = shape.rectangle,
-    bar_height           = false,
-    bar_color            = false,
-    bar_active_color     = false,
-    bar_margins          = {},
-    bar_border_width     = 0,
-    bar_border_color     = false,
+    bar_shape            = Nil,
+    bar_height           = Nil,
+    bar_color            = "#aa00aa",
+    bar_active_color     = "#008800",
+    bar_margins          = gthickness(),
+    bar_border_width     = 1,
+    bar_border_color     = "#ff00ff",
+}
 
-    -- Content
-    value                = 0,
-    minimum              = 0,
-    maximum              = 100,
+noice.register_element(slider, "slider", "widget", default_style)
+
+for prop in pairs(default_style) do
+    slider["set_" .. prop] = function(self, value)
+        if self:set_style_value(prop, value) then
+            self:emit_signal("widget::redraw_needed")
+            self:emit_signal("property::" .. prop, value)
+        end
+    end
+    slider["get_" .. prop] = function(self)
+        return self:get_style_value(prop)
+    end
+end
+
+local properties = {
+    value   = 0,
+    minimum = 0,
+    maximum = 100,
 }
 
 -- Create the accessors
@@ -343,40 +363,28 @@ local function get_extremums(self)
 end
 
 function slider:draw(_, cr, width, height)
-    local value = self._private.value or self._private.min or 0
+    local minimum, maximum, range = get_extremums(self)
 
-    local maximum = self._private.maximum
-        or properties.maximum
+    local value = self._private.value or minimum
 
-    local minimum = self._private.minimum
-        or properties.minimum
-
-    local range = maximum - minimum
     local active_rate = (value - minimum) / range
 
-    local handle_height, handle_width = height, self._private.handle_width
-        or beautiful.slider_handle_width
-        or math.floor(height/2)
+    local handle_height, handle_width = height, self:get_style_value("handle_width") or math.floor(height / 2)
 
-    local handle_border_width = self._private.handle_border_width
-        or beautiful.slider_handle_border_width
-        or properties.handle_border_width or 0
+    local handle_border_width = self:get_style_value("handle_border_width") or 0
 
-    local bar_height = self._private.bar_height
+    local bar_height = self:get_style_value("bar_height")
 
     -- If there is no background, then skip this
-    local bar_color = self._private.bar_color
-        or beautiful.slider_bar_color
+    local bar_color = self:get_style_value("bar_color")
 
-    local bar_active_color = self._private.bar_active_color
-        or beautiful.slider_bar_active_color
+    local bar_active_color = self:get_style_value("bar_active_color")
 
     if bar_color then
         cr:set_source(color(bar_color))
     end
 
-    local margins = self._private.bar_margins
-        or beautiful.slider_bar_margins
+    local margins = self:get_style_value("bar_margins")
 
     local x_offset, right_margin, y_offset = 0, 0
 
@@ -393,20 +401,16 @@ function slider:draw(_, cr, width, height)
             right_margin = margins.right or 0
         end
     else
-        bar_height = bar_height or beautiful.slider_bar_height or height
+        bar_height = bar_height or height
         y_offset   = math.floor((height - bar_height)/2)
     end
 
 
     cr:translate(x_offset, y_offset)
 
-    local bar_shape = self._private.bar_shape
-        or beautiful.slider_bar_shape
-        or properties.bar_shape
+    local bar_shape = self:get_style_value("bar_shape") or shape.rectangle
 
-    local bar_border_width = self._private.bar_border_width
-        or beautiful.slider_bar_border_width
-        or properties.bar_border_width
+    local bar_border_width = self:get_style_value("bar_border_width")
 
     bar_shape(cr, width - x_offset - right_margin, bar_height or height)
 
@@ -433,9 +437,7 @@ function slider:draw(_, cr, width, height)
 
     -- Draw the bar border
     if bar_border_width > 0 then
-        local bar_border_color = self._private.bar_border_color
-            or beautiful.slider_bar_border_color
-            or properties.bar_border_color
+        local bar_border_color = self:get_style_value("bar_border_color")
 
         cr:set_line_width(bar_border_width)
 
@@ -452,21 +454,17 @@ function slider:draw(_, cr, width, height)
     cr:translate(-x_offset, -y_offset)
 
     -- Paint the handle
-    local handle_color = self._private.handle_color
-        or beautiful.slider_handle_color
+    local handle_color = self:get_style_value("handle_color")
 
     -- It is ok if there is no color, it will be inherited
     if handle_color then
         cr:set_source(color(handle_color))
     end
 
-    local handle_shape = self._private.handle_shape
-        or beautiful.slider_handle_shape
-        or properties.handle_shape
+    local handle_shape = self:get_style_value("handle_shape") or shape.rectangle
 
     -- Lets get the margins for the handle
-    margins = self._private.handle_margins
-        or beautiful.slider_handle_margins
+    margins = self:get_style_value("handle_margins")
 
     x_offset, y_offset = 0, 0
 
@@ -500,9 +498,7 @@ function slider:draw(_, cr, width, height)
 
     -- Draw the handle border
     if handle_border_width > 0 then
-        local handle_border_color = self._private.handle_border_color
-            or beautiful.slider_handle_border_color
-            or properties.handle_border_color
+        local handle_border_color = self:get_style_value("handle_border_color")
 
         if handle_border_color then
             cr:set_source(color(handle_border_color))
@@ -520,8 +516,8 @@ end
 
 -- Move the handle to the correct location
 local function move_handle(self, width, x, _)
-    local _, _, interval = get_extremums(self)
-    self:set_value(math.floor((x*interval)/width))
+    local min, _, interval = get_extremums(self)
+    self:set_value(min + math.floor((x*interval)/width))
 end
 
 local function mouse_press(self, x, y, button_id, _, geo)
@@ -539,9 +535,7 @@ local function mouse_press(self, x, y, button_id, _, geo)
     local wgeo = geo.drawable.drawable:geometry()
     local matrix = matrix_from_device:translate(-wgeo.x, -wgeo.y)
 
-    local handle_cursor = self._private.handle_cursor
-        or beautiful.slider_handle_cursor
-        or properties.handle_cursor
+    local handle_cursor = self:get_style_value("handle_cursor")
 
     capi.mousegrabber.run(function(mouse)
         if not mouse.buttons[1] then
@@ -581,9 +575,12 @@ local function new(args)
         enable_properties = true,
     })
 
-    gtable.crush(ret._private, args or {})
-
     gtable.crush(ret, slider, true)
+    stylable.initialize(ret, slider)
+
+    for name, value in pairs(args or {}) do
+        ret["set_" .. name](ret, value)
+    end
 
     ret:connect_signal("button::press", mouse_press)
 

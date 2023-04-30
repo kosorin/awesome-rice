@@ -94,6 +94,9 @@ local function do_redraw(self)
                 self._widget_hierarchy_callback_arg = {}
                 self._widget_hierarchy = whierarchy.new(context, self._widget, width, height,
                         self._redraw_callback, self._layout_callback, self._widget_hierarchy_callback_arg)
+                if self._widget._stylable and not self._widget._stylable.ignore_hierarchy then
+                    self._widget:set_hierarchy_root(self:get_wibox())
+                end
             else
                 self._widget_hierarchy = nil
             end
@@ -376,132 +379,132 @@ local function setup_signals(self)
 end
 
 function drawable.new(d, widget_context_skeleton, drawable_name)
-    local ret = object()
-    ret.drawable = d
-    ret._widget_context_skeleton = widget_context_skeleton
-    ret._need_complete_repaint = true
-    ret._need_relayout = true
-    ret._dirty_area = cairo.Region.create()
-    setup_signals(ret)
+    local self = object()
+    self.drawable = d
+    self._widget_context_skeleton = widget_context_skeleton
+    self._need_complete_repaint = true
+    self._need_relayout = true
+    self._dirty_area = cairo.Region.create()
+    setup_signals(self)
 
     for k, v in pairs(drawable) do
         if type(v) == "function" then
-            ret[k] = v
+            self[k] = v
         end
     end
 
     -- Only redraw a drawable once, even when we get told to do so multiple times.
-    ret._redraw_pending = false
-    ret._do_redraw = function()
-        ret._redraw_pending = false
-        do_redraw(ret)
+    self._redraw_pending = false
+    self._do_redraw = function()
+        self._redraw_pending = false
+        do_redraw(self)
     end
 
     -- Connect our signal when we need a redraw
-    ret.draw = function()
-        if not ret._redraw_pending then
-            timer.delayed_call(ret._do_redraw)
-            ret._redraw_pending = true
+    self.draw = function()
+        if not self._redraw_pending then
+            timer.delayed_call(self._do_redraw)
+            self._redraw_pending = true
         end
     end
-    ret._do_complete_repaint = function()
-        ret._need_complete_repaint = true
-        ret:draw()
+    self._do_complete_repaint = function()
+        self._need_complete_repaint = true
+        self:draw()
     end
 
     -- Do a full redraw if the surface changes (the new surface has no content yet)
-    d:connect_signal("property::surface", ret._do_complete_repaint)
+    d:connect_signal("property::surface", self._do_complete_repaint)
 
     -- Do a normal redraw when the drawable moves. This will likely do nothing
     -- in most cases, but it makes us do a complete repaint when we are moved to
     -- a different screen.
-    d:connect_signal("property::x", ret.draw)
-    d:connect_signal("property::y", ret.draw)
+    d:connect_signal("property::x", self.draw)
+    d:connect_signal("property::y", self.draw)
 
     -- Currently we aren't redrawing on move (signals not connected).
     -- :set_bg() will later recompute this.
-    ret._redraw_on_move = false
+    self._redraw_on_move = false
 
     -- Set the default background
-    ret:set_bg(beautiful.bg_normal)
-    ret:set_fg(beautiful.fg_normal)
+    self:set_bg(beautiful.bg_normal)
+    self:set_fg(beautiful.fg_normal)
 
     -- Initialize internals
-    ret._widgets_under_mouse = {}
+    self._widgets_under_mouse = {}
 
     local function button_signal(name)
         d:connect_signal(name, function(_, x, y, button, modifiers)
-            local widgets = ret:find_widgets(x, y)
+            local widgets = self:find_widgets(x, y)
             for _, v in pairs(widgets) do
                 -- Calculate x/y inside of the widget
                 local lx, ly = v.hierarchy:get_matrix_from_device():transform_point(x, y)
-                v.widget:emit_signal(name, lx, ly, button, modifiers,v)
+                v.widget:emit_signal(name, lx, ly, button, modifiers, v)
             end
         end)
     end
     button_signal("button::press")
     button_signal("button::release")
 
-    d:connect_signal("mouse::move", function(_, x, y) handle_motion(ret, x, y) end)
-    d:connect_signal("mouse::leave", function() handle_leave(ret) end)
+    d:connect_signal("mouse::move", function(_, x, y) handle_motion(self, x, y) end)
+    d:connect_signal("mouse::leave", function() handle_leave(self) end)
 
     -- Set up our callbacks for repaints
-    ret._redraw_callback = function(hierar, arg)
+    self._redraw_callback = function(hierar, arg)
         -- Avoid crashes when a drawable was partly finalized and dirty_area is broken.
-        if not ret._visible then
+        if not self._visible then
             return
         end
-        if ret._widget_hierarchy_callback_arg ~= arg then
+        if self._widget_hierarchy_callback_arg ~= arg then
             return
         end
         local m = hierar:get_matrix_to_device()
         local x, y, width, height = matrix.transform_rectangle(m, hierar:get_draw_extents())
         local x1, y1 = math.floor(x), math.floor(y)
         local x2, y2 = math.ceil(x + width), math.ceil(y + height)
-        ret._dirty_area:union_rectangle(cairo.RectangleInt{
-            x = x1, y = y1, width = x2 - x1, height = y2 - y1
+        self._dirty_area:union_rectangle(cairo.RectangleInt {
+            x = x1, y = y1, width = x2 - x1, height = y2 - y1,
         })
-        ret:draw()
+        self:draw()
     end
-    ret._layout_callback = function(_, arg)
-        if ret._widget_hierarchy_callback_arg ~= arg then
+    self._layout_callback = function(_, arg)
+        if self._widget_hierarchy_callback_arg ~= arg then
             return
         end
-        ret._need_relayout = true
+        self._need_relayout = true
         -- When not visible, we will be redrawn when we become visible. In the
         -- mean-time, the layout does not matter much.
-        if ret._visible then
-            ret:draw()
+        if self._visible then
+            self:draw()
         end
     end
 
     -- Add __tostring method to metatable.
-    ret.drawable_name = drawable_name or object.modulename(3)
+    self.drawable_name = drawable_name or object.modulename(3)
     local mt = {}
-    local orig_string = tostring(ret)
+    local orig_string = tostring(self)
     mt.__tostring = function()
-        return string.format("%s (%s)", ret.drawable_name, orig_string)
+        return string.format("%s (%s)", self.drawable_name, orig_string)
     end
-    ret = setmetatable(ret, mt)
+    self = setmetatable(self, mt)
 
     -- Make sure the drawable is drawn at least once
-    ret._do_complete_repaint()
+    self._do_complete_repaint()
 
-    return setmetatable(ret, {
-        __index = function(self, k)
-            if rawget(self, "get_"..k) then
-                return rawget(self, "get_"..k)(self)
+    return setmetatable(self, {
+        __index = function(t, k)
+            if rawget(t, "get_" .. k) then
+                return rawget(t, "get_" .. k)(t)
             else
-                return rawget(ret, k)
+                return rawget(t, k)
             end
         end,
-        __newindex = function(self, k,v)
-            if rawget(self, "set_"..k) then
-                rawget(self, "set_"..k)(self, v)
+        __newindex = function(t, k, v)
+            if rawget(t, "set_" .. k) then
+                rawget(t, "set_" .. k)(t, v)
             else
-                rawset(self, k, v)
+                rawset(t, k, v)
             end
-        end
+        end,
     })
 end
 

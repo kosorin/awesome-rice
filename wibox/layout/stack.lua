@@ -20,8 +20,31 @@ local fixed = require("wibox.layout.fixed")
 local table = table
 local pairs = pairs
 local gtable  = require("gears.table")
+local noice = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
 
 local stack = {mt={}}
+
+local default_style = {
+    top_only = false,
+    horizontal_offset = 0,
+    vertical_offset = 0,
+}
+
+noice.register_element(stack, "stack", "fixed", default_style)
+
+for prop in pairs(default_style) do
+    stack["set_" .. prop] = function(self, value)
+        if self:set_style_value(prop, value) then
+            self:emit_signal("widget::layout_changed")
+            self:emit_signal("property::" .. prop, value)
+        end
+    end
+    stack["get_" .. prop] = function(self)
+        return self:get_style_value(prop)
+    end
+end
 
 --- Add some widgets to the given stack layout.
 --
@@ -71,17 +94,19 @@ local stack = {mt={}}
 
 function stack:layout(_, width, height)
     local result = {}
-    local spacing = self._private.spacing
+    local spacing = self:get_style_value("spacing") or 0
+    local h_offset = self:get_style_value("horizontal_offset") or 0
+    local v_offset = self:get_style_value("vertical_offset") or 0
 
-    width  = width  - math.abs(self._private.h_offset * #self._private.widgets) - 2*spacing
-    height = height - math.abs(self._private.v_offset * #self._private.widgets) - 2*spacing
+    width  = width  - math.abs(h_offset * #self._private.widgets) - 2*spacing
+    height = height - math.abs(v_offset * #self._private.widgets) - 2*spacing
 
     local h_off, v_off = spacing, spacing
 
     for _, v in pairs(self._private.widgets) do
         table.insert(result, base.place_widget_at(v, h_off, v_off, width, height))
-        h_off, v_off = h_off + self._private.h_offset, v_off + self._private.v_offset
-        if self._private.top_only then break end
+        h_off, v_off = h_off + h_offset, v_off + v_offset
+        if self:get_style_value("top_only") then break end
     end
 
     return result
@@ -89,7 +114,7 @@ end
 
 function stack:fit(context, orig_width, orig_height)
     local max_w, max_h = 0,0
-    local spacing = self._private.spacing
+    local spacing = self:get_style_value("spacing") or 0
 
     for _, v in pairs(self._private.widgets) do
         local w, h = base.fit_widget(self, context, v, orig_width, orig_height)
@@ -104,16 +129,6 @@ end
 -- @property top_only
 -- @tparam[opt=false] boolean top_only
 -- @propemits true false
-
-function stack:get_top_only()
-    return self._private.top_only
-end
-
-function stack:set_top_only(top_only)
-    self._private.top_only = top_only
-    self:emit_signal("widget::layout_changed")
-    self:emit_signal("property::top_only", top_only)
-end
 
 --- Raise a widget at `index` to the top of the stack.
 --
@@ -178,26 +193,6 @@ end
 -- @propemits true false
 -- @see horizontal_offset
 
-function stack:set_horizontal_offset(value)
-    self._private.h_offset = value
-    self:emit_signal("widget::layout_changed")
-    self:emit_signal("property::horizontal_offset", value)
-end
-
-function stack:get_horizontal_offset()
-    return self._private.h_offset
-end
-
-function stack:set_vertical_offset(value)
-    self._private.v_offset = value
-    self:emit_signal("widget::layout_changed")
-    self:emit_signal("property::vertical_offset", value)
-end
-
-function stack:get_vertical_offset()
-    return self._private.v_offset
-end
-
 --- Create a new stack layout.
 --
 -- @constructorfct wibox.layout.stack
@@ -207,9 +202,7 @@ local function new(...)
     local ret = fixed.horizontal(...)
 
     gtable.crush(ret, stack, true)
-
-    ret._private.h_offset = 0
-    ret._private.v_offset = 0
+    stylable.initialize(ret, stack)
 
     return ret
 end

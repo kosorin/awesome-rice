@@ -21,17 +21,22 @@
 -- @popupmod awful.popup
 -- @supermodule wibox
 ---------------------------------------------------------------------------
-local wibox     = require( "wibox"           )
-local gtable    = require( "gears.table"     )
-local placement = require( "awful.placement" )
-local xresources= require("beautiful.xresources")
-local timer     = require( "gears.timer"     )
-local capi      = {mouse = mouse}
+local wibox      = require("wibox")
+local gtable     = require("gears.table")
+local placement  = require("awful.placement")
+local xresources = require("beautiful.xresources")
+local timer      = require("gears.timer")
+local noice      = require("theme.manager")
+local stylable   = require("theme.stylable")
+local Nil        = require("theme.nil")
+local capi       = { mouse = mouse }
 
 
 local module = {}
 
 local main_widget = {}
+
+noice.register_element(main_widget, "popup-widget", "widget", {})
 
 -- Get the optimal direction for the wibox
 -- This (try to) avoid going offscreen
@@ -52,7 +57,7 @@ local function set_position(self)
     if pf == false then return end
 
     if pf then
-        pf(self, {bounding_rect = self.screen.geometry})
+        pf(self, { bounding_rect = self.screen.geometry })
         return
     end
 
@@ -64,7 +69,7 @@ local function set_position(self)
         preferred_positions = self._private.preferred_directions,
         geometry            = geo,
         preferred_anchors   = self._private.preferred_anchors,
-        offset              = self._private.offset or { x = 0, y = 0},
+        offset              = self._private.offset or { x = 0, y = 0 },
     })
 
     if pos_name ~= self._private.current_position then
@@ -84,8 +89,8 @@ end
 local function apply_size(self, width, height, set_pos)
     local prev_geo = self:geometry()
 
-    width  = math.max(self._private.minimum_width  or 1, math.ceil(width  or 1))
-    height = math.max(self._private.minimum_height or 1, math.ceil(height or 1))
+    width          = math.max(self._private.minimum_width or 1, math.ceil(width or 1))
+    height         = math.max(self._private.minimum_height or 1, math.ceil(height or 1))
 
     if self._private.maximum_width then
         width = math.min(self._private.maximum_width, width)
@@ -109,7 +114,7 @@ function main_widget:layout(context, width, height)
             self,
             context,
             self._private.widget,
-            self._wb._private.maximum_width  or 9999,
+            self._wb._private.maximum_width or 9999,
             self._wb._private.maximum_height or 9999
         )
         timer.delayed_call(function()
@@ -138,6 +143,8 @@ function main_widget:get_children_by_id(name)
 end
 
 local popup = {}
+
+noice.register_element(popup, "popup", "wibox", {})
 
 --- Set the preferred popup position relative to its parent.
 --
@@ -342,15 +349,15 @@ end
 -- @rangestart 1
 -- @propemits true false
 
-for _, orientation in ipairs {"_width", "_height"} do
-    for _, limit in ipairs {"minimum", "maximum"} do
-        local prop = limit..orientation
-        popup["set_"..prop] = function(self, value)
+for _, orientation in ipairs { "_width", "_height" } do
+    for _, limit in ipairs { "minimum", "maximum" } do
+        local prop = limit .. orientation
+        popup["set_" .. prop] = function(self, value)
             self._private[prop] = value
             self._private.container:emit_signal("widget::layout_changed")
-            self:emit_signal("property::"..prop, value)
+            self:emit_signal("property::" .. prop, value)
         end
-        popup["get_"..prop] = function(self)
+        popup["get_" .. prop] = function(self)
             return self._private[prop]
         end
     end
@@ -373,7 +380,6 @@ end
 -- @propemits true false
 
 function popup:set_offset(offset)
-
     if type(offset) == "number" then
         offset = {
             x = offset or 0,
@@ -381,7 +387,7 @@ function popup:set_offset(offset)
         }
     end
 
-    local oldoff = self._private.offset or {x=0, y=0}
+    local oldoff = self._private.offset or { x = 0, y = 0 }
 
     if oldoff.x == offset.x and oldoff.y == offset.y then return end
 
@@ -418,11 +424,11 @@ end
 function popup:_apply_size_now(skip_set)
     if not self.widget then return end
 
-    local w, h = wibox.widget.base.fit_widget(
+    local w, h  = wibox.widget.base.fit_widget(
         self.widget,
-        {dpi= self.screen.dpi or xresources.get_dpi()},
+        { dpi = self.screen.dpi or xresources.get_dpi() },
         self.widget,
-        self._private.maximum_width  or 9999,
+        self._private.maximum_width or 9999,
         self._private.maximum_height or 9999
     )
 
@@ -466,61 +472,58 @@ local function create_popup(_, args)
     assert(original_widget, "The `awful.popup` requires a `widget` constructor argument")
 
     local child_widget = wibox.widget.base.make_widget_from_value(original_widget)
+    local container_widget = wibox.widget.base.make_widget(child_widget, "awful.popup", { enable_properties = true })
 
-    local ii = wibox.widget.base.make_widget(child_widget, "awful.popup", {
-        enable_properties = true
-    })
-
-    gtable.crush(ii, main_widget, true)
+    gtable.crush(container_widget, main_widget, true)
+    stylable.initialize(container_widget, main_widget)
 
     -- Create a wibox to host the widget
-    local w = wibox(args or {})
+    local self = wibox(args or {})
 
-    rawset(w, "_private", {
-        container            = ii,
+    rawset(self, "_private", {
+        container            = container_widget,
         preferred_directions = { "right", "left", "top", "bottom" },
         preferred_anchors    = { "back", "front", "middle" },
-        widget = child_widget
+        widget               = child_widget,
     })
 
-    gtable.crush(w, popup)
+    gtable.crush(self, popup, true)
+    stylable.initialize(self, popup)
 
-    ii:set_widget(child_widget)
+    container_widget:set_widget(child_widget)
 
     -- Create the signal handlers
-    function w._private.show_fct(wdg, _, _, button, _, geo)
-        if button == w._private.button_for_widget[wdg] then
-            w:move_next_to(geo)
+    function self._private.show_fct(wdg, _, _, button, _, geo)
+        if button == self._private.button_for_widget[wdg] then
+            self:move_next_to(geo)
         end
     end
-    function w._private.hide_fct()
-        w.visible = false
+
+    function self._private.hide_fct()
+        self.visible = false
     end
 
     -- Restore
     args.widget = original_widget
 
     -- Cross-link the wibox and widget
-    ii._wb = w
-    wibox.set_widget(w, ii)
+    container_widget._wb = self
+    wibox.set_widget(self, container_widget)
 
     --WARNING The order is important
     -- First, apply the limits to avoid a flicker with large width or height
     -- when set_position is called before the limits
-    for _,v in ipairs{"minimum_width", "minimum_height", "maximum_height",
-      "maximum_width", "offset", "placement","preferred_positions",
-      "preferred_anchors", "hide_on_right_click"} do
+    for _, v in ipairs { "minimum_width", "minimum_height", "maximum_height",
+        "maximum_width", "offset", "placement", "preferred_positions",
+        "preferred_anchors", "hide_on_right_click", } do
         if args[v] ~= nil then
-            w["set_"..v](w, args[v])
+            self["set_" .. v](self, args[v])
         end
     end
 
-    -- Default to visible
-    if args.visible ~= false then
-        w.visible = true
-    end
+    self:request_style()
 
-    return w
+    return self
 end
 
-return setmetatable(module, {__call = create_popup})
+return setmetatable(module, { __call = create_popup })

@@ -14,9 +14,12 @@ local gdebug = require("gears.debug")
 local protected_call = require("gears.protected_call")
 local gtable = require("gears.table")
 local setmetatable = setmetatable
-local pairs = pairs
+local pairs, ipairs = pairs, ipairs
 local type = type
 local table = table
+local tmanager = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
 
 local base = {}
 
@@ -225,24 +228,18 @@ local base = {}
 -- Functions available on all widgets.
 base.widget = {}
 
+tmanager.register_element(base.widget, "widget", nil, {
+    forced_width = Nil,
+    forced_height = Nil,
+    opacity = 1,
+    visible = true,
+})
+
 object.properties._legacy_accessors(base.widget, "buttons", nil, true, function(new_btns)
     return new_btns[1] and (
         type(new_btns[1]) == "button" or new_btns[1]._is_capi_button
     ) or false
 end, true)
-
---- Set a widget's visibility.
--- @tparam boolean b Whether the widget is visible.
--- @method wibox.widget.base:set_visible
--- @hidden
-function base.widget:set_visible(b)
-    if b ~= self._private.visible then
-        self._private.visible = b
-        self:emit_signal("widget::layout_changed")
-        -- In case something ignored fit and drew the widget anyway.
-        self:emit_signal("widget::redraw_needed")
-    end
-end
 
 --- Add a new `awful.button` to this widget.
 -- @tparam awful.button button The button to add.
@@ -269,12 +266,23 @@ function base.widget:add_button(button)
     table.insert(self._private.buttons, button)
 end
 
+--- Set a widget's visibility.
+-- @tparam boolean b Whether the widget is visible.
+-- @method wibox.widget.base:set_visible
+-- @hidden
+function base.widget:set_visible(visible)
+    if self:set_style_value("visible", not not visible) then
+        self:emit_signal("widget::layout_changed")
+        self:emit_signal("widget::redraw_needed")
+    end
+end
+
 --- Is the widget visible?
 -- @treturn boolean
 -- @method wibox.widget.base:get_visible
 -- @hidden
 function base.widget:get_visible()
-    return self._private.visible or false
+    return self:get_style_value("visible")
 end
 
 --- Set a widget's opacity.
@@ -282,9 +290,8 @@ end
 -- (opaque)).
 -- @method wibox.widget.base:set_opacity
 -- @hidden
-function base.widget:set_opacity(o)
-    if o ~= self._private.opacity then
-        self._private.opacity = o
+function base.widget:set_opacity(opacity)
+    if self:set_style_value("opacity", opacity or 1) then
         self:emit_signal("widget::redraw_needed")
     end
 end
@@ -294,7 +301,7 @@ end
 -- @method wibox.widget.base:get_opacity
 -- @hidden
 function base.widget:get_opacity()
-    return self._private.opacity
+    return self:get_style_value("opacity")
 end
 
 --- Set the widget's forced width.
@@ -304,8 +311,7 @@ end
 -- @method wibox.widget.base:set_forced_width
 -- @hidden
 function base.widget:set_forced_width(width)
-    if width ~= self._private.forced_width then
-        self._private.forced_width = width
+    if self:set_style_value("forced_width", width) then
         self:emit_signal("widget::layout_changed")
     end
 end
@@ -321,7 +327,7 @@ end
 -- @method wibox.widget.base:get_forced_width
 -- @hidden
 function base.widget:get_forced_width()
-    return self._private.forced_width
+    return self:get_style_value("forced_width")
 end
 
 --- Set the widget's forced height.
@@ -331,8 +337,7 @@ end
 -- @method wibox.widget.base:set_height
 -- @hidden
 function base.widget:set_forced_height(height)
-    if height ~= self._private.forced_height then
-        self._private.forced_height = height
+    if self:set_style_value("forced_height", height) then
         self:emit_signal("widget::layout_changed")
     end
 end
@@ -347,7 +352,7 @@ end
 -- @method wibox.widget.base:get_forced_height
 -- @hidden
 function base.widget:get_forced_height()
-    return self._private.forced_height
+    return self:get_style_value("forced_height")
 end
 
 --- Get the widget's direct children widgets.
@@ -941,27 +946,44 @@ function base.make_widget(proxy, widget_name, args)
     end)
 
     -- Create a table used to store the widgets internal data.
-    rawset(ret, "_private", {})
-
-    -- Widget is visible.
-    ret._private.visible = true
-
-    -- Widget is fully opaque.
-    ret._private.opacity = 1
+    rawset(ret, "_private", setmetatable({}, {
+        __index = function(t, k)
+            if k == "visible" or k == "opacity" or k == "forced_width" or k == "forced_height" then
+                -- local di = debug.getinfo(2)
+                -- print(("! get 'wibox.widget.base._private.%s' in %s:%d"):format(k, di.source, di.currentline))
+                return ret["get_" .. k](ret)
+            end
+        end,
+        __newindex = function(t, k, v)
+            if k == "visible" or k == "opacity" or k == "forced_width" or k == "forced_height" then
+                -- local di = debug.getinfo(2)
+                -- print(("! set 'wibox.widget.base._private.%s' in %s:%d"):format(k, di.source, di.currentline))
+                ret["set_" .. k](ret, v)
+            else
+                rawset(t, k, v)
+            end
+        end,
+    }))
 
     -- Differentiate tables from widgets.
     rawset(ret, "is_widget", true)
 
-    -- Size is not restricted/forced.
-    ret._private.forced_width = nil
-    ret._private.forced_height = nil
-
     -- Make buttons work.
     ret:connect_signal("button::press", function(...)
+        ret:change_state("active", true)
         return base.handle_button("press", ...)
     end)
     ret:connect_signal("button::release", function(...)
+        ret:change_state("active", false)
         return base.handle_button("release", ...)
+    end)
+
+    ret:connect_signal("mouse::enter", function()
+        ret:change_state("hover", true)
+    end)
+    ret:connect_signal("mouse::leave", function()
+        ret:change_state("hover", false)
+        ret:change_state("active", false)
     end)
 
     if proxy then
@@ -989,6 +1011,9 @@ function base.make_widget(proxy, widget_name, args)
     for k, v in pairs(base.widget) do
         rawset(ret, k, v)
     end
+
+    -- Initialize style.
+    stylable.initialize(ret, base.widget)
 
     -- Add __tostring method to metatable.
     rawset(ret, "widget_name", widget_name or object.modulename(3))

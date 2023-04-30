@@ -28,8 +28,13 @@ local gdebug = require("gears.debug")
 local gtable = require("gears.table")
 local base = require("wibox.widget.base")
 local beautiful = require("beautiful")
+local noice = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
 
 local graph = { mt = {} }
+
+noice.register_element(graph, "graph", "widget")
 
 --- Set the graph border_width.
 --
@@ -928,6 +933,7 @@ function graph.new(args)
     _graph._private.values    = {}
     -- Copy methods and properties over
     gtable.crush(_graph, graph, true)
+    stylable.initialize(_graph, graph)
     -- Except those, which don't belong in the widget instance
     rawset(_graph, "new", nil)
     rawset(_graph, "mt", nil)

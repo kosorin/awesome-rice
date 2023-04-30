@@ -31,8 +31,29 @@ local table = table
 local pairs = pairs
 local gmath = require("gears.math")
 local gtable = require("gears.table")
+local noice = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
 
 local flex = {}
+
+local default_style = {
+    max_widget_size = Nil,
+}
+
+noice.register_element(flex, "flex", "fixed", default_style)
+
+for prop in pairs(default_style) do
+    flex["set_" .. prop] = function(self, value)
+        if self:set_style_value(prop, value) then
+            self:emit_signal("widget::layout_changed")
+            self:emit_signal("property::" .. prop, value)
+        end
+    end
+    flex["get_" .. prop] = function(self)
+        return self:get_style_value(prop)
+    end
+end
 
 -- {{{ Override inherited properties we want to hide
 
@@ -110,7 +131,7 @@ local flex = {}
 
 function flex:layout(_, width, height)
     local result = {}
-    local spacing = self._private.spacing
+    local spacing = self:get_style_value("spacing") or 0
     local num = #self._private.widgets
     local total_spacing = (spacing*(num-1))
     local spacing_widget = self._private.spacing_widget
@@ -126,8 +147,9 @@ function flex:layout(_, width, height)
         space_per_item = width / num - total_spacing/num
     end
 
-    if self._private.max_widget_size then
-        space_per_item = math.min(space_per_item, self._private.max_widget_size)
+    local max_widget_size = self:get_style_value("max_widget_size")
+    if max_widget_size then
+        space_per_item = math.min(space_per_item, max_widget_size)
     end
 
     local pos, pos_rounded = 0, 0
@@ -184,12 +206,13 @@ function flex:fit(context, orig_width, orig_height)
         used_in_dir = used_in_dir + (self._private.dir == "y" and h or w)
     end
 
-    if self._private.max_widget_size then
+    local max_widget_size = self:get_style_value("max_widget_size")
+    if max_widget_size then
         used_in_dir = math.min(used_in_dir,
-            #self._private.widgets * self._private.max_widget_size)
+            #self._private.widgets * max_widget_size)
     end
 
-    local spacing = self._private.spacing * (#self._private.widgets-1)
+    local spacing = (self:get_style_value("spacing") or 0) * (#self._private.widgets-1)
 
     if self._private.dir == "y" then
         return used_in_other, used_in_dir + spacing
@@ -207,20 +230,11 @@ end
 -- @negativeallowed false
 -- @propemits true false
 
-function flex:set_max_widget_size(val)
-    if self._private.max_widget_size ~= val then
-        self._private.max_widget_size = val
-        self:emit_signal("widget::layout_changed")
-        self:emit_signal("property::max_widget_size", val)
-    end
-end
-
 local function get_layout(dir, widget1, ...)
     local ret = fixed[dir](widget1, ...)
 
     gtable.crush(ret, flex, true)
-
-    ret._private.fill_space = nil
+    stylable.initialize(ret, flex)
 
     return ret
 end

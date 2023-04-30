@@ -18,9 +18,18 @@ local pairs = pairs
 local floor = math.floor
 local gmath = require("gears.math")
 local gtable = require("gears.table")
+local noice = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
 local ratio = {}
+
+local default_style = {
+    inner_fill_strategy = "default",
+}
+
+noice.register_element(ratio, "ratio", "flex", default_style)
 
 --- The widget used to fill the spacing between the layout elements.
 --
@@ -102,7 +111,7 @@ end
 
 function ratio:layout(context, width, height)
     local preliminary_results = {}
-    local pos,spacing = 0, self._private.spacing
+    local pos,spacing = 0, self:get_style_value("spacing") or 0
     local strategy = self:get_inner_fill_strategy()
     local has_stragety = strategy ~= "default"
     local to_redistribute, void_count = 0, 0
@@ -477,10 +486,6 @@ end
 -- @propertyvalue "right" Squash remaining widgets and leave empty space on the right.
 -- @propemits true false
 
-function ratio:get_inner_fill_strategy()
-    return self._private.inner_fill_strategy or "default"
-end
-
 local valid_strategies = {
     default       = true,
     justify       = true,
@@ -492,19 +497,20 @@ local valid_strategies = {
 }
 
 function ratio:set_inner_fill_strategy(strategy)
-    assert(valid_strategies[strategy] ~= nil, "Invalid strategy: "..(strategy or ""))
-
-    self._private.inner_fill_strategy = strategy
-    self:emit_signal("widget::layout_changed")
-    self:emit_signal("property::inner_fill_strategy", strategy)
+    if not valid_strategies[strategy] then
+        strategy = "default"
+    end
+    if self:set_style_value("inner_fill_strategy", strategy) then
+        self:emit_signal("widget::layout_changed")
+        self:emit_signal("property::inner_fill_strategy", strategy)
+    end
 end
 
 local function get_layout(dir, widget1, ...)
     local ret = flex[dir](widget1, ...)
 
     gtable.crush(ret, ratio, true)
-
-    ret._private.fill_space = nil
+    stylable.initialize(ret, ratio)
 
     ret._private.ratios = {}
 

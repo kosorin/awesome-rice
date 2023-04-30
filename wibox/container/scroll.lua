@@ -30,9 +30,15 @@ local hierarchy = require("wibox.hierarchy")
 local base = require("wibox.widget.base")
 local gtable = require("gears.table")
 local lgi = require("lgi")
+local noice = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
 local GLib = lgi.GLib
 
 local scroll = {}
+
+noice.register_element(scroll, "scroll", "widget")
+
 local _need_scroll_redraw
 
 -- "Strip" a context so that we can use it for our own drawing
@@ -426,6 +432,7 @@ local function get_layout(dir, widget, fps, speed, extra_space, expand, max_size
     ret._private.scroll_timer = nil
 
     gtable.crush(ret, scroll, true)
+    stylable.initialize(ret, scroll)
 
     ret:set_direction(dir)
     ret:set_widget(widget)

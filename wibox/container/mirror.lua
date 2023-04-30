@@ -15,21 +15,36 @@ local setmetatable = setmetatable
 local base = require("wibox.widget.base")
 local matrix = require("gears.matrix")
 local gtable = require("gears.table")
+local noice = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
 
 local mirror = { mt = {} }
+
+noice.register_element(mirror, "mirror", "widget", {
+    reflection = Nil,
+})
+
+local reflections = {
+    none = {},
+    horizontal = { horizontal = true },
+    vertical = { vertical = true },
+    both = { horizontal = true, vertical = true },
+}
 
 -- Layout this layout
 function mirror:layout(_, width, height)
     if not self._private.widget then return end
 
+    local reflection = self:get_style_value("reflection") or reflections.none
     local m = matrix.identity
     local t = { x = 0, y = 0 } -- translation
     local s = { x = 1, y = 1 } -- scale
-    if self._private.horizontal then
+    if reflection.horizontal then
         t.x = width
         s.x = -1
     end
-    if self._private.vertical then
+    if reflection.vertical then
         t.y = height
         s.y = -1
     end
@@ -73,23 +88,37 @@ end
 -- @noreturn
 -- @interface container
 function mirror:reset()
-    self._private.horizontal = false
-    self._private.vertical = false
+    self:clear_local_style()
     self:set_widget(nil)
 end
 
+local function parse_reflection(reflection)
+    local t = type(reflection)
+    if t == "string" then
+        return reflections[reflection] or reflections.none
+    elseif t == "table" then
+        return {
+            horizontal = not not reflection.horizontal,
+            vertical = not not reflection.vertical,
+        }
+    else
+        return reflections.none
+    end
+end
+
+local function reflection_comparer(a, b)
+    if not a and not b then
+        return true
+    end
+    return a.horizontal == b.horizontal and a.vertical == b.vertical
+end
+
 function mirror:set_reflection(reflection)
-    if type(reflection) ~= 'table' then
-        error("Invalid type of reflection for mirror layout: " ..
-              type(reflection) .. " (should be a table)")
+    reflection = parse_reflection(reflection)
+    if self:set_style_value("reflection", reflection, reflection_comparer) then
+        self:emit_signal("widget::layout_changed")
+        self:emit_signal("property::reflection", reflection)
     end
-    for _, ref in ipairs({"horizontal", "vertical"}) do
-        if reflection[ref] ~= nil then
-            self._private[ref] = reflection[ref]
-        end
-    end
-    self:emit_signal("widget::layout_changed")
-    self:emit_signal("property::reflection", reflection)
 end
 
 --- Get the reflection of this mirror layout.
@@ -101,7 +130,7 @@ end
 -- @propemits true false
 
 function mirror:get_reflection()
-    return { horizontal = self._private.horizontal, vertical = self._private.vertical }
+    return self:get_style_value("reflection")
 end
 
 --- Returns a new mirror container.
@@ -115,14 +144,18 @@ end
 -- @treturn table A new mirror container
 -- @constructorfct wibox.container.mirror
 local function new(widget, reflection)
-    local ret = base.make_widget(nil, nil, {enable_properties = true})
-    ret._private.horizontal = false
-    ret._private.vertical = false
+    local ret = base.make_widget(nil, nil, { enable_properties = true })
 
     gtable.crush(ret, mirror, true)
+    stylable.initialize(ret, mirror)
 
-    ret:set_widget(widget)
-    ret:set_reflection(reflection or {})
+    if reflection then
+        ret:set_reflection(reflection)
+    end
+
+    if widget then
+        ret:set_widget(widget)
+    end
 
     return ret
 end

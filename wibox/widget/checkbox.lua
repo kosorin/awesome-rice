@@ -12,13 +12,32 @@
 -- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
-local color     = require( "gears.color"       )
-local base      = require( "wibox.widget.base" )
-local beautiful = require( "beautiful"         )
-local shape     = require( "gears.shape"       )
-local gtable    = require( "gears.table"       )
+local color            = require("gears.color")
+local base             = require("wibox.widget.base")
+local beautiful        = require("beautiful")
+local shape            = require("gears.shape")
+local gtable           = require("gears.table")
+local gthickness       = require("gears.thickness")
+local noice            = require("theme.manager")
+local stylable         = require("theme.stylable")
+local Nil              = require("theme.nil")
 
 local checkbox = {}
+
+local default_style = {
+    border_width = Nil,
+    bg = Nil,
+    border_color = Nil,
+    check_border_color = Nil,
+    check_border_width = Nil,
+    check_color = Nil,
+    shape = Nil,
+    check_shape = Nil,
+    paddings = Nil,
+    color = Nil,
+}
+
+noice.register_element(checkbox, "checkbox", "widget", default_style)
 
 --- The outer (unchecked area) border width.
 --
@@ -172,8 +191,7 @@ local checkbox = {}
 -- @propemits true false
 
 local function outline_workarea(self, width, height)
-    local offset = (self._private.border_width or
-        beautiful.checkbox_border_width or 1)/2
+    local offset = (self:get_style_value("border_width") or 1) / 2
 
     return {
         x      = offset,
@@ -185,8 +203,8 @@ end
 
 -- The child widget area
 local function content_workarea(self, width, height)
-    local padding = self._private.paddings or {}
-    local offset = self:get_check_border_width() or 0
+    local padding = gthickness(self:get_style_value("paddings"))
+    local offset = self:get_style_value("check_border_width") or 0
     local wa = outline_workarea(self, width, height)
 
     wa.x      = offset + wa.x + (padding.left or 1)
@@ -197,15 +215,14 @@ local function content_workarea(self, width, height)
     return wa
 end
 
-local function draw(self, _, cr, width, height)
+function checkbox:draw(_, cr, width, height)
     local size = math.min(width, height)
 
-    local background_shape = self:get_shape() or shape.rectangle
-    local border_width = self:get_border_width() or 1
-
-    local main_color = self:get_color()
-    local bg = self:get_bg()
-    local border_color = self:get_border_color()
+    local bg = self:get_style_value("bg")
+    local main_color = self:get_style_value("color")
+    local border_color = self:get_style_value("border_color")
+    local border_width = self:get_style_value("border_width") or 1
+    local background_shape = self:get_style_value("shape") or shape.rectangle
 
     -- If no color is set, it will fallback to the default one
     if border_color or main_color then
@@ -230,10 +247,10 @@ local function draw(self, _, cr, width, height)
 
     -- Draw the checked part
     if self._private.checked then
-        local col = self:get_check_color() or main_color
-        border_color = self:get_check_border_color()
-        border_width = self:get_check_border_width() or 0
-        local check_shape = self:get_check_shape() or background_shape
+        local col = self:get_style_value("check_color") or main_color
+        border_color = self:get_style_value("check_border_color")
+        border_width = self:get_style_value("check_border_width") or 0
+        local check_shape = self:get_style_value("check_shape") or background_shape
 
         wa = content_workarea(self, size, size)
         cr:translate(wa.x, wa.y)
@@ -255,7 +272,7 @@ local function draw(self, _, cr, width, height)
     end
 end
 
-local function fit(_, _, w, h)
+function checkbox:fit(_, w, h)
     local size = math.min(w, h)
     return size, size
 end
@@ -264,28 +281,29 @@ end
 -- @property checked
 -- @tparam[opt=false] boolean checked
 
-for _, prop in ipairs {"border_width", "bg", "border_color", "check_border_color",
-    "check_border_width", "check_color", "shape", "check_shape", "paddings",
-    "checked", "color" } do
-    checkbox["set_"..prop] = function(self, value)
-        self._private[prop] = value
-        self:emit_signal("property::"..prop, value)
-        self:emit_signal("widget::redraw_needed")
+function checkbox:set_checked(checked)
+    if self._private.checked == checked then
+        return
     end
-    checkbox["get_"..prop] = function(self)
-        return self._private[prop] or beautiful["checkbox_"..prop]
-    end
+    self._private.checked = checked
+    self:emit_signal("widget::redraw_needed")
+    self:emit_signal("property::checked", checked)
 end
 
-function checkbox:set_paddings(val)
-    self._private.paddings = type(val) == "number" and {
-        left   = val,
-        right  = val,
-        top    = val,
-        bottom = val,
-    } or val or {}
-    self:emit_signal("property::paddings")
-    self:emit_signal("widget::redraw_needed")
+function checkbox:get_checked()
+    return self._private.checked
+end
+
+for prop in pairs(default_style) do
+    checkbox["set_" .. prop] = function(self, value)
+        if self:set_style_value(prop, value) then
+            self:emit_signal("widget::redraw_needed")
+            self:emit_signal("property::" .. prop, value)
+        end
+    end
+    checkbox["get_" .. prop] = function(self)
+        return self:get_style_value(prop)
+    end
 end
 
 --- Create a new checkbox.
@@ -301,13 +319,14 @@ local function new(checked, args)
         enable_properties = true,
     })
 
-    gtable.crush(ret, checkbox)
+    gtable.crush(ret, checkbox, true)
+    stylable.initialize(ret, checkbox)
 
-    ret._private.checked = checked
-    ret._private.color = args.color and color(args.color) or nil
+    ret:set_checked(checked)
 
-    rawset(ret, "fit" , fit )
-    rawset(ret, "draw", draw)
+    if args.color then
+        ret:set_color(args.color)
+    end
 
     return ret
 end

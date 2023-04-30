@@ -11,8 +11,35 @@
 local setmetatable = setmetatable
 local base = require("wibox.widget.base")
 local gtable = require("gears.table")
+local noice = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
+local math = math
 
 local place = { mt = {} }
+
+local default_style = {
+    valign = "center",
+    halign = "center",
+    fill_vertical = false,
+    fill_horizontal = false,
+    content_fill_vertical = false,
+    content_fill_horizontal = false,
+}
+
+noice.register_element(place, "place", "widget", default_style)
+
+for prop in pairs(default_style) do
+    place["set_" .. prop] = function(self, value)
+        if self:set_style_value(prop, value) then
+            self:emit_signal("widget::layout_changed")
+            self:emit_signal("property::" .. prop, value)
+        end
+    end
+    place["get_" .. prop] = function(self)
+        return self:get_style_value(prop)
+    end
+end
 
 -- Take the widget width/height and compute the position from the full
 -- width/height
@@ -27,16 +54,16 @@ align_fct.top, align_fct.bottom = align_fct.left, align_fct.right
 function place:_layout(context, width, height)
     local w, h = base.fit_widget(self, context, self._private.widget, width, height)
 
-    if self._private.content_fill_horizontal then
+    if self:get_style_value("content_fill_horizontal") then
         w = width
     end
 
-    if self._private.content_fill_vertical then
+    if self:get_style_value("content_fill_vertical") then
         h = height
     end
 
-    local valign = self._private.valign or "center"
-    local halign = self._private.halign or "center"
+    local valign = self:get_style_value("valign") or "center"
+    local halign = self:get_style_value("halign") or "center"
 
     local x, y = align_fct[halign](w, width), align_fct[valign](h, height)
 
@@ -66,10 +93,12 @@ function place:fit(context, width, height)
 
     local w, h = base.fit_widget(self, context, self._private.widget, width, height)
 
-    return (self._private.fill_horizontal or self._private.content_fill_horizontal)
-        and width or w,
-    (self._private.fill_vertical or self._private.content_fill_vertical)
-        and height or h
+    local fh = self:get_style_value("fill_horizontal")
+    local fv = self:get_style_value("fill_vertical")
+    local cfh = self:get_style_value("content_fill_horizontal")
+    local cfv = self:get_style_value("content_fill_vertical")
+
+    return (fh or cfh) and width or w, (fv or cfv) and height or h
 end
 
 --- The widget to be placed.
@@ -97,6 +126,7 @@ end
 -- @noreturn
 -- @interface container
 function place:reset()
+    self:clear_local_style()
     self:set_widget(nil)
 end
 
@@ -122,24 +152,36 @@ end
 -- @propertyvalue "right"
 -- @propemits true false
 
-function place:set_valign(value)
-    if value ~= "center" and value ~= "top" and value ~= "bottom" then
-        return
-    end
+local valigns = {
+    top = true,
+    center = true,
+    bottom = true,
+}
 
-    self._private.valign = value
-    self:emit_signal("widget::layout_changed")
-    self:emit_signal("property::valign", value)
+function place:set_valign(value)
+    if not valigns[value] then
+        value = "center"
+    end
+    if self:set_style_value("valign", value) then
+        self:emit_signal("widget::layout_changed")
+        self:emit_signal("property::valign", value)
+    end
 end
 
-function place:set_halign(value)
-    if value ~= "center" and value ~= "left" and value ~= "right" then
-        return
-    end
+local haligns = {
+    left = true,
+    center = true,
+    right = true,
+}
 
-    self._private.halign = value
-    self:emit_signal("widget::layout_changed")
-    self:emit_signal("property::halign", value)
+function place:set_halign(value)
+    if not haligns[value] then
+        value = "center"
+    end
+    if self:set_style_value("halign", value) then
+        self:emit_signal("widget::layout_changed")
+        self:emit_signal("property::halign", value)
+    end
 end
 
 --- Fill the vertical space.
@@ -148,23 +190,11 @@ end
 -- @tparam[opt=false] boolean fill_vertical
 -- @propemits true false
 
-function place:set_fill_vertical(value)
-    self._private.fill_vertical = value
-    self:emit_signal("widget::layout_changed")
-    self:emit_signal("property::fill_vertical", value)
-end
-
 --- Fill the horizontal space.
 --
 -- @property fill_horizontal
 -- @tparam[opt=false] boolean fill_horizontal
 -- @propemits true false
-
-function place:set_fill_horizontal(value)
-    self._private.fill_horizontal = value
-    self:emit_signal("widget::layout_changed")
-    self:emit_signal("property::fill_horizontal", value)
-end
 
 --- Stretch the contained widget so it takes all the vertical space.
 --
@@ -174,12 +204,6 @@ end
 -- @tparam[opt=false] boolean content_fill_vertical
 -- @propemits true false
 
-function place:set_content_fill_vertical(value)
-    self._private.content_fill_vertical = value
-    self:emit_signal("widget::layout_changed")
-    self:emit_signal("property::content_fill_vertical", value)
-end
-
 --- Stretch the contained widget so it takes all the horizontal space.
 --
 --@DOC_wibox_container_place_content_fill_horizontal_EXAMPLE@
@@ -187,12 +211,6 @@ end
 -- @property content_fill_horizontal
 -- @tparam[opt=false] boolean content_fill_horizontal
 -- @propemits true false
-
-function place:set_content_fill_horizontal(value)
-    self._private.content_fill_horizontal = value
-    self:emit_signal("widget::layout_changed")
-    self:emit_signal("property::content_fill_horizontal", value)
-end
 
 --- Returns a new place container.
 --
@@ -202,13 +220,21 @@ end
 -- @treturn table A new place container.
 -- @constructorfct wibox.container.place
 local function new(widget, halign, valign)
-    local ret = base.make_widget(nil, nil, {enable_properties = true})
+    local ret = base.make_widget(nil, nil, { enable_properties = true })
 
     gtable.crush(ret, place, true)
+    stylable.initialize(ret, place)
 
-    ret:set_widget(widget)
-    ret:set_halign(halign)
-    ret:set_valign(valign)
+    if valign then
+        ret:set_valign(valign)
+    end
+    if halign then
+        ret:set_halign(halign)
+    end
+
+    if widget then
+        ret:set_widget(widget)
+    end
 
     return ret
 end

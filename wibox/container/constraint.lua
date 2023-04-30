@@ -11,9 +11,44 @@
 local setmetatable = setmetatable
 local base = require("wibox.widget.base")
 local gtable = require("gears.table")
+local noice = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
 local math = math
 
 local constraint = { mt = {} }
+
+local default_style = {
+    strategy = "max",
+    width = Nil,
+    height = Nil,
+}
+
+noice.register_element(constraint, "constraint", "widget", default_style)
+
+for prop in pairs(default_style) do
+    constraint["set_" .. prop] = function(self, value)
+        if self:set_style_value(prop, value) then
+            self:emit_signal("widget::layout_changed")
+            self:emit_signal("property::" .. prop, value)
+        end
+    end
+    constraint["get_" .. prop] = function(self)
+        return self:get_style_value(prop)
+    end
+end
+
+local strategies = {
+    min = function(real_size, limit)
+        return limit and math.max(limit, real_size) or real_size
+    end,
+    max = function(real_size, limit)
+        return limit and math.min(limit, real_size) or real_size
+    end,
+    exact = function(real_size, limit)
+        return limit or real_size
+    end,
+}
 
 -- Layout a constraint layout
 function constraint:layout(_, width, height)
@@ -24,18 +59,25 @@ end
 
 -- Fit a constraint layout into the given space
 function constraint:fit(context, width, height)
+    local strategy = strategies[self:get_style_value("strategy")]
+    if not strategy then
+        return width, height
+    end
+
+    local limit_w, limit_h = self:get_style_value("width"), self:get_style_value("height")
     local w, h
+
     if self._private.widget then
-        w = self._private.strategy(width, self._private.width)
-        h = self._private.strategy(height, self._private.height)
+        w = strategy(width, limit_w)
+        h = strategy(height, limit_h)
 
         w, h = base.fit_widget(self, context, self._private.widget, w, h)
     else
         w, h = 0, 0
     end
 
-    w = self._private.strategy(w, self._private.width)
-    h = self._private.strategy(h, self._private.height)
+    w = strategy(w, limit_w)
+    h = strategy(h, limit_h)
 
     return w, h
 end
@@ -69,32 +111,6 @@ end
 -- @propertyvalue "exact" Force the widget size.
 -- @propemits true false
 
-function constraint:set_strategy(val)
-    local func = {
-        min = function(real_size, limit)
-            return limit and math.max(limit, real_size) or real_size
-        end,
-        max = function(real_size, limit)
-            return limit and math.min(limit, real_size) or real_size
-        end,
-        exact = function(real_size, limit)
-            return limit or real_size
-        end
-    }
-
-    if not func[val] then
-        error("Invalid strategy for constraint layout: " .. tostring(val))
-    end
-
-    self._private.strategy = func[val]
-    self:emit_signal("widget::layout_changed")
-    self:emit_signal("property::strategy", val)
-end
-
-function constraint:get_strategy()
-    return self._private.strategy
-end
-
 --- Set the maximum width to val. nil for no width limit.
 --
 -- @property width
@@ -104,16 +120,6 @@ end
 -- @propertytype nil Do not set a width limit.
 -- @propertytype number Set a width limit.
 -- @propemits true false
-
-function constraint:set_width(val)
-    self._private.width = val
-    self:emit_signal("widget::layout_changed")
-    self:emit_signal("property::width", val)
-end
-
-function constraint:get_width()
-    return self._private.width
-end
 
 --- Set the maximum height to val. nil for no height limit.
 --
@@ -125,16 +131,6 @@ end
 -- @propertytype number Set a height limit.
 -- @propemits true false
 
-function constraint:set_height(val)
-    self._private.height = val
-    self:emit_signal("widget::layout_changed")
-    self:emit_signal("property::height", val)
-end
-
-function constraint:get_height()
-    return self._private.height
-end
-
 --- Reset this layout.
 --
 --The widget will be unreferenced, strategy set to "max"
@@ -144,9 +140,7 @@ end
 -- @noreturn
 -- @interface container
 function constraint:reset()
-    self._private.width = nil
-    self._private.height = nil
-    self:set_strategy("max")
+    self:clear_local_style()
     self:set_widget(nil)
 end
 
@@ -165,13 +159,20 @@ end
 -- @treturn table A new constraint container
 -- @constructorfct wibox.container.constraint
 local function new(widget, strategy, width, height)
-    local ret = base.make_widget(nil, nil, {enable_properties = true})
+    local ret = base.make_widget(nil, nil, { enable_properties = true })
 
     gtable.crush(ret, constraint, true)
+    stylable.initialize(ret, constraint)
 
-    ret:set_strategy(strategy or "max")
-    ret:set_width(width)
-    ret:set_height(height)
+    if strategy then
+        ret:set_strategy(strategy)
+    end
+    if width then
+        ret:set_width(width)
+    end
+    if height then
+        ret:set_height(height)
+    end
 
     if widget then
         ret:set_widget(widget)

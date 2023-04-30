@@ -32,8 +32,15 @@ local type = type
 local floor = math.floor
 local gtable = require("gears.table")
 local base = require("wibox.widget.base")
+local noice = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
 
 local align = {}
+
+noice.register_element(align, "align", "widget", {
+    expand = "inside",
+})
 
 -- Calculate the layout of an align layout.
 -- @param context The context in which we are drawn.
@@ -56,11 +63,13 @@ function align:layout(context, width, height)
     -- It contains the size allocated to the second widget.
     local size_second
 
+    local expand = self:get_style_value("expand") or "inside"
+
     -- we will prioritize the middle widget unless the expand mode is "inside"
     --  if it is, we prioritize the first widget by not doing this block also,
     --  if the second widget doesn't exist, we will prioritise the first one
     --  instead
-    if self._private.expand ~= "inside" and self._private.second then
+    if expand ~= "inside" and self._private.second then
         local w, h = base.fit_widget(self, context, self._private.second, width, height)
         size_second = self._private.dir == "y" and h or w
         -- if all the space is taken, skip the rest, and draw just the middle
@@ -78,7 +87,7 @@ function align:layout(context, width, height)
         -- we use the fit function for the "inside" and "none" modes, but
         --  ignore it for the "outside" mode, which will force it to expand
         --  into the remaining space
-        if self._private.expand ~= "outside" then
+        if expand ~= "outside" then
             if self._private.dir == "y" then
                 _, h = base.fit_widget(self, context, self._private.first, width, size_remains)
                 size_first = h
@@ -87,13 +96,13 @@ function align:layout(context, width, height)
                 --  the third widget the remaining space if there was no second
                 --  widget to take up any space (as the first if block is skipped
                 --  if this is the case)
-                if self._private.expand == "inside" or not self._private.second then
+                if expand == "inside" or not self._private.second then
                     size_remains = size_remains - h
                 end
             else
                 w, _ = base.fit_widget(self, context, self._private.first, size_remains, height)
                 size_first = w
-                if self._private.expand == "inside" or not self._private.second then
+                if expand == "inside" or not self._private.second then
                     size_remains = size_remains - w
                 end
             end
@@ -109,16 +118,16 @@ function align:layout(context, width, height)
     -- size_remains will be <= 0 if first used all the space
     if self._private.third and size_remains > 0 then
         local w, h, _ = width, height, nil
-        if self._private.expand ~= "outside" then
+        if expand ~= "outside" then
             if self._private.dir == "y" then
                 _, h = base.fit_widget(self, context, self._private.third, width, size_remains)
                 -- give the middle widget the rest of the space for "inside" mode
-                if self._private.expand == "inside" then
+                if expand == "inside" then
                     size_remains = size_remains - h
                 end
             else
                 w, _ = base.fit_widget(self, context, self._private.third, size_remains, height)
-                if self._private.expand == "inside" then
+                if expand == "inside" then
                     size_remains = size_remains - w
                 end
             end
@@ -136,7 +145,7 @@ function align:layout(context, width, height)
     -- in the beginning, or in the remaining space, if it is "inside"
     if self._private.second and size_remains > 0 then
         local x, y, w, h = 0, 0, width, height
-        if self._private.expand == "inside" then
+        if expand == "inside" then
             if self._private.dir == "y" then
                 h = size_remains
                 x, y = 0, size_first
@@ -218,7 +227,7 @@ function align:set_third(widget)
     self:emit_signal("property::third", widget)
 end
 
-for _, prop in ipairs {"first", "second", "third", "expand" } do
+for _, prop in ipairs {"first", "second", "third" } do
     align["get_"..prop] = function(self)
         return self._private[prop]
     end
@@ -280,14 +289,24 @@ end
 -- @propertyvalue "none" All widgets are given their minimal required size or the
 --   remaining space, whichever is smaller. The center widget gets priority.
 
+local valid_expands = {
+    none = true,
+    inside = true,
+    outside = true,
+}
+
 function align:set_expand(mode)
-    if mode == "none" or mode == "outside" then
-        self._private.expand = mode
-    else
-        self._private.expand = "inside"
+    if not valid_expands[mode] then
+        mode = "inside"
     end
-    self:emit_signal("widget::layout_changed")
-    self:emit_signal("property::expand", mode)
+    if self:set_style_value("expand", mode) then
+        self:emit_signal("widget::layout_changed")
+        self:emit_signal("property::expand")
+    end
+end
+
+function align:get_expand()
+    return self:get_style_value("expand")
 end
 
 function align:reset()
@@ -301,13 +320,9 @@ local function get_layout(dir, first, second, third)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
     ret._private.dir = dir
 
-    for k, v in pairs(align) do
-        if type(v) == "function" then
-            rawset(ret, k, v)
-        end
-    end
+    gtable.crush(ret, align, true)
+    stylable.initialize(ret, align)
 
-    ret:set_expand("inside")
     ret:set_first(first)
     ret:set_second(second)
     ret:set_third(third)

@@ -11,14 +11,44 @@
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
-local base      = require("wibox.widget.base")
-local shape     = require("gears.shape"      )
-local gtable    = require( "gears.table"     )
-local color     = require( "gears.color"     )
-local beautiful = require("beautiful"        )
+local base = require("wibox.widget.base")
+local shape = require("gears.shape")
+local gtable = require("gears.table")
+local color = require("gears.color")
+local beautiful = require("beautiful")
+local gthickness = require("gears.thickness")
+local noice = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
+local math = math
 
 
 local arcchart = { mt = {} }
+
+local default_style = {
+    paddings = gthickness(0),
+    bg = Nil,
+    colors = Nil,
+    border_color = Nil,
+    border_width = Nil,
+    rounded_edge = Nil,
+    thickness = Nil,
+    start_angle = Nil,
+}
+
+noice.register_element(arcchart, "arcchart", "widget", default_style)
+
+for prop in pairs(default_style) do
+    arcchart["set_" .. prop] = function(self, value)
+        if self:set_style_value(prop, value) then
+            self:emit_signal("widget::redraw_needed")
+            self:emit_signal("property::" .. prop, value)
+        end
+    end
+    arcchart["get_" .. prop] = function(self)
+        return self:get_style_value(prop)
+    end
+end
 
 --- The progressbar border background color.
 -- @beautiful beautiful.arcchart_border_color
@@ -65,17 +95,15 @@ end
 
 -- The child widget area
 local function content_workarea(self, width, height)
-    local padding = self._private.paddings or {}
-    local border_width = self:get_border_width() or 0
+    local padding = self:get_style_value("paddings") or {}
+    local border_width = self:get_style_value("border_width") or 0
     local wa = outline_workarea(width, height)
-    local thickness = math.max(border_width, self:get_thickness() or 5)
+    local thickness = math.max(border_width, self:get_style_value("thickness") or 5)
 
-    wa.x      = wa.x + (padding.left or 0) + thickness + 2*border_width
-    wa.y      = wa.y + (padding.top  or 0) + thickness + 2*border_width
-    wa.width  = wa.width  - (padding.left or 0) - (padding.right  or 0)
-        - 2*thickness - 4*border_width
-    wa.height = wa.height - (padding.top  or 0) - (padding.bottom or 0)
-        - 2*thickness - 4*border_width
+    wa.x      = wa.x + (padding.left or 0) + thickness + 2 * border_width
+    wa.y      = wa.y + (padding.top or 0) + thickness + 2 * border_width
+    wa.width  = math.max(0, wa.width - (padding.left or 0) - (padding.right or 0) - 2 * thickness - 4 * border_width)
+    wa.height = math.max(0, wa.height - (padding.top or 0) - (padding.bottom or 0) - 2 * thickness - 4 * border_width)
 
     return wa
 end
@@ -85,13 +113,13 @@ function arcchart:after_draw_children(_, cr, width, height)
     cr:restore()
 
     local values  = self:get_values() or {}
-    local border_width = self:get_border_width() or 0
-    local thickness = math.max(border_width, self:get_thickness() or 5)
+    local border_width = self:get_style_value("border_width") or 0
+    local thickness = math.max(border_width, self:get_style_value("thickness") or 5)
 
     local offset = thickness + 2*border_width
 
     -- Draw a circular background
-    local bg = self:get_bg()
+    local bg = self:get_style_value("bg")
     if bg then
         cr:save()
         cr:translate(offset/2, offset/2)
@@ -128,13 +156,13 @@ function arcchart:after_draw_children(_, cr, width, height)
 
     max_val = math.max(max_val, sum)
 
-    local use_rounded_edges = sum ~= max_val and self:get_rounded_edge()
+    local use_rounded_edges = sum ~= max_val and self:get_style_value("rounded_edge")
 
     -- Fallback to the current foreground color
-    local colors = self:get_colors() or {}
+    local colors = self:get_style_value("colors") or {}
 
     -- Draw the outline
-    local offset_angle = self:get_start_angle() or math.pi
+    local offset_angle = self:get_style_value("start_angle") or math.pi
     local start_angle, end_angle = offset_angle, offset_angle
 
     for k, v in ipairs(values) do
@@ -154,7 +182,7 @@ function arcchart:after_draw_children(_, cr, width, height)
     end
 
     if border_width > 0 then
-        local border_color = self:get_border_color()
+        local border_color = self:get_style_value("border_color")
 
         cr:set_source(color(border_color))
         cr:set_line_width(border_width)
@@ -220,16 +248,8 @@ end
 -- @noreturn
 -- @interface container
 function arcchart:reset()
+    self:clear_local_style()
     self:set_widget(nil)
-end
-
-for _,v in ipairs {"left", "right", "top", "bottom"} do
-    arcchart["set_"..v.."_padding"] = function(self, val)
-        self._private.paddings = self._private.paddings or {}
-        self._private.paddings[v] = val
-        self:emit_signal("widget::redraw_needed")
-        self:emit_signal("widget::layout_changed")
-    end
 end
 
 --- The padding between the outline and the progressbar.
@@ -249,6 +269,15 @@ end
 -- @emitstparam property::paddings table paddings The new paddings.
 -- @usebeautiful beautiful.arcchart_paddings Fallback value when the object
 --  `paddings` isn't specified.
+
+function arcchart:set_paddings(paddings)
+    paddings = gthickness(paddings)
+    if self:set_style_value("paddings", paddings) then
+        self:emit_signal("widget::redraw_needed")
+        self:emit_signal("widget::layout_changed")
+        self:emit_signal("property::paddings", paddings)
+    end
+end
 
 --- The border background color.
 --@DOC_wibox_container_arcchart_border_color_EXAMPLE@
@@ -342,44 +371,65 @@ end
 -- @propemits true false
 -- @usebeautiful beautiful.arcchart_start_angle
 
-for _, prop in ipairs {"border_width", "border_color", "paddings", "colors",
-    "rounded_edge", "bg", "thickness", "values", "min_value", "max_value",
-    "start_angle" } do
-    arcchart["set_"..prop] = function(self, value)
-        self._private[prop] = value
-        self:emit_signal("property::"..prop, value)
-        self:emit_signal("widget::redraw_needed")
+function arcchart:set_max_value(max_value)
+    if self._private.max_value == max_value then
+        return
     end
-    arcchart["get_"..prop] = function(self)
-        return self._private[prop] or beautiful["arcchart_"..prop]
-    end
+
+    self._private.max_value = max_value
+    self:emit_signal("widget::redraw_needed")
+    self:emit_signal("property::max_value", max_value)
 end
 
-function arcchart:set_paddings(val)
-    self._private.paddings = type(val) == "number" and {
-        left   = val,
-        right  = val,
-        top    = val,
-        bottom = val,
-    } or val or {}
-    self:emit_signal("property::paddings")
+function arcchart:get_max_value()
+    return self._private.max_value
+end
+
+function arcchart:set_min_value(min_value)
+    if self._private.min_value == min_value then
+        return
+    end
+
+    self._private.min_value = min_value
     self:emit_signal("widget::redraw_needed")
-    self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::min_value", min_value)
+end
+
+function arcchart:get_min_value()
+    return self._private.min_value
+end
+
+function arcchart:set_values(values)
+    if self._private.values == values then
+        return
+    end
+
+    self._private.values = values
+    self:emit_signal("widget::redraw_needed")
+    self:emit_signal("property::values", values)
+end
+
+function arcchart:get_values()
+    return self._private.values
 end
 
 function arcchart:set_value(value)
-    self:set_values {value}
+    self:set_values { value }
 end
 
 --- Returns a new arcchart layout.
 -- @tparam[opt] wibox.widget widget The widget to display.
 -- @constructorfct wibox.container.arcchart
-local function new(widget)
+local function new(widget, min_value, max_value)
     local ret = base.make_widget(nil, nil, {
         enable_properties = true,
     })
 
-    gtable.crush(ret, arcchart)
+    gtable.crush(ret, arcchart, true)
+    stylable.initialize(ret, arcchart)
+
+    ret._private.min_value = min_value or 0
+    ret._private.max_value = max_value or 1
 
     ret:set_widget(widget)
 

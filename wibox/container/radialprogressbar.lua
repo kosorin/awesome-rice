@@ -12,15 +12,40 @@
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
-local base      = require("wibox.widget.base")
-local shape     = require("gears.shape"      )
-local gtable    = require( "gears.table"     )
-local color     = require( "gears.color"     )
-local beautiful = require("beautiful"        )
+local base = require("wibox.widget.base")
+local shape = require("gears.shape")
+local gtable = require("gears.table")
+local color = require("gears.color")
+local beautiful = require("beautiful")
+local gthickness = require("gears.thickness")
+local noice = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
 
-local default_outline_width  = 2
+local default_outline_width = 2
 
 local radialprogressbar = { mt = {} }
+
+local default_style = {
+    paddings = gthickness(0),
+    color = Nil,
+    border_color = Nil,
+    border_width = Nil,
+}
+
+noice.register_element(radialprogressbar, "radialprogressbar", "widget", default_style)
+
+for prop in pairs(default_style) do
+    radialprogressbar["set_" .. prop] = function(self, value)
+        if self:set_style_value(prop, value) then
+            self:emit_signal("widget::redraw_needed")
+            self:emit_signal("property::" .. prop, value)
+        end
+    end
+    radialprogressbar["get_" .. prop] = function(self)
+        return self:get_style_value(prop)
+    end
+end
 
 --- The progressbar border background color.
 --
@@ -46,8 +71,7 @@ local radialprogressbar = { mt = {} }
 -- @tparam[opt=0] number paddings.right
 
 local function outline_workarea(self, width, height)
-    local border_width = self._private.border_width or
-        beautiful.radialprogressbar_border_width or default_outline_width
+    local border_width = self:get_style_value("border_width") or default_outline_width
 
     local x, y = 0, 0
 
@@ -61,7 +85,7 @@ end
 
 -- The child widget area
 local function content_workarea(self, width, height)
-    local padding = self._private.paddings or {}
+    local padding = self:get_style_value("paddings") or {}
     local wa = outline_workarea(self, width, height)
 
     wa.x      = wa.x + (padding.left or 0)
@@ -76,21 +100,20 @@ end
 function radialprogressbar:after_draw_children(_, cr, width, height)
     cr:restore()
 
-    local border_width = self._private.border_width or
-        beautiful.radialprogressbar_border_width or default_outline_width
+    local border_width = self:get_style_value("border_width") or default_outline_width
 
     local wa = outline_workarea(self, width, height)
     cr:translate(wa.x, wa.y)
 
     -- Draw the outline
     shape.rounded_bar(cr, wa.width, wa.height)
-    cr:set_source(color(self:get_border_color() or "#0000ff"))
+    cr:set_source(color(self:get_style_value("border_color") or "#0000ff"))
     cr:set_line_width(border_width)
     cr:stroke()
 
     -- Draw the progress
-    cr:set_source(color(self:get_color() or "#ff00ff"))
-    shape.radial_progress(cr,  wa.width, wa.height, self._percent or 0)
+    cr:set_source(color(self:get_style_value("color") or "#ff00ff"))
+    shape.radial_progress(cr,  wa.width, wa.height, self._private.percent or 0)
     cr:set_line_width(border_width)
     cr:stroke()
 
@@ -151,16 +174,8 @@ end
 -- @noreturn
 -- @interface container
 function radialprogressbar:reset()
+    self:clear_local_style()
     self:set_widget(nil)
-end
-
-for _,v in ipairs {"left", "right", "top", "bottom"} do
-    radialprogressbar["set_"..v.."_padding"] = function(self, val)
-        self._private.paddings = self._private.paddings or {}
-        self._private.paddings[v] = val
-        self:emit_signal("widget::redraw_needed")
-        self:emit_signal("widget::layout_changed")
-    end
 end
 
 --- The padding between the outline and the progressbar.
@@ -179,6 +194,15 @@ end
 -- @propbeautiful
 -- @propemits false false
 
+function radialprogressbar:set_paddings(paddings)
+    paddings = gthickness(paddings)
+    if self:set_style_value("paddings", paddings) then
+        self:emit_signal("widget::redraw_needed")
+        self:emit_signal("widget::layout_changed")
+        self:emit_signal("property::paddings", paddings)
+    end
+end
+
 --- The progressbar value.
 --
 --@DOC_wibox_container_radialprogressbar_value_EXAMPLE@
@@ -190,17 +214,13 @@ end
 -- @propemits true false
 
 function radialprogressbar:set_value(val)
-    if not val then self._percent = 0; return end
-
-    if val > self._private.max_value then
-        self:set_max_value(val)
-    elseif val < self._private.min_value then
-        self:set_min_value(val)
-    end
-
+    val = val or 0
     local delta = self._private.max_value - self._private.min_value
-
-    self._percent = val/delta
+    local percent = (val - self._private.min_value) / delta
+    if self._private.percent == percent then
+        return
+    end
+    self._private.percent = percent
     self:emit_signal("widget::redraw_needed")
     self:emit_signal("property::value", val)
 end
@@ -245,28 +265,32 @@ end
 -- @negativeallowed true
 -- @propemits true false
 
-for _, prop in ipairs {"max_value", "min_value", "border_color", "color",
-    "border_width", "paddings"} do
-    radialprogressbar["set_"..prop] = function(self, value)
-        self._private[prop] = value
-        self:emit_signal("property::"..prop, value)
-        self:emit_signal("widget::redraw_needed")
+function radialprogressbar:set_max_value(max_value)
+    if self._private.max_value == max_value then
+        return
     end
-    radialprogressbar["get_"..prop] = function(self)
-        return self._private[prop] or beautiful["radialprogressbar_"..prop]
-    end
+
+    self._private.max_value = max_value
+    self:emit_signal("widget::redraw_needed")
+    self:emit_signal("property::max_value", max_value)
 end
 
-function radialprogressbar:set_paddings(val)
-    self._private.paddings = type(val) == "number" and {
-        left   = val,
-        right  = val,
-        top    = val,
-        bottom = val,
-    } or val or {}
-    self:emit_signal("property::paddings")
+function radialprogressbar:get_max_value()
+    return self._private.max_value
+end
+
+function radialprogressbar:set_min_value(min_value)
+    if self._private.min_value == min_value then
+        return
+    end
+
+    self._private.min_value = min_value
     self:emit_signal("widget::redraw_needed")
-    self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::min_value", min_value)
+end
+
+function radialprogressbar:get_min_value()
+    return self._private.min_value
 end
 
 --- Returns a new radialprogressbar layout.
@@ -276,14 +300,16 @@ end
 --
 -- @tparam[opt] widget widget The widget to display.
 -- @constructorfct wibox.container.radialprogressbar
-local function new(widget)
+local function new(widget, min_value, max_value)
     local ret = base.make_widget(nil, nil, {
         enable_properties = true,
     })
 
     gtable.crush(ret, radialprogressbar)
-    ret._private.max_value = 1
-    ret._private.min_value = 0
+    stylable.initialize(ret, radialprogressbar)
+
+    ret._private.min_value = min_value or 0
+    ret._private.max_value = max_value or 1
 
     ret:set_widget(widget)
 

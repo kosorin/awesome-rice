@@ -17,7 +17,7 @@ local config = require("config")
 local Nil = require("theme.nil")
 
 
----@class Theme.tomorrow_night
+---@class Theme.gruvbox_dark
 local theme = {}
 
 theme.palette = setmetatable({

@@ -69,23 +69,83 @@ local function match_selector(selector, context)
 end
 
 ---@param hierarchy? wibox.hierarchy
----@return stylable.context|nil
-local function get_context(hierarchy)
+---@return stylable|nil
+local function get_stylable(hierarchy)
     if not hierarchy then
         return nil
     end
 
-    local widget = hierarchy._widget --[[@as stylable|nil]]
-    if not widget then
+    return hierarchy._widget --[[@as stylable|nil]]
+end
+
+---@param root? wibox
+---@return stylable.context|nil
+local function get_wibox_context(root)
+    if not root then
+        return nil
+    end
+    ---@cast root +stylable
+
+    local stylable_data = root._stylable
+    if not stylable_data then
         return nil
     end
 
-    local style_data = widget._style
-    if not style_data then
+    return stylable_data.context
+end
+
+---@param hierarchy? wibox.hierarchy
+---@return stylable.context|nil
+local function get_widget_context(hierarchy)
+    local stylable = get_stylable(hierarchy)
+    if not stylable then
         return nil
     end
 
-    return style_data.context
+    local stylable_data = stylable._stylable
+    if not stylable_data then
+        return nil
+    end
+
+    return stylable_data.context
+end
+
+---@param context stylable.context
+---@return stylable.context|nil
+local function get_parent_context(context)
+    local hierarchy = context.hierarchy
+    if hierarchy.root then
+        return get_wibox_context(hierarchy.root)
+    elseif hierarchy.parent then
+        return get_widget_context(hierarchy.parent)
+    else
+        return nil
+    end
+end
+
+---@param context stylable.context
+---@param index integer
+---@return stylable.context|nil
+local function get_sibling_context(context, index)
+    local parent = context.hierarchy.parent
+    if parent then
+        local sibling = parent._children[index]
+        return get_widget_context(sibling)
+    end
+    return nil
+end
+
+---@param context stylable.context
+---@return integer|nil
+---@return integer|nil
+local function get_sibling_info(context)
+    local hierarchy = context.hierarchy
+    local parent = hierarchy.parent
+    local index = hierarchy.index
+    if parent and index then
+        return index, #parent._children
+    end
+    return nil, nil
 end
 
 ---@param combinator style_sheet.combinator
@@ -101,34 +161,31 @@ function match_combinator(combinator, context)
     end
 
     if not combinator.operator then
-        local parent = context.hierarchy.parent
-        while parent do
-            local parent_context = get_context(parent)
+        local parent_context = get_parent_context(context)
+        while parent_context do
             if match_selector(combinator.former, parent_context) then
                 return true
             end
-            parent = parent._parent
+            parent_context = get_parent_context(parent_context)
         end
     elseif combinator.operator == ">" then
-        return match_selector(combinator.former, get_context(context.hierarchy.parent))
+        return match_selector(combinator.former, get_parent_context(context))
     elseif combinator.operator == "+" then
-        local parent = context.hierarchy.parent
-        local index = context.hierarchy.index
-        if parent and index then
-            local sibling = parent._children[index - 1]
-            return match_selector(combinator.former, get_context(sibling))
+        local index = get_sibling_info(context)
+        if index then
+            return match_selector(combinator.former, get_sibling_context(context, index - 1))
         end
+        return false
     elseif combinator.operator == "~" then
-        local parent = context.hierarchy.parent
-        local index = context.hierarchy.index
-        if parent and index then
+        local index = get_sibling_info(context)
+        if index then
             for i = index - 1, 1, -1 do
-                local sibling = parent._children[i]
-                if match_selector(combinator.former, get_context(sibling)) then
+                if match_selector(combinator.former, get_sibling_context(context, i)) then
                     return true
                 end
             end
         end
+        return false
     end
 
     return false
