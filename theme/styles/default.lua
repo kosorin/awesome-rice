@@ -70,148 +70,82 @@ end
 
 ----------------------------------------------------------------------------------------------------
 
----@type style_sheet.source
-theme.style_sheet = {
+---@type style_sheet.source[]
+theme.style_sheets = {
     {
-        "wibox",
-        "popup",
-        -- bg = theme.common.bg,
-        -- fg = theme.common.primary_bright,
-        border_color = theme.common.secondary,
-        border_width = 8,
-        -- shape = gshape.rounded_rect,
-    },
-    {
-        "progressbar",
-        forced_height = 50,
-        border_color = theme.palette.red,
-        border_width = 1,
-        color = theme.palette.red_bright,
-        background_color = theme.palette.red_33,
-        shape = gshape.rounded_bar,
-        bar_shape = gshape.rounded_bar,
-    },
-    {
-        ".test",
-        border_color = theme.palette.yellow,
-        border_width = 4,
-        bar_border_color = theme.palette.yellow,
-        bar_border_width = 2,
-        color = theme.palette.blue,
-        background_color = theme.palette.blue_33,
-    },
-    {
-        ".test.powerline",
-        forced_height = 100,
-        shape = gshape.powerline,
-        bar_shape = gshape.powerline,
-        paddings = hui.thickness { 10, 24 },
-    },
-    {
-        "slider",
-        bar_shape = gshape.rounded_rect,
-    },
-    {
-        "slider:hover",
-        bar_border_color = theme.common.secondary,
-    },
-    {
-        "checkbox",
-        forced_width = 20,
-        forced_height = 20,
-        shape = function(cr, w, h) gshape.rounded_rect(cr, w, h, 3) end,
-        bg = theme.common.bg_66,
-        color = theme.common.primary_bright,
-        border_color = theme.common.fg_66,
-        border_width = 2,
-        paddings = 3,
-        check_border_color = theme.common.fg_bright,
-        check_shape = function(cr, w, h)
-            local cross = function(cr2, w2, h2) gshape.cross(cr2, w2, h2, w2 / 5) end
-            gshape.transform(cross)
-                :rotate_at(w / 2, h / 2, math.pi / 4)(cr, w, h)
-        end,
-    },
-    {
-        "checkbox:hover",
-        bg = theme.common.bg_110,
-        color = theme.common.primary_bright_125,
-    },
-    {
-        "checkbox:active",
-        bg = theme.common.bg_120,
-    },
-    {
-        "#profile",
-        halign = "center",
-        image = config.places.theme .. "/soy.png",
-        clip_shape = gshape.circle,
-    },
-    {
-        "#profile:hover",
-        image = config.places.theme .. "/soy_gigachad.png",
-        clip_shape = gshape.rounded_rect,
-    },
-    {
-        "#profile:active",
-        opacity = 0.5,
-    },
-    {
-        "textbox",
-        "textclock",
-        font = "JetBrains Mono 12",
-    },
-    {
-        "progressbar + textbox",
-        halign = "center",
-    },
-    {
-        "progressbar:hover",
-        background_color = theme.palette.green_33,
-    },
-    {
-        ".myclock",
-        format = "%a, %b %-e (%H:%M:%S)",
-        refresh = 1,
-    },
-    {
-        "separator",
-        color = theme.palette.cyan,
-        span_ratio = 0.75,
-        thickness = 2,
-    },
-    {
-        "separator + separator",
-        color = theme.palette.magenta,
-    },
-    {
-        ".arrow:hover",
-        border_color = theme.palette.red,
-    },
-    {
-        "tile textbox",
-        font = "Iosevka 16",
-    },
-    {
-        "wibox > #fuu",
-        margins = 20,
-    },
-    {
-        "wibox #profile",
-        height = 100,
-    },
-    {
-        "wibar",
-        border_width = 0,
-        shape = gshape.rounded_bar,
-        margins = 20,
-        bg = "#004444",
-        align = "bottom",
-    },
-    {
-        "wibar > background:hover",
-        fg = "#008800",
-        bg = "#000066",
+        {
+            "*",
+            font = "FantasqueSansM Nerd Font 12",
+        },
+        {
+            "wibar.topbar",
+            position = "top",
+            height = dpi(46),
+            bg = theme.common.bg,
+            fg = theme.common.fg,
+            border_color = theme.common.bg_110,
+            border_width = dpi(1),
+            shape = function(cr, w, h)
+                gshape.rounded_rect(cr, w, h, dpi(12))
+            end,
+            margins = dpi(12),
+        },
+        {
+            "wibar.topbar .paddings",
+            margins = { dpi(8), dpi(16) },
+        },
+        {
+            "wibar.topbar .container",
+            expand = "outside",
+        },
+        {
+            "wibar.topbar #left",
+            "wibar.topbar #middle",
+            "wibar.topbar #right",
+            spacing = dpi(32),
+            spacing_widget = wibox.widget.separator,
+        },
+        {
+            "wibar.topbar fixed#right",
+            reverse = true,
+        },
+        {
+            "wibar.topbar separator",
+            orientation = "vertical",
+            span_ratio = 0.6,
+            thickness = dpi(1),
+            color = theme.common.bg_120,
+        },
+        {
+            "wibar.topbar taglist .layout",
+            spacing = dpi(8),
+        },
+        {
+            "wibar.topbar taglist .tag",
+            bg = theme.common.bg,
+            fg = theme.common.fg,
+            border_color = theme.common.bg_110,
+            border_width = dpi(1),
+            shape = function(cr, w, h)
+                gshape.rounded_rect(cr, w, h, dpi(8))
+            end,
+            forced_width = dpi(32),
+            hover_overlay = theme.common.bg_105,
+        },
+        {
+            "wibar.topbar taglist .tag textbox",
+            halign = "center",
+            valign = "center",
+        },
+        {
+            "wibar.topbar textclock.date",
+            format = "%a, %b %-e",
+        },
+        {
+            "wibar.topbar textclock.time",
+            format = "%-H:%M:%S",
+            refresh = 1,
+        },
     },
 }
 

@@ -174,10 +174,10 @@ local function draw_line(self, _, cr, width, height)
 
     if orientation == "horizontal" then
         local w = width * span_ratio
-        cr:rectangle((width - w) / 2, height / 2 - thickness / 2, w, thickness)
+        cr:rectangle((width - w) // 2, height // 2 - thickness // 2, w, thickness)
     else
         local h = height * span_ratio
-        cr:rectangle(width / 2 - thickness / 2, (height - h) / 2, thickness, h)
+        cr:rectangle(width // 2 - thickness // 2, (height - h) // 2, thickness, h)
     end
 
     cr:fill()

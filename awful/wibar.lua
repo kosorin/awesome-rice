@@ -234,7 +234,7 @@ local function get_placement_margin(self, position, auto_stop)
         end
 
         if other.visible and other.screen == self.screen and ((other:get_style_value("position") or "top") == position) then
-            margin = margin + other[size_name]
+            margin = margin + other:get_style_value(size_name)
             local other_margins = other:get_style_value("margins")
             if other_margins then
                 margin = margin + other_margins[position] + other_margins[opposite_margin[position]]
@@ -346,12 +346,6 @@ function awfulwibar.set_position(self, position)
         position = "top"
     end
     if self:set_style_value("position", position) then
-        -- In case the position changed, it may be necessary to reset the size
-        if (old_position == "left" or old_position == "right") and (position == "top" or position == "bottom") then
-            self.height = math.ceil(beautiful.get_font_height(self.font) * 1.5)
-        elseif (old_position == "top" or old_position == "bottom") and (position == "left" or position == "right") then
-            self.width = math.ceil(beautiful.get_font_height(self.font) * 1.5)
-        end
         reattach_all(self)
         self:emit_signal("property::position", position)
     end
@@ -477,32 +471,6 @@ function awfulwibar.new(args)
     end
 
     local screen = get_screen(args.screen or 1)
-    local has_to_stretch = true
-
-    -- Set default size
-    if position == "left" or position == "right" then
-        args.width = args.width or beautiful["wibar_width"] or math.ceil(beautiful.get_font_height(args.font) * 1.5)
-        if args.height then
-            has_to_stretch = false
-            if screen then
-                local hp = tostring(args.height):match("(%d+)%%")
-                if hp then
-                    args.height = math.ceil(screen.geometry.height * hp / 100)
-                end
-            end
-        end
-    else
-        args.height = args.height or beautiful["wibar_height"] or math.ceil(beautiful.get_font_height(args.font) * 1.5)
-        if args.width then
-            has_to_stretch = false
-            if screen then
-                local wp = tostring(args.width):match("(%d+)%%")
-                if wp then
-                    args.width = math.ceil(screen.geometry.width * wp / 100)
-                end
-            end
-        end
-    end
 
     args.screen = nil
 
@@ -519,7 +487,7 @@ function awfulwibar.new(args)
     gtable.crush(self, awfulwibar, true)
     stylable.initialize(self, awfulwibar)
 
-    if args.stretch ~= nil or not has_to_stretch then
+    if args.stretch ~= nil then
         self:set_stretch(args.stretch)
     end
 

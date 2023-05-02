@@ -23,6 +23,15 @@ local mirror = { mt = {} }
 
 noice.register_element(mirror, "mirror", "widget", {
     reflection = Nil,
+}, {
+    reflection = {
+        equality_comparer = function(a, b)
+            if not a and not b then
+                return true
+            end
+            return a.horizontal == b.horizontal and a.vertical == b.vertical
+        end,
+    },
 })
 
 local reflections = {
@@ -75,7 +84,7 @@ function mirror:get_widget()
 end
 
 function mirror:get_children()
-    return {self._private.widget}
+    return { self._private.widget }
 end
 
 function mirror:set_children(children)
@@ -106,16 +115,9 @@ local function parse_reflection(reflection)
     end
 end
 
-local function reflection_comparer(a, b)
-    if not a and not b then
-        return true
-    end
-    return a.horizontal == b.horizontal and a.vertical == b.vertical
-end
-
 function mirror:set_reflection(reflection)
     reflection = parse_reflection(reflection)
-    if self:set_style_value("reflection", reflection, reflection_comparer) then
+    if self:set_style_value("reflection", reflection) then
         self:emit_signal("widget::layout_changed")
         self:emit_signal("property::reflection", reflection)
     end

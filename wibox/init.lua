@@ -15,6 +15,7 @@ local capi = {
 local setmetatable = setmetatable
 local pairs, ipairs = pairs, ipairs
 local type = type
+local math = math
 local object = require("gears.object")
 local grect = require("gears.geometry").rectangle
 local beautiful = require("beautiful")
@@ -45,6 +46,10 @@ local default_style = {
     bgimage = Nil,
     bg = "#000022",
     fg = "#0000ff",
+    x = Nil,
+    y = Nil,
+    width = Nil,
+    height = Nil,
     shape = Nil,
     border_color = "#008800",
     border_width = 1,
@@ -55,7 +60,12 @@ local default_style = {
     input_passthrough = false,
 }
 
-noice.register_element(wibox, "wibox", nil, default_style)
+noice.register_element(wibox, "wibox", nil, default_style, {
+    x = { fallback = function(self) return self.drawin.x end, coerce = function(value, self) return value or self.drawin.x end },
+    y = { fallback = function(self) return self.drawin.y end, coerce = function(value, self) return value or self.drawin.y end },
+    width = { fallback = function(self) return self.drawin.width end, coerce = function(value, self) return value or self.drawin.width end },
+    height = { fallback = function(self) return self.drawin.height end, coerce = function(value, self) return value or self.drawin.height end },
+})
 
 for _, prop in ipairs { "bgimage", "bg", "fg" } do
     wibox["set_" .. prop] = function(self, value)
@@ -83,6 +93,18 @@ for _, prop in ipairs { "visible", "ontop", "cursor" } do
     wibox["set_" .. prop] = function(self, value)
         if self:set_style_value(prop, value) then
             self.drawin[prop] = value
+        end
+    end
+    wibox["get_" .. prop] = function(self)
+        return self:get_style_value(prop) or self.drawin[prop]
+    end
+end
+
+for _, prop in ipairs { "x", "y", "width", "height" } do
+    wibox["set_" .. prop] = function(self, value)
+        local changed, new_value = self:set_style_value(prop, value)
+        if changed then
+            self.drawin[prop] = new_value
         end
     end
     wibox["get_" .. prop] = function(self)
@@ -373,11 +395,11 @@ local function new(args)
         drawable:_inform_visible(drawin.visible)
     end)
 
-    stylable.initialize(self, wibox)
-
     -- Make sure the wibox is drawn at least once
     self.draw = drawable.draw
     self.draw()
+
+    stylable.initialize(self, wibox)
 
     -- Set other wibox specific arguments
     if args.bg then
@@ -418,6 +440,30 @@ local function new(args)
 
     if args.screen then
         self:set_screen(args.screen)
+    end
+
+    if args.sid then
+        self:set_sid(args.sid)
+    end
+
+    if args.class then
+        self:set_class(args.class)
+    end
+
+    if args.x then
+        self:set_x(args.x)
+    end
+
+    if args.y then
+        self:set_y(args.y)
+    end
+
+    if args.width then
+        self:set_width(args.width)
+    end
+
+    if args.height then
+        self:set_height(args.height)
     end
 
     -- Make sure all signals bubble up

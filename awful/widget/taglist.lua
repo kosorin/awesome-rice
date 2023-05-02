@@ -56,6 +56,9 @@ local gstring = require("gears.string")
 local gdebug = require("gears.debug")
 local base = require("wibox.widget.base")
 local gtable = require("gears.table")
+local noice = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
 
 local function get_screen(s)
     return s and capi.screen[s]
@@ -63,6 +66,8 @@ end
 
 local taglist = { mt = {} }
 taglist.filter, taglist.source = {}, {}
+
+noice.register_element(taglist, "taglist", "widget", {})
 
 --- The tag list main foreground (text) color.
 -- @beautiful beautiful.taglist_fg_focus
@@ -652,6 +657,7 @@ function taglist.new(args, filter, buttons, style, update_function, base_widget)
     })
 
     gtable.crush(w, taglist, true)
+    stylable.initialize(w, taglist)
 
     gtable.crush(w._private, {
         style           = args.style or {},

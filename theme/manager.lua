@@ -10,6 +10,9 @@ local style_sheet = require("theme.style_sheet")
 
 ---@class style.property_descriptor
 ---@field name string
+---@field equality_comparer? fun(a, b, self: stylable, property: stylable.property): boolean
+---@field fallback? fun(self: stylable, property: stylable.property): any
+---@field coerce? fun(value: any, self: stylable, property: stylable.property): any
 
 ---@class style.element_info
 ---@field module stylable
@@ -20,29 +23,36 @@ local style_sheet = require("theme.style_sheet")
 
 ---@class theme_manager : gears.object
 ---@field element_info_map table<string, style.element_info>
----@field default_style_sheet style_sheet
----@field style_sheet style_sheet
 ---@field stylables table<stylable, boolean>
 ---@field requests? table<stylable, boolean>
----@field _beautiful Theme # TODO: obsolete
+---@field default_style_sheet style_sheet
+---@field style_sheets? style_sheet[]
+---@field _beautiful Theme.default # TODO: obsolete
 local M = gobject { enable_properties = false }
 
-gtable.crush(M, {
-    element_info_map = {},
-    default_style_sheet = style_sheet.new(),
-    style_sheet = style_sheet.new(),
-    stylables = setmetatable({}, { __mode = "k" }),
-    _beautiful = setmetatable({}, {
-        __index = function() error("Theme is not loaded yet!") end,
-        __newindex = function() error("Theme is not loaded yet!") end,
-    }),
-}, true)
+M.element_info_map = {}
+M.stylables = setmetatable({}, { __mode = "k" })
 
----@param theme Theme
+M.default_style_sheet = style_sheet.new()
+M.style_sheets = {}
+
+M._beautiful = setmetatable({}, {
+    __index = function() error("Theme is not loaded yet!") end,
+    __newindex = function() error("Theme is not loaded yet!") end,
+})
+
+---@param theme Theme.default
 function M.load(theme)
     M._beautiful = theme
 
-    M.style_sheet = style_sheet.parse(theme.style_sheet)
+    local style_sheets = {}
+    for _, source in ipairs(theme.style_sheets or {}) do
+        local parsed, ss = pcall(style_sheet.parse, source)
+        if parsed then
+            style_sheets[#style_sheets + 1] = ss
+        end
+    end
+    M.style_sheets = style_sheets
 
     for stylable in pairs(M.stylables) do
         M.process_request(stylable)
@@ -54,8 +64,10 @@ end
 function M.build_style(context)
     local style = {}
     M.default_style_sheet:enrich(style, context)
-    if M.style_sheet then
-        M.style_sheet:enrich(style, context)
+    if M.style_sheets then
+        for _, ss in ipairs(M.style_sheets) do
+            ss:enrich(style, context)
+        end
     end
     return style
 end

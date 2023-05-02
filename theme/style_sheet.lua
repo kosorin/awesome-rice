@@ -2,7 +2,7 @@ local warn, error = warn, error
 local setmetatable = setmetatable
 local type = type
 local assert = assert
-local pairs = pairs
+local pairs, ipairs = pairs, ipairs
 local ustring = require("utils.string")
 
 
@@ -262,20 +262,43 @@ local function parse_selector(s)
         return { all = true }
     end
 
-    local selector, operator
+    local parts = {}
+    for text in s:gmatch("(%S+)") do
+        local function add_part(from, to)
+            local part = text:sub(from, to)
+            if part and #part > 0 then
+                parts[#parts + 1] = part
+            end
+        end
+        local position = 1
+        repeat
+            local from, to = text:find("[>+~]", position)
+            if from then
+                if from > position then
+                    add_part(position, from - 1)
+                end
+            else
+                from = position
+                to = #text
+            end
+            add_part(from, to)
+            position = to + 1
+        until position > #text
+    end
 
-    for x in s:gmatch("(%S+)") do
-        if x == ">" or x == "+" or x == "~" then
+    local selector, operator
+    for _, part in ipairs(parts) do
+        if part == ">" or part == "+" or part == "~" then
             if not selector then
                 error("parse_selector: unexpected operator")
             end
-            operator = x
+            operator = part
         else
             local element
             local id
             local classes
             local pseudo_classes
-            for kind, name in x:gmatch("([%.:#]?)([%w_-]+)") do
+            for kind, name in part:gmatch("([%.:#]?)([%w_-]+)") do
                 if kind == "" then
                     assert(not id, "parse_selector: too many elements")
                     element = name

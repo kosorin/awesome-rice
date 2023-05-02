@@ -11,6 +11,7 @@ return setmetatable({
     rotate = require("wibox.container.rotate");
     margin = require("wibox.container.margin");
     mirror = require("wibox.container.mirror");
+    capsule = require("wibox.container.capsule");
     constraint = require("wibox.container.constraint");
     scroll = require("wibox.container.scroll");
     background = require("wibox.container.background");

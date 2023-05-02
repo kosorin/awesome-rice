@@ -54,9 +54,9 @@ end
 
 ---@param name string
 ---@param value any
----@param equality_comparer? fun(a, b): boolean
 ---@return boolean
-function M.stylable:set_style_value(name, value, equality_comparer)
+---@return any
+function M.stylable:set_style_value(name, value)
     local property = self._stylable.properties[name]
     if not property then
         return false
@@ -66,9 +66,13 @@ function M.stylable:set_style_value(name, value, equality_comparer)
         property.override = true
     end
 
+    if property.descriptor.coerce then
+        value = property.descriptor.coerce(value, self, property)
+    end
+
     if not property.empty then
-        if equality_comparer then
-            if equality_comparer(property.value, value) then
+        if property.descriptor.equality_comparer then
+            if property.descriptor.equality_comparer(property.value, value, self, property) then
                 return false
             end
         elseif property.value == value then
@@ -76,23 +80,33 @@ function M.stylable:set_style_value(name, value, equality_comparer)
         end
     end
 
-    -- if self._stylable.context.element == "wibar" then
-    -- print(("> [%s] %s.%s = %s"):format(self._stylable.context.id, self._stylable.context.element, name, value))
+    -- if self._stylable.context.element == "wibox" then
+    -- if name == "height" then
+    --     print(("> [%s] %s.%s = %s %d"):format(self._stylable.context.id, self._stylable.context.element, name, value, self._stylable.ignore_override))
     -- end
     property.value = value
     property.empty = false
-    return true
+    return true, value
 end
 
 ---@param name string
 ---@return any
 function M.stylable:get_style_value(name)
     local property = self._stylable.properties[name]
+
+    local value
+
     if not property or property.empty then
-        return nil
+        value = nil
     end
 
-    return property.value
+    value = property.value
+
+    if value == nil and property.descriptor.fallback then
+        value = property.descriptor.fallback(self, property)
+    end
+
+    return value
 end
 
 function M.stylable:clear_local_style()

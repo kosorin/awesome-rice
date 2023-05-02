@@ -1,15 +1,17 @@
 local setmetatable = setmetatable
 local ipairs = ipairs
 local type = type
-local beautiful = require("theme.theme")
 local gtable = require("gears.table")
 local gcolor = require("gears.color")
 local gshape = require("gears.shape")
+local gthickness = require("gears.thickness")
 local base = require("wibox.widget.base")
 local cairo = require("lgi").cairo
-local noice = require("theme.style")
+local noice = require("theme.manager")
+local stylable = require("theme.stylable")
+local Nil = require("theme.nil")
 local uui = require("utils.ui")
-local binding = require("io.binding")
+-- local binding = require("io.binding")
 
 
 ---@class Capsule.module
@@ -52,7 +54,19 @@ M.object = { allow_empty_widget = true }
 ---@field hover_overlay boolean
 ---@field press_overlay boolean
 
-noice.define_style(M.object, {
+local default_style = {
+    bg = Nil,
+    fg = Nil,
+    border_color = Nil,
+    border_width = Nil,
+    shape = Nil,
+    margins = Nil,
+    paddings = Nil,
+    hover_overlay = Nil,
+    press_overlay = Nil,
+}
+
+noice.register_element(M.object, "capsule", "widget", default_style, {
     bg = { convert = gcolor.create_pattern, emit_redraw_needed = true },
     fg = { convert = gcolor.create_pattern, emit_redraw_needed = true },
     border_color = { convert = gcolor.create_pattern, emit_redraw_needed = true },
@@ -63,6 +77,22 @@ noice.define_style(M.object, {
     hover_overlay = { convert = gcolor.create_pattern, emit_redraw_needed = true },
     press_overlay = { convert = gcolor.create_pattern, emit_redraw_needed = true },
 })
+
+for property in pairs(default_style) do
+    M.object["set_" .. property] = function(self, value)
+        if self:set_style_value(property, value) then
+            self:emit_signal("widget::redraw_needed")
+            if property == "margins" or property == "paddings" then
+                self:emit_signal("widget::layout_changed")
+            end
+            self:emit_signal("property::" .. property, value)
+        end
+    end
+    M.object["get_" .. property] = function(self)
+        return self:get_style_value(property)
+    end
+end
+
 
 local function dispose_pattern(pattern)
     local status, surface = pattern:get_surface()
@@ -75,9 +105,9 @@ end
 ---@param include_paddings boolean
 ---@param include_border boolean
 local function get_layout_geometry(self, width, height, include_paddings, include_border)
-    local margins = self._style.current.margins or uui.zero_thickness
-    local paddings = include_paddings and self._style.current.paddings or uui.zero_thickness
-    local bw = include_border and self._style.current.border_width or 0
+    local margins = gthickness(self:get_style_value("margins"))
+    local paddings = include_paddings and gthickness(self:get_style_value("paddings")) or gthickness.zero
+    local bw = include_border and self:get_style_value("border_width") or 0
 
     local x1 = bw + margins.left + paddings.left
     local y1 = bw + margins.top + paddings.top
@@ -97,15 +127,15 @@ end
 ---@param width number
 ---@param height number
 function M.object:before_draw_children(_, cr, width, height)
-    local bw = self._style.current.border_width or 0
-    local shape = self._style.current.shape or (bw > 0 and gshape.rectangle or nil)
+    local bw = self:get_style_value("border_width") or 0
+    local shape = self:get_style_value("shape") or (bw > 0 and gshape.rectangle or nil)
     if shape then
         cr:push_group_with_content(cairo.Content.COLOR_ALPHA)
     end
 
-    local bg = self._style.current.bg
-    local hover = self._private.enable_overlay and self._private.hover_overlay and self._style.current.hover_overlay
-    local press = self._private.enable_overlay and self._private.press_overlay and self._style.current.press_overlay
+    local bg = gcolor.create_pattern(self:get_style_value("bg"))
+    local hover = self._private.enable_overlay and self._private.hover_overlay and gcolor.create_pattern(self:get_style_value("hover_overlay"))
+    local press = self._private.enable_overlay and self._private.press_overlay and gcolor.create_pattern(self:get_style_value("press_overlay"))
 
     if bg or hover or press then
         local x, y, w, h = get_layout_geometry(self, width, height, false, false)
@@ -128,7 +158,7 @@ function M.object:before_draw_children(_, cr, width, height)
         cr:restore()
     end
 
-    local fg = self._style.current.fg
+    local fg = gcolor.create_pattern(self:get_style_value("fg"))
     if fg then
         cr:set_source(fg)
     end
@@ -139,8 +169,8 @@ end
 ---@param width number
 ---@param height number
 function M.object:after_draw_children(_, cr, width, height)
-    local bw = self._style.current.border_width or 0
-    local shape = self._style.current.shape or (bw > 0 and gshape.rectangle or nil)
+    local bw = self:get_style_value("border_width") or 0
+    local shape = self:get_style_value("shape") or (bw > 0 and gshape.rectangle or nil)
     if not shape then
         return
     end
@@ -153,7 +183,7 @@ function M.object:after_draw_children(_, cr, width, height)
     end
 
     if bw > 0 then
-        local border_color = self._style.current.border_color
+        local border_color = gcolor.create_pattern(self:get_style_value("border_color"))
 
         cr:push_group_with_content(cairo.Content.ALPHA)
 
@@ -339,6 +369,7 @@ function M.new(args)
     local self = base.make_widget(nil, nil, { enable_properties = true }) --[[@as Capsule]]
 
     gtable.crush(self, M.object, true)
+    stylable.initialize(self, M.object)
 
     self:set_widget(args.widget)
 
@@ -355,34 +386,29 @@ function M.new(args)
         set_hover_overlay(self, false)
         set_press_overlay(self, false)
     end)
-    self:connect_signal("button::press", function(_, _, _, button, modifiers)
-        if not self._private.buttons_formatted then
-            return
-        end
-        for _, b in ipairs(self._private.buttons_formatted) do
-            if binding.match_button(button, b.button, modifiers, b.modifiers) then
-                set_press_overlay(self, true)
-                return
-            end
-        end
-    end)
-    self:connect_signal("button::release", function(_, _, _, button)
-        if not self._private.buttons_formatted then
-            set_press_overlay(self, false)
-            return
-        end
-        for _, b in ipairs(self._private.buttons_formatted) do
-            if binding.match_button(button, b.button) then
-                set_press_overlay(self, false)
-                return
-            end
-        end
-    end)
-
-
-    self:initialize_style(beautiful.capsule.default_style)
-
-    self:apply_style(args)
+    -- self:connect_signal("button::press", function(_, _, _, button, modifiers)
+    --     if not self._private.buttons_formatted then
+    --         return
+    --     end
+    --     for _, b in ipairs(self._private.buttons_formatted) do
+    --         if binding.match_button(button, b.button, modifiers, b.modifiers) then
+    --             set_press_overlay(self, true)
+    --             return
+    --         end
+    --     end
+    -- end)
+    -- self:connect_signal("button::release", function(_, _, _, button)
+    --     if not self._private.buttons_formatted then
+    --         set_press_overlay(self, false)
+    --         return
+    --     end
+    --     for _, b in ipairs(self._private.buttons_formatted) do
+    --         if binding.match_button(button, b.button) then
+    --             set_press_overlay(self, false)
+    --             return
+    --         end
+    --     end
+    -- end)
 
     return self
 end
