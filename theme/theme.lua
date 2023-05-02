@@ -34,7 +34,7 @@ theme.icon_theme = "Archdroid-Amber"
 
 ----------------------------------------------------------------------------------------------------
 
-theme.font_name = "FantasqueSansMono Nerd Font"
+theme.font_name = "FantasqueSansM Nerd Font"
 theme.font_size = 12
 
 -- TODO: Move to the utils?
