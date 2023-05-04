@@ -32,7 +32,9 @@ local manager = require("theme.manager")
 local pango = require("utils.pango")
 local uui = require("utils.ui")
 local umouse = require("utils.mouse")
+local ext = require("ext")
 local capi = Capi
+local helper_client = require("utils.client")
 
 capi.screen.connect_signal("request::desktop_decoration", function(screen)
     for index = 1, 5 do
@@ -60,18 +62,28 @@ capi.screen.connect_signal("request::desktop_decoration", function(screen)
                 {
                     layout = wibox.layout.fixed.horizontal,
                     sid = "middle",
-                    awful.widget.taglist {
+                    ext.taglist {
                         screen = screen,
-                        filter = awful.widget.taglist.filter.all,
+                        buttons = binding.awful_buttons {
+                            binding.awful({}, btn.left, function(_, tag)
+                                tag:view_only()
+                            end),
+                            binding.awful({}, btn.right, function(_, tag)
+                                tag.volatile = not tag.volatile
+                            end),
+                            binding.awful({}, btn.middle, function(_, tag)
+                                awful.tag.viewtoggle(tag)
+                            end),
+                        },
                         base_layout = {
                             layout = wibox.layout.fixed.horizontal,
                             class = "layout",
                         },
                         widget_template = {
-                            layout = wibox.container.capsule,
+                            widget = ext.capsule,
                             class = "tag",
                             {
-                                id = "text_role",
+                                id = "text",
                                 widget = wibox.widget.textbox,
                             },
                         },
@@ -94,3 +106,64 @@ capi.screen.connect_signal("request::desktop_decoration", function(screen)
         },
     }
 end)
+
+binding.add_global_range {
+
+    binding.new {
+        modifiers = {},
+        triggers = btn.left,
+        on_press = function()
+            awful.spawn("xterm")
+        end,
+    },
+
+}
+
+binding.add_client_range {
+
+    binding.new {
+        modifiers = { mod.super, mod.control },
+        triggers = "Escape",
+        path = "Client",
+        description = "Quit",
+        order = 0,
+        on_press = function(_, client)
+            if client.minimize_on_close then
+                client.minimized = true
+            else
+                client:kill()
+            end
+        end,
+    },
+
+    binding.new {
+        modifiers = {},
+        triggers = btn.left,
+        on_press = function(_, client) client:activate { context = "mouse_click" } end,
+    },
+
+    binding.new {
+        modifiers = { mod.super },
+        triggers = btn.left,
+        path = "Client",
+        description = "Move",
+        on_press = function(_, client)
+            client:activate { context = "mouse_click" }
+            helper_client.mouse_move(client)
+        end,
+    },
+
+    binding.new {
+        modifiers = { mod.super },
+        triggers = btn.right,
+        path = "Client",
+        description = "Resize",
+        on_press = function(_, client)
+            client:activate { context = "mouse_click" }
+            helper_client.mouse_resize(client)
+        end,
+    },
+
+}
+
+require("awful.autofocus")

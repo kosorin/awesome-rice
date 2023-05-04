@@ -49,17 +49,17 @@ local function match_selector(selector, context)
     if selector.pseudo_classes then
         for i = 1, #selector.pseudo_classes do
             local pc = selector.pseudo_classes[i]
-            if pc == "even" then
+            if pc.name == "even" then
                 local index = context.hierarchy.index
                 if not index or (index % 2) ~= 0 then
                     return false
                 end
-            elseif pc == "odd" then
+            elseif pc.name == "odd" then
                 local index = context.hierarchy.index
                 if not index or (index % 2) ~= 1 then
                     return false
                 end
-            elseif not context.pseudo_classes[pc] then
+            elseif not context.pseudo_classes[pc.name] == not pc.negate then
                 return false
             end
         end
@@ -220,7 +220,7 @@ end
 ---@field element? string
 ---@field id? string
 ---@field classes? string[]
----@field pseudo_classes? string[]
+---@field pseudo_classes? { name: string, negate: boolean }[]
 
 ---@class style_sheet.rule
 ---@field selectors style_sheet.selector[]
@@ -298,7 +298,7 @@ local function parse_selector(s)
             local id
             local classes
             local pseudo_classes
-            for kind, name in part:gmatch("([%.:#]?)([%w_-]+)") do
+            for kind, modifier, name in part:gmatch("([%.:#]?)(!?)([%w_-]+)") do
                 if kind == "" then
                     assert(not id, "parse_selector: too many elements")
                     element = name
@@ -310,7 +310,10 @@ local function parse_selector(s)
                     classes[#classes + 1] = name
                 elseif kind == ":" then
                     pseudo_classes = pseudo_classes or {}
-                    pseudo_classes[#pseudo_classes + 1] = name
+                    pseudo_classes[#pseudo_classes + 1] = {
+                        name = name,
+                        negate = modifier == "!",
+                    }
                 else
                     error("parse_selector: unexpected input")
                 end

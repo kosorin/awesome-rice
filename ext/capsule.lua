@@ -374,7 +374,7 @@ function M.new(args)
     self:set_widget(args.widget)
 
 
-    self:set_enable_overlay(args.enable_overlay ~= false)
+    self:set_enable_overlay(args.enable_overlay)
     set_hover_overlay(self, false)
     set_press_overlay(self, false)
 
@@ -411,6 +411,11 @@ function M.new(args)
     -- end)
 
     return self
+end
+
+function M.new_template(template)
+    template.layout = M.new
+    return template
 end
 
 return setmetatable(M, M.mt)

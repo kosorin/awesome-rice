@@ -122,15 +122,47 @@ theme.style_sheets = {
         },
         {
             "wibar.topbar taglist .tag",
-            bg = theme.common.bg,
-            fg = theme.common.fg,
-            border_color = theme.common.bg_110,
-            border_width = dpi(1),
+            forced_width = dpi(32),
             shape = function(cr, w, h)
                 gshape.rounded_rect(cr, w, h, dpi(8))
             end,
-            forced_width = dpi(32),
-            hover_overlay = theme.common.bg_105,
+        },
+        {
+            "wibar.topbar taglist .tag:empty",
+            bg = theme.common.bg_105,
+            fg = theme.common.fg_50,
+            border_color = theme.common.bg_115,
+            border_width = 0,
+        },
+        {
+            "wibar.topbar taglist .tag:!empty",
+            bg = theme.common.bg_110,
+            fg = theme.common.fg,
+            border_color = theme.common.bg_130,
+            border_width = dpi(1),
+        },
+        {
+            "wibar.topbar taglist .tag:selected",
+            bg = theme.common.primary_50,
+            fg = theme.common.fg_bright,
+            border_color = theme.common.primary_75,
+            border_width = dpi(1),
+        },
+        {
+            "wibar.topbar taglist .tag:volatile",
+            border_color = theme.common.secondary_75,
+            border_width = dpi(1),
+        },
+        {
+            "wibar.topbar taglist .tag:volatile:selected",
+            bg = theme.common.secondary_50,
+        },
+        {
+            "wibar.topbar taglist .tag:urgent",
+            bg = theme.palette.red_66,
+            fg = theme.common.fg_bright,
+            border_color = theme.palette.red,
+            border_width = dpi(1),
         },
         {
             "wibar.topbar taglist .tag textbox",
