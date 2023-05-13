@@ -57,7 +57,32 @@ capi.screen.connect_signal("request::desktop_decoration", function(screen)
                 {
                     layout = wibox.layout.fixed.horizontal,
                     sid = "left",
-                    wibox.widget.textbox("Hello World"),
+                    {
+                        layout = wibox.layout.stack,
+                        {
+                            sid = "bar",
+                            widget = ext.capsule,
+                            wibox.widget.textbox(""),
+                        },
+                        {
+                            sid = "foo",
+                            widget = ext.capsule,
+                            wibox.widget.textbox("Hello World"),
+                        },
+                    },
+                    {
+                        layout = wibox.layout.stack,
+                        {
+                            sid = "bar",
+                            widget = ext.capsule,
+                            wibox.widget.textbox(""),
+                        },
+                        {
+                            sid = "foo",
+                            widget = ext.capsule,
+                            wibox.widget.textbox("🥰 Foo Bar"),
+                        },
+                    },
                 },
                 {
                     layout = wibox.layout.fixed.horizontal,

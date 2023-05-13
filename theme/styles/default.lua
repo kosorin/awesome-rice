@@ -178,6 +178,46 @@ theme.style_sheets = {
             format = "%-H:%M:%S",
             refresh = 1,
         },
+        {
+            "#bar",
+            bg = theme.palette.green_33,
+            border_color = theme.palette.green_50,
+            shape = function(cr, w, h)
+                gshape.rounded_rect(cr, w, h, dpi(6))
+            end,
+        },
+        {
+            "#foo",
+            bg = theme.palette.green_66,
+            fg = theme.palette.white_bright,
+            border_color = theme.palette.green,
+            paddings = { dpi(4), dpi(12) },
+            margins = { bottom = dpi(4) },
+        },
+        {
+            "#bar",
+            "#foo",
+            border_width = dpi(1),
+            shape = function(cr, w, h)
+                gshape.rounded_rect(cr, w, h, dpi(6))
+            end,
+        },
+        {
+            "#bar:hover",
+            bg = theme.palette.green_50,
+        },
+        {
+            "#foo:hover",
+            bg = theme.palette.green_75,
+        },
+        {
+            "#bar:active",
+            margins = { top = dpi(4) },
+        },
+        {
+            "#foo:active",
+            margins = { top = dpi(2), bottom = dpi(2) },
+        },
     },
 }
 
