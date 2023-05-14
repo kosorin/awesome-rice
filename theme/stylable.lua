@@ -187,6 +187,45 @@ function M.stylable:set_class(class)
     self:request_style()
 end
 
+---@param hierarchy? wibox.hierarchy
+local function request_styles(hierarchy)
+    if not hierarchy then
+        return
+    end
+
+    local stylable = hierarchy._widget --[[@as stylable?]]
+    if stylable then
+        stylable:request_style()
+    end
+
+    for _, child in ipairs(hierarchy._children) do
+        request_styles(child)
+    end
+end
+
+---@param stylable? stylable
+local function hierarchy_request_style(stylable)
+    if not stylable then
+        return
+    end
+
+    local current = stylable._stylable.context.hierarchy.parent
+
+    request_styles(current)
+
+    if not current then
+        return
+    end
+
+    while current and current._parent do
+        stylable = current._parent._widget --[[@as stylable?]]
+        if stylable then
+            stylable:request_style()
+        end
+        current = current._parent
+    end
+end
+
 ---@param pseudo_class string
 ---@param state? boolean
 function M.stylable:change_state(pseudo_class, state)
@@ -202,7 +241,7 @@ function M.stylable:change_state(pseudo_class, state)
 
     self._stylable.context.pseudo_classes[pseudo_class] = state
 
-    self:request_style()
+    hierarchy_request_style(self)
 end
 
 ---@param root? wibox

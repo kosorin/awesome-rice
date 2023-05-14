@@ -1,21 +1,8 @@
 require("develop")
-
 require("globals")
-
 require("config")
 
-local dark = true
----@return Theme.default
-local function toggle_light_dark()
-    local theme = dark
-        and require("theme.styles.default")
-        or require("theme.styles.default_light")
-    dark = not dark
-    ---@diagnostic disable-next-line: return-type-mismatch
-    return theme
-end
-
-require("theme.manager").load(toggle_light_dark())
+require("theme.manager").load(require("theme.styles.castle"))
 
 local awful = require("awful")
 local wibox = require("wibox")
@@ -35,6 +22,10 @@ local umouse = require("utils.mouse")
 local ext = require("ext")
 local capi = Capi
 local helper_client = require("utils.client")
+
+capi.screen.connect_signal("request::wallpaper", function(screen)
+    awful.spawn.with_shell([[feh --no-fehbg --bg-fill ~/.config/awesome/theme/wallpaper.jpg]])
+end)
 
 capi.screen.connect_signal("request::desktop_decoration", function(screen)
     for index = 1, 5 do
@@ -149,8 +140,6 @@ binding.add_client_range {
     binding.new {
         modifiers = { mod.super, mod.control },
         triggers = "Escape",
-        path = "Client",
-        description = "Quit",
         order = 0,
         on_press = function(_, client)
             if client.minimize_on_close then
@@ -170,8 +159,6 @@ binding.add_client_range {
     binding.new {
         modifiers = { mod.super },
         triggers = btn.left,
-        path = "Client",
-        description = "Move",
         on_press = function(_, client)
             client:activate { context = "mouse_click" }
             helper_client.mouse_move(client)
@@ -181,8 +168,6 @@ binding.add_client_range {
     binding.new {
         modifiers = { mod.super },
         triggers = btn.right,
-        path = "Client",
-        description = "Resize",
         on_press = function(_, client)
             client:activate { context = "mouse_click" }
             helper_client.mouse_resize(client)
