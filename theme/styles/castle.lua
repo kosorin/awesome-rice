@@ -22,12 +22,16 @@ local theme = {}
 
 ----------------------------------------------------------------------------------------------------
 
-theme.palette = setmetatable({
+theme.palette = {
+    c0             = "#080D0C",
     c1             = "#364C59",
     c2             = "#6894A6",
     c3             = "#9FBFB9",
     c4             = "#DDF2BD",
     c5             = "#8C7D30",
+    c6             = "#D99518",
+    c7             = "#14261C",
+    c8             = "#112226",
     --
     black          = "#1d1f21",
     white          = "#c5c8c6",
@@ -46,7 +50,7 @@ theme.palette = setmetatable({
     cyan_bright    = "#70c0b1",
     blue_bright    = "#7aa6da",
     magenta_bright = "#c397d8",
-}, hcolor.palette_metatable)
+}
 
 theme.color_names = {
     palette = {
