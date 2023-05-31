@@ -1,7 +1,9 @@
 local capi = Capi
 local math = math
+local pairs, ipairs = pairs, ipairs
 local setmetatable = setmetatable
 local alayout = require("awful.layout")
+local gtable = require("gears.table")
 
 
 local layout_descriptor = { object = {} }
@@ -68,6 +70,47 @@ function layout_descriptor.new(tag)
         tag = tag,
         padding = setmetatable({}, { __mode = "k" }),
     }, { __index = layout_descriptor.object })
+end
+
+function layout_descriptor.copy(source_tag, destination_tag)
+    if true then return  end
+    local sld = source_tag and source_tag.tilted_layout_descriptor
+    local dld = destination_tag and destination_tag.tilted_layout_descriptor
+    if sld and dld then
+        dld.from = sld.from
+        dld.to = sld.to
+        dld.last_size = sld.last_size
+        dld.size = sld.size
+        for i, scd in ipairs(sld) do
+            local dcd = dld[i]
+            if not dcd then
+                break
+            end
+            dcd.from = scd.from
+            dcd.to = scd.to
+            dcd.last_size = scd.last_size
+            dcd.size = scd.size
+
+            for ii, sid in ipairs(scd) do
+                local did = dcd[ii]
+                if not did then
+                    break
+                end
+                did.from = sid.from
+                did.to = sid.to
+                did.last_size = sid.last_size
+                did.size = sid.size
+            end
+        end
+        destination_tag:emit_signal("property::tilted_layout_descriptor")
+    end
+end
+
+function layout_descriptor.reset(tag)
+    if tag then
+        tag.tilted_layout_descriptor = nil
+        tag:emit_signal("property::tilted_layout_descriptor")
+    end
 end
 
 function layout_descriptor.update(tag, clients)

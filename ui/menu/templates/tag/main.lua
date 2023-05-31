@@ -7,7 +7,9 @@ local mebox = require("widget.mebox")
 local screen_helper = require("utils.screen")
 local config = require("config")
 local common = require("ui.menu.templates.tag._common")
+local select = require("ui.menu.templates.tag.select")
 local layout_menu_template = require("ui.menu.templates.tag.layout")
+local layout_descriptor = require("layouts.tilted.layout_descriptor")
 
 
 local M = {}
@@ -54,15 +56,30 @@ function M.new()
                     callback = function() taglist:rename_tag_inline(tag) end,
                 })
             end
+            insert(items, common.build_simple_toggle("Volatile", "volatile", nil, "/icons/delete-clock.svg", beautiful.palette.gray))
+            insert(items, mebox.separator)
+
             insert(items, {
                 text = "Layout",
                 icon = config.places.theme .. "/icons/view-grid.svg",
                 icon_color = beautiful.palette.blue,
                 submenu = layout_menu_template.shared,
             })
-            insert(items, mebox.separator)
-
-            insert(items, common.build_simple_toggle("Volatile", "volatile", nil, "/icons/delete-clock.svg", beautiful.palette.gray))
+            insert(items, {
+                text = "Copy from",
+                icon = config.places.theme .. "/icons/content-copy.svg",
+                icon_color = beautiful.palette.gray,
+                cache_submenu = false,
+                submenu = select.new(function(selected_tag)
+                    layout_descriptor.copy(selected_tag, tag)
+                end, nil, tag),
+            })
+            insert(items, {
+                text = "Reset",
+                icon = config.places.theme .. "/icons/arrow-u-left-top.svg",
+                icon_color = beautiful.palette.gray,
+                callback = function() layout_descriptor.reset(tag) end,
+            })
             insert(items, mebox.separator)
 
             insert(items, {
