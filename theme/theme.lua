@@ -377,7 +377,7 @@ theme.bindbox.default_style = setmetatable({
     find_dim_fg = theme.common.fg_66,
     find_highlight_bg = nil,
     find_highlight_fg = theme.common.urgent_bright,
-    group_path_separator_markup = pango.span { fgalpha = "50%", "  " },
+    group_path_separator_markup = pango.span { fgalpha = "50%", " 󰅂 " },
     slash_separator_markup = pango.span { fgalpha = "50%", size = "smaller", " / " },
     plus_separator_markup = pango.span { fgalpha = "50%", "+" },
     range_separator_markup = pango.span { fgalpha = "50%", ".." },
