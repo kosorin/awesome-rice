@@ -156,7 +156,7 @@ binding.add_global_range {
         modifiers = { mod.control, mod.super },
         triggers = "b",
         path = "Launcher",
-        description = "Web browser (private window)",
+        description = "Web browser (incognito)",
         on_press = function() awful.spawn(config.apps.private_browser) end,
     },
 
@@ -735,13 +735,13 @@ main_bindbox:add_group {
                 modifiers = { mod.control },
                 "Left",
                 "Right",
-                description = "Seek to the previous/next subtitle"
+                description = "Seek to the previous/next subtitle",
             },
             {
                 modifiers = { mod.control, mod.shift },
                 "Left",
                 "Right",
-                description = "Adjust subtitle delay so that the previous/next subtitle is displayed now"
+                description = "Adjust subtitle delay so that the previous/next subtitle is displayed now",
             },
             { "r", "R", description = "Move subtitles up/down" },
             { modifiers = { mod.shift }, "g", "f", description = "Adjust subtitle font size by +/- 10%" },
