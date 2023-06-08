@@ -3,6 +3,7 @@ local ipairs = ipairs
 local math = math
 local aclient = require("awful.client")
 local alayout = require("awful.layout")
+local ascreen = require("awful.screen")
 local amresize = require("awful.mouse.resize")
 local aplacement = require("awful.placement")
 local grectangle = require("gears.geometry").rectangle
@@ -271,10 +272,17 @@ local function resize_tiled(client, direction)
 end
 
 function M.move(client, direction)
+    local old_screen = client.screen
+
     if M.is_floating(client) then
         move_floating(client, direction)
     else
         move_tiled(client, direction)
+    end
+
+    local new_screen = client.screen
+    if old_screen ~= new_screen then
+        ascreen.focus(new_screen)
     end
 end
 
