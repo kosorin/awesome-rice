@@ -415,6 +415,14 @@ binding.add_global_range {
         on_press = function() services.media.player:stop("%all") end,
     },
 
+
+    binding.new {
+        modifiers = { mod.super },
+        triggers = binding.group.arrows,
+        path = "Client",
+        description = "Change focus",
+        on_press = function(trigger) hclient.focus(nil, trigger.direction) end,
+    },
 }
 
 if config.features.screenshot_tools then
@@ -576,14 +584,6 @@ binding.add_client_range {
                 end,
             }, { source = "keyboard" })
         end,
-    },
-
-    binding.new {
-        modifiers = { mod.super },
-        triggers = binding.group.arrows,
-        path = "Client",
-        description = "Change focus",
-        on_press = function(trigger, client) awful.client.focus.global_bydirection(trigger.direction, client) end,
     },
 
     binding.new {

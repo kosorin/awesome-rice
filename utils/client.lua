@@ -272,6 +272,7 @@ local function resize_tiled(client, direction)
 end
 
 function M.move(client, direction)
+    client = client or capi.client.focus
     local old_screen = client.screen
 
     if M.is_floating(client) then
@@ -287,10 +288,19 @@ function M.move(client, direction)
 end
 
 function M.resize(client, direction)
+    client = client or capi.client.focus
     if M.is_floating(client) then
         resize_floating(client, direction)
     else
         resize_tiled(client, direction)
+    end
+end
+
+function M.focus(client, direction)
+    client = client or capi.client.focus
+    aclient.focus.global_bydirection(direction, client)
+    if client == capi.client.focus then
+        ascreen.focus_bydirection(direction)
     end
 end
 
