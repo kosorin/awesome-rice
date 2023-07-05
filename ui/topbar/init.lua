@@ -64,9 +64,6 @@ capi.screen.connect_signal("request::desktop_decoration", function(screen)
     left:add(layoutbox_widget.new(wibar))
     left:add(screen.topbar.clientlist)
     if is_primary then
-        left:add(systray_widget.new(wibar))
-    end
-    if is_primary then
         left:add(media_player_widget.new(wibar))
     end
 
@@ -84,6 +81,7 @@ capi.screen.connect_signal("request::desktop_decoration", function(screen)
             right:add(weather_widget.new(wibar))
         end
         right:add(tools_widget.new(wibar))
+        right:add(systray_widget.new(wibar))
         right:add(datetime_widget.new(wibar))
         right:add(power_widget.new(wibar))
     else
