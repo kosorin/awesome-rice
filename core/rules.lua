@@ -2,7 +2,6 @@ local capi = Capi
 local table = table
 local awful = require("awful")
 local beautiful = require("theme.theme")
-local gshape = require("gears.shape")
 local ruled = require("ruled")
 local binding = require("io.binding")
 local helper_client = require("utils.client")
@@ -70,6 +69,7 @@ end, { "awful.spawn", "awful.rules" }, {})
 
 
 ruled.client.connect_signal("request::rules", function()
+    ----------------------------------------------------------------------------------------------------
     ruled.client.append_rule {
         id = "global",
         rule = {},
@@ -88,7 +88,6 @@ ruled.client.connect_signal("request::rules", function()
         id = "floating",
         rule_any = {
             class = {
-                "1Password",
                 "Arandr",
             },
             name = {
@@ -104,7 +103,7 @@ ruled.client.connect_signal("request::rules", function()
         },
     }
     ruled.client.append_rule {
-        id = "picture-in-picture",
+        id = "picture_in_picture",
         rule_any = {
             name = {
                 "Picture in picture",
@@ -124,6 +123,18 @@ ruled.client.connect_signal("request::rules", function()
         },
     }
     ruled.client.append_rule {
+        id = "size_hints",
+        rule_any = {
+            class = {
+                "XTerm",
+            },
+        },
+        properties = {
+            size_hints_honor = false,
+        },
+    }
+    ----------------------------------------------------------------------------------------------------
+    ruled.client.append_rule {
         rule = {
             class = "SpeedCrunch",
         },
@@ -133,16 +144,27 @@ ruled.client.connect_signal("request::rules", function()
             titlebars_enabled = true,
         },
     }
+    ----------------------------------------------------------------------------------------------------
     ruled.client.append_rule {
         rule = {
             class = "1Password",
-            name = "^Quick Access — 1Password$",
+        },
+        properties = {
+            floating = true,
+            titlebars_enabled = true,
+        },
+    }
+    ruled.client.append_rule {
+        rule = {
+            class = "1Password",
+            name = "Quick Access",
         },
         properties = {
             skip_taskbar = true,
             titlebars_enabled = "toolbox",
         },
     }
+    ----------------------------------------------------------------------------------------------------
     ruled.client.append_rule {
         rule = {
             class = "qr_code_clipboard",
@@ -152,12 +174,8 @@ ruled.client.connect_signal("request::rules", function()
             ontop = true,
             placement = awful.placement.centered,
             skip_taskbar = true,
+            titlebars_enabled = "toolbox",
             buttons = binding.awful_buttons {
-                binding.new {
-                    modifiers = {},
-                    triggers = { btn.left, btn.right },
-                    on_press = function(_, client) client:kill() end,
-                },
                 binding.new {
                     modifiers = { mod.super },
                     triggers = btn.left,
@@ -177,17 +195,7 @@ ruled.client.connect_signal("request::rules", function()
             },
         },
     }
-    ruled.client.append_rule {
-        rule = {
-            class = "jetbrains-rider",
-            name = "^splash$",
-        },
-        properties = {
-            floating = true,
-            placement = awful.placement.centered,
-            skip_taskbar = true,
-        },
-    }
+    ----------------------------------------------------------------------------------------------------
     ruled.client.append_rule {
         rule = {
             class = "Dragon-drop",
@@ -197,10 +205,13 @@ ruled.client.connect_signal("request::rules", function()
             ontop = true,
             sticky = true,
             placement = awful.placement.centered,
-            border_width = dpi(8),
+            titlebars_enabled = "toolbox",
+            border_width = dpi(4),
             border_color = beautiful.common.secondary_bright,
+            shape = false,
         },
     }
+    ----------------------------------------------------------------------------------------------------
     ruled.client.append_rule {
         rule = {
             class = "Xephyr",
@@ -209,12 +220,5 @@ ruled.client.connect_signal("request::rules", function()
             floating = false,
         },
     }
-    ruled.client.append_rule {
-        rule = {
-            class = "XTerm",
-        },
-        properties = {
-            size_hints_honor = false,
-        },
-    }
+    ----------------------------------------------------------------------------------------------------
 end)
