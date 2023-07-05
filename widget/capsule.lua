@@ -89,7 +89,7 @@ local function get_layout_geometry(self, width, height, include_paddings, includ
     local w = width - ew
     local h = height - eh
 
-    return x1, y2, w, h, ew, eh
+    return x1, y1, w, h, ew, eh
 end
 
 ---@param _ widget_context
