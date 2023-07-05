@@ -203,7 +203,7 @@ local function create_temperature_data_widget()
             return humanizer.relative_time(seconds, {
                 formats = humanizer.long_time_formats,
                 part_count = 2,
-                suffix = " ago"
+                suffix = " ago",
             })
         end,
     }
@@ -271,7 +271,7 @@ local function create_indoor_data_widget()
             return humanizer.relative_time(seconds, {
                 formats = humanizer.long_time_formats,
                 part_count = 2,
-                suffix = " ago"
+                suffix = " ago",
             })
         end,
     }

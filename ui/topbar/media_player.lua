@@ -417,7 +417,7 @@ function M.new(wibar)
                 },
                 {
                     widget = wibox.widget.textbox,
-                    text = "No Player"
+                    text = "No Player",
                 },
             },
         },

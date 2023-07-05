@@ -107,8 +107,8 @@ return mebox {
             local style = item.urgent
                 and styles.urgent
                 or (item.active
-                and styles.active
-                or styles.normal)
+                    and styles.active
+                    or styles.normal)
             self:apply_style(style)
 
             local icon_widget = self:get_children_by_id("#icon")[1]

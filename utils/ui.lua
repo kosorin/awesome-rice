@@ -164,11 +164,11 @@ M.zero_thickness = M.thickness(0)
 function M.inflate(geometry, thickness)
     thickness = M.thickness(thickness)
     return thickness and {
-            x = geometry.x - thickness.left,
-            y = geometry.y - thickness.top,
-            width = geometry.width + thickness.left + thickness.right,
-            height = geometry.height + thickness.top + thickness.bottom,
-        } or geometry
+        x = geometry.x - thickness.left,
+        y = geometry.y - thickness.top,
+        width = geometry.width + thickness.left + thickness.right,
+        height = geometry.height + thickness.top + thickness.bottom,
+    } or geometry
 end
 
 ---@param geometry geometry

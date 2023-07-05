@@ -48,8 +48,8 @@ ruled.client.add_rule_source("fix_dialog", function(client, properties)
         if not parent and client.pid then
             local screen = properties.screen
                 and (type(properties.screen) == "function"
-                and capi.screen[properties.screen(client, properties)]
-                or capi.screen[properties.screen])
+                    and capi.screen[properties.screen(client, properties)]
+                    or capi.screen[properties.screen])
                 or nil
             if screen then
                 local possible_parents = {}

@@ -108,7 +108,7 @@ function M.new()
             },
         },
     }
-    
+
     return args
 end
 
