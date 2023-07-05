@@ -101,7 +101,6 @@ ruled.client.connect_signal("request::rules", function()
         properties = {
             floating = true,
             titlebars_enabled = true,
-            titlebars_type = "toolbox",
         },
     }
     ruled.client.append_rule {
@@ -141,8 +140,7 @@ ruled.client.connect_signal("request::rules", function()
         },
         properties = {
             skip_taskbar = true,
-            titlebars_enabled = true,
-            titlebars_type = "toolbox",
+            titlebars_enabled = "toolbox",
         },
     }
     ruled.client.append_rule {

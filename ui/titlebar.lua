@@ -133,7 +133,7 @@ local function toggle_client_menu(args)
 end
 
 capi.client.connect_signal("request::titlebars", function(client, _, args)
-    if args.properties.titlebars_type == "toolbox" then
+    if args.properties.titlebars_enabled == "toolbox" then
         local style = beautiful.titlebar.toolbox
         awful.titlebar(client, {
             position = "top",
@@ -143,7 +143,7 @@ capi.client.connect_signal("request::titlebars", function(client, _, args)
             margins = style.paddings,
             {
                 layout = wibox.layout.align.horizontal,
-                expand = "outside",
+                expand = "inside",
                 nil,
                 {
                     widget = awful.titlebar.widget.titlewidget(client),
@@ -202,7 +202,7 @@ capi.client.connect_signal("request::titlebars", function(client, _, args)
             margins = style.paddings,
             {
                 layout = wibox.layout.align.horizontal,
-                expand = "outside",
+                expand = "inside",
                 {
                     layout = wibox.layout.fixed.horizontal,
                     spacing = style.spacing,

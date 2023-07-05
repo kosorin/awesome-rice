@@ -89,7 +89,7 @@ end
 
 function volume_widget:show_tools(command)
     awful.spawn.single_instance(command, {
-        titlebars_enabled = true,
+        titlebars_enabled = "toolbox",
         floating = true,
         ontop = true,
         sticky = true,
