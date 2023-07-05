@@ -22,10 +22,6 @@ local theme = {}
 
 ----------------------------------------------------------------------------------------------------
 
-local main_border_radius = dpi(16)
-
-----------------------------------------------------------------------------------------------------
-
 theme.gap = dpi(6)
 
 ----------------------------------------------------------------------------------------------------
@@ -248,7 +244,7 @@ theme.popup.default_style = {
     border_color = theme.common.bg_bright,
     border_width = dpi(1),
     shape = function(cr, width, height)
-        gshape.rounded_rect(cr, width, height, main_border_radius)
+        gshape.rounded_rect(cr, width, height, dpi(12))
     end,
     placement = aplacement.under_mouse,
     paddings = hui.thickness { dpi(20) },
@@ -600,7 +596,7 @@ theme.clientlist.item = {
 ----------------------------------------------------------------------------------------------------
 
 local client_border_width = dpi(1)
-local client_border_radius = main_border_radius
+local client_border_radius = dpi(12)
 
 theme.client = {
     normal = {
@@ -854,8 +850,8 @@ theme.snap = {
     edge = {
         distance = dpi(8),
         bg = theme.common.fg .. "33",
-        border_color = nil,
-        border_width = 0,
+        border_color = theme.palette.red_bright,
+        border_width = dpi(2),
         shape = function(cr, width, height)
             gshape.rounded_rect(cr, width, height, client_border_radius)
         end,
