@@ -1,6 +1,6 @@
 local capi = Capi
 local setmetatable = setmetatable
-local ipairs = ipairs
+local pairs, ipairs = pairs, ipairs
 local table = table
 local awful = require("awful")
 local beautiful = require("theme.theme")
@@ -45,53 +45,49 @@ local function update_on_signal(client, signal, widget)
     table.insert(widgets, widget)
 end
 
-local function titlebar_button(client, action, normal_args, toggle_args, button_theme)
-    local function get_state()
-        return toggle_args and toggle_args.get_state(client)
-    end
-
-    local button = wibox.widget {
+local function titlebar_button(args)
+    local button_widget = wibox.widget {
         widget = capsule,
+        buttons = binding.awful_buttons {
+            binding.awful({}, btn.left, nil, function()
+                args.action(args)
+            end),
+        },
         {
             widget = wibox.widget.imagebox,
             valign = "center",
         },
     }
 
-    function button.update()
-        local args = get_state() and toggle_args or normal_args
+    function button_widget.update()
+        local focus_state = args.client.active and "focus" or "normal"
+        local toggle_state = args.get_state and args.get_state() and "toggle" or "normal"
+        local button_style = args.style.buttons[args.id] or args.style.buttons.default
+        local icon = args.style.icons[args.id]
 
-        button:apply_style(args.style)
-        button.opacity = client.active
-            and button_theme.opacity_focus
-            or button_theme.opacity_normal
+        button_style = button_style[focus_state][toggle_state]
+        button_widget:apply_style(button_style)
 
-        local icon_widget = button.widget
-        icon_widget:set_image(args.icon)
-        icon_widget:set_stylesheet(css.style {
-            ["path, .fill"] = { fill = args.style.fg },
-        })
+        local icon_widget = button_widget.widget
+        if icon then
+            icon_widget:set_image(icon)
+            icon_widget:set_stylesheet(css.style {
+                path = { fill = button_style.fg },
+            })
+        else
+            icon_widget:set_image(nil)
+        end
     end
 
-    button.buttons = binding.awful_buttons {
-        binding.awful({}, btn.left, nil, function()
-            action(client, get_state())
-        end),
-    }
-
-    normal_args.style = normal_args.style or button_theme.styles.normal
-    if toggle_args then
-        toggle_args.style = toggle_args.style or button_theme.styles.active
-        toggle_args.icon = toggle_args.icon or normal_args.icon
-        update_on_signal(client, toggle_args.property, button)
+    update_on_signal(args.client, "focus", button_widget)
+    update_on_signal(args.client, "unfocus", button_widget)
+    if args.get_state and args.property then
+        update_on_signal(args.client, args.property, button_widget)
     end
 
-    update_on_signal(client, "focus", button)
-    update_on_signal(client, "unfocus", button)
+    button_widget.update()
 
-    button.update()
-
-    return button
+    return button_widget
 end
 
 local client_menu_instances = setmetatable({}, { __mode = "kv" })
@@ -112,7 +108,8 @@ local function ensure_client_menu(client)
     client_menu_instances[client] = mebox(template)
 end
 
-local function toggle_client_menu(client)
+local function toggle_client_menu(args)
+    local client = args.client
     if client_menu_instances[client] then
         client_menu_instances[client]:hide()
     else
@@ -123,7 +120,7 @@ local function toggle_client_menu(client)
                 aplacement.top_left(menu, {
                     parent = client,
                     margins = beautiful.popup.margins,
-                    offset = { y = beautiful.titlebar.height },
+                    offset = { y = args.style.height },
                 })
                 aplacement.no_offscreen(menu, {
                     honor_workarea = true,
@@ -136,19 +133,22 @@ local function toggle_client_menu(client)
 end
 
 capi.client.connect_signal("request::titlebars", function(client, _, args)
-    if args.properties.is_toolbox then
+    if args.properties.titlebars_type == "toolbox" then
+        local style = beautiful.titlebar.toolbox
         awful.titlebar(client, {
             position = "top",
-            size = beautiful.toolbox_titlebar.height,
+            size = style.height,
         }).widget = {
             layout = wibox.container.margin,
-            margins = beautiful.toolbox_titlebar.paddings,
+            margins = style.paddings,
             {
                 layout = wibox.layout.align.horizontal,
-                expand = "inside",
+                expand = "outside",
                 nil,
                 {
-                    widget = wibox.container.margin,
+                    widget = awful.titlebar.widget.titlewidget(client),
+                    halign = "center",
+                    valign = "center",
                     buttons = binding.awful_buttons {
                         binding.awful({}, btn.left, function()
                             client:activate { context = "titlebar" }
@@ -166,119 +166,123 @@ capi.client.connect_signal("request::titlebars", function(client, _, args)
                 {
                     layout = wibox.layout.fixed.horizontal,
                     reverse = true,
-                    spacing = beautiful.toolbox_titlebar.button.spacing,
-                    titlebar_button(client, function(c, state) c.minimized = not state end,
-                        {
-                            icon = beautiful.toolbox_titlebar.button.icons.minimize,
-                        },
-                        {
-                            property = "property::minimized",
-                            get_state = function(c) return c.minimized end,
-                        }, beautiful.toolbox_titlebar.button),
-                    titlebar_button(client, function(c, state) c.maximized = not state end,
-                        {
-                            icon = beautiful.toolbox_titlebar.button.icons.maximize,
-                        },
-                        {
-                            property = "property::maximized",
-                            get_state = function(c) return c.maximized end,
-                        }, beautiful.toolbox_titlebar.button),
-                    titlebar_button(client, function(c) c:kill() end,
-                        {
-                            style = beautiful.toolbox_titlebar.button.styles.close,
-                            icon = beautiful.toolbox_titlebar.button.icons.close,
-                        }, nil, beautiful.toolbox_titlebar.button),
+                    spacing = style.spacing,
+                    titlebar_button {
+                        id = "minimize",
+                        client = client,
+                        style = style,
+                        action = function() client.minimized = not client.minimized end,
+                        get_state = function() return client.minimized end,
+                        property = "property::minimized",
+                    },
+                    titlebar_button {
+                        id = "maximize",
+                        client = client,
+                        style = style,
+                        action = function() client.maximized = not client.maximized end,
+                        get_state = function() return client.maximized end,
+                        property = "property::maximized",
+                    },
+                    titlebar_button {
+                        id = "close",
+                        client = client,
+                        style = style,
+                        action = function() client:kill() end,
+                    },
                 },
             },
         }
-        return
-    end
-
-    awful.titlebar(client, {
-        position = "top",
-        size = beautiful.titlebar.height,
-    }).widget = {
-        layout = wibox.container.margin,
-        margins = beautiful.titlebar.paddings,
-        {
-            layout = wibox.layout.align.horizontal,
-            expand = "inside",
+    else
+        local style = beautiful.titlebar.default
+        awful.titlebar(client, {
+            position = "top",
+            size = style.height,
+        }).widget = {
+            layout = wibox.container.margin,
+            margins = style.paddings,
             {
-                layout = wibox.layout.fixed.horizontal,
-                spacing = beautiful.titlebar.button.spacing,
-                titlebar_button(client, toggle_client_menu,
-                    {
-                        icon = beautiful.titlebar.button.icons.menu,
-                    }, nil, beautiful.titlebar.button),
-            },
-            {
-                widget = awful.titlebar.widget.titlewidget(client),
-                halign = "center",
-                valign = "center",
-                buttons = binding.awful_buttons {
-                    binding.awful({}, btn.left, function()
-                        client:activate { context = "titlebar" }
-                        helper_client.mouse_move(client)
-                    end),
-                    binding.awful({}, btn.right, function()
-                        client:activate { context = "titlebar" }
-                        helper_client.mouse_resize(client)
-                    end),
-                    binding.awful({}, btn.middle, function()
-                        client:kill()
-                    end),
+                layout = wibox.layout.align.horizontal,
+                expand = "outside",
+                {
+                    layout = wibox.layout.fixed.horizontal,
+                    spacing = style.spacing,
+                    titlebar_button {
+                        id = "menu",
+                        client = client,
+                        style = style,
+                        action = toggle_client_menu,
+                    },
+                },
+                {
+                    widget = awful.titlebar.widget.titlewidget(client),
+                    halign = "center",
+                    valign = "center",
+                    buttons = binding.awful_buttons {
+                        binding.awful({}, btn.left, function()
+                            client:activate { context = "titlebar" }
+                            helper_client.mouse_move(client)
+                        end),
+                        binding.awful({}, btn.right, function()
+                            client:activate { context = "titlebar" }
+                            helper_client.mouse_resize(client)
+                        end),
+                        binding.awful({}, btn.middle, function()
+                            client:kill()
+                        end),
+                    },
+                },
+                {
+                    layout = wibox.layout.fixed.horizontal,
+                    reverse = true,
+                    spacing = style.spacing,
+                    titlebar_button {
+                        id = "floating",
+                        client = client,
+                        style = style,
+                        action = function() client.floating = not client.floating end,
+                        get_state = function() return client.floating end,
+                        property = "property::floating",
+                    },
+                    titlebar_button {
+                        id = "on_top",
+                        client = client,
+                        style = style,
+                        action = function() client.ontop = not client.ontop end,
+                        get_state = function() return client.ontop end,
+                        property = "property::ontop",
+                    },
+                    titlebar_button {
+                        id = "sticky",
+                        client = client,
+                        style = style,
+                        action = function() client.sticky = not client.sticky end,
+                        get_state = function() return client.sticky end,
+                        property = "property::sticky",
+                    },
+                    titlebar_button {
+                        id = "minimize",
+                        client = client,
+                        style = style,
+                        action = function() client.minimized = not client.minimized end,
+                        get_state = function() return client.minimized end,
+                        property = "property::minimized",
+                    },
+                    titlebar_button {
+                        id = "maximize",
+                        client = client,
+                        style = style,
+                        action = function() client.maximized = not client.maximized end,
+                        get_state = function() return client.maximized end,
+                        property = "property::maximized",
+                    },
+                    titlebar_button {
+                        id = "close",
+                        client = client,
+                        style = style,
+                        action = function() client:kill() end,
+                    },
                 },
             },
-            {
-                layout = wibox.layout.fixed.horizontal,
-                reverse = true,
-                spacing = beautiful.titlebar.button.spacing,
-                titlebar_button(client, function(c, state) c.floating = not state end,
-                    {
-                        icon = beautiful.titlebar.button.icons.floating,
-                    },
-                    {
-                        property = "property::floating",
-                        get_state = function(c) return c.floating end,
-                    }, beautiful.titlebar.button),
-                titlebar_button(client, function(c, state) c.ontop = not state end,
-                    {
-                        icon = beautiful.titlebar.button.icons.on_top,
-                    },
-                    {
-                        property = "property::ontop",
-                        get_state = function(c) return c.ontop end,
-                    }, beautiful.titlebar.button),
-                titlebar_button(client, function(c, state) c.sticky = not state end,
-                    {
-                        icon = beautiful.titlebar.button.icons.sticky,
-                    },
-                    {
-                        property = "property::sticky",
-                        get_state = function(c) return c.sticky end,
-                    }, beautiful.titlebar.button),
-                titlebar_button(client, function(c, state) c.minimized = not state end,
-                    {
-                        icon = beautiful.titlebar.button.icons.minimize,
-                    },
-                    {
-                        property = "property::minimized",
-                        get_state = function(c) return c.minimized end,
-                    }, beautiful.titlebar.button),
-                titlebar_button(client, function(c, state) c.maximized = not state end,
-                    {
-                        icon = beautiful.titlebar.button.icons.maximize,
-                    },
-                    {
-                        property = "property::maximized",
-                        get_state = function(c) return c.maximized end,
-                    }, beautiful.titlebar.button),
-                titlebar_button(client, function(c) c:kill() end,
-                    {
-                        style = beautiful.titlebar.button.styles.close,
-                        icon = beautiful.titlebar.button.icons.close,
-                    }, nil, beautiful.titlebar.button),
-            },
-        },
-    }
+        }
+    end
 end)

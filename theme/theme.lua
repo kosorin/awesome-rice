@@ -625,112 +625,148 @@ end
 
 ----------------------------------------------------------------------------------------------------
 
+theme.titlebar = {}
+
 do
     local button_shape = function(cr, width, height)
         gshape.rounded_rect(cr, width, height, dpi(3))
     end
-    local button_paddings = hui.thickness { dpi(5), dpi(5) }
-    local button_margins = hui.thickness { dpi(3), 0, dpi(7) }
-    theme.titlebar = {
-        height = dpi(36),
-        paddings = hui.thickness { 0, dpi(12) },
-        button = {
-            opacity_normal = 0.5,
-            opacity_focus = 1,
-            spacing = dpi(4),
-            styles = {
+    local button_paddings = hui.thickness { dpi(3) }
+    local button_margins = hui.thickness { 0 }
+
+    theme.titlebar.default = {
+        height = dpi(32),
+        border_width = dpi(3),
+        paddings = hui.thickness { dpi(6), dpi(8) },
+        spacing = dpi(4),
+        icons = {
+            menu = config.places.theme .. "/icons/menu.svg",
+            floating = config.places.theme .. "/icons/arrange-bring-forward.svg",
+            on_top = config.places.theme .. "/icons/chevron-double-up.svg",
+            sticky = config.places.theme .. "/icons/pin.svg",
+            minimize = config.places.theme .. "/icons/window-minimize.svg",
+            maximize = config.places.theme .. "/icons/window-maximize.svg",
+            close = config.places.theme .. "/icons/window-close.svg",
+        },
+        buttons = {
+            default = {
                 normal = {
-                    hover_overlay = hcolor.white .. "30",
-                    press_overlay = hcolor.white .. "30",
-                    bg = hcolor.transparent,
-                    fg = theme.common.fg,
-                    border_width = 0,
-                    shape = button_shape,
-                    paddings = button_paddings,
-                    margins = button_margins,
+                    normal = {
+                        hover_overlay = hcolor.white .. "30",
+                        press_overlay = hcolor.white .. "30",
+                        bg = hcolor.transparent,
+                        fg = theme.common.fg_60,
+                        border_width = 0,
+                        shape = button_shape,
+                        paddings = button_paddings,
+                        margins = button_margins,
+                    },
+                    toggle = {
+                        hover_overlay = hcolor.white .. "20",
+                        press_overlay = hcolor.white .. "20",
+                        bg = theme.common.fg_30,
+                        fg = theme.common.fg_60,
+                        border_color = theme.common.primary_bright,
+                        border_width = 0,
+                        shape = button_shape,
+                        paddings = button_paddings,
+                        margins = button_margins,
+                    },
                 },
-                active = {
-                    hover_overlay = hcolor.white .. "20",
-                    press_overlay = hcolor.white .. "20",
-                    bg = theme.common.primary_50,
-                    fg = theme.common.fg_bright,
-                    border_color = theme.common.primary_75,
-                    border_width = 0,
-                    shape = button_shape,
-                    paddings = button_paddings,
-                    margins = button_margins,
-                },
-                close = {
-                    hover_overlay = theme.common.urgent_bright,
-                    press_overlay = theme.palette.white .. "30",
-                    bg = hcolor.transparent,
-                    fg = theme.common.fg_bright,
-                    border_width = 0,
-                    shape = button_shape,
-                    paddings = button_paddings,
-                    margins = button_margins,
+                focus = {
+                    normal = {
+                        hover_overlay = hcolor.white .. "30",
+                        press_overlay = hcolor.white .. "30",
+                        bg = hcolor.transparent,
+                        fg = theme.common.fg,
+                        border_width = 0,
+                        shape = button_shape,
+                        paddings = button_paddings,
+                        margins = button_margins,
+                    },
+                    toggle = {
+                        hover_overlay = hcolor.white .. "20",
+                        press_overlay = hcolor.white .. "20",
+                        bg = theme.common.primary,
+                        fg = theme.common.bg,
+                        border_color = theme.common.primary_bright,
+                        border_width = 0,
+                        shape = button_shape,
+                        paddings = button_paddings,
+                        margins = button_margins,
+                    },
                 },
             },
-            icons = {
-                menu = config.places.theme .. "/icons/menu.svg",
-                floating = config.places.theme .. "/icons/arrange-bring-forward.svg",
-                on_top = config.places.theme .. "/icons/chevron-double-up.svg",
-                sticky = config.places.theme .. "/icons/pin.svg",
-                minimize = config.places.theme .. "/icons/window-minimize.svg",
-                maximize = config.places.theme .. "/icons/window-maximize.svg",
-                close = config.places.theme .. "/icons/window-close.svg",
+            close = {
+                normal = {
+                    normal = {
+                        hover_overlay = hcolor.white .. "30",
+                        press_overlay = hcolor.white .. "30",
+                        bg = hcolor.transparent,
+                        fg = theme.common.fg_60,
+                        border_width = 0,
+                        shape = button_shape,
+                        paddings = button_paddings,
+                        margins = button_margins,
+                    },
+                },
+                focus = {
+                    normal = {
+                        hover_overlay = theme.common.urgent_bright,
+                        press_overlay = theme.palette.white .. "30",
+                        bg = hcolor.transparent,
+                        fg = theme.common.fg_bright,
+                        border_width = 0,
+                        shape = button_shape,
+                        paddings = button_paddings,
+                        margins = button_margins,
+                    },
+                },
             },
         },
     }
 end
 
 do
-    local toolbox_button_shape = function(cr, width, height)
+    local button_shape = function(cr, width, height)
         gshape.rounded_rect(cr, width, height, dpi(2))
     end
-    local toolbox_button_paddings = hui.thickness { dpi(4) }
-    local toolbox_button_margins = hui.thickness { 0 }
-    theme.toolbox_titlebar = {
+    local button_paddings = hui.thickness { dpi(1) }
+    local button_margins = hui.thickness { 0 }
+
+    local function clone_button_style(style)
+        return setmetatable({
+            shape = button_shape,
+            paddings = button_paddings,
+            margins = button_margins,
+        }, { __index = style })
+    end
+
+    theme.titlebar.toolbox = {
         height = dpi(24),
-        paddings = hui.thickness { dpi(2) },
-        button = {
-            opacity_normal = theme.titlebar.button.opacity_normal,
-            opacity_focus = theme.titlebar.button.opacity_focus,
-            spacing = dpi(2),
-            styles = {
+        border_width = dpi(3),
+        paddings = hui.thickness { dpi(4), dpi(10) },
+        spacing = dpi(4),
+        icons = theme.titlebar.default.icons,
+        buttons = {
+            default = {
                 normal = {
-                    hover_overlay = theme.titlebar.button.styles.normal.hover_overlay,
-                    press_overlay = theme.titlebar.button.styles.normal.press_overlay,
-                    bg = theme.titlebar.button.styles.normal.bg,
-                    fg = theme.titlebar.button.styles.normal.fg,
-                    border_width = theme.titlebar.button.styles.normal.border_width,
-                    shape = toolbox_button_shape,
-                    paddings = toolbox_button_paddings,
-                    margins = toolbox_button_margins,
+                    normal = clone_button_style(theme.titlebar.default.buttons.default.normal.normal),
+                    toggle = clone_button_style(theme.titlebar.default.buttons.default.normal.toggle),
                 },
-                active = {
-                    hover_overlay = theme.titlebar.button.styles.active.hover_overlay,
-                    press_overlay = theme.titlebar.button.styles.active.press_overlay,
-                    bg = theme.titlebar.button.styles.active.bg,
-                    fg = theme.titlebar.button.styles.active.fg,
-                    border_color = theme.titlebar.button.styles.active.border_width,
-                    border_width = dpi(1),
-                    shape = toolbox_button_shape,
-                    paddings = toolbox_button_paddings,
-                    margins = toolbox_button_margins,
-                },
-                close = {
-                    hover_overlay = theme.titlebar.button.styles.close.hover_overlay,
-                    press_overlay = theme.titlebar.button.styles.close.press_overlay,
-                    bg = theme.titlebar.button.styles.close.bg,
-                    fg = theme.titlebar.button.styles.close.fg,
-                    border_width = theme.titlebar.button.styles.close.border_width,
-                    shape = toolbox_button_shape,
-                    paddings = toolbox_button_paddings,
-                    margins = toolbox_button_margins,
+                focus = {
+                    normal = clone_button_style(theme.titlebar.default.buttons.default.focus.normal),
+                    toggle = clone_button_style(theme.titlebar.default.buttons.default.focus.toggle),
                 },
             },
-            icons = theme.titlebar.button.icons,
+            close = {
+                normal = {
+                    normal = clone_button_style(theme.titlebar.default.buttons.close.normal.normal),
+                },
+                focus = {
+                    normal = clone_button_style(theme.titlebar.default.buttons.close.focus.normal),
+                },
+            },
         },
     }
 end

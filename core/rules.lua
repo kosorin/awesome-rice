@@ -100,6 +100,8 @@ ruled.client.connect_signal("request::rules", function()
         },
         properties = {
             floating = true,
+            titlebars_enabled = true,
+            titlebars_type = "toolbox",
         },
     }
     ruled.client.append_rule {
@@ -135,10 +137,12 @@ ruled.client.connect_signal("request::rules", function()
     ruled.client.append_rule {
         rule = {
             class = "1Password",
-            name = "^Quick Access — 1Password$"
+            name = "^Quick Access — 1Password$",
         },
         properties = {
             skip_taskbar = true,
+            titlebars_enabled = true,
+            titlebars_type = "toolbox",
         },
     }
     ruled.client.append_rule {
