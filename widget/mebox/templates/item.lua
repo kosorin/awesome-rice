@@ -111,11 +111,15 @@ return {
         end
 
         if item.flex then
-            self.forced_width = self:fit({
+            local width = self:fit({
                 screen = menu.screen,
                 dpi = menu.screen.dpi,
                 drawable = menu._drawable,
             }, menu.screen.geometry.width, menu.screen.geometry.height)
+            if type(item.flex) == "function" then
+                width = item.flex(width, self.forced_width)
+            end
+            self.forced_width = width
         end
     end,
 }
