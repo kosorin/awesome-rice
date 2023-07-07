@@ -11,6 +11,9 @@ local humanizer = require("utils.humanizer")
 local capsule = require("widget.capsule")
 local hui = require("utils.ui")
 local umath = require("utils.math")
+local mebox = require("widget.mebox")
+local pango = require("utils.pango")
+local css = require("utils.css")
 
 
 local M = {}
@@ -44,6 +47,78 @@ function M.refresh.connect(item_widget, item, menu, refresh_callback)
     capi.awesome.connect_signal("power::timer", rcb)
 
     rcb(power_service.get_timer_status())
+end
+
+M.action_item_template = {
+    id = "#container",
+    widget = capsule,
+    margins = hui.thickness { dpi(2), 0 },
+    paddings = hui.thickness { dpi(8), dpi(8) },
+    {
+        layout = wibox.layout.align.horizontal,
+        expand = "inside",
+        nil,
+        {
+            id = "#text",
+            widget = wibox.widget.textbox,
+        },
+        {
+            widget = wibox.container.margin,
+            {
+                id = "#right_icon",
+                widget = wibox.widget.imagebox,
+                resize = true,
+            },
+        },
+    },
+    update_callback = function(self, item, menu)
+        self.forced_width = item.width or menu.item_width
+        self.forced_height = item.height or menu.item_height
+
+        local styles = item.selected
+            and beautiful.mebox.item_styles.selected
+            or beautiful.mebox.item_styles.normal
+        local style = item.urgent
+            and styles.urgent
+            or styles.normal
+        self:apply_style(style)
+
+        local text_widget = self:get_children_by_id("#text")[1]
+        if text_widget then
+            local text = item.text or ""
+            text_widget:set_text(text)
+        end
+
+        local right_icon_widget = self:get_children_by_id("#right_icon")[1]
+        if right_icon_widget then
+            local checkbox_type = item.checkbox_type or "radiobox"
+            local checkbox_style = beautiful.mebox[checkbox_type][not not item.checked]
+            local icon = checkbox_style.icon
+            local color = checkbox_style.color
+
+            if item.selected then
+                color = style.fg
+            end
+
+            right_icon_widget:set_stylesheet(css.style { path = { fill = color } })
+            right_icon_widget:set_image(icon)
+        end
+    end,
+}
+
+---@param item MeboxItem
+---@param menu Mebox
+---@param context Mebox.context
+---@return boolean?
+local function action_callback(item, menu, context)
+    menu.action = item.power_action
+    for i, x in ipairs(menu._private.items) do
+        if x.power_action then
+            x.checked = x == item
+            menu:update_item(i)
+        end
+    end
+    return false
 end
 
 ---@param default_timeout? integer
@@ -120,8 +195,8 @@ function M.new(default_timeout)
                 text = "Start",
                 icon = config.places.theme .. "/icons/play.svg",
                 icon_color = beautiful.palette.green,
-                callback = function()
-                    power_service.start_timer(minutes)
+                callback = function(item, menu)
+                    power_service.start_timer(minutes, menu.action)
                 end,
             },
             {
@@ -233,6 +308,22 @@ function M.new(default_timeout)
                     change_minutes(minutes_step)
                     return false
                 end,
+            },
+            mebox.separator,
+            mebox.header("Action"),
+            {
+                power_action = power_service.shutdown,
+                text = "Shut down",
+                checked = true,
+                callback = action_callback,
+                template = M.action_item_template,
+            },
+            {
+                power_action = power_service.suspend,
+                text = "Suspend",
+                checked = false,
+                callback = action_callback,
+                template = M.action_item_template,
             },
         },
     }

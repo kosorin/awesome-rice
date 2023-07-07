@@ -1,6 +1,6 @@
 local capi = Capi
-local time = os.time
-local execute = os.execute
+local os_execute = os.execute
+local os_time = os.time
 local gtimer = require("gears.timer")
 local config = require("config")
 
@@ -11,6 +11,14 @@ local power_service = {
         alert_threshold = 60, -- seconds
     },
 }
+
+local function execute(command)
+    if false then
+        print("power timer: " .. command)
+    else
+        os_execute(command)
+    end
+end
 
 function power_service.shutdown()
     execute(config.power.shutdown)
@@ -42,7 +50,7 @@ do
     function power_service.get_timer_status()
         local remaining_seconds
         if current_timer then
-            remaining_seconds = (current_timer.start + current_timer.seconds) - time()
+            remaining_seconds = (current_timer.start + current_timer.seconds) - os_time()
             if remaining_seconds < 0 then
                 remaining_seconds = true
             end
@@ -76,7 +84,7 @@ do
         power_service.stop_timer()
 
         current_timer = {
-            start = time(),
+            start = os_time(),
             seconds = seconds,
             countdown_timer = gtimer {
                 timeout = 1,
