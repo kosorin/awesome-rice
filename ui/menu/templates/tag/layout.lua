@@ -8,43 +8,10 @@ local hui = require("utils.ui")
 local css = require("utils.css")
 local common = require("ui.menu.templates.tag._common")
 local core_layouts = require("core.layouts")
+local mebox = require("widget.mebox")
 
 
 local M = {}
-
-local info_item_template = {
-    widget = wibox.container.margin,
-    margins = hui.thickness { dpi(12), dpi(16) },
-    {
-        layout = wibox.container.place,
-        halign = "center",
-        valign = "center",
-        {
-            id = "#text",
-            widget = wibox.widget.textbox,
-        },
-    },
-    update_callback = function(self, item)
-        local style = beautiful.mebox.item_styles.normal.normal
-        local text_widget = self:get_children_by_id("#text")[1]
-        if text_widget then
-            local text = item.text
-            text_widget:set_markup(pango.span {
-                fgcolor = style.fg,
-                weight = "bold",
-                pango.i(pango.escape(text)),
-            })
-        end
-    end,
-}
-
-local function info_item(text)
-    return {
-        enabled = false,
-        text = text,
-        template = info_item_template,
-    }
-end
 
 M.item_template = {
     id = "#container",
@@ -132,16 +99,16 @@ function M.new()
         items_source = function(menu)
             local tag = menu.tag --[[@as tag]]
             if not tag then
-                return { info_item("No tag selected") }
+                return { mebox.info("No tag selected") }
             end
             local screen = tag.screen
             if not screen then
-                return { info_item("Unknown screen") }
+                return { mebox.info("Unknown screen") }
             end
             local layouts = tag.layouts
             local count = layouts and #layouts or awful.layout.layouts
             if count == 0 then
-                return { info_item("No layout available") }
+                return { mebox.info("No layout available") }
             end
 
             ---@type MeboxItem.args[]

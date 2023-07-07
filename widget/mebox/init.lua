@@ -106,6 +106,7 @@ M.object = {}
 ---@field item_template widget_template
 ---@field separator_template widget_template
 ---@field header_template widget_template
+---@field info_template widget_template
 
 noice.define_style(M.object, {
     bg = { proxy = true },
@@ -140,6 +141,18 @@ function M.header(text)
             enabled = false,
             text = text,
             template = menu._private.header_template,
+        }
+    end
+end
+
+---@param text string
+---@return fun(menu: Mebox): MeboxItem
+function M.info(text)
+    return function(menu)
+        return {
+            enabled = false,
+            text = text,
+            template = menu._private.info_template,
         }
     end
 end
@@ -858,6 +871,7 @@ end
 ---@field item_template? widget_template
 ---@field separator_template? widget_template
 ---@field header_template? widget_template
+---@field info_template? widget_template
 ---@field [integer] MeboxItem.args -- TODO: Remove this, always use `items_source`
 
 ---@param args? Mebox.new.args
@@ -893,6 +907,7 @@ function M.new(args, is_submenu)
     self._private.item_template = args.item_template or templates.item
     self._private.separator_template = args.separator_template or templates.separator
     self._private.header_template = args.header_template or templates.header
+    self._private.info_template = args.info_template or templates.info
 
     self.buttons = type(args.buttons_builder) == "function"
         and args.buttons_builder(self)
