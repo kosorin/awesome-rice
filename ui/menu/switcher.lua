@@ -74,6 +74,10 @@ return mebox {
             end
         end
 
+        if #items == 0 then
+            items[#items + 1] = mebox.info("Client list is empty")
+        end
+
         return items
     end,
     item_template = {
