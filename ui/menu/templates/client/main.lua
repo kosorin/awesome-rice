@@ -1,3 +1,4 @@
+local capi = Capi
 local tostring = tostring
 local beautiful = require("theme.theme")
 local dpi = Dpi
@@ -8,6 +9,7 @@ local common = require("ui.menu.templates.client._common")
 local opacity_menu_template = require("ui.menu.templates.client.opacity")
 local signals_menu_template = require("ui.menu.templates.client.signals")
 local tags_menu_template = require("ui.menu.templates.client.tags")
+local screens_menu_template = require("ui.menu.templates.client.screens")
 
 
 local M = {}
@@ -25,6 +27,13 @@ function M.new()
                 icon = config.places.theme .. "/icons/tag-multiple.svg",
                 icon_color = beautiful.palette.green,
                 submenu = tags_menu_template.shared,
+            },
+            {
+                text = "Screen",
+                icon = config.places.theme .. "/icons/monitor.svg",
+                icon_color = beautiful.palette.blue,
+                submenu = screens_menu_template.shared,
+                on_show = function() return capi.screen.count() > 1 end,
             },
             mebox.separator,
             common.build_simple_toggle("Minimize", "minimized", nil, "/icons/window-minimize.svg", beautiful.palette.white),
