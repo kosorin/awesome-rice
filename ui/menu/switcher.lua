@@ -68,7 +68,7 @@ return mebox {
             if #items > 0 then
                 items[#items + 1] = mebox.separator
             end
-            items[#items + 1] = mebox.header("Hidden clients")
+            items[#items + 1] = mebox.header("Hidden Clients")
             for _, client in ipairs(hidden_clients) do
                 add_client(client)
             end
