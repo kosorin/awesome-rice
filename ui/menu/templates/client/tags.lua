@@ -30,7 +30,7 @@ local checkbox_item_template = {
     },
     update_callback = function(self, item, menu)
         self.forced_height = item.height or menu.item_height
-        self.forced_width = self.forced_height - dpi(4 * 2)
+        self.forced_width = self.forced_height - dpi(2 * 2)
 
         self.enable_overlay = item.enabled
         self.opacity = item.opacity or (item.enabled and 1 or 0.5)
@@ -67,7 +67,7 @@ local checkbox_item_template = {
 function M.new()
     ---@type Mebox.new.args
     local args = {
-        item_width = dpi(150),
+        item_width = dpi(100),
         layout_template = {
             layout = wibox.layout.fixed.vertical,
             {
