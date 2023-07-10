@@ -13,10 +13,10 @@ local power_service = {
 }
 
 local function execute(command)
-    if false then
-        print("power timer: " .. command)
-    else
+    if true then
         os_execute(command)
+    else
+        print("power timer: " .. command)
     end
 end
 
@@ -78,12 +78,17 @@ do
     end
 
     function power_service.start_timer(minutes, action)
-        local seconds = (tonumber(minutes) or power_service.config.default_timeout) * 60
-        action = action or power_service.shutdown
-
         power_service.stop_timer()
 
+        minutes = tonumber(minutes) or power_service.config.default_timeout
+        if minutes < 1 then
+            minutes = 1
+        end
+        action = action or power_service.shutdown
+
+        local seconds = minutes * 60
         current_timer = {
+            action = action,
             start = os_time(),
             seconds = seconds,
             countdown_timer = gtimer {

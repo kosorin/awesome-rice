@@ -24,6 +24,9 @@ local power_widget = { mt = {} }
 
 local time_args = {
     formats = {
+        year = { text = "yr" },
+        month = { text = "mo" },
+        week = { text = "wk" },
         day = { text = "d" },
         hour = { text = "h" },
         minute = { text = "min" },

@@ -2,6 +2,7 @@ local capi = Capi
 local beautiful = require("theme.theme")
 local wibox = require("wibox")
 local dpi = Dpi
+local floor = math.floor
 local binding = require("io.binding")
 local mod = binding.modifier
 local btn = binding.button
@@ -10,7 +11,6 @@ local config = require("config")
 local humanizer = require("utils.humanizer")
 local capsule = require("widget.capsule")
 local hui = require("utils.ui")
-local umath = require("utils.math")
 local mebox = require("widget.mebox")
 local pango = require("utils.pango")
 local css = require("utils.css")
@@ -49,7 +49,7 @@ function M.refresh.connect(item_widget, item, menu, refresh_callback)
     rcb(power_service.get_timer_status())
 end
 
-M.action_item_template = {
+M.power_action_item_template = {
     id = "#container",
     widget = capsule,
     margins = hui.thickness { dpi(2), 0 },
@@ -110,8 +110,8 @@ M.action_item_template = {
 ---@param menu Mebox
 ---@param context Mebox.context
 ---@return boolean?
-local function action_callback(item, menu, context)
-    menu.action = item.power_action
+local function change_power_action_callback(item, menu, context)
+    menu.power_action = item.power_action
     for i, x in ipairs(menu._private.items) do
         if x.power_action then
             x.checked = x == item
@@ -124,7 +124,10 @@ end
 ---@param default_timeout? integer
 ---@return Mebox.new.args
 function M.new(default_timeout)
-    local minutes = default_timeout or power_service.config.default_timeout
+    local default_hours = floor((default_timeout or power_service.config.default_timeout) / 60)
+    local default_minutes = floor(default_timeout or power_service.config.default_timeout % 60)
+
+    local hours, minutes = default_hours, default_minutes
 
     local settings_time_args = {
         part_count = 1,
@@ -132,32 +135,51 @@ function M.new(default_timeout)
         formats = humanizer.long_time_formats,
     }
 
-    local hours_step = 60
     local hours_widget
     local hours_args = setmetatable({ from_part = "hour" }, { __index = settings_time_args })
     local function update_hours_text()
         if not hours_widget then
             return
         end
-        local text = humanizer.relative_time(minutes * 60, hours_args)
+        local text = humanizer.relative_time(hours * 60 * 60, hours_args)
         hours_widget:set_markup(text)
     end
 
-    local minutes_step = 1
     local minutes_widget
     local minutes_args = setmetatable({ from_part = "minute" }, { __index = settings_time_args })
     local function update_minutes_text()
         if not minutes_widget then
             return
         end
-        local text = humanizer.relative_time((minutes % 60) * 60, minutes_args)
+        local text = humanizer.relative_time(minutes * 60, minutes_args)
         minutes_widget:set_markup(text)
     end
 
-    local function change_minutes(change)
-        minutes = umath.clamp(minutes + change, 1, 10 * 24 * 60)
+    local function set_hours(value)
+        hours = value
         update_hours_text()
+    end
+
+    local function set_minutes(value)
+        minutes = value
         update_minutes_text()
+    end
+
+    local function change_hours(change)
+        local value = hours + change
+        if value < 0 then
+            value = 0
+        end
+        set_hours(value)
+    end
+
+    local function change_minutes(change)
+        local value = minutes + change
+        while value < 0 do
+            value = value + 60
+        end
+        value = value % 60
+        set_minutes(value)
     end
 
     ---@type Mebox.new.args
@@ -196,7 +218,7 @@ function M.new(default_timeout)
                 icon = config.places.theme .. "/icons/play.svg",
                 icon_color = beautiful.palette.green,
                 callback = function(item, menu)
-                    power_service.start_timer(minutes, menu.action)
+                    power_service.start_timer((hours * 60) + minutes, menu.power_action)
                 end,
             },
             {
@@ -228,7 +250,7 @@ function M.new(default_timeout)
                 icon = config.places.theme .. "/icons/minus.svg",
                 icon_color = beautiful.palette.white,
                 callback = function()
-                    change_minutes(-hours_step)
+                    change_hours(-1)
                     return false
                 end,
             },
@@ -239,7 +261,10 @@ function M.new(default_timeout)
                 buttons_builder = function()
                     return binding.awful_buttons {
                         binding.awful({}, binding.group.mouse_wheel, function(trigger)
-                            change_minutes(trigger.y * hours_step)
+                            change_hours(trigger.y)
+                        end),
+                        binding.awful({}, btn.middle, function()
+                            set_hours(0)
                         end),
                     }
                 end,
@@ -261,7 +286,7 @@ function M.new(default_timeout)
                 icon = config.places.theme .. "/icons/plus.svg",
                 icon_color = beautiful.palette.white,
                 callback = function()
-                    change_minutes(hours_step)
+                    change_hours(1)
                     return false
                 end,
             },
@@ -272,7 +297,7 @@ function M.new(default_timeout)
                 icon = config.places.theme .. "/icons/minus.svg",
                 icon_color = beautiful.palette.white,
                 callback = function()
-                    change_minutes(-minutes_step)
+                    change_minutes(-1)
                     return false
                 end,
             },
@@ -283,7 +308,10 @@ function M.new(default_timeout)
                 buttons_builder = function()
                     return binding.awful_buttons {
                         binding.awful({}, binding.group.mouse_wheel, function(trigger)
-                            change_minutes(trigger.y * minutes_step)
+                            change_minutes(trigger.y)
+                        end),
+                        binding.awful({}, btn.middle, function()
+                            set_minutes(0)
                         end),
                     }
                 end,
@@ -305,7 +333,7 @@ function M.new(default_timeout)
                 icon = config.places.theme .. "/icons/plus.svg",
                 icon_color = beautiful.palette.white,
                 callback = function()
-                    change_minutes(minutes_step)
+                    change_minutes(1)
                     return false
                 end,
             },
@@ -315,15 +343,15 @@ function M.new(default_timeout)
                 power_action = power_service.shutdown,
                 text = "Shut down",
                 checked = true,
-                callback = action_callback,
-                template = M.action_item_template,
+                callback = change_power_action_callback,
+                template = M.power_action_item_template,
             },
             {
                 power_action = power_service.suspend,
                 text = "Suspend",
                 checked = false,
-                callback = action_callback,
-                template = M.action_item_template,
+                callback = change_power_action_callback,
+                template = M.power_action_item_template,
             },
         },
     }
