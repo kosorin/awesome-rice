@@ -29,6 +29,10 @@ function clientlist:show_client_menu(client)
     local item = self._private.cache and self._private.cache[client]
     local container = item and item.container
     if container then
+        local tooltip = self._private.tooltip
+        if tooltip then
+            tooltip.hide()
+        end
         local menu = self._private.menu
         if not menu then
             menu = mebox(client_menu_template.shared)
@@ -66,9 +70,19 @@ function clientlist.new(wibar)
                     local root = base.make_widget_from_value(args.widget_template)
                     root.buttons = { common.create_buttons(buttons, client) }
                     root:connect_signal("mouse::enter", function()
+                        local tooltip = self._private.tooltip
+                        if tooltip then
+                            tooltip.text = client.name or ""
+                        end
                         local menu = self._private.menu
                         if menu and menu.visible and menu.client ~= client then
                             self:show_client_menu(client)
+                        end
+                    end)
+                    root:connect_signal("mouse::leave", function()
+                        local tooltip = self._private.tooltip
+                        if tooltip then
+                            tooltip.text = ""
                         end
                     end)
 
@@ -182,6 +196,16 @@ function clientlist.new(wibar)
     gtable.crush(self, clientlist, true)
 
     self._private.wibar = wibar
+
+    self._private.tooltip = awful.tooltip {
+        objects = { self },
+        delay_show = 1.5,
+        mode = "outside",
+        preferred_positions = { "bottom", "right", "left", "top" },
+        preferred_alignments = { "middle", "front", "back" },
+        margins_leftright = beautiful.tooltip.default_style.paddings.left,
+        margins_topbottom = beautiful.tooltip.default_style.paddings.top,
+    }
 
     return self
 end

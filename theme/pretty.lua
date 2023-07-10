@@ -128,5 +128,14 @@ return function(theme)
 
     ----------------------------------------------------------------------------------------------------
 
+    pretty.tooltip_bg = theme.tooltip.default_style.bg
+    pretty.tooltip_fg = theme.tooltip.default_style.fg
+    pretty.tooltip_border_color = theme.tooltip.default_style.border_color
+    pretty.tooltip_border_width = theme.tooltip.default_style.border_width
+    pretty.tooltip_shape = theme.tooltip.default_style.shape
+    pretty.tooltip_gaps = theme.tooltip.default_style.margins
+
+    ----------------------------------------------------------------------------------------------------
+
     return pretty
 end

@@ -252,6 +252,18 @@ theme.popup.default_style = {
 
 ----------------------------------------------------------------------------------------------------
 
+theme.tooltip = {}
+
+theme.tooltip.default_style = setmetatable({
+    bg = theme.common.bg_33,
+    border_width = dpi(1),
+    shape = false,
+    margins = hui.thickness { dpi(0) },
+    paddings = hui.thickness { dpi(12), dpi(16) },
+}, { __index = theme.popup.default_style })
+
+----------------------------------------------------------------------------------------------------
+
 theme.mebox = {
     checkmark = {
         [false] = {
