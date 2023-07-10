@@ -188,10 +188,16 @@ function M.new(default_timeout)
         layout_template = {
             layout = wibox.layout.fixed.vertical,
             {
+                id = "#top",
+                layout = wibox.layout.fixed.vertical,
+            },
+            {
                 widget = capsule,
                 enable_overlay = false,
                 bg = beautiful.common.bg_33,
                 fg = beautiful.common.fg,
+                border_color = beautiful.common.bg_bright,
+                border_width = dpi(1),
                 margins = hui.thickness { dpi(8), dpi(0) },
                 paddings = hui.thickness { dpi(2), dpi(4) },
                 {
@@ -204,6 +210,8 @@ function M.new(default_timeout)
                 enable_overlay = false,
                 bg = beautiful.common.bg_33,
                 fg = beautiful.common.fg,
+                border_color = beautiful.common.bg_bright,
+                border_width = dpi(1),
                 paddings = hui.thickness { dpi(2), dpi(4) },
                 {
                     id = "#minutes",
@@ -213,7 +221,7 @@ function M.new(default_timeout)
         },
         items_source = {
             {
-                layout_add = function(layout, item_widget) layout:insert(1, item_widget) end,
+                layout_id = "#top",
                 text = "Start",
                 icon = config.places.theme .. "/icons/play.svg",
                 icon_color = beautiful.palette.green,
@@ -222,7 +230,7 @@ function M.new(default_timeout)
                 end,
             },
             {
-                layout_add = function(layout, item_widget) layout:insert(2, item_widget) end,
+                layout_id = "#top",
                 enabled = false,
                 text = "Stop",
                 icon = config.places.theme .. "/icons/stop.svg",
