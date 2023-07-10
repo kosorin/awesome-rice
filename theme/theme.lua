@@ -242,7 +242,7 @@ theme.popup.default_style = {
     bg = theme.common.bg,
     fg = theme.common.fg,
     border_color = theme.common.bg_bright,
-    border_width = dpi(1),
+    border_width = dpi(3),
     shape = function(cr, width, height)
         gshape.rounded_rect(cr, width, height, dpi(12))
     end,
@@ -595,7 +595,7 @@ theme.clientlist.item = {
 
 ----------------------------------------------------------------------------------------------------
 
-local client_border_width = dpi(1)
+local client_border_width = dpi(3)
 local client_border_radius = dpi(12)
 
 theme.client = {
