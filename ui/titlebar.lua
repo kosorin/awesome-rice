@@ -244,20 +244,20 @@ capi.client.connect_signal("request::titlebars", function(client, _, args)
                         property = "property::floating",
                     },
                     titlebar_button {
-                        id = "on_top",
-                        client = client,
-                        style = style,
-                        action = function() client.ontop = not client.ontop end,
-                        get_state = function() return client.ontop end,
-                        property = "property::ontop",
-                    },
-                    titlebar_button {
                         id = "sticky",
                         client = client,
                         style = style,
                         action = function() client.sticky = not client.sticky end,
                         get_state = function() return client.sticky end,
                         property = "property::sticky",
+                    },
+                    titlebar_button {
+                        id = "on_top",
+                        client = client,
+                        style = style,
+                        action = function() client.ontop = not client.ontop end,
+                        get_state = function() return client.ontop end,
+                        property = "property::ontop",
                     },
                     titlebar_button {
                         id = "minimize",
