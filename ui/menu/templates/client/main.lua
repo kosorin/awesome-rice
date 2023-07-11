@@ -36,18 +36,13 @@ function M.new()
                 on_show = function() return capi.screen.count() > 1 end,
             },
             mebox.separator,
+            common.build_simple_toggle("Floating", "floating", nil, "/icons/arrange-bring-forward.svg", beautiful.palette.white),
+            common.build_simple_toggle("Sticky", "sticky", nil, "/icons/pin.svg", beautiful.palette.white),
+            common.build_simple_toggle("On Top", "ontop", nil, "/icons/chevron-double-up.svg", beautiful.palette.white),
+            mebox.separator,
             common.build_simple_toggle("Minimize", "minimized", nil, "/icons/window-minimize.svg", beautiful.palette.white),
             common.build_simple_toggle("Maximize", "maximized", nil, "/icons/window-maximize.svg", beautiful.palette.white),
             common.build_simple_toggle("Fullscreen", "fullscreen", nil, "/icons/fullscreen.svg", beautiful.palette.white),
-            mebox.separator,
-            common.build_simple_toggle("On Top", "ontop", nil, "/icons/chevron-double-up.svg", beautiful.palette.white),
-            common.build_simple_toggle("Floating", "floating", nil, "/icons/arrange-bring-forward.svg", beautiful.palette.white),
-            {
-                text = "Opacity",
-                icon = config.places.theme .. "/icons/circle-opacity.svg",
-                icon_color = beautiful.palette.cyan,
-                submenu = opacity_menu_template.shared,
-            },
             mebox.separator,
             {
                 text = "More",
@@ -79,6 +74,23 @@ function M.new()
                         },
                         common.build_simple_toggle("Below", "below", "radiobox", "/icons/chevron-down.svg", beautiful.palette.white),
                         mebox.separator,
+                        mebox.header("Window"),
+                        {
+                            text = "Opacity",
+                            icon = config.places.theme .. "/icons/circle-opacity.svg",
+                            icon_color = beautiful.palette.cyan,
+                            submenu = opacity_menu_template.shared,
+                        },
+                        {
+                            text = "Hide",
+                            icon = config.places.theme .. "/icons/eye-off.svg",
+                            icon_color = beautiful.palette.gray,
+                            callback = function(item, menu)
+                                local client = menu.client --[[@as client]]
+                                client.hidden = true
+                            end,
+                        },
+                        mebox.separator,
                         common.build_simple_toggle("Dockable", "dockable", nil, "/icons/dock-left.svg", beautiful.palette.white),
                         common.build_simple_toggle("Focusable", "focusable", nil, "/icons/image-filter-center-focus.svg", beautiful.palette.white),
                         common.build_simple_toggle("Size Hints", "size_hints_honor", nil, "/icons/move-resize.svg", beautiful.palette.white),
@@ -101,16 +113,6 @@ function M.new()
                             icon = config.places.theme .. "/icons/target.svg",
                             icon_color = beautiful.palette.red,
                             submenu = signals_menu_template.shared,
-                        },
-                        mebox.separator,
-                        {
-                            text = "Hide",
-                            icon = config.places.theme .. "/icons/eye-off.svg",
-                            icon_color = beautiful.palette.gray,
-                            callback = function(item, menu)
-                                local client = menu.client --[[@as client]]
-                                client.hidden = true
-                            end,
                         },
                     },
                 },
