@@ -212,6 +212,14 @@ theme.capsule.styles = {
         border_color = theme.palette.red,
         border_width = dpi(1),
     },
+    nested = {
+        hover_overlay = noice.value.Default,
+        press_overlay = noice.value.Default,
+        bg = theme.common.bg_33,
+        fg = theme.common.fg,
+        border_color = theme.common.bg_bright,
+        border_width = dpi(1),
+    },
 }
 
 theme.capsule.styles.palette = {}
@@ -389,14 +397,11 @@ theme.bindbox.default_style = setmetatable({
     slash_separator_markup = pango.span { fgalpha = "50%", size = "smaller", " / " },
     plus_separator_markup = pango.span { fgalpha = "50%", "+" },
     range_separator_markup = pango.span { fgalpha = "50%", ".." },
-    status_style = {
-        -- TODO: Fix me - capsule:set_style() no longer exists
-        bg = theme.palette.black_50,
-        fg = theme.common.fg,
-        border_color = theme.palette.black_115,
-        border_width = dpi(1),
-        paddings = hui.thickness { dpi(12), dpi(16) },
-    },
+    status_bg = theme.capsule.styles.nested.bg,
+    status_fg = theme.capsule.styles.nested.fg,
+    status_border_color = theme.capsule.styles.nested.border_color,
+    status_border_width = theme.capsule.styles.nested.border_width,
+    status_paddings = hui.thickness { dpi(12), dpi(16) },
     status_spacing = dpi(24),
     find_placeholder_fg = theme.common.fg_66,
     find_cursor_bg = theme.common.secondary_66,

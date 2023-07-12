@@ -4,6 +4,8 @@ local setmetatable = setmetatable
 local ipairs = ipairs
 local select = select
 local tostring = tostring
+local dpi = Dpi
+local hui = require("utils.ui")
 local math = math
 local table = table
 local string = string
@@ -190,7 +192,11 @@ noice.define_style(M.object, {
     slash_separator_markup = {},
     plus_separator_markup = {},
     range_separator_markup = {},
-    status_style = { id = "#status_container", property = "style" }, -- TODO: Fix me - capsule:set_style() no longer exists
+    status_bg = { id = "#status_container", property = "bg" },
+    status_fg = { id = "#status_container", property = "fg" },
+    status_border_color = { id = "#status_container", property = "border_color" },
+    status_border_width = { id = "#status_container", property = "border_width" },
+    status_paddings = { id = "#status_container", property = "paddings" },
     status_spacing = { id = "#status_bindings", property = "spacing" },
     find_placeholder_fg = { id = "#find_placeholder", property = "fg" },
     find_cursor_bg = {},
