@@ -236,20 +236,20 @@ capi.client.connect_signal("request::titlebars", function(client, _, args)
                     reverse = true,
                     spacing = style.spacing,
                     titlebar_button {
-                        id = "floating",
-                        client = client,
-                        style = style,
-                        action = function() client.floating = not client.floating end,
-                        get_state = function() return client.floating end,
-                        property = "property::floating",
-                    },
-                    titlebar_button {
                         id = "sticky",
                         client = client,
                         style = style,
                         action = function() client.sticky = not client.sticky end,
                         get_state = function() return client.sticky end,
                         property = "property::sticky",
+                    },
+                    titlebar_button {
+                        id = "floating",
+                        client = client,
+                        style = style,
+                        action = function() client.floating = not client.floating end,
+                        get_state = function() return client.floating end,
+                        property = "property::floating",
                     },
                     titlebar_button {
                         id = "on_top",
