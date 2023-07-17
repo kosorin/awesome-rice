@@ -385,7 +385,7 @@ binding.add_global_range {
         },
         path = "Media",
         description = "Rewind/fast forward (5s)",
-        on_press = function(trigger) services.media.player:seek(trigger.offset * services.media.player.second) end,
+        on_press = function(trigger) services.media.player:seek(trigger.offset * services.media.player.unit) end,
     },
 
     binding.new {
@@ -396,7 +396,7 @@ binding.add_global_range {
         },
         path = "Media",
         description = "Rewind/fast forward (30s)",
-        on_press = function(trigger) services.media.player:seek(trigger.offset * services.media.player.second) end,
+        on_press = function(trigger) services.media.player:seek(trigger.offset * services.media.player.unit) end,
     },
 
     binding.new {

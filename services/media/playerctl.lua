@@ -37,14 +37,14 @@ local playerctl = {
 }
 
 ---@class Playerctl : gears.object
----@field second integer # Number of microseconds in a second.
+---@field unit integer # Number of microseconds in a second.
 ---@field package primary_player_data? Playerctl.data
 ---@field package player_data table<string, Playerctl.data>
 ---@field package tracked_metadata string[]
 ---@field package excluded_players table<string, boolean>
 ---@field package player_priorities table<string, integer>
 ---@field package manager lgi.Playerctl.PlayerManager
-playerctl.object = { second = 1000000 }
+playerctl.object = { unit = 1000000 }
 
 ---@param  player_data? Playerctl.data
 ---@return Playerctl.position_data|nil

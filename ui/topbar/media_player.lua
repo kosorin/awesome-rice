@@ -41,7 +41,7 @@ local time_args = {
 ---@param useconds integer
 ---@return string
 local function format_time(useconds)
-    local text = humanizer.relative_time(useconds / media_player.second, time_args)
+    local text = humanizer.relative_time(useconds / media_player.unit, time_args)
     local trimmed = string.gsub(text, "^[0:]+", "")
     if #trimmed >= 4 then
         return trimmed
@@ -310,7 +310,7 @@ local function initialize_content_container(self)
 
     self._private.wheel_seeking_interrupt = select(2, hmouse.attach_wheel {
         widget = self,
-        step = 5 * media_player.second,
+        step = 5 * media_player.unit,
         start = function()
             if self._private.is_seeking then
                 return false
