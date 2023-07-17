@@ -297,9 +297,12 @@ function M.resize(client, direction)
 end
 
 function M.focus(client, direction)
-    client = client or capi.client.focus
-    aclient.focus.global_bydirection(direction, client)
-    if client == capi.client.focus then
+    local old_client = client or capi.client.focus
+    aclient.focus.global_bydirection(direction, old_client)
+    local new_client = capi.client.focus
+    if new_client and new_client ~= old_client then
+        new_client:raise()
+    else
         ascreen.focus_bydirection(direction)
     end
 end
