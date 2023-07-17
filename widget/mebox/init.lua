@@ -571,8 +571,9 @@ end
 
 ---@param args? Mebox.show.args
 ---@param context? Mebox.context
-function M.object:show(args, context)
-    if self.visible or not ui_controller.enter(self:get_root_menu()) then
+---@param force? boolean
+function M.object:show(args, context, force)
+    if not force and (self.visible or not ui_controller.enter(self:get_root_menu())) then
         return
     end
 

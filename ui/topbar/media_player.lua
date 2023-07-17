@@ -20,6 +20,8 @@ local tcolor = require("utils.color")
 local pango = require("utils.pango")
 local desktop = require("services.desktop")
 local humanizer = require("utils.humanizer")
+local mebox = require("widget.mebox")
+local media_player_menu_template = require("ui.menu.templates.media_player")
 local media_player = require("services.media").player
 local hui = require("utils.ui")
 
@@ -115,7 +117,6 @@ M.object = {}
 ---@field icon wibox.widget.imagebox
 ---@field text wibox.widget.textbox
 ---@field time wibox.widget.textbox
----@field pin wibox.container
 ---@field playback_bar unknown
 ---@field is_seeking? "drag"|"wheel"
 ---@field drag_seeking_interrupt function
@@ -170,8 +171,6 @@ local function update_player(self, player_data)
 
         local icon = desktop.lookup_icon(player_data and player_data.name)
         self._private.icon:set_image(icon)
-
-        self._private.pin:set_visible(not player_data or media_player:is_pinned(player_data))
     end
 end
 
@@ -248,7 +247,6 @@ local function initialize_content_container(self)
     self._private.icon = self:get_children_by_id("#icon")[1] --[[@as wibox.widget.imagebox]]
     self._private.text = self:get_children_by_id("#text")[1] --[[@as wibox.widget.textbox]]
     self._private.time = self:get_children_by_id("#time")[1] --[[@as wibox.widget.textbox]]
-    self._private.pin = self:get_children_by_id("#pin")[1] --[[@as wibox.container]]
     self._private.playback_bar = wibox.widget {
         layout = wibox.layout.ratio.horizontal,
         {
@@ -459,21 +457,6 @@ function M.new(wibar)
                                 widget = wibox.widget.textbox,
                                 halign = "right",
                             },
-                            {
-                                id = "#pin",
-                                widget = wibox.container.place,
-                                halign = "right",
-                                {
-                                    widget = wibox.container.margin,
-                                    margins = hui.thickness { dpi(2), -dpi(2) },
-                                    {
-                                        widget = wibox.widget.imagebox,
-                                        image = config.places.theme .. "/icons/pin.svg",
-                                        resize = true,
-                                        stylesheet = css.style { path = { fill = beautiful.common.secondary_bright } },
-                                    },
-                                },
-                            },
                         },
                     },
                 },
@@ -534,6 +517,8 @@ function M.new(wibar)
 
     self._private.wibar = wibar
 
+    self._private.menu = mebox(media_player_menu_template.shared)
+
     self.no_player_button.buttons = binding.awful_buttons {
         binding.awful({}, btn.left, function()
             if not self.no_player_button.visible then
@@ -544,19 +529,19 @@ function M.new(wibar)
     }
 
     self.player_container.buttons = binding.awful_buttons {
+        binding.awful({}, btn.right, function()
+            if not self.player_container.visible then
+                return
+            end
+            self._private.menu:toggle {
+                placement = beautiful.wibar.build_placement(self, self._private.wibar),
+            }
+        end),
         binding.awful({}, btn.middle, function()
             if not self.player_container.visible then
                 return
             end
             media_player:play_pause()
-        end),
-        binding.awful({ mod.control }, btn.middle, function()
-            if not self.player_container.visible then
-                return
-            end
-            local player_data = media_player:get_primary_player_data()
-            local is_pinned = player_data and media_player:is_pinned(player_data)
-            media_player:pin(not is_pinned and player_data or nil)
         end),
     }
 

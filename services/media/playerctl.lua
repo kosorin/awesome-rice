@@ -6,7 +6,7 @@ local ipairs = ipairs
 local gobject = require("gears.object")
 local gtable = require("gears.table")
 local gtimer = require("gears.timer")
-local lgi_playerctl = require("lgi").Playerctl
+local lgi_playerctl = require("lgi").Playerctl -- /usr/share/gtk-doc/html/playerctl/index.html
 
 
 ---@alias Playerctl.selector
@@ -246,16 +246,16 @@ end
 ---@param player_data Playerctl.data
 ---@return boolean
 function playerctl.object:is_pinned(player_data)
-    local player_name = player_data and player_data.name or nil
-    return self.pinned_player_name == player_name
+    local player_instance = player_data and player_data.instance or nil
+    return self.pinned_player_instance == player_instance
 end
 
 ---@param player_data? Playerctl.data
 function playerctl.object:pin(player_data)
-    local player_name = player_data and player_data.name or nil
-    if self.pinned_player_name ~= player_name then
-        self.pinned_player_name = player_name
-        self:emit_signal("media::player::pinned", self.pinned_player_name)
+    local player_instance = player_data and player_data.instance or nil
+    if self.pinned_player_instance ~= player_instance then
+        self.pinned_player_instance = player_instance
+        self:emit_signal("media::player::pinned", self.pinned_player_instance)
 
         local player
         if player_data then
@@ -266,6 +266,16 @@ function playerctl.object:pin(player_data)
 
         update_primary_player(self, player)
     end
+end
+
+---@return Playerctl.data[]
+function playerctl.object:list()
+    ---@type Playerctl.data[]
+    local players = {}
+    for _, p in ipairs(self.manager.players) do
+        players[#players + 1] = self.player_data[p.player_instance]
+    end
+    return players
 end
 
 ---@param player_data Playerctl.data
@@ -433,8 +443,8 @@ end
 ---@param player_b lgi.Playerctl.Player
 ---@return sign
 local function compare_players(self, player_a, player_b)
-    local pinned_a = self.pinned_player_name == player_a.player_name and 0 or 1
-    local pinned_b = self.pinned_player_name == player_b.player_name and 0 or 1
+    local pinned_a = self.pinned_player_instance == player_a.player_instance and 0 or 1
+    local pinned_b = self.pinned_player_instance == player_b.player_instance and 0 or 1
     if pinned_a ~= pinned_b then
         return pinned_a - pinned_b
     end
@@ -505,12 +515,16 @@ local function initialize_manager(self)
     function self.manager.on_player_vanished(_, player)
         update_primary_player(self)
 
-        local player_data = assert(self.player_data[player.player_instance])
+        if self.pinned_player_instance == player.player_instance then
+            self:pin(nil)
+        end
 
-        player_data._position_timer:stop()
-
-        self:emit_signal("media::player::vanished", player_data)
-        self.player_data[player.player_instance] = nil
+        local player_data = self.player_data[player.player_instance]
+        if player_data then
+            player_data._position_timer:stop()
+            self:emit_signal("media::player::vanished", player_data)
+            self.player_data[player.player_instance] = nil
+        end
     end
 
     for _, full_name in ipairs(self.manager.player_names) do

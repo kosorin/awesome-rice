@@ -91,7 +91,7 @@ return {
             local icon, color
             if item.checked ~= nil then
                 local checkbox_type = item.checkbox_type or "checkbox"
-                local checkbox_style = beautiful.mebox[checkbox_type][not not item.checked]
+                local checkbox_style = (type(checkbox_type) == "table" and checkbox_type or beautiful.mebox[checkbox_type])[not not item.checked]
                 icon = checkbox_style.icon
                 color = checkbox_style.color
             elseif item.submenu then
