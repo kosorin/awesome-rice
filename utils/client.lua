@@ -176,8 +176,25 @@ function M.find_closest(args)
     return closest_client, closest_distance
 end
 
+---@param client client
+---@param direction direction
+local function move_to_screen(client, direction)
+    local target_screen = client.screen:get_next_in_direction(direction)
+    if target_screen then
+        client.screen = target_screen
+        client:activate { context = "move_to_screen" }
+    end
+end
+
+---@param client client
+---@param direction direction
 local function move_floating(client, direction)
-    if not client or client.immobilized_horizontal or client.immobilized_vertical then
+    if not client then
+        return
+    end
+
+    if client.maximized or (client.immobilized_horizontal and client.immobilized_vertical) then
+        move_to_screen(client, direction)
         return
     end
 
@@ -192,8 +209,14 @@ local function move_floating(client, direction)
         0, 0)
 end
 
+---@param client client
+---@param direction direction
 local function resize_floating(client, direction)
     if not client or client.immobilized_horizontal or client.immobilized_vertical then
+        return
+    end
+
+    if client.maximized or (client.immobilized_horizontal and client.immobilized_vertical) then
         return
     end
 
@@ -207,8 +230,15 @@ local function resize_floating(client, direction)
         client.immobilized_vertical and 0 or (rc.y * M.floating_move_step))
 end
 
+---@param client client
+---@param direction direction
 local function move_tiled(client, direction)
     if not client or not client.screen then
+        return
+    end
+
+    if client.maximized or (client.immobilized_horizontal and client.immobilized_vertical) then
+        move_to_screen(client, direction)
         return
     end
 
@@ -221,14 +251,13 @@ local function move_tiled(client, direction)
     if target_client then
         clients[target_client]:swap(client)
     else
-        local target_screen = client.screen:get_next_in_direction(direction)
-        if target_screen then
-            client.screen = target_screen
-            client:activate { context = "move_to_screen" }
-        end
+        move_to_screen(client, direction)
     end
 end
 
+---@param descriptor unknown
+---@param parent_descriptor unknown
+---@param resize_factor number
 local function resize_descriptor(descriptor, parent_descriptor, resize_factor)
     resize_factor = resize_factor * M.tiled_resize_factor
     if resize_factor == 0 then
@@ -240,6 +269,8 @@ local function resize_descriptor(descriptor, parent_descriptor, resize_factor)
     end
 end
 
+---@param client client
+---@param direction direction
 local function resize_tiled(client, direction)
     local screen = client and client.screen and capi.screen[client.screen]
     local tag = screen and screen.selected_tag
@@ -271,6 +302,8 @@ local function resize_tiled(client, direction)
     tag:emit_signal("property::tilted_layout_descriptor")
 end
 
+---@param client client
+---@param direction direction
 function M.move(client, direction)
     client = client or capi.client.focus
     local old_screen = client.screen
@@ -287,6 +320,8 @@ function M.move(client, direction)
     end
 end
 
+---@param client client
+---@param direction direction
 function M.resize(client, direction)
     client = client or capi.client.focus
     if M.is_floating(client) then
@@ -296,6 +331,8 @@ function M.resize(client, direction)
     end
 end
 
+---@param client client
+---@param direction direction
 function M.focus(client, direction)
     local old_client = client or capi.client.focus
     aclient.focus.global_bydirection(direction, old_client)
@@ -307,6 +344,7 @@ function M.focus(client, direction)
     end
 end
 
+---@param client client
 function M.mouse_move(client)
     if not client
         or client.fullscreen
@@ -332,6 +370,7 @@ function M.mouse_move(client)
     })
 end
 
+---@param client client
 function M.mouse_resize(client)
     if client == true then
         client = M.find_closest {
