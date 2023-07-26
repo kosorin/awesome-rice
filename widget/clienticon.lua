@@ -9,6 +9,7 @@
 local base = require("wibox.widget.base")
 local surface = require("gears.surface")
 local gtable = require("gears.table")
+local desktop = require("services.desktop")
 
 local clienticon = {}
 local instances = setmetatable({}, { __mode = "k" })
@@ -39,7 +40,19 @@ function clienticon:draw(_, cr, width, height)
     end
 
     local index, size = find_best_icon(c.icon_sizes, width, height)
-    if not index then
+
+    index = nil
+    local s
+    if index then
+        s = surface(c:get_icon(index))
+    else
+        local icon_name = (c.class or ""):lower():gsub("%s", "-")
+        local icon_path = desktop.lookup_icon(icon_name)
+        s = surface.load_silently(icon_path)
+        if not s then
+            return
+        end
+        size = { s.width, s.height }
         return
     end
 
@@ -47,8 +60,6 @@ function clienticon:draw(_, cr, width, height)
     local aspect_h = height / size[2]
     local aspect = math.min(aspect_w, aspect_h)
     cr:scale(aspect, aspect)
-
-    local s = surface(c:get_icon(index))
     cr:set_source_surface(s, 0, 0)
     cr:paint()
 end
@@ -106,7 +117,7 @@ end
 -- @treturn widget A new `widget`
 -- @constructorfct awful.widget.clienticon
 local function new(c)
-    local ret = base.make_widget(nil, nil, {enable_properties = true})
+    local ret = base.make_widget(nil, nil, { enable_properties = true })
 
     gtable.crush(ret, clienticon, true)
 
@@ -129,7 +140,7 @@ end)
 return setmetatable(clienticon, {
     __call = function(_, ...)
         return new(...)
-    end
+    end,
 })
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

@@ -11,11 +11,9 @@ local base = require("wibox.widget.base")
 local beautiful = require("theme.theme")
 local gtable = require("gears.table")
 local mebox = require("widget.mebox")
+local clienticon = require("widget.clienticon")
 local client_menu_template = require("ui.menu.templates.client.main")
-local aplacement = require("awful.placement")
-local widget_helper = require("utils.widget")
 local pango = require("utils.pango")
-local desktop = require("services.desktop")
 local hui = require("utils.ui")
 
 
@@ -104,7 +102,7 @@ function clientlist.new(wibar)
                     end
                 end
 
-                local text, bg, _, icon, item_args = label(client, item.text)
+                local text, bg, _, _, item_args = label(client, item.text)
                 item_args = item_args or {}
 
                 if item.container then
@@ -113,18 +111,14 @@ function clientlist.new(wibar)
                     item.container.border_color = item_args.shape_border_color
                 end
 
-                icon = icon or (client.desktop_file and client.desktop_file.icon_path)
-                if not icon then
-                    local icon_path = (client.class or ""):lower():gsub("%s", "-")
-                    icon = desktop.lookup_icon(icon_path)
-                end
                 if item.icon then
-                    item.icon:set_image(icon)
                     item.icon.forced_height = item_args.icon_size
                     item.icon.forced_width = item_args.icon_size
                     item.icon.opacity = client.minimized and 0.5 or 1
+                    item.icon.client = client
                 end
 
+                local icon = true
                 text = not icon and text or nil
                 text = text or ""
                 if item.text then
@@ -181,8 +175,7 @@ function clientlist.new(wibar)
                     spacing = beautiful.capsule.item_content_spacing,
                     {
                         id = "#icon",
-                        widget = wibox.widget.imagebox,
-                        resize = true,
+                        widget = clienticon,
                     },
                     {
                         id = "#text",
