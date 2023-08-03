@@ -118,13 +118,7 @@ return function(theme)
 
     ----------------------------------------------------------------------------------------------------
 
-    pretty.notification_width = dpi(400)
-    pretty.notification_spacing = dpi(16)
-    pretty.notification_margin = dpi(8)
-    pretty.notification_border_width = pretty.border_width
-    pretty.notification_shape = function(cr, width, height)
-        gshape.rounded_rect(cr, width, height, dpi(8))
-    end
+    pretty.notification_spacing = theme.notification.spacing
 
     ----------------------------------------------------------------------------------------------------
 

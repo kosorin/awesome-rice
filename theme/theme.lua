@@ -260,6 +260,38 @@ theme.popup.default_style = {
 
 ----------------------------------------------------------------------------------------------------
 
+theme.notification = {
+    spacing = dpi(6),
+    width = dpi(360),
+}
+
+theme.notification.default_style = setmetatable({
+    bg = theme.common.bg_33,
+    fg = theme.common.fg,
+    border_color = theme.common.bg_bright,
+    header_bg = theme.common.bg_75,
+    header_fg = theme.common.fg_bright,
+    header_border_color = theme.common.bg_bright,
+    header_border_width = dpi(1),
+    shape = function(cr, width, height)
+        gshape.rounded_rect(cr, width, height, dpi(8))
+    end,
+    placement = false,
+    paddings = hui.thickness { dpi(12), dpi(16) },
+    icon_spacing = dpi(12),
+    timer_bg = theme.common.secondary_33,
+    actions_paddings = hui.thickness { dpi(16), top = 0 },
+    actions_spacing = dpi(8),
+}, { __index = theme.popup.default_style })
+
+theme.notification.styles = {
+    critical = setmetatable({
+        border_color = theme.common.urgent_bright,
+    }, { __index = theme.notification.default_style }),
+}
+
+----------------------------------------------------------------------------------------------------
+
 theme.tooltip = {}
 
 theme.tooltip.default_style = setmetatable({
