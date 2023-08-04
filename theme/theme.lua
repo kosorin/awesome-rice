@@ -272,14 +272,12 @@ theme.notification.default_style = setmetatable({
     header_bg = theme.common.bg_75,
     header_fg = theme.common.fg_bright,
     header_border_color = theme.common.bg_bright,
-    header_border_width = dpi(1),
-    shape = function(cr, width, height)
-        gshape.rounded_rect(cr, width, height, dpi(8))
-    end,
+    header_paddings = hui.thickness { dpi(12), dpi(16) },
     placement = false,
-    paddings = hui.thickness { dpi(12), dpi(16) },
+    paddings = hui.thickness { dpi(16) },
     icon_spacing = dpi(12),
-    timer_bg = theme.common.secondary_33,
+    timer_height = dpi(3),
+    timer_bg = theme.common.secondary_66,
     actions_paddings = hui.thickness { dpi(16), top = 0 },
     actions_spacing = dpi(8),
 }, { __index = theme.popup.default_style })
