@@ -71,6 +71,14 @@ binding.add_global_range {
     },
 
     binding.new {
+        modifiers = { mod.alt, mod.super, mod.control },
+        triggers = "j",
+        path = "System",
+        description = "Stop power timer",
+        on_press = function() services.power.stop_timer() end,
+    },
+
+    binding.new {
         modifiers = { mod.super, mod.control },
         triggers = "l",
         path = "System",
