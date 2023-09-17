@@ -17,77 +17,113 @@ local M = {}
 
 local root_menu
 
-local function build_categories(category_factory)
+local function create_category_manager(category_builder)
     local categories = {}
     local category_map = {}
+    local fallback_category = category_builder(beautiful.application.fallback_category, true)
+    local fallback_category_map = {}
 
     for _, menu_category in pairs(beautiful.application.categories) do
-        local category = category_factory(menu_category)
+        local category = category_builder(menu_category)
         categories[#categories + 1] = category
-        category_map[menu_category.id] = category_map[menu_category.id]
-            or (menu_category.enabled ~= false and category)
+        local ids = menu_category.id
+        if type(ids) ~= "table" then
+            ids = { ids }
+        end
+        for _, id in ipairs(ids) do
+            category_map[id] = category_map[id] or (menu_category.enabled ~= false and category)
+        end
     end
 
+    categories[#categories + 1] = fallback_category
+
     local function category_mapper(desktop_file)
+        local first_category_id
         if desktop_file.Categories then
             for _, category_id in pairs(desktop_file.Categories) do
+                if not first_category_id then
+                    first_category_id = category_id
+                end
                 local category = category_map[category_id]
                 if category then
                     return category
                 end
             end
         end
+
+        if first_category_id then
+            local category = fallback_category_map[first_category_id]
+            if not category then
+                category = category_builder({ name = tostring(first_category_id) }, true)
+                categories[#categories + 1] = category
+                fallback_category_map[first_category_id] = category
+            end
+            return category
+        else
+            return fallback_category
+        end
     end
 
-    local fallback_category = category_factory(beautiful.application.fallback_category)
-
-    return categories, fallback_category, category_mapper
+    return {
+        all = categories,
+        add = function(desktop_file)
+            local category = category_mapper(desktop_file)
+            table.insert(category.submenu, {
+                flex = true,
+                text = hstring.trim(desktop_file.Name) or "",
+                icon = desktop_file.icon_path,
+                icon_color = false,
+                callback = function()
+                    awful.spawn(hstring.trim(desktop_file.command) or "")
+                end,
+            })
+        end,
+    }
 end
 
 local function generate_menu(desktop_files)
     desktop_files = desktop_files or desktop_utils.desktop_files or {}
 
-    local function category_builder(menu_category)
+    local function category_builder(menu_category, is_fallback)
         return {
             text = menu_category.name,
             icon = menu_category.icon_name and desktop_utils.lookup_icon(menu_category.icon_name),
             icon_color = menu_category.icon_color,
             submenu = {},
+            is_fallback = is_fallback,
         }
     end
 
-    local categories, fallback_category, category_mapper = build_categories(category_builder)
+    local category_manager = create_category_manager(category_builder)
 
     for _, desktop_file in pairs(desktop_files) do
-        local category = category_mapper(desktop_file) or fallback_category
-        table.insert(category.submenu, {
-            flex = true,
-            text = hstring.trim(desktop_file.Name) or "",
-            icon = desktop_file.icon_path,
-            icon_color = false,
-            callback = function()
-                awful.spawn(hstring.trim(desktop_file.command) or "")
-            end,
-        })
+        category_manager.add(desktop_file)
+    end
+
+    local categories = {}
+
+    for _, category in ipairs(category_manager.all) do
+        if category.submenu and #category.submenu > 0 then
+            table.sort(category.submenu, function(a, b) return a.text < b.text end)
+            categories[#categories + 1] = category
+        end
     end
 
     table.sort(categories, function(a, b)
-        local sma = a.submenu and 0 or 1
-        local smb = b.submenu and 0 or 1
-        if sma ~= smb then
-            return sma < smb
-        else
-            return a.text < b.text
+        local av = a.submenu and 0 or 1
+        local ab = b.submenu and 0 or 1
+        if av ~= ab then
+            return av < ab
         end
+
+        av = a.is_fallback and 1 or 0
+        ab = b.is_fallback and 1 or 0
+        if av ~= ab then
+            return av < ab
+        end
+
+        return a.text < b.text
     end)
-    if #fallback_category.submenu > 0 then
-        table.insert(categories, fallback_category)
-    end
-    for _, category in ipairs(categories) do
-        if category.submenu then
-            table.sort(category.submenu, function(a, b) return a.text < b.text end)
-        end
-    end
 
     root_menu = {
         item_width = dpi(200),

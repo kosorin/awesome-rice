@@ -846,7 +846,7 @@ theme.application = {
     ---@type string|nil # The default icon for applications that don't provide any icon in their .desktop files.
     default_icon = nil,
     fallback_category = {
-        name = "other",
+        name = "Other",
     },
     categories = {
         utility = {
@@ -868,7 +868,7 @@ theme.application = {
             icon_color = theme.palette.gray,
         },
         games = {
-            id = "Game",
+            id = { "Game", "Games" },
             name = "Games",
             icon_name = "applications-games",
             icon_color = theme.palette.red,
