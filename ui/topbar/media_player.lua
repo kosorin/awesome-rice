@@ -519,20 +519,8 @@ function M.new(wibar)
 
     self._private.menu = mebox(media_player_menu_template.shared)
 
-    self.no_player_button.buttons = binding.awful_buttons {
-        binding.awful({}, btn.left, function()
-            if not self.no_player_button.visible then
-                return
-            end
-            aspawn(config.apps.music_player)
-        end),
-    }
-
     self.player_container.buttons = binding.awful_buttons {
         binding.awful({}, btn.right, function()
-            if not self.player_container.visible then
-                return
-            end
             self._private.menu:toggle {
                 placement = beautiful.wibar.build_placement(self, self._private.wibar),
             }
