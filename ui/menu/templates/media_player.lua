@@ -30,11 +30,11 @@ local play_pause_status = {
 
 local pin_status = {
     [false] = {
-        icon = config.places.theme .. "/icons/pin.svg",
+        icon = config.places.theme .. "/icons/pin-off.svg",
         color = beautiful.palette.gray_75,
     },
     [true] = {
-        icon = config.places.theme .. "/icons/pin-off.svg",
+        icon = config.places.theme .. "/icons/pin.svg",
         color = beautiful.palette.gray_bright,
     },
 }
