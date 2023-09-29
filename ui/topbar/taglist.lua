@@ -14,6 +14,7 @@ local btn = binding.button
 local dpi = Dpi
 local capsule = require("widget.capsule")
 local gtable = require("gears.table")
+local gcolor = require("gears.color")
 local core_tags = require("core.tags")
 local mebox = require("widget.mebox")
 local tag_menu_template = require("ui.menu.templates.tag.main")
@@ -105,7 +106,7 @@ function taglist.new(wibar)
 
                 local plus_button = layout.widget.children[2]
                 local plus_button_icon = layout:get_children_by_id("#icon")[1]
-                plus_button_icon:set_stylesheet(css.style { path = { fill = plus_button.fg } })
+                plus_button_icon:set_stylesheet(css.style { path = { fill = gcolor.ensure_pango_color(plus_button.fg) } })
             end
 
             root_container:reset()
