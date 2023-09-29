@@ -243,7 +243,7 @@ binding.add_global_range {
         description = "Show only the specified tag",
         on_press = function(trigger)
             local screen = awful.screen.focused()
-            local tag = screen.tags[trigger.index]
+            local tag = screen and screen.tags[trigger.index]
             if tag then
                 tag:view_only()
             end
@@ -257,7 +257,7 @@ binding.add_global_range {
         description = "Toggle tag",
         on_press = function(trigger)
             local screen = awful.screen.focused()
-            local tag = screen.tags[trigger.index]
+            local tag = screen and screen.tags[trigger.index]
             if tag then
                 awful.tag.viewtoggle(tag)
             end

@@ -5,6 +5,13 @@ local gfilesystem = require("gears.filesystem")
 
 local config = {}
 
+---@class Features
+---@field screenshot_tools boolean?
+---@field magnifier_tools boolean?
+---@field torrent_widget boolean?
+---@field weather_widget boolean?
+---@field redshift_widget boolean?
+---@field wallpaper_menu boolean?
 config.features = {
     screenshot_tools = false,
     magnifier_tools = false,

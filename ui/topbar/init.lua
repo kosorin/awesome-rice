@@ -22,6 +22,8 @@ local media_player_widget = require("ui.topbar.media_player")
 
 
 capi.screen.connect_signal("request::desktop_decoration", function(screen)
+    ---@cast screen screen
+
     local is_primary = screen == capi.screen.primary
     local wibar = awful.wibar {
         position = "top",
@@ -53,6 +55,8 @@ capi.screen.connect_signal("request::desktop_decoration", function(screen)
         },
     }
 
+    ---@class screen
+    ---@field topbar table
     screen.topbar = {
         wibox = wibar,
         clientlist = clientlist_widget.new(wibar),

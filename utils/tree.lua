@@ -185,10 +185,12 @@ end
 ---@return Tree
 function tree.new()
     ---@type Tree
-    local self = {}
+    local self = {
+        root = create_empty_node(tree.root_key, tree.root_name),
+        nodes = {},
+    }
 
-    self.root = create_empty_node(tree.root_key, tree.root_name)
-    self.nodes = { [self.root.key] = self.root }
+    self.nodes[self.root.key] = self.root
 
     return setmetatable(self, { __index = Tree })
 end

@@ -146,6 +146,7 @@ function M.get_distance(client, coords)
     return distance
 end
 
+---@return client?
 function M.find_closest(args)
     args = args or {}
     local clients = args.clients or (capi.mouse.screen and capi.mouse.screen.clients)
@@ -331,7 +332,7 @@ function M.resize(client, direction)
     end
 end
 
----@param client client
+---@param client? client
 ---@param direction direction
 function M.focus(client, direction)
     local old_client = client or capi.client.focus
@@ -370,7 +371,7 @@ function M.mouse_move(client)
     })
 end
 
----@param client client
+---@param client client|boolean
 function M.mouse_resize(client)
     if client == true then
         client = M.find_closest {

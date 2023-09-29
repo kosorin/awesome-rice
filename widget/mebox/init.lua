@@ -889,7 +889,8 @@ function M.new(args, is_submenu)
             id = "#layout_container",
             layout = wibox.container.margin,
         },
-    } --[[@as Mebox]]
+    }
+    ---@cast self Mebox
 
     gtable.crush(self, M.object, true)
 

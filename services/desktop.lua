@@ -248,7 +248,7 @@ function M.lookup_icon_uncached(icon_file)
     local icon_file_ext = icon_file:match(".+%.(.*)$")
     if icon_file:sub(1, 1) == "/" and supported_icon_file_exts[icon_file_ext] then
         -- If the path to the icon is absolute do not perform a lookup [nil if unsupported ext or missing]
-        return gfilesystem.file_readable(icon_file) and icon_file or nil
+        return gfilesystem.file_readable(icon_file) and icon_file
     else
         -- Look for the requested file in the lookup path
         for _, directory in ipairs(M.get_icon_lookup_paths()) do
@@ -301,6 +301,8 @@ function M.parse_desktop_file(path)
         icon_path = nil,
         actions_table = nil,
         command = nil,
+        Type = "Application",
+        Name = "",
     }
 
     -- Parse the .desktop file.
@@ -329,7 +331,7 @@ function M.parse_desktop_file(path)
 
         for _, action in pairs(desktop_file.Actions) do
             local cur_action = "Desktop Action " .. action
-            desktop_file.actions_table[action] = {}
+            desktop_file.actions_table[action] = { Name = action }
 
             for _, key in pairs(key_file:get_keys(cur_action)) do
                 desktop_file.actions_table[action][key] = key_file:get_locale_string(cur_action, key)

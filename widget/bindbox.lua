@@ -859,7 +859,7 @@ end
 ---@field bg? hex_color
 ---@field fg? hex_color
 ---@field page_break? boolean
----@field groups BindboxGroup[]
+---@field groups? BindboxGroup[]
 
 ---@param group BindboxGroup
 function M.object:add_group(group)

@@ -27,7 +27,7 @@ local lgi_playerctl = require("lgi").Playerctl -- /usr/share/gtk-doc/html/player
 ---@field loop_status lgi.Playerctl.LoopStatus
 ---@field volume number
 ---@field metadata table<string, any>
----@field package _position_timer gears.timer
+---@field package _position_timer? gears.timer
 
 
 local playerctl = {
@@ -40,7 +40,7 @@ local playerctl = {
 ---@field unit integer # Number of microseconds in a second.
 ---@field package primary_player_data? Playerctl.data
 ---@field package player_data table<string, Playerctl.data>
----@field package tracked_metadata string[]
+---@field package tracked_metadata table<string, string>
 ---@field package excluded_players table<string, boolean>
 ---@field package player_priorities table<string, integer>
 ---@field package manager lgi.Playerctl.PlayerManager
@@ -573,7 +573,7 @@ end
 
 ---@class Playerctl.new.args
 ---@field players string[]
----@field excluded_players string[]
+---@field excluded_players? string[]
 ---@field metadata table<string, string>
 
 ---@param args? Playerctl.new.args
