@@ -22,8 +22,10 @@ local config = require("config")
 ---@field icon_name? string # Icon name. Uses current icon theme.
 ---@field icon_color? string # Icon color for SVG icons.
 
+---@alias AppMenu.ItemCollection (AppMenu.Item|string)[]
+
 ---@class AppMenu
----@field favorites (AppMenu.Item|string)[]
+---@field favorites AppMenu.ItemCollection
 ---@field fallback_category? AppMenu.FallbackCategory
 ---@field categories? table<string, AppMenu.Category>
 local app_menu = {

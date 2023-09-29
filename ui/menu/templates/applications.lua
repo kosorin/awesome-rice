@@ -14,20 +14,25 @@ local dpi = Dpi
 
 local M = {}
 
+---@return MeboxItem.args[]
 local favorites_items
+
+---@return Mebox.new.args
 local categories_menu
 
 ---@param callback DesktopFile|string|function|nil
 ---@return MeboxItem.args?
-local function build_item(callback)
+local function build_item_base(callback)
     if not callback then
         return nil
     end
 
-    local callback_type = type(callback)
+    ---@type MeboxItem.args
     local item = {
         flex = true,
     }
+
+    local callback_type = type(callback)
     if callback_type == "table" then
         local desktop_file = callback --[[@as DesktopFile]]
         item.text = hstring.trim(desktop_file.Name) or ""
@@ -43,63 +48,92 @@ local function build_item(callback)
     elseif callback_type == "function" then
         item.callback = callback
     end
+
     return item
 end
 
+---@param args? string|AppMenu.Item
 ---@param desktop_files? DesktopFileCollection
-local function generate_favorites(desktop_files)
+---@return MeboxItem.args?
+local function build_item(args, desktop_files)
+    desktop_files = desktop_files or desktop_utils.desktop_files
+
+    ---@type MeboxItem.args?
+    local item
+
+    if type(args) == "string" then
+        item = build_item_base(desktop_files:find(args))
+    elseif type(args) == "table" then
+        if args.id then
+            item = build_item_base(desktop_files:find(args.id))
+        elseif args.command then
+            item = build_item_base(args.command)
+        end
+
+        if item then
+            if args.name then
+                item.text = args.name
+            end
+
+            if args.icon then
+                item.icon = args.icon
+            elseif args.icon_name then
+                item.icon = desktop_utils.lookup_icon(args.icon_name)
+            end
+
+            if args.icon_color then
+                item.icon_color = args.icon_color
+            end
+        end
+    end
+
+    return item
+end
+
+---@param items_source? AppMenu.ItemCollection
+---@param desktop_files? DesktopFileCollection
+---@return MeboxItem.args[]
+function M.build_items(items_source, desktop_files)
     desktop_files = desktop_files or desktop_utils.desktop_files
 
     local items = {}
 
-    if app_menu.favorites then
-        for _, favorite in ipairs(app_menu.favorites) do
-            local item
-
-            if type(favorite) == "string" then
-                item = build_item(desktop_files:find(favorite))
-            else
-                if favorite.id then
-                    item = build_item(desktop_files:find(favorite.id))
-                elseif favorite.command then
-                    item = build_item(favorite.command)
-                end
-
-                if item then
-                    if favorite.name then
-                        item.text = favorite.name
-                    end
-
-                    if favorite.icon then
-                        item.icon = favorite.icon
-                    elseif favorite.icon_name then
-                        item.icon = desktop_utils.lookup_icon(favorite.icon_name)
-                    end
-
-                    if favorite.icon_color then
-                        item.icon_color = favorite.icon_color
-                    end
-                end
-            end
-
+    if items_source then
+        for _, args in ipairs(items_source) do
+            local item = build_item(args, desktop_files)
             if item then
                 table.insert(items, item)
             end
         end
     end
 
-    favorites_items = items
+    return items
 end
 
-local function create_category_manager(category_builder)
+---@param desktop_files? DesktopFileCollection
+local function generate_favorites(desktop_files)
+    favorites_items = M.build_items(app_menu.favorites, desktop_files)
+end
+
+local function new_category_manager()
+    local function build_category(menu_category, is_fallback)
+        return {
+            text = menu_category.name,
+            icon = menu_category.icon_name and desktop_utils.lookup_icon(menu_category.icon_name),
+            icon_color = menu_category.icon_color,
+            is_fallback = is_fallback,
+            desktop_file_ids = {},
+        }
+    end
+
     local categories = {}
     local category_map = {}
-    local fallback_category = category_builder(app_menu.fallback_category, true)
+    local fallback_category = build_category(app_menu.fallback_category, true)
     local fallback_category_map = {}
 
     if app_menu.categories then
         for _, menu_category in pairs(app_menu.categories) do
-            local category = category_builder(menu_category)
+            local category = build_category(menu_category)
             categories[#categories + 1] = category
             local ids = menu_category.id
             if type(ids) ~= "table" then
@@ -113,10 +147,10 @@ local function create_category_manager(category_builder)
 
     categories[#categories + 1] = fallback_category
 
-    local function category_mapper(desktop_file)
+    local function category_mapper(desktop_file_categories)
         local first_category_id
-        if desktop_file.Categories then
-            for _, category_id in pairs(desktop_file.Categories) do
+        if desktop_file_categories then
+            for _, category_id in pairs(desktop_file_categories) do
                 if not first_category_id then
                     first_category_id = category_id
                 end
@@ -130,7 +164,7 @@ local function create_category_manager(category_builder)
         if first_category_id then
             local category = fallback_category_map[first_category_id]
             if not category then
-                category = category_builder({ name = tostring(first_category_id) }, true)
+                category = build_category({ name = tostring(first_category_id) }, true)
                 categories[#categories + 1] = category
                 fallback_category_map[first_category_id] = category
             end
@@ -143,8 +177,11 @@ local function create_category_manager(category_builder)
     return {
         all = categories,
         add = function(desktop_file)
-            local category = category_mapper(desktop_file)
-            table.insert(category.submenu, build_item(desktop_file))
+            ---@cast desktop_file DesktopFile
+            if desktop_file.id then
+                local category = category_mapper(desktop_file.Categories)
+                table.insert(category.desktop_file_ids, desktop_file.id)
+            end
         end,
     }
 end
@@ -153,17 +190,7 @@ end
 local function generate_categories(desktop_files)
     desktop_files = desktop_files or desktop_utils.desktop_files
 
-    local function category_builder(menu_category, is_fallback)
-        return {
-            text = menu_category.name,
-            icon = menu_category.icon_name and desktop_utils.lookup_icon(menu_category.icon_name),
-            icon_color = menu_category.icon_color,
-            submenu = {},
-            is_fallback = is_fallback,
-        }
-    end
-
-    local category_manager = create_category_manager(category_builder)
+    local category_manager = new_category_manager()
 
     for _, desktop_file in ipairs(desktop_files) do
         category_manager.add(desktop_file)
@@ -172,9 +199,13 @@ local function generate_categories(desktop_files)
     local categories = {}
 
     for _, category in ipairs(category_manager.all) do
-        if category.submenu and #category.submenu > 0 then
-            table.sort(category.submenu, function(a, b) return a.text < b.text end)
-            categories[#categories + 1] = category
+        if #category.desktop_file_ids > 0 then
+            local items = M.build_items(category.desktop_file_ids, desktop_files)
+            if #items > 0 then
+                category.submenu = items
+                table.sort(category.submenu, function(a, b) return a.text < b.text end)
+                table.insert(categories, category)
+            end
         end
     end
 
@@ -194,18 +225,19 @@ local function generate_categories(desktop_files)
         return a.text < b.text
     end)
 
-    categories_menu = {
-        item_width = dpi(200),
-        items_source = categories,
-    }
-
-    table.insert(categories_menu.items_source, mebox.separator)
-    table.insert(categories_menu.items_source, {
+    table.insert(categories, mebox.separator)
+    table.insert(categories, {
         text = "Reload",
         icon = config.places.theme .. "/icons/refresh.svg",
         icon_color = beautiful.palette.gray,
         callback = function() desktop_utils.load_desktop_files() end,
     })
+
+    ---@type Mebox.new.args
+    categories_menu = {
+        item_width = dpi(200),
+        items_source = categories,
+    }
 end
 
 capi.awesome.connect_signal("desktop::files", function(desktop_files)
@@ -216,10 +248,12 @@ end)
 generate_favorites()
 generate_categories()
 
+---@return MeboxItem.args[]
 function M.get_favorites_items()
     return favorites_items or {}
 end
 
+---@return Mebox.new.args
 function M.get_categories_menu()
     return categories_menu or {}
 end
