@@ -4,34 +4,110 @@ local ipairs = ipairs
 local table = table
 local awful = require("awful")
 local beautiful = require("theme.theme")
-local gtable = require("gears.table")
-local gfilesystem = require("gears.filesystem")
 local desktop_utils = require("services.desktop")
 local mebox = require("widget.mebox")
 local hstring = require("utils.string")
 local config = require("config")
+local app_menu = require("app_menu")
 local dpi = Dpi
 
 
 local M = {}
 
-local root_menu
+local favorites_items
+local categories_menu
+
+---@param callback DesktopFile|string|function|nil
+---@return MeboxItem.args?
+local function build_item(callback)
+    if not callback then
+        return nil
+    end
+
+    local callback_type = type(callback)
+    local item = {
+        flex = true,
+    }
+    if callback_type == "table" then
+        local desktop_file = callback --[[@as DesktopFile]]
+        item.text = hstring.trim(desktop_file.Name) or ""
+        item.icon = desktop_file.icon_path
+        item.icon_color = false
+        item.callback = function()
+            awful.spawn(hstring.trim(desktop_file.command) or "")
+        end
+    elseif callback_type == "string" then
+        item.callback = function()
+            awful.spawn(callback)
+        end
+    elseif callback_type == "function" then
+        item.callback = callback
+    end
+    return item
+end
+
+---@param desktop_files? DesktopFileCollection
+local function generate_favorites(desktop_files)
+    desktop_files = desktop_files or desktop_utils.desktop_files
+
+    local items = {}
+
+    if app_menu.favorites then
+        for _, favorite in ipairs(app_menu.favorites) do
+            local item
+
+            if type(favorite) == "string" then
+                item = build_item(desktop_files:find(favorite))
+            else
+                if favorite.id then
+                    item = build_item(desktop_files:find(favorite.id))
+                elseif favorite.command then
+                    item = build_item(favorite.command)
+                end
+
+                if item then
+                    if favorite.name then
+                        item.text = favorite.name
+                    end
+
+                    if favorite.icon then
+                        item.icon = favorite.icon
+                    elseif favorite.icon_name then
+                        item.icon = desktop_utils.lookup_icon(favorite.icon_name)
+                    end
+
+                    if favorite.icon_color then
+                        item.icon_color = favorite.icon_color
+                    end
+                end
+            end
+
+            if item then
+                table.insert(items, item)
+            end
+        end
+    end
+
+    favorites_items = items
+end
 
 local function create_category_manager(category_builder)
     local categories = {}
     local category_map = {}
-    local fallback_category = category_builder(beautiful.application.fallback_category, true)
+    local fallback_category = category_builder(app_menu.fallback_category, true)
     local fallback_category_map = {}
 
-    for _, menu_category in pairs(beautiful.application.categories) do
-        local category = category_builder(menu_category)
-        categories[#categories + 1] = category
-        local ids = menu_category.id
-        if type(ids) ~= "table" then
-            ids = { ids }
-        end
-        for _, id in ipairs(ids) do
-            category_map[id] = category_map[id] or (menu_category.enabled ~= false and category)
+    if app_menu.categories then
+        for _, menu_category in pairs(app_menu.categories) do
+            local category = category_builder(menu_category)
+            categories[#categories + 1] = category
+            local ids = menu_category.id
+            if type(ids) ~= "table" then
+                ids = { ids }
+            end
+            for _, id in ipairs(ids) do
+                category_map[id] = category_map[id] or (menu_category.enabled ~= false and category)
+            end
         end
     end
 
@@ -68,21 +144,14 @@ local function create_category_manager(category_builder)
         all = categories,
         add = function(desktop_file)
             local category = category_mapper(desktop_file)
-            table.insert(category.submenu, {
-                flex = true,
-                text = hstring.trim(desktop_file.Name) or "",
-                icon = desktop_file.icon_path,
-                icon_color = false,
-                callback = function()
-                    awful.spawn(hstring.trim(desktop_file.command) or "")
-                end,
-            })
+            table.insert(category.submenu, build_item(desktop_file))
         end,
     }
 end
 
-local function generate_menu(desktop_files)
-    desktop_files = desktop_files or desktop_utils.desktop_files or {}
+---@param desktop_files? DesktopFileCollection
+local function generate_categories(desktop_files)
+    desktop_files = desktop_files or desktop_utils.desktop_files
 
     local function category_builder(menu_category, is_fallback)
         return {
@@ -96,7 +165,7 @@ local function generate_menu(desktop_files)
 
     local category_manager = create_category_manager(category_builder)
 
-    for _, desktop_file in pairs(desktop_files) do
+    for _, desktop_file in ipairs(desktop_files) do
         category_manager.add(desktop_file)
     end
 
@@ -125,13 +194,13 @@ local function generate_menu(desktop_files)
         return a.text < b.text
     end)
 
-    root_menu = {
+    categories_menu = {
         item_width = dpi(200),
         items_source = categories,
     }
 
-    table.insert(root_menu.items_source, mebox.separator)
-    table.insert(root_menu.items_source, {
+    table.insert(categories_menu.items_source, mebox.separator)
+    table.insert(categories_menu.items_source, {
         text = "Reload",
         icon = config.places.theme .. "/icons/refresh.svg",
         icon_color = beautiful.palette.gray,
@@ -140,13 +209,19 @@ local function generate_menu(desktop_files)
 end
 
 capi.awesome.connect_signal("desktop::files", function(desktop_files)
-    generate_menu(desktop_files)
+    generate_favorites(desktop_files)
+    generate_categories(desktop_files)
 end)
 
-generate_menu()
+generate_favorites()
+generate_categories()
 
-function M.shared()
-    return root_menu or {}
+function M.get_favorites_items()
+    return favorites_items or {}
+end
+
+function M.get_categories_menu()
+    return categories_menu or {}
 end
 
 return M

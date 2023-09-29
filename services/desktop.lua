@@ -30,6 +30,7 @@ local glib = lgi.GLib
 ---@field Exec? string
 
 ---@class DesktopFile
+---@field id? string
 ---@field show boolean
 ---@field path string
 ---@field icon_path? string
@@ -61,11 +62,16 @@ local glib = lgi.GLib
 ---@field PrefersNonDefaultGPU? boolean
 ---@field SingleMainWindow? boolean
 
+---@class DesktopFileCollection
+---@field [integer] DesktopFile
+---@field by_id table<string, DesktopFile>
+---@field by_path table<string, DesktopFile>
+---@field find fun(self: DesktopFileCollection, id: string): DesktopFile?
+
 
 ---@class _Desktop
+---@field desktop_files DesktopFileCollection
 local M = {}
-
-M.desktop_files = {}
 
 ---Maps keys in desktop entries to suitable getter function.
 ---The order of entries is as in the spec.
@@ -238,21 +244,21 @@ do
 end
 
 ---Lookup an icon in different folders of the filesystem.
----@param icon_file string # Short or full name of the icon.
+---@param icon_name string # Short or full name of the icon.
 ---@return string|false # Full name of the icon, or `false` on failure.
-function M.lookup_icon_uncached(icon_file)
-    if not icon_file or icon_file == "" then
+function M.lookup_icon_uncached(icon_name)
+    if not icon_name or icon_name == "" then
         return false
     end
 
-    local icon_file_ext = icon_file:match(".+%.(.*)$")
-    if icon_file:sub(1, 1) == "/" and supported_icon_file_exts[icon_file_ext] then
+    local icon_file_ext = icon_name:match(".+%.(.*)$")
+    if icon_name:sub(1, 1) == "/" and supported_icon_file_exts[icon_file_ext] then
         -- If the path to the icon is absolute do not perform a lookup [nil if unsupported ext or missing]
-        return gfilesystem.file_readable(icon_file) and icon_file
+        return gfilesystem.file_readable(icon_name) and icon_name
     else
         -- Look for the requested file in the lookup path
         for _, directory in ipairs(M.get_icon_lookup_paths()) do
-            local possible_file = directory .. "/" .. icon_file
+            local possible_file = directory .. "/" .. icon_name
             -- Check to see if file exists if requested with a valid extension
             if supported_icon_file_exts[icon_file_ext] and gfilesystem.file_readable(possible_file) then
                 return possible_file
@@ -276,23 +282,23 @@ do
     local lookup_icon_cache = {}
 
     ---Lookup an icon in different folders of the filesystem (cached).
-    ---@param icon? string # Short or full name of the icon.
-    ---@param default_icon? string
-    ---@return string|nil # Full name of the icon.
-    function M.lookup_icon(icon, default_icon)
-        if not icon then
+    ---@param icon_name? string # Short or full name of the icon.
+    ---@param default_icon? string # Icon path.
+    ---@return string? # Full name of the icon.
+    function M.lookup_icon(icon_name, default_icon)
+        if not icon_name then
             return default_icon or theme.application.default_icon
         end
-        if not lookup_icon_cache[icon] and lookup_icon_cache[icon] ~= false then
-            lookup_icon_cache[icon] = M.lookup_icon_uncached(icon)
+        if not lookup_icon_cache[icon_name] and lookup_icon_cache[icon_name] ~= false then
+            lookup_icon_cache[icon_name] = M.lookup_icon_uncached(icon_name)
         end
-        return lookup_icon_cache[icon] or default_icon or theme.application.default_icon
+        return lookup_icon_cache[icon_name] or default_icon or theme.application.default_icon
     end
 end
 
 ---Parse a .desktop file.
 ---@param path string # The .desktop file.
----@return DesktopFile|nil # A table with file entries.
+---@return DesktopFile? # A table with file entries.
 function M.parse_desktop_file(path)
     ---@type DesktopFile
     local desktop_file = {
@@ -407,26 +413,26 @@ end
 
 do
     ---@param file lgi.Gio.File
-    ---@return string|nil
+    ---@return string?
     local function get_readable_path(file)
         return file:get_path() or file:get_uri()
     end
 
-    ---@param file lgi.Gio.File
+    ---@param directory lgi.Gio.File
     ---@param desktop_files DesktopFile[]
-    local function parser(file, desktop_files)
+    local function directory_parser(directory, desktop_files)
         -- Except for "NONE" there is also NOFOLLOW_SYMLINKS
         local attributes = gio.FILE_ATTRIBUTE_STANDARD_NAME .. "," .. gio.FILE_ATTRIBUTE_STANDARD_TYPE
-        local enum, err = file:async_enumerate_children(attributes, gio.FileQueryInfoFlags.NONE)
+        local enum, err = directory:async_enumerate_children(attributes, gio.FileQueryInfoFlags.NONE)
         if not enum then
-            gdebug.print_warning(get_readable_path(file) .. ": " .. tostring(err))
+            gdebug.print_warning(get_readable_path(directory) .. ": " .. tostring(err))
             return
         end
         local files_per_call = 100 -- Actual value is not that important
         while true do
             local list, enum_err = enum:async_next_files(files_per_call)
             if enum_err then
-                gdebug.print_error(get_readable_path(file) .. ": " .. tostring(enum_err))
+                gdebug.print_error(get_readable_path(directory) .. ": " .. tostring(enum_err))
                 return
             end
             for _, info in ipairs(list) do
@@ -443,7 +449,7 @@ do
                         end
                     end
                 elseif file_type == "DIRECTORY" then
-                    parser(file_child, desktop_files)
+                    directory_parser(file_child, desktop_files)
                 end
             end
             if #list == 0 then
@@ -456,16 +462,14 @@ do
     ---Parse a directory with .desktop files recursively.
     ---@param directory string # The directory path.
     ---@param callback fun(desktop_files: DesktopFile[]) # Will be fired when all the files were parsed with the resulting list of menu entries as argument.
-    function M.parse_directory(directory, callback)
+    local function parse_directory(directory, callback)
         gio.Async.start(gpcall)(function()
             local desktop_files = {}
-            parser(gio.File.new_for_path(directory), desktop_files)
+            directory_parser(gio.File.new_for_path(directory), desktop_files)
             callback(desktop_files)
         end)
     end
-end
 
-do
     ---@return string[]
     local function get_xdg_directories()
         local directories = gfilesystem.get_xdg_data_dirs()
@@ -480,58 +484,111 @@ do
         return select(1, string.gsub(string.sub(path, #directory + 1), "/", "-"))
     end
 
+    ---@type metatable
+    local desktop_files_mt = { __index = {} }
+
+    ---@param self DesktopFileCollection
+    ---@param id string
+    ---@return DesktopFile?
+    function desktop_files_mt.__index.find(self, id)
+        if type(id) == "string" then
+            return self.by_id[id] or self.by_path[id]
+        end
+    end
+
+    ---@type metatable
+    local by_path_mt = {
+        __index = function(t, k)
+            local success, desktop_file = pcall(M.parse_desktop_file, k)
+            if not success then
+                gdebug.print_error("Error while reading '" .. k .. "': " .. desktop_file)
+            end
+            rawset(t, k, success and desktop_file or false)
+        end,
+    }
+
+    ---@param desktop_files? DesktopFile[]
+    local function set_desktop_files(desktop_files)
+        ---@type DesktopFileCollection
+        local result = setmetatable({
+            by_id = {},
+            by_path = setmetatable({}, by_path_mt),
+        }, desktop_files_mt)
+
+        for _, desktop_file in ipairs(desktop_files or {}) do
+            result[#result + 1] = desktop_file
+            result.by_id[desktop_file.id] = desktop_file
+            result.by_id[desktop_file.path] = desktop_file
+        end
+
+        M.desktop_files = result
+    end
+
     ---@param all_desktop_files table<string, (DesktopFile|true)[]>
     ---@param directory_count integer
-    ---@param callback? fun(desktop_files: DesktopFile[]) # Will be fired when all the files were parsed with the resulting list of menu entries as argument.
+    ---@param callback? fun(desktop_files: DesktopFileCollection) # Will be fired when all the files were parsed with the resulting list of menu entries as argument.
     local function process_desktop_files(all_desktop_files, directory_count, callback)
-        local new_desktop_files = {}
+        local desktop_files_map = {}
         for id, desktop_files in pairs(all_desktop_files) do
             for priority = 1, directory_count do
                 local desktop_file = desktop_files[priority]
                 if desktop_file then
                     if type(desktop_file) == "table" then
-                        new_desktop_files[id] = desktop_file
+                        desktop_files_map[id] = desktop_file
                     end
                     break
                 end
             end
         end
 
-        M.desktop_files = new_desktop_files
-        capi.awesome.emit_signal("desktop::files", new_desktop_files)
+        local desktop_files = {}
+        for _, desktop_file in pairs(desktop_files_map) do
+            desktop_files[#desktop_files + 1] = desktop_file
+        end
+        set_desktop_files(desktop_files)
+
+        capi.awesome.emit_signal("desktop::files", M.desktop_files)
         if callback then
-            callback(new_desktop_files)
+            callback(M.desktop_files)
         end
     end
 
     ---Loads all .desktop files and emits signal `desktop::files` with .desktop files as a first argument.
-    ---@param callback? fun(desktop_files: DesktopFile[]) # Will be fired when all the files were parsed with the resulting list of menu entries as argument.
+    ---@param callback? fun(desktop_files: DesktopFileCollection) # Will be fired when all the files were parsed with the resulting list of menu entries as argument.
     function M.load_desktop_files(callback)
         local all_desktop_files = {}
         local all_directories = get_xdg_directories()
         local directory_count = #all_directories
         local parsed_directory_count = 0
-        for priority, directory in ipairs(all_directories) do
-            M.parse_directory(directory, function(directory_desktop_files)
-                directory_desktop_files = directory_desktop_files or {}
-                for _, desktop_file in ipairs(directory_desktop_files) do
-                    local id = get_desktop_file_id(directory, desktop_file.path)
-                    if not all_desktop_files[id] then
-                        all_desktop_files[id] = {}
+        if directory_count > 0 then
+            for priority, directory in ipairs(all_directories) do
+                parse_directory(directory, function(directory_desktop_files)
+                    directory_desktop_files = directory_desktop_files or {}
+                    for _, desktop_file in ipairs(directory_desktop_files) do
+                        local id = get_desktop_file_id(directory, desktop_file.path)
+                        desktop_file.id = id
+                        if not all_desktop_files[id] then
+                            all_desktop_files[id] = {}
+                        end
+                        if desktop_file.show and desktop_file.Name and desktop_file.command then
+                            all_desktop_files[id][priority] = desktop_file
+                        else
+                            all_desktop_files[id][priority] = true
+                        end
                     end
-                    if desktop_file.show and desktop_file.Name and desktop_file.command then
-                        all_desktop_files[id][priority] = desktop_file
-                    else
-                        all_desktop_files[id][priority] = true
+                    parsed_directory_count = parsed_directory_count + 1
+                    if parsed_directory_count == directory_count then
+                        process_desktop_files(all_desktop_files, directory_count, callback)
                     end
-                end
-                parsed_directory_count = parsed_directory_count + 1
-                if parsed_directory_count == directory_count then
-                    process_desktop_files(all_desktop_files, directory_count, callback)
-                end
-            end)
+                end)
+            end
+        else
+            process_desktop_files({}, 0, callback)
         end
     end
+
+    -- Ensure object is created
+    set_desktop_files()
 end
 
 M.load_desktop_files()
