@@ -85,13 +85,21 @@ ruled.client.connect_signal("request::rules", function()
         end,
     }
     ruled.client.append_rule {
+        id = "tools",
+        rule_any = {
+            floating = true,
+            type = "dialog",
+        },
+        properties = {
+            floating = true,
+            titlebars_enabled = "toolbox",
+        },
+    }
+    ruled.client.append_rule {
         id = "floating",
         rule_any = {
             class = {
                 "Arandr",
-            },
-            name = {
-                "Event Tester",
             },
             role = {
                 "pop-up",
@@ -123,7 +131,7 @@ ruled.client.connect_signal("request::rules", function()
         },
     }
     ruled.client.append_rule {
-        id = "size_hints",
+        id = "no_size_hints",
         rule_any = {
             class = {
                 "XTerm",
@@ -131,6 +139,24 @@ ruled.client.connect_signal("request::rules", function()
         },
         properties = {
             size_hints_honor = false,
+        },
+    }
+    ruled.client.append_rule {
+        id = "urgent",
+        rule_any = {
+            class = {
+                "^Gcr-prompter$",
+            },
+            name = {
+                "^Authenticate$",
+            },
+        },
+        properties = {
+            floating = true,
+            ontop = true,
+            sticky = true,
+            titlebars_enabled = "toolbox",
+            placement = awful.placement.centered,
         },
     }
     ----------------------------------------------------------------------------------------------------
@@ -147,7 +173,7 @@ ruled.client.connect_signal("request::rules", function()
     ----------------------------------------------------------------------------------------------------
     ruled.client.append_rule {
         rule = {
-            class = "1Password",
+            class = "^1Password$",
         },
         properties = {
             floating = true,
@@ -156,7 +182,7 @@ ruled.client.connect_signal("request::rules", function()
     }
     ruled.client.append_rule {
         rule = {
-            class = "1Password",
+            class = "^1Password$",
             name = "Quick Access",
         },
         properties = {
@@ -172,27 +198,9 @@ ruled.client.connect_signal("request::rules", function()
         properties = {
             floating = true,
             ontop = true,
+            sticky = true,
             placement = awful.placement.centered,
-            skip_taskbar = true,
             titlebars_enabled = "toolbox",
-            buttons = binding.awful_buttons {
-                binding.new {
-                    modifiers = { mod.super },
-                    triggers = btn.left,
-                    on_press = function(_, client)
-                        client:activate { context = "mouse_click" }
-                        helper_client.mouse_move(client)
-                    end,
-                },
-                binding.new {
-                    modifiers = { mod.super },
-                    triggers = btn.right,
-                    on_press = function(_, client)
-                        client:activate { context = "mouse_click" }
-                        helper_client.mouse_resize(client)
-                    end,
-                },
-            },
         },
     }
     ----------------------------------------------------------------------------------------------------
@@ -206,18 +214,33 @@ ruled.client.connect_signal("request::rules", function()
             sticky = true,
             placement = awful.placement.centered,
             titlebars_enabled = "toolbox",
-            border_width = dpi(4),
             border_color = beautiful.common.secondary_bright,
-            shape = false,
         },
     }
     ----------------------------------------------------------------------------------------------------
     ruled.client.append_rule {
         rule = {
-            class = "Xephyr",
+            class = "^Xephyr$",
         },
         properties = {
             floating = false,
+            switch_to_tags = true,
+            new_tag = core_tags.build_tag {
+                selected = true,
+                volatile = true,
+            },
+        },
+    }
+    ----------------------------------------------------------------------------------------------------
+    ruled.client.append_rule {
+        rule = {
+            name = "^Event Tester$",
+        },
+        properties = {
+            titlebars_enabled = "toolbox",
+            floating = true,
+            ontop = true,
+            sticky = true,
         },
     }
     ----------------------------------------------------------------------------------------------------
