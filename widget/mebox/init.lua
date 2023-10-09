@@ -8,6 +8,7 @@ local awful = require("awful")
 local beautiful = require("theme.theme")
 local gtable = require("gears.table")
 local grectangle = require("gears.geometry").rectangle
+local gtimer = require("gears.timer")
 local wibox = require("wibox")
 local base = require("wibox.widget.base")
 local binding = require("io.binding")
@@ -86,6 +87,9 @@ M.object = {}
 ---@class Mebox.private
 ---@field parent? Mebox
 ---@field active_submenu? { index: integer, menu: Mebox }
+---@field submenu_delay? number|boolean
+---@field submenu_delay_timer? gears.timer
+---@field submenu_delay_callback? function
 ---@field submenu_cache? (Mebox|false)[]
 ---@field items? MeboxItem[]
 ---@field item_widgets? (wibox.widget.base|false)[]
@@ -452,6 +456,12 @@ function M.object:hide(context)
     end
     context = context or {}
 
+    if self._private.submenu_delay_timer then
+        self._private.submenu_delay_timer:stop()
+    end
+    self._private.submenu_delay_timer = nil
+    self._private.submenu_delay_callback = nil
+
     hide_active_submenu(self)
 
     local parent = self._private.parent
@@ -542,10 +552,27 @@ local function add_items(self, args, context)
                     show_submenu = self._private.mouse_move_show_submenu
                 end
                 if show_submenu then
-                    self:show_submenu(index, setmetatable({ source = "mouse" }, context))
+                    context = setmetatable({ source = "mouse" }, context)
+                    local p = self:get_root_menu()._private
+                    if p.submenu_delay_timer then
+                        p.submenu_delay_callback = function()
+                            self:show_submenu(index, context)
+                        end
+                        p.submenu_delay_timer:again()
+                    else
+                        self:show_submenu(index, context)
+                    end
                 else
                     hide_active_submenu(self)
                 end
+            end)
+
+            item_widget:connect_signal("mouse::leave", function()
+                local p = self:get_root_menu()._private
+                if p.submenu_delay_timer then
+                    p.submenu_delay_timer:stop()
+                end
+                p.submenu_delay_callback = nil
             end)
 
             local layout = item.layout_id
@@ -573,7 +600,43 @@ end
 ---@param context? Mebox.context
 ---@param force? boolean
 function M.object:show(args, context, force)
-    if not force and (self.visible or not ui_controller.enter(self:get_root_menu())) then
+    local root_menu = self:get_root_menu()
+
+    if root_menu == self then
+        local p = root_menu._private
+
+        if p.submenu_delay_timer then
+            p.submenu_delay_timer:stop()
+        end
+
+        p.submenu_delay_timer = nil
+        p.submenu_delay_callback = nil
+
+        local delay = p.submenu_delay
+        if delay == true then
+            delay = 0.25
+        end
+
+        if delay then
+            ---@cast delay number
+            p.submenu_delay_timer = gtimer {
+                timeout = delay,
+                autostart = false,
+                call_now = false,
+                callback = function()
+                    if p.submenu_delay_timer then
+                        p.submenu_delay_timer:stop()
+                    end
+                    if root_menu.visible and p.submenu_delay_callback then
+                        p.submenu_delay_callback()
+                    end
+                    p.submenu_delay_callback = nil
+                end,
+            }
+        end
+    end
+
+    if not force and (self.visible or not ui_controller.enter(root_menu)) then
         return
     end
 
@@ -859,6 +922,7 @@ end
 ---@field orientation? orientation
 ---@field layout_template? widget_value -- TODO: Rename `layout_template` property
 ---@field layout_navigator? fun(menu: Mebox, x: sign, y: sign, direction?: direction, context: Mebox.context)
+---@field submenu_delay? number|boolean
 ---@field cache_submenus? boolean
 ---@field items_source Mebox.items_source
 ---@field on_show? fun(menu: Mebox, args: Mebox.show.args, context: Mebox.context): boolean?
@@ -894,6 +958,7 @@ function M.new(args, is_submenu)
 
     gtable.crush(self, M.object, true)
 
+    self._private.submenu_delay = args.submenu_delay == nil or args.submenu_delay
     self._private.submenu_cache = args.cache_submenus ~= false and {} or nil
     self._private.items_source = args.items_source or args
     self._private.on_show = args.on_show
