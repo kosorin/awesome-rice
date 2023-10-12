@@ -767,6 +767,9 @@ end
 ---@param seek_origin integer|"begin"|"end"
 ---@overload fun(seek_origin: "begin"|"end")
 function M.object:select_next(direction, seek_origin)
+    if not self._private.items then
+        return
+    end
     local count = #self._private.items
     if count < 1 then
         return
