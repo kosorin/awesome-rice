@@ -97,17 +97,13 @@ local function ensure_client_menu(client)
         return
     end
 
-    local template = client_menu_template.shared
-    local old_on_hide = template.on_hide
+    local menu = mebox(client_menu_template.shared)
 
-    function template.on_hide(...)
+    menu:connect_signal("menu::hide", function()
         client_menu_instances[client] = nil
-        if old_on_hide then
-            old_on_hide(...)
-        end
-    end
+    end)
 
-    client_menu_instances[client] = mebox(template)
+    client_menu_instances[client] = menu
 end
 
 local function toggle_client_menu(args)
