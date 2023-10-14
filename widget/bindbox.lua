@@ -947,8 +947,8 @@ local function prepare_wibox(self, screen)
     self.screen = screen
 
     local workarea = screen.workarea
-    local workarea_width = workarea.width - beautiful.gap * 4
-    local workarea_height = workarea.height - beautiful.gap * 4
+    local workarea_width = workarea.width - beautiful.edge_gap * 2
+    local workarea_height = workarea.height - beautiful.edge_gap * 2
 
     local page_container = self.widget:get_children_by_id("#page_container")[1]
     page_container.width = self.page_width

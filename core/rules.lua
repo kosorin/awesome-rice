@@ -126,13 +126,14 @@ ruled.client.connect_signal("request::rules", function()
             },
         },
         properties = {
+            titlebars_enabled = "toolbox",
             floating = true,
             ontop = true,
             sticky = true,
             placement = function(client)
                 awful.placement.bottom_right(client, {
                     honor_workarea = true,
-                    margins = dpi(32),
+                    margins = beautiful.edge_gap,
                 })
             end,
         },
@@ -248,6 +249,12 @@ ruled.client.connect_signal("request::rules", function()
             floating = true,
             ontop = true,
             sticky = true,
+            placement = function(client)
+                awful.placement.bottom_left(client, {
+                    honor_workarea = true,
+                    margins = beautiful.edge_gap,
+                })
+            end,
         },
     }
     ----------------------------------------------------------------------------------------------------

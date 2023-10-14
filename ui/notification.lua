@@ -9,7 +9,6 @@ local ruled = require("ruled")
 local beautiful = require("theme.theme")
 local capsule = require("widget.capsule")
 local gtimer = require("gears.timer")
-local ucolor = require("utils.color")
 
 local get_time = socket and socket.gettime
 
@@ -56,7 +55,7 @@ naughty.connect_signal("request::display", function(n)
                             {
                                 widget = wibox.widget.textbox,
                                 opacity = 0.5,
-                                text = "at " .. os_date("%H:%M"):gsub("^0", ""),
+                                text = os_date("%H:%M"):gsub("^0", ""),
                                 valign = "top",
                             },
                         },
