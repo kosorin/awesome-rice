@@ -195,7 +195,10 @@ function M.new()
                         callback = function(item, menu, context)
                             for _, client in ipairs(capi.client.get()) do
                                 if string.lower(client.class) == string.lower(player_data.name) then
-                                    client:activate()
+                                    client:activate {
+                                        switch_to_tag = true,
+                                        raise = true,
+                                    }
                                     break
                                 end
                             end
