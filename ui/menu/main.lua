@@ -3,6 +3,7 @@ local table = table
 local awful = require("awful")
 local beautiful = require("theme.theme")
 local config = require("config")
+local gtimer = require("gears.timer")
 local mebox = require("widget.mebox")
 local menu_templates = require("ui.menu.templates")
 local app_menu = require("app_menu")
@@ -52,7 +53,11 @@ return mebox {
             text = "Shortcuts",
             icon = config.places.theme .. "/icons/apple-keyboard-command.svg",
             icon_color = beautiful.palette.blue,
-            callback = function() capi.awesome.emit_signal("main_bindbox::show") end,
+            callback = function()
+                gtimer.delayed_call(function()
+                    capi.awesome.emit_signal("main_bindbox::show")
+                end)
+            end,
         })
         add_separator()
         table.insert(items, {
