@@ -481,6 +481,7 @@ function M.object:hide(context)
     if type(self._private.on_hide) == "function" then
         self._private.on_hide(self)
     end
+    self:emit_signal("menu::hide", context)
 
     if self._private.keygrabber_auto and self._private.keygrabber then
         self._private.keygrabber:stop()
@@ -648,6 +649,7 @@ function M.object:show(args, context, force)
             return
         end
     end
+    self:emit_signal("menu::show", args, context)
 
     self._private.layout = base.make_widget_from_value(self._private.layout_template) --[[@as wibox.layout]]
     self._private.layout_container:set_widget(self._private.layout)
@@ -666,6 +668,7 @@ function M.object:show(args, context, force)
             item.on_ready(item_widget, item, self, args, context)
         end
     end
+    self:emit_signal("menu::ready", args, context)
 
     if self._private.keygrabber_auto and self._private.keygrabber then
         self._private.keygrabber:start()
