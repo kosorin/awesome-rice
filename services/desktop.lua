@@ -169,6 +169,17 @@ local all_icon_types = {
 ---Enum of supported icon exts.
 local supported_icon_file_exts = { svg = 1, png = 2, xpm = 3 }
 
+---@type string[]?
+local icon_lookup_paths_cache
+
+---@type table<string, string|false>?
+local lookup_icon_cache
+
+function M.clear_cache()
+    icon_lookup_paths_cache = nil
+    lookup_icon_cache = nil
+end
+
 ---Get a list of icon lookup paths, uncached.
 ---@return string[] # A list of directories, without trailing slash.
 function M.get_icon_lookup_paths_uncached()
@@ -229,18 +240,14 @@ function M.get_icon_lookup_paths_uncached()
     return add_if_readable(icon_lookup_path, paths)
 end
 
-do
-    local icon_lookup_paths_cache
-
-    ---Get a list of icon lookup paths.
-    ---@return string[] # A list of directories, without trailing slash.
-    function M.get_icon_lookup_paths()
-        if not icon_lookup_paths_cache then
-            icon_lookup_paths_cache = M.get_icon_lookup_paths_uncached()
-        end
-
-        return icon_lookup_paths_cache
+---Get a list of icon lookup paths.
+---@return string[] # A list of directories, without trailing slash.
+function M.get_icon_lookup_paths()
+    if not icon_lookup_paths_cache then
+        icon_lookup_paths_cache = M.get_icon_lookup_paths_uncached()
     end
+
+    return icon_lookup_paths_cache
 end
 
 ---Lookup an icon in different folders of the filesystem.
@@ -277,23 +284,21 @@ function M.lookup_icon_uncached(icon_name)
     end
 end
 
-do
-    ---@type table<string, string|false>
-    local lookup_icon_cache = {}
-
-    ---Lookup an icon in different folders of the filesystem (cached).
-    ---@param icon_name? string # Short or full name of the icon.
-    ---@param default_icon? string # Icon path.
-    ---@return string? # Full name of the icon.
-    function M.lookup_icon(icon_name, default_icon)
-        if not icon_name then
-            return default_icon or theme.application.default_icon
-        end
-        if not lookup_icon_cache[icon_name] and lookup_icon_cache[icon_name] ~= false then
-            lookup_icon_cache[icon_name] = M.lookup_icon_uncached(icon_name)
-        end
-        return lookup_icon_cache[icon_name] or default_icon or theme.application.default_icon
+---Lookup an icon in different folders of the filesystem (cached).
+---@param icon_name? string # Short or full name of the icon.
+---@param default_icon? string # Icon path.
+---@return string? # Full name of the icon.
+function M.lookup_icon(icon_name, default_icon)
+    if not icon_name then
+        return default_icon or theme.application.default_icon
     end
+    if not lookup_icon_cache then
+        lookup_icon_cache = {}
+    end
+    if not lookup_icon_cache[icon_name] and lookup_icon_cache[icon_name] ~= false then
+        lookup_icon_cache[icon_name] = M.lookup_icon_uncached(icon_name)
+    end
+    return lookup_icon_cache[icon_name] or default_icon or theme.application.default_icon
 end
 
 ---Parse a .desktop file.
@@ -556,6 +561,7 @@ do
     ---Loads all .desktop files and emits signal `desktop::files` with .desktop files as a first argument.
     ---@param callback? fun(desktop_files: DesktopFileCollection) # Will be fired when all the files were parsed with the resulting list of menu entries as argument.
     function M.load_desktop_files(callback)
+        M.clear_cache()
         local all_desktop_files = {}
         local all_directories = get_xdg_directories()
         local directory_count = #all_directories
