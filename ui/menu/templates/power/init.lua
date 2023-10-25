@@ -102,9 +102,9 @@ function M.new()
                 callback = power_service.lock_session,
             },
             mebox.separator,
-            mebox.header("Shut Down Timer"),
+            mebox.header("Timer"),
             {
-                icon = config.places.theme .. "/icons/power.svg",
+                icon = config.places.theme .. "/icons/timer-outline.svg",
                 submenu = timer_menu_template.shared,
                 on_hide = function(item, menu)
                     -- TODO: Pass `item_widget` in `on_hide` callback?
