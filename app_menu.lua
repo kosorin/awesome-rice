@@ -9,9 +9,10 @@ local config = require("config")
 
 ---@class AppMenu.Category
 ---@field id string|string[] # Category ID. Registered categories: https://specifications.freedesktop.org/menu-spec/latest/apa.html
----@field name string
----@field icon_name? string
----@field icon_color? string
+---@field name? string # Menu item name.
+---@field icon? string # Icon path.
+---@field icon_name? string # Icon name. Uses current icon theme.
+---@field icon_color? string # Icon color for SVG icons.
 ---@field enabled? boolean
 
 ---@class AppMenu.Item
@@ -31,18 +32,8 @@ local config = require("config")
 ---@field categories? table<string, AppMenu.Category>
 local app_menu = {
     favorites = {
-        {
-            command = config.apps.terminal,
-            name = "Terminal",
-            icon = config.places.theme .. "/icons/console-line.svg",
-            icon_color = beautiful.palette.gray,
-        },
-        {
-            command = config.apps.calculator,
-            name = "Calculator",
-            icon = config.places.theme .. "/icons/calculator.svg",
-            icon_color = beautiful.palette.magenta,
-        },
+        "Alacritty.desktop",
+        "speedcrunch.desktop",
         "brave-browser.desktop",
         "spotify.desktop",
         "freetube.desktop",
