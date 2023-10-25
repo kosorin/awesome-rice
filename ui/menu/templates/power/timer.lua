@@ -111,9 +111,9 @@ M.power_action_item_template = {
 ---@param context Mebox.context
 ---@return boolean?
 local function change_power_action_callback(item, menu, context)
-    menu.power_action = item.power_action
+    menu.power_request = item.power_request
     for i, x in ipairs(menu._private.items) do
-        if x.power_action then
+        if x.power_request then
             x.checked = x == item
             menu:update_item(i)
         end
@@ -124,8 +124,9 @@ end
 ---@param default_timeout? integer
 ---@return Mebox.new.args
 function M.new(default_timeout)
-    local default_hours = floor((default_timeout or power_service.config.default_timeout) / 60)
-    local default_minutes = floor(default_timeout or power_service.config.default_timeout % 60)
+    local total_minutes = (default_timeout or power_service.config.default_timeout) // 60
+    local default_hours = floor(total_minutes / 60)
+    local default_minutes = floor(total_minutes % 60)
 
     local hours, minutes = default_hours, default_minutes
 
@@ -182,6 +183,17 @@ function M.new(default_timeout)
         set_minutes(value)
     end
 
+    local shutdown_request = {
+        action = power_service.shutdown,
+        reason = "Shut down",
+    }
+    local suspend_request = {
+        action = power_service.suspend,
+        reason = "Suspend",
+    }
+
+    local default_request = shutdown_request
+
     ---@type Mebox.new.args
     local args = {
         item_width = dpi(192),
@@ -226,7 +238,12 @@ function M.new(default_timeout)
                 icon = config.places.theme .. "/icons/play.svg",
                 icon_color = beautiful.palette.green,
                 callback = function(item, menu)
-                    power_service.start_timer((hours * 60) + minutes, menu.power_action)
+                    local request = menu.power_request or default_request
+                    power_service.start_timer {
+                        timeout = hours * 3600 + minutes * 60,
+                        action = request.action,
+                        reason = request.reason,
+                    }
                 end,
             },
             {
@@ -348,16 +365,16 @@ function M.new(default_timeout)
             mebox.separator,
             mebox.header("Action"),
             {
-                power_action = power_service.shutdown,
+                power_request = shutdown_request,
                 text = "Shut down",
-                checked = true,
+                checked = default_request == shutdown_request,
                 callback = change_power_action_callback,
                 template = M.power_action_item_template,
             },
             {
-                power_action = power_service.suspend,
+                power_request = suspend_request,
                 text = "Suspend",
-                checked = false,
+                checked = default_request == suspend_request,
                 callback = change_power_action_callback,
                 template = M.power_action_item_template,
             },

@@ -182,4 +182,10 @@ ruled.notification.connect_signal("request::rules", function()
             style = beautiful.notification.styles.critical,
         },
     }
+    ruled.notification.append_rule {
+        rule = { category = "awesome.power.timer" },
+        properties = {
+            never_timeout = false,
+        },
+    }
 end)

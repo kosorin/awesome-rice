@@ -274,7 +274,6 @@ theme.notification.default_style = setmetatable({
     header_fg = theme.common.fg_bright,
     header_border_color = theme.common.bg_bright,
     header_paddings = hui.thickness { dpi(12), dpi(16) },
-    placement = false,
     paddings = hui.thickness { dpi(16) },
     icon_spacing = dpi(12),
     timer_height = dpi(3),

@@ -3,20 +3,23 @@ local os_execute = os.execute
 local os_time = os.time
 local gtimer = require("gears.timer")
 local config = require("config")
+local naughty = require("naughty")
+local maxinteger = math.maxinteger
 
 
 local power_service = {
     config = {
-        default_timeout = 60, -- minutes
+        default_timeout = 3600, -- seconds
+        minimum_timeout = 15, -- seconds
         alert_threshold = 60, -- seconds
     },
 }
 
 local function execute(command)
-    if true then
-        os_execute(command)
+    if DEBUG then
+        print("power timer command: ", command)
     else
-        print("power timer: " .. command)
+        os_execute(command)
     end
 end
 
@@ -46,6 +49,7 @@ end
 
 do
     local current_timer
+    local alert_notification
 
     function power_service.get_timer_status()
         local remaining_seconds
@@ -62,7 +66,34 @@ do
     end
 
     local function timer_tick()
-        capi.awesome.emit_signal("power::timer", power_service.get_timer_status())
+        local status = power_service.get_timer_status()
+
+        if (tonumber(status) or maxinteger) <= power_service.config.alert_threshold then
+            local reason = current_timer and current_timer.reason or "Execute"
+            if not alert_notification then
+                local execute_action = naughty.action { name = string.format("%s now", reason) }
+                local stop_action = naughty.action { name = "Stop timer" }
+                execute_action:connect_signal("invoked", power_service.execute_now)
+                stop_action:connect_signal("invoked", power_service.stop_timer)
+                alert_notification = naughty.notification {
+                    title = "Power timer",
+                    urgency = "critical",
+                    timeout = status,
+                    category = "awesome.power.timer",
+                    actions = { execute_action, stop_action },
+                }
+            end
+            alert_notification.message = string.format("%s in %i seconds", reason or "Execute", status)
+        end
+
+        if not status then
+            if alert_notification then
+                alert_notification:destroy()
+            end
+            alert_notification = nil
+        end
+
+        capi.awesome.emit_signal("power::timer", status)
     end
 
     function power_service.stop_timer()
@@ -77,26 +108,38 @@ do
         timer_tick()
     end
 
-    function power_service.start_timer(minutes, action)
+    function power_service.execute_now()
+        if not current_timer then
+            return
+        end
+
+        local action = current_timer.action
+
+        power_service.stop_timer()
+        action()
+    end
+
+    function power_service.start_timer(request)
         power_service.stop_timer()
 
-        minutes = tonumber(minutes) or power_service.config.default_timeout
-        if minutes < 1 then
-            minutes = 1
+        local timeout = tonumber(request.timeout) or power_service.config.default_timeout
+        if timeout < power_service.config.minimum_timeout then
+            timeout = power_service.config.minimum_timeout
         end
-        action = action or power_service.shutdown
 
-        local seconds = minutes * 60
+        local action = request.action or power_service.shutdown
+
         current_timer = {
             action = action,
+            reason = request.reason,
             start = os_time(),
-            seconds = seconds,
+            seconds = timeout,
             countdown_timer = gtimer {
                 timeout = 1,
                 callback = timer_tick,
             },
             action_timer = gtimer {
-                timeout = seconds,
+                timeout = timeout,
                 single_shot = true,
                 callback = function()
                     power_service.stop_timer()
