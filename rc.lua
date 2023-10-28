@@ -7,6 +7,7 @@ require("config")
 require("theme.manager").initialize()
 
 require("core")
+require("rice")
 require("services")
 require("ui")
 

@@ -1,0 +1,87 @@
+local binding = require("io.binding")
+local mod = binding.modifier
+local btn = binding.button
+
+---@type BindboxGroup
+return {
+    name = "mpv",
+    rule = { rule = { instance = "gl", class = "mpv" } },
+    bg = "#5f2060",
+    { "q", description = "Quit" },
+    { modifiers = { mod.shift }, "q", description = "Store the playback position and quit" },
+    { "f", description = "Toggle fullscreen" },
+    groups = {
+        {
+            name = "Playback",
+            { "space", "p", description = "Toggle pause" },
+            { ",", ".", description = "Step backward/forward 1 frame" },
+            { modifiers = { mod.shift }, "Left", "Right", description = "Seek backward/forward 1 second" },
+            { "Left", "Right", description = "Seek backward/forward 5 seconds" },
+            { "Up", "Down", description = "Seek backward/forward 1 minute" },
+            { binding.button.wheel_up, binding.button.wheel_down, description = "Seek backward/forward 10 seconds" },
+            { "l", description = "Set/clear A-B loop points" },
+            { modifiers = { mod.shift }, "l", description = "Toggle infinite looping" },
+            { "[", "]", description = "Decrease/increase current playback speed by 10%" },
+            { "{", "}", description = "Halve/double current playback speed" },
+            { "BackSpace", description = "Reset playback speed to normal" },
+        },
+        {
+            name = "Video",
+            { "_", description = "Cycle through the available video tracks" },
+            { "w", "W", description = "Decrease/increase pan-and-scan range" },
+            { modifiers = { mod.shift }, "a", description = "Cycle aspect ratio override" },
+            { "1", "2", description = "Adjust contrast" },
+            { "3", "4", description = "Adjust brightness" },
+            { "5", "6", description = "Adjust gamma" },
+            { "7", "8", description = "Adjust saturation" },
+            { modifiers = { mod.alt }, "Left", "Up", "Right", "Down", description = "Move the video rectangle" },
+            { modifiers = { mod.alt }, "+", "-", description = "Zoom the video" },
+            { modifiers = { mod.alt }, "BackSpace", description = "Reset the pan/zoom settings" },
+        },
+        {
+            name = "Audio",
+            { "#", description = "Cycle through the available audio tracks" },
+            { "m", description = "Mute sound" },
+            { binding.button.wheel_left, "/", "9", description = "Decrease volume" },
+            { binding.button.wheel_right, "*", "0", description = "Increase volume" },
+            { modifiers = { mod.control }, "+", "-", description = "Adjust audio delay by +/- 0.1 seconds" },
+        },
+        {
+            name = "Subtitles",
+            { "v", description = "Toggle subtitle visibility" },
+            { "j", "J", description = "Cycle through the available subtitles" },
+            { "z", "Z", description = "Adjust subtitle delay by +/- 0.1 seconds" },
+            {
+                modifiers = { mod.control },
+                "Left",
+                "Right",
+                description = "Seek to the previous/next subtitle",
+            },
+            {
+                modifiers = { mod.control, mod.shift },
+                "Left",
+                "Right",
+                description = "Adjust subtitle delay so that the previous/next subtitle is displayed now",
+            },
+            { "r", "R", description = "Move subtitles up/down" },
+            { modifiers = { mod.shift }, "g", "f", description = "Adjust subtitle font size by +/- 10%" },
+        },
+        {
+            name = "Playlist",
+            { "&lt;", "&gt;", description = "Go backward/forward" },
+            { "Return", description = "Go forward" },
+            { binding.button.extra_back, binding.button.extra_forward, description = "Skip to previous/next entry" },
+            { "F8", description = "Show the playlist and the current position in it" },
+        },
+        {
+            name = "Other",
+            { modifiers = {}, "s", description = "Take a screenshot" },
+            { modifiers = { mod.shift }, "s", description = "Take a screenshot without subtitles" },
+            { modifiers = { mod.control }, "s", description = "Take a screenshot as the window shows it" },
+            { "o", "O", description = "Show/toggle OSD playback" },
+            { "i", "I", description = "Show/toggle an overlay displaying statistics" },
+            { "F9", description = "Show the list of audio and subtitle streams" },
+            { "`", description = "Show the console" },
+        },
+    },
+}
