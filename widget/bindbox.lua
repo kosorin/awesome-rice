@@ -1131,4 +1131,8 @@ function M.new(args)
     return self
 end
 
+M.main = M.new {
+    include_awesome_bindings = true,
+}
+
 return setmetatable(M, M.mt)

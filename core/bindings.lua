@@ -17,11 +17,7 @@ local config = require("config")
 local hclient = require("utils.client")
 
 
-local main_bindbox = bindbox.new{
-    include_awesome_bindings = true,
-}
-
-main_bindbox:add_groups {
+bindbox.main:add_groups {
     { name = "System" },
     { name = "Awesome" },
     { name = "Launcher" },
@@ -52,11 +48,6 @@ main_bindbox:add_groups {
         },
     },
 }
-
-capi.awesome.connect_signal("main_bindbox::show", function()
-    main_bindbox:show()
-end)
-
 
 binding.add_global_range {
 
@@ -116,7 +107,7 @@ binding.add_global_range {
         triggers = "h",
         path = "Awesome",
         description = "Keyboard shortcuts",
-        on_press = function() main_bindbox:show() end,
+        on_press = function() bindbox.main:show() end,
     },
 
     binding.new {
@@ -700,7 +691,7 @@ binding.add_client_range {
 }
 
 
-main_bindbox:add_group {
+bindbox.main:add_group {
     name = "mpv",
     rule = { rule = { instance = "gl", class = "mpv" } },
     bg = "#5f2060",
@@ -783,7 +774,7 @@ main_bindbox:add_group {
     },
 }
 
-main_bindbox:add_group {
+bindbox.main:add_group {
     name = "feh",
     rule = { rule = { instance = "feh", class = "feh" } },
     bg = "#70011a",
@@ -837,8 +828,4 @@ main_bindbox:add_group {
             { "h", description = "Pause/continue the slideshow" },
         },
     },
-}
-
-return {
-    main_bindbox = main_bindbox,
 }

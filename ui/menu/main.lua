@@ -5,6 +5,7 @@ local beautiful = require("theme.theme")
 local config = require("config")
 local gtimer = require("gears.timer")
 local mebox = require("widget.mebox")
+local bindbox = require("widget.bindbox")
 local menu_templates = require("ui.menu.templates")
 local app_menu = require("app_menu")
 local dpi = Dpi
@@ -55,7 +56,7 @@ return mebox {
             icon_color = beautiful.palette.blue,
             callback = function()
                 gtimer.delayed_call(function()
-                    capi.awesome.emit_signal("main_bindbox::show")
+                    bindbox.main:show()
                 end)
             end,
         })
