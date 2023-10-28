@@ -19,6 +19,7 @@ local aplacement = require("awful.placement")
 local widget_helper = require("utils.widget")
 local htable = require("utils.table")
 local hui = require("utils.ui")
+local ucolor = require("utils.color")
 
 
 local network_widget = { mt = {} }
@@ -164,7 +165,7 @@ function network_widget.new(wibar)
                         beautiful.palette.red_bright,
                     },
                     nan_indication = true,
-                    nan_color = beautiful.palette.red,
+                    nan_color = ucolor.transparent,
                     step_width = 2,
                     step_spacing = 0,
                     min_value = -max_upload_speed,
