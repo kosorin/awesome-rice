@@ -17,11 +17,6 @@ local config = require("config")
 local hclient = require("utils.client")
 
 
----@type table<client, screen>
-local fullscreen_restore_screens = setmetatable({}, { __mode = "kv" })
-
--- Available keys with `super` modifier: gstpzxcv jlyiok
-
 local main_bindbox = bindbox.new()
 
 main_bindbox:add_groups {
@@ -658,20 +653,7 @@ binding.add_client_range {
         path = { "Client", "State" },
         description = "Fullscreen",
         on_press = function(_, client)
-            ---@cast client client
-            local client_screen = client.screen
-            if not client.fullscreen then
-                fullscreen_restore_screens[client] = nil
-                client.fullscreen = true
-            else
-                local restore_screen = fullscreen_restore_screens[client]
-                if restore_screen and restore_screen ~= client_screen then
-                    client:move_to_screen(restore_screen)
-                    fullscreen_restore_screens[client] = nil
-                end
-                client.fullscreen = false
-            end
-            client:raise()
+            hclient.fullscreen(client, false)
         end,
     },
 
@@ -681,22 +663,7 @@ binding.add_client_range {
         path = { "Client", "State" },
         description = "Fullscreen on primary screen",
         on_press = function(_, client)
-            ---@cast client client
-            local primary_screen = capi.screen["primary"]
-            local client_screen = client.screen
-            if not client.fullscreen or client_screen ~= primary_screen then
-                fullscreen_restore_screens[client] = client_screen
-                client:move_to_screen(primary_screen)
-                client.fullscreen = true
-            else
-                local restore_screen = fullscreen_restore_screens[client]
-                if restore_screen and restore_screen ~= client_screen then
-                    client:move_to_screen(restore_screen)
-                    fullscreen_restore_screens[client] = nil
-                end
-                client.fullscreen = false
-            end
-            client:raise()
+            hclient.fullscreen(client, true)
         end,
     },
 

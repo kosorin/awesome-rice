@@ -409,4 +409,41 @@ function M.mouse_resize(client)
     })
 end
 
+---@type table<client, screen>
+local fullscreen_restore_screens = setmetatable({}, { __mode = "kv" })
+
+---@param client client
+---@param on_primary_screen? boolean
+function M.fullscreen(client, on_primary_screen)
+    local client_screen = client.screen
+    if on_primary_screen then
+        local primary_screen = capi.screen["primary"]
+        if not client.fullscreen or client_screen ~= primary_screen then
+            fullscreen_restore_screens[client] = client_screen
+            client:move_to_screen(primary_screen)
+            client.fullscreen = true
+        else
+            local restore_screen = fullscreen_restore_screens[client]
+            if restore_screen and restore_screen ~= client_screen then
+                client:move_to_screen(restore_screen)
+                fullscreen_restore_screens[client] = nil
+            end
+            client.fullscreen = false
+        end
+    else
+        if not client.fullscreen then
+            fullscreen_restore_screens[client] = nil
+            client.fullscreen = true
+        else
+            local restore_screen = fullscreen_restore_screens[client]
+            if restore_screen and restore_screen ~= client_screen then
+                client:move_to_screen(restore_screen)
+                fullscreen_restore_screens[client] = nil
+            end
+            client.fullscreen = false
+        end
+    end
+    client:raise()
+end
+
 return M
