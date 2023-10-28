@@ -1027,7 +1027,7 @@ end
 
 
 ---@class Bindbox.new.args
----@field include_awesome_bindings? boolean # Default: `true`
+---@field include_awesome_bindings? boolean # Default: `false`
 
 ---@param args? Bindbox.new.args
 ---@return Bindbox
@@ -1106,7 +1106,7 @@ function M.new(args)
 
     self._private.matcher = gmatcher()
     self._private.source_binding_tree = utree.new()
-    self._private.include_awesome_bindings = args.include_awesome_bindings ~= false
+    self._private.include_awesome_bindings = not not args.include_awesome_bindings
 
     self:initialize_style(beautiful.bindbox.default_style, self.widget)
 

@@ -17,7 +17,9 @@ local config = require("config")
 local hclient = require("utils.client")
 
 
-local main_bindbox = bindbox.new()
+local main_bindbox = bindbox.new{
+    include_awesome_bindings = true,
+}
 
 main_bindbox:add_groups {
     { name = "System" },
