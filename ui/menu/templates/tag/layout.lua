@@ -7,7 +7,6 @@ local pango = require("utils.pango")
 local hui = require("utils.ui")
 local css = require("utils.css")
 local common = require("ui.menu.templates.tag._common")
-local core_layouts = require("core.layouts")
 local mebox = require("widget.mebox")
 
 
@@ -117,12 +116,12 @@ function M.new()
                 local layout = layouts[i]
 
                 local name = layout.name or ""
-                local icon = beautiful.layout_icons[name]
                 local checked = tag.layout == layout
+                local style = beautiful.layouts[name] or {}
 
                 items[i] = {
-                    text = core_layouts.name[name] or name,
-                    icon = icon,
+                    text = style.text or name,
+                    icon = style.icon,
                     checked = checked,
                     callback = function() tag.layout = layout end,
                     template = M.item_template,

@@ -833,11 +833,23 @@ function theme.build_layout_stylesheet(color)
     }
 end
 
-theme.layout_icons = {
-    tile = config.places.theme .. "/icons/layouts/tile.right.svg",
-    floating = config.places.theme .. "/icons/layouts/floating.svg",
-    max = config.places.theme .. "/icons/layouts/max.svg",
-    fullscreen = config.places.theme .. "/icons/layouts/fullscreen.svg",
+theme.layouts = {
+    tiling = {
+        text = "Tiling",
+        icon = config.places.theme .. "/icons/layouts/tiling.right.svg",
+    },
+    floating = {
+        text = "Floating",
+        icon = config.places.theme .. "/icons/layouts/floating.svg",
+    },
+    max = {
+        text = "Maximize",
+        icon = config.places.theme .. "/icons/layouts/max.svg",
+    },
+    fullscreen = {
+        text = "Fullscreen",
+        icon = config.places.theme .. "/icons/layouts/fullscreen.svg",
+    },
 }
 
 ----------------------------------------------------------------------------------------------------

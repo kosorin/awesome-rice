@@ -26,10 +26,11 @@ function layoutbox:update_from_tag(tag)
 end
 
 function layoutbox:update()
-    local name = alayout.getname(alayout.get(self._private.wibar.screen))
-    local icon = beautiful.layout_icons[name]
-    self.widget.text.text = icon and "" or name
-    self.widget.icon.image = icon
+    local layout = alayout.get(self._private.wibar.screen)
+    local name = alayout.getname(layout)
+    local style = beautiful.layouts[name] or {}
+    self.widget.text.text = style.icon and "" or name
+    self.widget.icon.image = style.icon
 end
 
 function layoutbox.new(wibar)

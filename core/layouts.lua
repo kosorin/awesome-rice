@@ -1,31 +1,31 @@
 local capi = Capi
+local ipairs = ipairs
 local awful = require("awful")
 local suit = require("awful.layout.suit")
 local tilted = require("layouts.tilted")
 
 
 local layouts = {
-    default = {
-        tile = tilted.new("tile"),
-        floating = suit.floating,
-        max = suit.max,
-        fullscreen = suit.max.fullscreen,
-    },
-    name = {
-        tile = "Tiling",
-        floating = "Floating",
-        max = "Maximize",
-        fullscreen = "Fullscreen",
-    },
+    default = setmetatable({
+        tilted.new("tiling"),
+        suit.floating,
+        suit.max,
+        suit.max.fullscreen,
+    }, {
+        __index = function(t, k)
+            if type(k) == "string" then
+                for _, layout in ipairs(t) do
+                    if layout.name == k then
+                        return layout
+                    end
+                end
+            end
+        end,
+    }),
 }
 
 capi.tag.connect_signal("request::default_layouts", function()
-    awful.layout.append_default_layouts {
-        layouts.default.tile,
-        layouts.default.floating,
-        layouts.default.max,
-        layouts.default.fullscreen,
-    }
+    awful.layout.append_default_layouts(layouts.default)
 end)
 
 return layouts
