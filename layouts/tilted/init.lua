@@ -554,6 +554,7 @@ function tilted.object.skip_gap(tiled_client_count, tag)
     return tiled_client_count == 1 and tag.master_fill_policy == "expand"
 end
 
+---@return awful.layout
 function tilted.new(name, args)
     args = args or {}
 

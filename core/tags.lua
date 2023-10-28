@@ -2,6 +2,7 @@ local capi = Capi
 local ipairs = ipairs
 local awful = require("awful")
 local gtable = require("gears.table")
+local rice_layouts = require("rice.layouts")
 
 
 local tags = {
@@ -36,6 +37,10 @@ function tags.add_volatile_tag(screen, name)
     })
     return tag
 end
+
+capi.tag.connect_signal("request::default_layouts", function()
+    awful.layout.append_default_layouts(rice_layouts.default)
+end)
 
 capi.screen.connect_signal("request::desktop_decoration", function(screen)
     for index = 1, DEBUG and 4 or 9 do

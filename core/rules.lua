@@ -7,7 +7,6 @@ local gtimer = require("gears.timer")
 local ruled = require("ruled")
 local binding = require("io.binding")
 local helper_client = require("utils.client")
-local core_layouts = require("core.layouts")
 local core_tags = require("core.tags")
 local mod = binding.modifier
 local btn = binding.button
