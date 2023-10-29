@@ -1,3 +1,4 @@
+local capi = Capi
 local select = select
 local table = table
 local string = string
@@ -9,7 +10,6 @@ local btn = binding.button
 local beautiful = require("theme.theme")
 local gshape = require("gears.shape")
 local dpi = Dpi
-local aspawn = require("awful.spawn")
 local gtable = require("gears.table")
 local gcolor = require("gears.color")
 local hstring = require("utils.string")
@@ -23,7 +23,7 @@ local humanizer = require("utils.humanizer")
 local mebox = require("widget.mebox")
 local media_player_menu_template = require("ui.menu.templates.media_player")
 local media_player = require("services.media").player
-local hui = require("utils.thickness")
+local thickness = require("utils.thickness")
 
 
 ---@type utils.humanizer.relative_time.args
@@ -111,6 +111,7 @@ M.object = {}
 ---@class MediaPlayer.private
 ---@field wibar unknown
 ---@field content_container Capsule
+---@field app_button Capsule
 ---@field previous_button Capsule
 ---@field play_pause_button Capsule
 ---@field next_button Capsule
@@ -165,6 +166,7 @@ local function update_player(self, player_data)
         local button_style = player_data
             and beautiful.capsule.styles.normal
             or beautiful.capsule.styles.disabled
+        self._private.app_button:apply_style(button_style)
         self._private.previous_button:apply_style(button_style)
         self._private.play_pause_button:apply_style(button_style)
         self._private.next_button:apply_style(button_style)
@@ -342,14 +344,17 @@ local function initialize_buttons(self)
         button.widget:set_stylesheet(css.style { path = { fill = gcolor.ensure_pango_color(fg) } })
     end
 
+    self._private.app_button = self:get_children_by_id("#app")[1] --[[@as Capsule]]
     self._private.previous_button = self:get_children_by_id("#previous")[1] --[[@as Capsule]]
     self._private.play_pause_button = self:get_children_by_id("#play_pause")[1] --[[@as Capsule]]
     self._private.next_button = self:get_children_by_id("#next")[1] --[[@as Capsule]]
 
+    self._private.app_button.fg = tcolor.transparent
     self._private.previous_button.fg = tcolor.transparent
     self._private.play_pause_button.fg = tcolor.transparent
     self._private.next_button.fg = tcolor.transparent
 
+    self._private.app_button:connect_signal("property::fg", update_icon_color)
     self._private.previous_button:connect_signal("property::fg", update_icon_color)
     self._private.play_pause_button:connect_signal("property::fg", update_icon_color)
     self._private.next_button:connect_signal("property::fg", update_icon_color)
@@ -403,7 +408,7 @@ function M.new(wibar)
         {
             id = "no_player_button",
             widget = capsule,
-            margins = hui.new { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
+            margins = thickness.new { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
             {
                 layout = wibox.layout.fixed.horizontal,
                 spacing = beautiful.capsule.item_content_spacing,
@@ -422,90 +427,113 @@ function M.new(wibar)
         {
             id = "player_container",
             widget = wibox.container.constraint,
-            strategy = "exact",
-            width = dpi(500),
+            strategy = "max",
+            width = dpi(600),
             {
-                layout = wibox.layout.fixed.horizontal,
-                reverse = true,
-                fill_space = true,
+                layout = wibox.layout.align.horizontal,
+                expand = "inside",
+                {
+                    id = "#app",
+                    widget = capsule,
+                    margins = thickness.new { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
+                    paddings = thickness.new { dpi(6), beautiful.capsule.default_style.paddings.right },
+                    shape = left_shape,
+                    buttons = binding.awful_buttons {
+                        binding.awful({}, btn.left, function()
+                            local player_data = media_player:get_primary_player_data()
+                            if not player_data then
+                                return
+                            end
+                            for _, client in ipairs(capi.client.get()) do
+                                if string.lower(client.class) == string.lower(player_data.name) then
+                                    client:activate {
+                                        switch_to_tag = true,
+                                        raise = true,
+                                    }
+                                    break
+                                end
+                            end
+                        end),
+                    },
+                    {
+                        id = "#icon",
+                        widget = wibox.widget.imagebox,
+                        image = config.places.theme .. "/icons/music.svg",
+                        resize = true,
+                    },
+                },
                 {
                     id = "#content_container",
                     widget = capsule,
                     enable_overlay = false,
-                    margins = hui.new { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
-                    shape = left_shape,
+                    margins = thickness.new { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
+                    shape = false,
                     {
                         layout = wibox.layout.fixed.horizontal,
-                        spacing = beautiful.capsule.item_content_spacing,
+                        reverse = true,
+                        fill_space = true,
+                        spacing = beautiful.capsule.item_spacing,
                         {
-                            id = "#icon",
+                            id = "#text",
+                            widget = wibox.widget.textbox,
+                            halign = "left",
+                        },
+                        {
+                            id = "#time",
+                            widget = wibox.widget.textbox,
+                            halign = "right",
+                        },
+                    },
+                },
+                {
+                    layout = wibox.layout.fixed.horizontal,
+                    {
+                        id = "#previous",
+                        widget = capsule,
+                        margins = thickness.new { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
+                        paddings = thickness.new { dpi(6), left = beautiful.capsule.default_style.paddings.left },
+                        shape = false,
+                        buttons = binding.awful_buttons {
+                            binding.awful({}, btn.left, function() media_player:previous() end),
+                        },
+                        {
+                            widget = wibox.widget.imagebox,
+                            image = config.places.theme .. "/icons/skip-previous.svg",
+                            resize = true,
+                        },
+                    },
+                    {
+                        id = "#play_pause",
+                        widget = capsule,
+                        margins = thickness.new { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
+                        paddings = thickness.new {
+                            dpi(6),
+                            left = beautiful.capsule.default_style.paddings.left,
+                            right = beautiful.capsule.default_style.paddings.right,
+                        },
+                        shape = false,
+                        buttons = binding.awful_buttons {
+                            binding.awful({}, btn.left, function() media_player:play_pause() end),
+                        },
+                        {
                             widget = wibox.widget.imagebox,
                             resize = true,
                         },
-                        {
-                            layout = wibox.layout.fixed.horizontal,
-                            reverse = true,
-                            fill_space = true,
-                            spacing = beautiful.capsule.item_spacing,
-                            {
-                                id = "#text",
-                                widget = wibox.widget.textbox,
-                                halign = "left",
-                            },
-                            {
-                                id = "#time",
-                                widget = wibox.widget.textbox,
-                                halign = "right",
-                            },
+                    },
+                    {
+                        id = "#next",
+                        widget = capsule,
+                        margins = thickness.new { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
+                        paddings = thickness.new { dpi(6), right = beautiful.capsule.default_style.paddings.right },
+                        shape = right_shape,
+                        buttons = binding.awful_buttons {
+                            binding.awful({}, btn.left, function() media_player:next() end),
                         },
-                    },
-                },
-                {
-                    id = "#previous",
-                    widget = capsule,
-                    margins = hui.new { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
-                    paddings = hui.new { dpi(6), left = beautiful.capsule.default_style.paddings.left },
-                    shape = false,
-                    buttons = binding.awful_buttons {
-                        binding.awful({}, btn.left, function() media_player:previous() end),
-                    },
-                    {
-                        widget = wibox.widget.imagebox,
-                        image = config.places.theme .. "/icons/skip-previous.svg",
-                        resize = true,
-                    },
-                },
-                {
-                    id = "#play_pause",
-                    widget = capsule,
-                    margins = hui.new { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
-                    paddings = hui.new {
-                        dpi(6),
-                        left = beautiful.capsule.default_style.paddings.left,
-                        right = beautiful.capsule.default_style.paddings.right,
-                    },
-                    shape = false,
-                    buttons = binding.awful_buttons {
-                        binding.awful({}, btn.left, function() media_player:play_pause() end),
-                    },
-                    {
-                        widget = wibox.widget.imagebox,
-                        resize = true,
-                    },
-                },
-                {
-                    id = "#next",
-                    widget = capsule,
-                    margins = hui.new { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
-                    paddings = hui.new { dpi(6), right = beautiful.capsule.default_style.paddings.right },
-                    shape = right_shape,
-                    buttons = binding.awful_buttons {
-                        binding.awful({}, btn.left, function() media_player:next() end),
-                    },
-                    {
-                        widget = wibox.widget.imagebox,
-                        image = config.places.theme .. "/icons/skip-next.svg",
-                        resize = true,
+                        {
+                            widget = wibox.widget.imagebox,
+                            image = config.places.theme .. "/icons/skip-next.svg",
+                            resize = true,
+                        },
                     },
                 },
             },
