@@ -2,13 +2,12 @@ local capi = Capi
 local awful = require("awful")
 local aplacement = require("awful.placement")
 local beautiful = require("theme.theme")
-local helper_client = require("utils.client")
+local cclient = require("core.client")
 local binding = require("core.binding")
 local mod = binding.modifier
 local btn = binding.button
 local menu_templates = require("ui.menu.templates")
 local mebox = require("widget.mebox")
-local hclient = require("utils.client")
 
 
 local client_bindings = {
@@ -42,7 +41,7 @@ local client_bindings = {
         description = "Move",
         on_press = function(_, client)
             client:activate { context = "mouse_click" }
-            helper_client.mouse_move(client)
+            cclient.mouse_move(client)
         end,
     },
 
@@ -53,7 +52,7 @@ local client_bindings = {
         description = "Resize",
         on_press = function(_, client)
             client:activate { context = "mouse_click" }
-            helper_client.mouse_resize(client)
+            cclient.mouse_resize(client)
         end,
     },
 
@@ -108,7 +107,7 @@ local client_bindings = {
         triggers = binding.group.arrows,
         path = "Client",
         description = "Move",
-        on_press = function(trigger, client) hclient.move(client, trigger.direction) end,
+        on_press = function(trigger, client) cclient.move(client, trigger.direction) end,
     },
 
     binding.new {
@@ -116,7 +115,7 @@ local client_bindings = {
         triggers = binding.group.arrows,
         path = "Client",
         description = "Resize",
-        on_press = function(trigger, client) hclient.resize(client, trigger.direction) end,
+        on_press = function(trigger, client) cclient.resize(client, trigger.direction) end,
     },
 
 
@@ -164,7 +163,7 @@ local client_bindings = {
         path = { "Client", "State" },
         description = "Fullscreen",
         on_press = function(_, client)
-            hclient.fullscreen(client, false)
+            cclient.fullscreen(client, false)
         end,
     },
 
@@ -174,7 +173,7 @@ local client_bindings = {
         path = { "Client", "State" },
         description = "Fullscreen on primary screen",
         on_press = function(_, client)
-            hclient.fullscreen(client, true)
+            cclient.fullscreen(client, true)
         end,
     },
 

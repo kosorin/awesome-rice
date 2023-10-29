@@ -15,7 +15,7 @@ local capsule = require("widget.capsule")
 local mebox = require("widget.mebox")
 local client_menu_template = require("ui.menu.templates.client.main")
 local config = require("config")
-local helper_client = require("utils.client")
+local cclient = require("core.client")
 local css = require("utils.css")
 
 
@@ -160,11 +160,11 @@ local function toolbox_titlebar(client, args)
                 buttons = binding.awful_buttons {
                     binding.awful({}, btn.left, function()
                         client:activate { context = "titlebar" }
-                        helper_client.mouse_move(client)
+                        cclient.mouse_move(client)
                     end),
                     binding.awful({}, btn.right, function()
                         client:activate { context = "titlebar" }
-                        helper_client.mouse_resize(client)
+                        cclient.mouse_resize(client)
                     end),
                     binding.awful({}, btn.middle, function()
                         client:kill()
@@ -216,11 +216,11 @@ local function default_titlebar(client, args)
                 buttons = binding.awful_buttons {
                     binding.awful({}, btn.left, function()
                         client:activate { context = "titlebar" }
-                        helper_client.mouse_move(client)
+                        cclient.mouse_move(client)
                     end),
                     binding.awful({}, btn.right, function()
                         client:activate { context = "titlebar" }
-                        helper_client.mouse_resize(client)
+                        cclient.mouse_resize(client)
                     end),
                     binding.awful({}, btn.middle, function()
                         client:kill()

@@ -28,7 +28,7 @@ do
     local function empty_interrupt()
     end
 
-    ---@class utils.mouse.attach_slider.args
+    ---@class core.mouse.attach_slider.args
     ---@field wibox wibox
     ---@field widget wibox.widget.base
     ---@field cursor? cursor # Cursor when dragging. Default: `"sb_up_arrow"` or `"sb_left_arrow"`
@@ -49,7 +49,7 @@ do
     ---@field update? fun(value: number) # A callback function called on every change.
     ---@field finish? fun(value: number, interrupted: boolean) # A callback function called at the end of dragging.
 
-    ---@param args utils.mouse.attach_slider.args
+    ---@param args core.mouse.attach_slider.args
     ---@return function # A detach function. When called detach the drag action from the widget. Does not interrupt current drag action.
     ---@return function # An interrupt function.
     function M.attach_slider(args)
@@ -174,7 +174,7 @@ do
         return detach, interrupt
     end
 
-    ---@class utils.mouse.attach_wheel.args
+    ---@class core.mouse.attach_wheel.args
     ---@field widget wibox.widget.base
     ---@field step? number # Default: `1`
     ---@field debounce? number # Debounce in seconds. Default: `0.5`
@@ -183,7 +183,7 @@ do
     ---@field update? fun(total_delta: number) # A callback function called on every change.
     ---@field finish? fun(total_delta: number, interrupted: boolean) # A callback function called at the end.
 
-    ---@param args utils.mouse.attach_wheel.args
+    ---@param args core.mouse.attach_wheel.args
     ---@return function # A detach function. When called detach the drag action from the widget. Does not interrupt current drag action.
     ---@return function # An interrupt function.
     function M.attach_wheel(args)

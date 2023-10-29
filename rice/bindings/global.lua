@@ -1,7 +1,7 @@
 local capi = Capi
 local awful = require("awful")
 local aplacement = require("awful.placement")
-local helper_client = require("utils.client")
+local cclient = require("core.client")
 local binding = require("core.binding")
 local mod = binding.modifier
 local btn = binding.button
@@ -12,7 +12,6 @@ local menu_templates = require("ui.menu.templates")
 local mebox = require("widget.mebox")
 local bindbox = require("widget.bindbox")
 local config = require("config")
-local hclient = require("utils.client")
 
 
 local global_bindings = {
@@ -49,7 +48,7 @@ local global_bindings = {
         triggers = btn.left,
         path = "Awesome",
         description = "Resize tiling clients",
-        on_press = function() helper_client.mouse_resize() end,
+        on_press = function() cclient.mouse_resize() end,
     },
 
     binding.new {
@@ -386,7 +385,7 @@ local global_bindings = {
         triggers = binding.group.arrows,
         path = "Client",
         description = "Change focus",
-        on_press = function(trigger) hclient.focus(nil, trigger.direction) end,
+        on_press = function(trigger) cclient.focus(nil, trigger.direction) end,
     },
 }
 
