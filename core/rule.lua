@@ -5,7 +5,6 @@ local ipairs = ipairs
 local open = io.open
 local awful = require("awful")
 local ruled = require("ruled")
-local rice_rules = require("rice.rules")
 
 
 local M = {}
@@ -74,10 +73,5 @@ do
         end
     end, { "awful.spawn", "awful.rules" }, {})
 end
-
-
-ruled.client.connect_signal("request::rules", function()
-    ruled.client.append_rules(rice_rules.client)
-end)
 
 return M

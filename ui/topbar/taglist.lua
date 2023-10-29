@@ -15,7 +15,7 @@ local dpi = Dpi
 local capsule = require("widget.capsule")
 local gtable = require("gears.table")
 local gcolor = require("gears.color")
-local core_tags = require("core.tags")
+local core_tag = require("core.tag")
 local mebox = require("widget.mebox")
 local tag_menu_template = require("ui.menu.templates.tag.main")
 local aplacement = require("awful.placement")
@@ -204,10 +204,10 @@ function taglist.new(wibar)
                     border_width = 0,
                     buttons = binding.awful_buttons {
                         binding.awful({}, btn.left, function()
-                            core_tags.add_volatile_tag(wibar.screen):view_only()
+                            core_tag.add { screen = wibar.screen, volatile = true }:view_only()
                         end),
                         binding.awful({}, btn.middle, function()
-                            core_tags.add_volatile_tag(wibar.screen)
+                            core_tag.add { screen = wibar.screen, volatile = true }
                         end),
                     },
                     {

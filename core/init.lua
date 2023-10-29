@@ -1,5 +1,6 @@
-require("core.layout")
-require("core.rule")
-require("core.system")
-
-require("core.tags")
+return {
+    layout = require("core.layout"),
+    rule = require("core.rule"),
+    system = require("core.system"),
+    tag = require("core.tag"),
+}
