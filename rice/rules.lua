@@ -4,6 +4,7 @@ local beautiful = require("theme.theme")
 local core_tag = require("core.tag")
 
 
+---@class Rice.Rules
 local rules = {}
 
 ruled.client.connect_signal("request::rules", function()

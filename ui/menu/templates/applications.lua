@@ -12,6 +12,36 @@ local app_menu = require("app_menu")
 local dpi = Dpi
 
 
+---@class AppMenu.Categories
+---@field categories table<string, AppMenu.Category>
+
+---@class AppMenu.FallbackCategory : AppMenu.Category
+---@field id nil
+
+---@class AppMenu.Category
+---@field id string|string[] # Category ID. Registered categories: https://specifications.freedesktop.org/menu-spec/latest/apa.html
+---@field name? string # Menu item name.
+---@field icon? string # Icon path.
+---@field icon_name? string # Icon name. Uses current icon theme.
+---@field icon_color? string # Icon color for SVG icons.
+---@field enabled? boolean
+
+---@class AppMenu.Item
+---@field id? string # Desktop file ID or path to the desktop file.
+---@field command? string|function
+---@field name? string # Menu item name.
+---@field icon? string # Icon path.
+---@field icon_name? string # Icon name. Uses current icon theme.
+---@field icon_color? string # Icon color for SVG icons.
+
+---@alias AppMenu.ItemCollection (AppMenu.Item|string)[]
+
+---@class AppMenu
+---@field favorites AppMenu.ItemCollection
+---@field fallback_category? AppMenu.FallbackCategory
+---@field categories? table<string, AppMenu.Category>
+
+
 local M = {}
 
 ---@return MeboxItem.args[]
@@ -20,7 +50,7 @@ local favorites_items
 ---@return Mebox.new.args
 local categories_menu
 
----@param callback DesktopFile|string|function|nil
+---@param callback? DesktopFile|string|function
 ---@return MeboxItem.args?
 local function build_item_base(callback)
     if not callback then

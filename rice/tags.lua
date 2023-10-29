@@ -4,6 +4,8 @@ local core = require("core")
 local layouts = require("rice.layouts")
 
 
+---@class Rice.Tags
+---@field list string[]
 local tags = {
     list = {
         "1",

@@ -4,6 +4,9 @@ local btn = binding.button
 local bindbox = require("widget.bindbox")
 
 
+---@class Rice.Bindings
+local bindings = {}
+
 bindbox.main:add_group(require("rice.bindings.apps.feh"))
 bindbox.main:add_group(require("rice.bindings.apps.mpv"))
 bindbox.main:add_groups {
@@ -66,3 +69,5 @@ bindbox.main:add_groups {
 
 binding.add_global_range(require("rice.bindings.global"))
 binding.add_client_range(require("rice.bindings.client"))
+
+return bindings

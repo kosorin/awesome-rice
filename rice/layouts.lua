@@ -4,6 +4,8 @@ local core = require("core")
 local tilted = require("layouts.tilted")
 
 
+---@class Rice.Layouts
+---@field list awful.layout[]
 local layouts = {
     list = core.layout.list {
         tilted.new("tiling"),
