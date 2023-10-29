@@ -177,8 +177,9 @@ ruled.client.connect_signal("request::rules", function()
                 floating = false,
                 switch_to_tags = true,
                 new_tag = core_tag.build {
-                    selected = true,
+                    name = "Xephyr",
                     volatile = true,
+                    selected = true,
                 },
             },
         },
@@ -200,6 +201,34 @@ ruled.client.connect_signal("request::rules", function()
                         margins = beautiful.edge_gap,
                     })
                 end,
+            },
+        },
+    }
+    ----------------------------------------------------------------------------------------------------
+    ruled.client.append_rules {
+        {
+            rule = {
+                class = "^Spotify$",
+            },
+            properties = {
+                new_tag = core_tag.build {
+                    name = "Spotify",
+                    volatile = true,
+                },
+            },
+        },
+    }
+    ----------------------------------------------------------------------------------------------------
+    ruled.client.append_rules {
+        {
+            rule = {
+                class = "^FreeTube$",
+            },
+            properties = {
+                new_tag = core_tag.build {
+                    name = "FreeTube",
+                    volatile = true,
+                },
             },
         },
     }
