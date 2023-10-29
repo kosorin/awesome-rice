@@ -7,7 +7,7 @@ local gtimer = require("gears.timer")
 local mebox = require("widget.mebox")
 local bindbox = require("widget.bindbox")
 local menu_templates = require("ui.menu.templates")
-local app_menu = require("app_menu")
+local app_menu = require("rice.apps").menu
 local dpi = Dpi
 
 
