@@ -7,7 +7,7 @@ local tilted = require("layouts.tilted")
 ---@class Rice.Layouts
 ---@field list awful.layout[]
 local layouts = {
-    list = core.layout.list {
+    list = core.layout.initialize_list {
         tilted.new("tiling"),
         awful.layout.suit.floating,
         awful.layout.suit.max,

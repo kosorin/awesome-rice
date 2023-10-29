@@ -16,14 +16,15 @@ local directions = {
     down = { x = 0, y = 1 },
 }
 
-
 local M = {
     resize_corner_size = 50,
     resize_max_distance = 20,
     floating_move_step = 50,
-    tiled_resize_factor = 0.02,
+    tiling_resize_factor = 0.02,
 }
 
+---@param client client
+---@return boolean|nil
 function M.is_floating(client)
     if not client then
         return nil
@@ -61,6 +62,9 @@ local resize_quadrants = {
     },
 }
 
+---@param client client
+---@param coords point
+---@return string
 function M.get_resize_corner(client, coords)
     local g = client:geometry()
     g.width = g.width + 2 * client.border_width
@@ -114,6 +118,9 @@ function M.get_resize_corner(client, coords)
     return corner
 end
 
+---@param client client
+---@param coords point
+---@return number
 function M.get_distance(client, coords)
     local x, y
 
@@ -233,7 +240,7 @@ end
 
 ---@param client client
 ---@param direction direction
-local function move_tiled(client, direction)
+local function move_tiling(client, direction)
     if not client or not client.screen then
         return
     end
@@ -260,7 +267,7 @@ end
 ---@param parent_descriptor unknown
 ---@param resize_factor number
 local function resize_descriptor(descriptor, parent_descriptor, resize_factor)
-    resize_factor = resize_factor * M.tiled_resize_factor
+    resize_factor = resize_factor * M.tiling_resize_factor
     if resize_factor == 0 then
         return
     end
@@ -272,7 +279,7 @@ end
 
 ---@param client client
 ---@param direction direction
-local function resize_tiled(client, direction)
+local function resize_tiling(client, direction)
     local screen = client and client.screen and capi.screen[client.screen]
     local tag = screen and screen.selected_tag
     local layout = tag and tag.layout
@@ -312,7 +319,7 @@ function M.move(client, direction)
     if M.is_floating(client) then
         move_floating(client, direction)
     else
-        move_tiled(client, direction)
+        move_tiling(client, direction)
     end
 
     local new_screen = client.screen
@@ -328,7 +335,7 @@ function M.resize(client, direction)
     if M.is_floating(client) then
         resize_floating(client, direction)
     else
-        resize_tiled(client, direction)
+        resize_tiling(client, direction)
     end
 end
 
@@ -371,13 +378,11 @@ function M.mouse_move(client)
     })
 end
 
----@param client client|boolean
+---@param client? client
 function M.mouse_resize(client)
-    if client == true then
-        client = M.find_closest {
-            max_distance = M.resize_max_distance,
-        }
-    end
+    client = client or M.find_closest {
+        max_distance = M.resize_max_distance,
+    }
 
     if not client
         or client.fullscreen

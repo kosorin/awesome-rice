@@ -8,13 +8,13 @@ local M = {}
 
 ---@param layouts awful.layout[]
 ---@return awful.layout[]
-function M.list(layouts)
+function M.initialize_list(layouts)
     return setmetatable(layouts, {
-        __index = function(t, k)
-            if type(k) == "string" then
-                for _, layout in ipairs(t) do
-                    ---@cast layout awful.layout
-                    if layout.name == k then
+        __index = function(self, key)
+            ---@cast self awful.layout[]
+            if type(key) == "string" then
+                for _, layout in ipairs(self) do
+                    if layout.name == key then
                         return layout
                     end
                 end

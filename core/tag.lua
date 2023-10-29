@@ -16,8 +16,7 @@ function M.add(args)
     args = args or {}
     args.screen = args.screen or capi.screen.primary
     args.name = args.name or tostring(1 + (# args.screen.tags or 0))
-    local tag = awful.tag.add(args.name, M.build(args))
-    return tag
+    return awful.tag.add(args.name, M.build(args))
 end
 
 capi.screen.connect_signal("tag::history::update", function(screen)

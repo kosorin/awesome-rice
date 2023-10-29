@@ -48,8 +48,8 @@ local global_bindings = {
         modifiers = {},
         triggers = btn.left,
         path = "Awesome",
-        description = "Resize tiled clients",
-        on_press = function() helper_client.mouse_resize(true) end,
+        description = "Resize tiling clients",
+        on_press = function() helper_client.mouse_resize() end,
     },
 
     binding.new {

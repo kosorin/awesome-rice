@@ -1,9 +1,7 @@
-local dpi = Dpi
-local gshape = require("gears.shape")
-
-
+---Maps a theme to the beautiful properties.
 ---@param theme Theme
-return function(theme)
+---@return table
+local function map(theme)
     local pretty = {}
 
     ----------------------------------------------------------------------------------------------------
@@ -133,3 +131,5 @@ return function(theme)
 
     return pretty
 end
+
+require("beautiful").init(map(require("theme.theme")))

@@ -1,12 +1,10 @@
 require("develop")
-
 require("globals")
 
-require("config")
-
-require("theme.manager").initialize()
-
 require("core")
+
+require("config")
+require("theme")
 require("rice")
 require("services")
 require("ui")
