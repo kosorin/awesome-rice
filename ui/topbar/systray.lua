@@ -18,13 +18,13 @@ function systray.new(wibar)
     local self = wibox.widget {
         widget = capsule,
         enable_overlay = false,
-        margins = hui.thickness {
+        margins = hui.new {
             top = beautiful.wibar.paddings.top,
             right = beautiful.capsule.default_style.margins.right,
             bottom = beautiful.wibar.paddings.bottom,
             left = beautiful.capsule.default_style.margins.left,
         },
-        paddings = hui.thickness { dpi(4), dpi(10) },
+        paddings = hui.new { dpi(4), dpi(10) },
         wibox.widget.systray(),
     }
 

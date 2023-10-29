@@ -193,12 +193,12 @@ function taglist.new(wibar)
                 },
                 {
                     widget = capsule,
-                    margins = hui.thickness {
+                    margins = hui.new {
                         beautiful.wibar.paddings.top,
                         beautiful.wibar.spacing / 2,
                         beautiful.wibar.paddings.bottom,
                     },
-                    paddings = hui.thickness { dpi(6) },
+                    paddings = hui.new { dpi(6) },
                     bg = tcolor.transparent,
                     fg = beautiful.capsule.styles.disabled.fg,
                     border_width = 0,
@@ -222,7 +222,7 @@ function taglist.new(wibar)
         widget_template = {
             id = "#container",
             widget = capsule,
-            margins = hui.thickness {
+            margins = hui.new {
                 beautiful.wibar.paddings.top,
                 beautiful.wibar.spacing / 2,
                 beautiful.wibar.paddings.bottom,

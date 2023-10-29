@@ -52,8 +52,8 @@ end
 M.power_action_item_template = {
     id = "#container",
     widget = capsule,
-    margins = hui.thickness { dpi(2), 0 },
-    paddings = hui.thickness { dpi(8), dpi(8) },
+    margins = hui.new { dpi(2), 0 },
+    paddings = hui.new { dpi(8), dpi(8) },
     {
         layout = wibox.layout.align.horizontal,
         expand = "inside",
@@ -210,8 +210,8 @@ function M.new(default_timeout)
                 fg = beautiful.capsule.styles.nested.fg,
                 border_color = beautiful.capsule.styles.nested.border_color,
                 border_width = beautiful.capsule.styles.nested.border_width,
-                margins = hui.thickness { dpi(8), dpi(0) },
-                paddings = hui.thickness { dpi(2), dpi(4) },
+                margins = hui.new { dpi(8), dpi(0) },
+                paddings = hui.new { dpi(2), dpi(4) },
                 {
                     id = "#hours",
                     layout = wibox.layout.align.horizontal,
@@ -224,7 +224,7 @@ function M.new(default_timeout)
                 fg = beautiful.capsule.styles.nested.fg,
                 border_color = beautiful.capsule.styles.nested.border_color,
                 border_width = beautiful.capsule.styles.nested.border_width,
-                paddings = hui.thickness { dpi(2), dpi(4) },
+                paddings = hui.new { dpi(2), dpi(4) },
                 {
                     id = "#minutes",
                     layout = wibox.layout.align.horizontal,

@@ -15,8 +15,8 @@ local M = {}
 M.item_template = {
     id = "#container",
     widget = capsule,
-    margins = hui.thickness { dpi(2), 0 },
-    paddings = hui.thickness { dpi(8), dpi(12) },
+    margins = hui.new { dpi(2), 0 },
+    paddings = hui.new { dpi(8), dpi(12) },
     {
         layout = wibox.layout.align.horizontal,
         expand = "inside",
@@ -36,7 +36,7 @@ M.item_template = {
         },
         {
             widget = wibox.container.margin,
-            margins = hui.thickness { dpi(4), right = 0 },
+            margins = hui.new { dpi(4), right = 0 },
             {
                 id = "#right_icon",
                 widget = wibox.widget.imagebox,

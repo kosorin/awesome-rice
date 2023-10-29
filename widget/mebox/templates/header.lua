@@ -7,7 +7,7 @@ local hui = require("utils.thickness")
 
 return {
     widget = wibox.container.margin,
-    margins = hui.thickness { dpi(6), dpi(8) },
+    margins = hui.new { dpi(6), dpi(8) },
     {
         id = "#text",
         widget = wibox.widget.textbox,

@@ -142,7 +142,7 @@ function network_widget.new(wibar)
     local self = wibox.widget {
         widget = capsule,
         enable_overlay = false,
-        margins = hui.thickness {
+        margins = hui.new {
             top = beautiful.wibar.paddings.top,
             right = beautiful.capsule.default_style.margins.right,
             bottom = beautiful.wibar.paddings.bottom,

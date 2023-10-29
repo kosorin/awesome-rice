@@ -20,7 +20,7 @@ return mebox {
     item_width = dpi(1000),
     bg = tcolor.change(beautiful.common.bg, { alpha = 0.85 }),
     placement = awful.placement.centered,
-    paddings = hui.thickness { dpi(16) },
+    paddings = hui.new { dpi(16) },
     items_source = function()
         local items = {}
 

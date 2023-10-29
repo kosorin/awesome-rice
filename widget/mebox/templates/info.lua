@@ -7,7 +7,7 @@ local hui = require("utils.thickness")
 
 return {
     widget = wibox.container.margin,
-    margins = hui.thickness { dpi(12), dpi(16) },
+    margins = hui.new { dpi(12), dpi(16) },
     {
         layout = wibox.container.place,
         halign = "center",

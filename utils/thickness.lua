@@ -6,6 +6,8 @@ local type = type
 local format = string.format
 
 
+---@class Thickness
+---@field zero thickness
 local M = {}
 
 ---@alias thickness_value number|number[]|thickness
@@ -47,7 +49,7 @@ local thickness_mt = {
 }
 
 thickness_mt.__add = function(self, other)
-    other = M.thickness(other)
+    other = M.new(other)
     return setmetatable({
         top = self.top + other.top,
         right = self.right + other.right,
@@ -56,7 +58,7 @@ thickness_mt.__add = function(self, other)
     }, thickness_mt)
 end
 thickness_mt.__sub = function(self, other)
-    other = M.thickness(other)
+    other = M.new(other)
     return setmetatable({
         top = self.top - other.top,
         right = self.right - other.right,
@@ -65,7 +67,7 @@ thickness_mt.__sub = function(self, other)
     }, thickness_mt)
 end
 thickness_mt.__mul = function(self, other)
-    other = M.thickness(other)
+    other = M.new(other)
     return setmetatable({
         top = self.top * other.top,
         right = self.right * other.right,
@@ -74,7 +76,7 @@ thickness_mt.__mul = function(self, other)
     }, thickness_mt)
 end
 thickness_mt.__div = function(self, other)
-    other = M.thickness(other)
+    other = M.new(other)
     return setmetatable({
         top = self.top / other.top,
         right = self.right / other.right,
@@ -83,7 +85,7 @@ thickness_mt.__div = function(self, other)
     }, thickness_mt)
 end
 thickness_mt.__idiv = function(self, other)
-    other = M.thickness(other)
+    other = M.new(other)
     return setmetatable({
         top = self.top // other.top,
         right = self.right // other.right,
@@ -102,9 +104,9 @@ end
 
 ---@param value? thickness_value
 ---@return thickness # Returns the same table instance (i.e. the `value` parameter).
-function M.thickness(value)
+function M.new(value)
     if not value then
-        return M.zero_thickness
+        return M.zero
     end
 
     if type(value) == "table" then
@@ -156,6 +158,6 @@ function M.thickness(value)
     end
 end
 
-M.zero_thickness = M.thickness(0)
+M.zero = M.new(0)
 
 return M

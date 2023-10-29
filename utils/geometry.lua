@@ -6,7 +6,7 @@ local M = {}
 ---@param thickness? thickness_value
 ---@return geometry
 function M.inflate(geometry, thickness)
-    thickness = uthickness.thickness(thickness)
+    thickness = uthickness.new(thickness)
     return thickness and {
         x = geometry.x - thickness.left,
         y = geometry.y - thickness.top,
@@ -19,7 +19,7 @@ end
 ---@param thickness? thickness_value
 ---@return geometry
 function M.shrink(geometry, thickness)
-    return M.inflate(geometry, -uthickness.thickness(thickness))
+    return M.inflate(geometry, -uthickness.new(thickness))
 end
 
 return M

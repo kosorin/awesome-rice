@@ -36,13 +36,13 @@ end
 function layoutbox.new(wibar)
     local self = wibox.widget {
         widget = capsule,
-        margins = hui.thickness {
+        margins = hui.new {
             top = beautiful.wibar.paddings.top,
             right = beautiful.capsule.default_style.margins.right,
             bottom = beautiful.wibar.paddings.bottom,
             left = beautiful.wibar.paddings.left,
         },
-        paddings = hui.thickness {
+        paddings = hui.new {
             beautiful.capsule.default_style.paddings.top,
             dpi(10),
             beautiful.capsule.default_style.paddings.bottom,

@@ -135,7 +135,7 @@ theme.screen_selection_color = hcolor.change(theme.common.primary, { alpha = 0.2
 theme.wibar = {
     bg = theme.common.bg,
     spacing = dpi(12),
-    paddings = hui.thickness { dpi(8), dpi(16) },
+    paddings = hui.new { dpi(8), dpi(16) },
 }
 
 theme.wibar.item_height = dpi(30)
@@ -176,8 +176,8 @@ theme.capsule.default_style = {
     shape = function(cr, width, height)
         gshape.rounded_rect(cr, width, height, theme.capsule.border_radius)
     end,
-    margins = hui.thickness { 0 },
-    paddings = hui.thickness { dpi(6), dpi(14) },
+    margins = hui.new { 0 },
+    paddings = hui.new { dpi(6), dpi(14) },
 }
 
 theme.capsule.styles = {
@@ -244,7 +244,7 @@ end
 ----------------------------------------------------------------------------------------------------
 
 theme.popup = {
-    margins = hui.thickness { dpi(6) },
+    margins = hui.new { dpi(6) },
 }
 
 theme.popup.default_style = {
@@ -256,7 +256,7 @@ theme.popup.default_style = {
         gshape.rounded_rect(cr, width, height, dpi(12))
     end,
     placement = aplacement.under_mouse,
-    paddings = hui.thickness { dpi(20) },
+    paddings = hui.new { dpi(20) },
 }
 
 ----------------------------------------------------------------------------------------------------
@@ -273,12 +273,12 @@ theme.notification.default_style = setmetatable({
     header_bg = theme.common.bg_75,
     header_fg = theme.common.fg_bright,
     header_border_color = theme.common.bg_bright,
-    header_paddings = hui.thickness { dpi(12), dpi(16) },
-    paddings = hui.thickness { dpi(16) },
+    header_paddings = hui.new { dpi(12), dpi(16) },
+    paddings = hui.new { dpi(16) },
     icon_spacing = dpi(12),
     timer_height = dpi(3),
     timer_bg = theme.common.secondary_66,
-    actions_paddings = hui.thickness { dpi(16), top = 0 },
+    actions_paddings = hui.new { dpi(16), top = 0 },
     actions_spacing = dpi(8),
 }, { __index = theme.popup.default_style })
 
@@ -296,8 +296,8 @@ theme.tooltip.default_style = setmetatable({
     bg = theme.common.bg_33,
     border_width = dpi(1),
     shape = false,
-    margins = hui.thickness { dpi(0) },
-    paddings = hui.thickness { dpi(12), dpi(16) },
+    margins = hui.new { dpi(0) },
+    paddings = hui.new { dpi(12), dpi(16) },
 }, { __index = theme.popup.default_style })
 
 ----------------------------------------------------------------------------------------------------
@@ -388,7 +388,7 @@ theme.mebox.default_style = setmetatable({
     submenu_offset = dpi(4),
     active_opacity = 1,
     inactive_opacity = 1,
-    paddings = hui.thickness { dpi(8) },
+    paddings = hui.new { dpi(8) },
     item_width = dpi(128),
     item_height = dpi(36),
 }, { __index = theme.popup.default_style })
@@ -406,7 +406,7 @@ theme.bindbox.default_style = setmetatable({
             honor_padding = false,
         })
     end,
-    page_paddings = hui.thickness { dpi(8), bottom = dpi(16) },
+    page_paddings = hui.new { dpi(8), bottom = dpi(16) },
     page_width = dpi(1400),
     page_height = dpi(1000),
     page_columns = 2,
@@ -431,7 +431,7 @@ theme.bindbox.default_style = setmetatable({
     status_fg = theme.capsule.styles.nested.fg,
     status_border_color = theme.capsule.styles.nested.border_color,
     status_border_width = theme.capsule.styles.nested.border_width,
-    status_paddings = hui.thickness { dpi(12), dpi(16) },
+    status_paddings = hui.new { dpi(12), dpi(16) },
     status_spacing = dpi(24),
     find_placeholder_fg = theme.common.fg_66,
     find_cursor_bg = theme.common.secondary_66,
@@ -466,10 +466,10 @@ theme.volume_osd = {
         placement = function(d)
             aplacement.top(d, {
                 honor_workarea = true,
-                margins = hui.thickness { dpi(32) },
+                margins = hui.new { dpi(32) },
             })
         end,
-        paddings = hui.thickness { dpi(16), dpi(32) },
+        paddings = hui.new { dpi(16), dpi(32) },
     }, { __index = theme.popup.default_style }),
 }
 
@@ -553,14 +553,14 @@ do
             widget.markup = pango.span { fgcolor = theme.common.fg_50, weight = "bold", widget.text, " " }
             return wibox.widget {
                 widget = wibox.container.margin,
-                margins = hui.thickness { dpi(6), 0 },
+                margins = hui.new { dpi(6), 0 },
                 widget,
             }
         elseif flag == "weekday" then
             widget.halign = "center"
             return wibox.widget {
                 widget = wibox.container.margin,
-                margins = hui.thickness { dpi(2), dpi(4) },
+                margins = hui.new { dpi(2), dpi(4) },
                 widget,
             }
         elseif flag == "monthheader" or flag == "header" then
@@ -568,7 +568,7 @@ do
             widget.markup = pango.b(widget.text)
             return wibox.widget {
                 widget = wibox.container.margin,
-                margins = hui.thickness { dpi(6), 0, dpi(14) },
+                margins = hui.new { dpi(6), 0, dpi(14) },
                 widget,
             }
         elseif flag == "month" then
@@ -678,13 +678,13 @@ do
     local button_shape = function(cr, width, height)
         gshape.rounded_rect(cr, width, height, dpi(3))
     end
-    local button_paddings = hui.thickness { dpi(3) }
-    local button_margins = hui.thickness { 0 }
+    local button_paddings = hui.new { dpi(3) }
+    local button_margins = hui.new { 0 }
 
     theme.titlebar.default = {
         height = dpi(32),
         border_width = dpi(3),
-        paddings = hui.thickness { dpi(6), dpi(8) },
+        paddings = hui.new { dpi(6), dpi(8) },
         spacing = dpi(4),
         icons = {
             menu = config.places.theme .. "/icons/menu.svg",
@@ -778,8 +778,8 @@ do
     local button_shape = function(cr, width, height)
         gshape.rounded_rect(cr, width, height, dpi(2))
     end
-    local button_paddings = hui.thickness { dpi(1) }
-    local button_margins = hui.thickness { 0 }
+    local button_paddings = hui.new { dpi(1) }
+    local button_margins = hui.new { 0 }
 
     local function clone_button_style(style)
         return setmetatable({
@@ -792,7 +792,7 @@ do
     theme.titlebar.toolbox = {
         height = dpi(24),
         border_width = dpi(3),
-        paddings = hui.thickness { dpi(4), dpi(10) },
+        paddings = hui.new { dpi(4), dpi(10) },
         spacing = dpi(4),
         icons = theme.titlebar.default.icons,
         buttons = {

@@ -77,7 +77,7 @@ function redshift_widget.new(wibar, on_dashboard)
     local self = wibox.widget {
         widget = capsule,
         margins = not on_dashboard
-            and hui.thickness {
+            and hui.new {
                 top = beautiful.wibar.paddings.top,
                 right = beautiful.capsule.default_style.margins.right,
                 bottom = beautiful.wibar.paddings.bottom,

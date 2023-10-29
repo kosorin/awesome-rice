@@ -403,7 +403,7 @@ function M.new(wibar)
         {
             id = "no_player_button",
             widget = capsule,
-            margins = hui.thickness { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
+            margins = hui.new { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
             {
                 layout = wibox.layout.fixed.horizontal,
                 spacing = beautiful.capsule.item_content_spacing,
@@ -432,7 +432,7 @@ function M.new(wibar)
                     id = "#content_container",
                     widget = capsule,
                     enable_overlay = false,
-                    margins = hui.thickness { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
+                    margins = hui.new { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
                     shape = left_shape,
                     {
                         layout = wibox.layout.fixed.horizontal,
@@ -463,8 +463,8 @@ function M.new(wibar)
                 {
                     id = "#previous",
                     widget = capsule,
-                    margins = hui.thickness { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
-                    paddings = hui.thickness { dpi(6), left = beautiful.capsule.default_style.paddings.left },
+                    margins = hui.new { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
+                    paddings = hui.new { dpi(6), left = beautiful.capsule.default_style.paddings.left },
                     shape = false,
                     buttons = binding.awful_buttons {
                         binding.awful({}, btn.left, function() media_player:previous() end),
@@ -478,8 +478,8 @@ function M.new(wibar)
                 {
                     id = "#play_pause",
                     widget = capsule,
-                    margins = hui.thickness { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
-                    paddings = hui.thickness {
+                    margins = hui.new { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
+                    paddings = hui.new {
                         dpi(6),
                         left = beautiful.capsule.default_style.paddings.left,
                         right = beautiful.capsule.default_style.paddings.right,
@@ -496,8 +496,8 @@ function M.new(wibar)
                 {
                     id = "#next",
                     widget = capsule,
-                    margins = hui.thickness { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
-                    paddings = hui.thickness { dpi(6), right = beautiful.capsule.default_style.paddings.right },
+                    margins = hui.new { beautiful.wibar.paddings.top, 0, beautiful.wibar.paddings.bottom },
+                    paddings = hui.new { dpi(6), right = beautiful.capsule.default_style.paddings.right },
                     shape = right_shape,
                     buttons = binding.awful_buttons {
                         binding.awful({}, btn.left, function() media_player:next() end),

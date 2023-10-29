@@ -171,7 +171,7 @@ function clientlist.new(wibar)
             {
                 id = "#container",
                 widget = capsule,
-                margins = hui.thickness {
+                margins = hui.new {
                     beautiful.wibar.paddings.top,
                     beautiful.wibar.spacing / 2,
                     beautiful.wibar.paddings.bottom,

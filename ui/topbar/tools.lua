@@ -36,7 +36,7 @@ function power_widget.new(wibar)
             top = beautiful.wibar.paddings.top,
             bottom = beautiful.wibar.paddings.bottom,
         },
-        paddings = hui.thickness {
+        paddings = hui.new {
             beautiful.capsule.default_style.paddings.top,
             dpi(10),
             beautiful.capsule.default_style.paddings.bottom,

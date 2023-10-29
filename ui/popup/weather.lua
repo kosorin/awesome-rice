@@ -383,7 +383,7 @@ local function new(parent, data_widget_factory, args)
         padding = args.padding or dpi(24),
     }, { __index = WeatherPopup })
 
-    self.margins = args.margins or hui.thickness {
+    self.margins = args.margins or hui.new {
         beautiful.gap,
         top = beautiful.gap - (self.arrow_size / 2) - self.border_width,
     }

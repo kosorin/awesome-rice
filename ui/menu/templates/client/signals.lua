@@ -79,8 +79,8 @@ M.signals = {
 
 M.item_template = {
     widget = capsule,
-    margins = hui.thickness { dpi(2), 0 },
-    paddings = hui.thickness { dpi(6), dpi(8) },
+    margins = hui.new { dpi(2), 0 },
+    paddings = hui.new { dpi(6), dpi(8) },
     {
         layout = wibox.layout.fixed.horizontal,
         {

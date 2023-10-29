@@ -98,7 +98,7 @@ do
         end
 
         local distance = beautiful.snap.distance or 10
-        local gap = uui.thickness(beautiful.snap.gap or 5)
+        local gap = uui.new(beautiful.snap.gap or 5)
 
         geo = fix_client_geometry(ugeometry.inflate, client, geo or client:geometry(), gap)
 
@@ -202,7 +202,7 @@ do
         local original_geo = geo or client:geometry()
 
         local distance = beautiful.snap.distance or 10
-        local gap = uui.thickness(beautiful.snap.gap or 5)
+        local gap = uui.new(beautiful.snap.gap or 5)
 
         geo = fix_client_geometry(ugeometry.inflate, client, original_geo, gap)
 

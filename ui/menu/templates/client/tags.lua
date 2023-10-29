@@ -17,8 +17,8 @@ local M = {}
 local checkbox_item_template = {
     id = "#container",
     widget = capsule,
-    margins = hui.thickness { dpi(2), 0 },
-    paddings = hui.thickness { dpi(6), 0 },
+    margins = hui.new { dpi(2), 0 },
+    paddings = hui.new { dpi(6), 0 },
     {
         layout = wibox.container.place,
         halign = "center",
