@@ -1,5 +1,5 @@
 local naughty = require("naughty")
-local clipboard = require("core.clipboard")
+local selection = require("core.selection")
 
 
 local M = {}
@@ -10,7 +10,7 @@ naughty.connect_signal("request::display_error", function(message, startup)
     }
 
     copy_action:connect_signal("invoked", function()
-        clipboard.clipboard:copy(message)
+        selection.clipboard:copy(message)
     end)
 
     naughty.notification {

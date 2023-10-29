@@ -10,7 +10,7 @@ local opacity_menu_template = require("ui.menu.templates.client.opacity")
 local signals_menu_template = require("ui.menu.templates.client.signals")
 local tags_menu_template = require("ui.menu.templates.client.tags")
 local screens_menu_template = require("ui.menu.templates.client.screens")
-local clipboard = require("core.clipboard")
+local selection = require("core.selection")
 
 
 local M = {}
@@ -106,7 +106,7 @@ function M.new()
                             end,
                             callback = function(item, menu)
                                 local client = menu.client --[[@as client]]
-                                clipboard.clipboard:copy(client.pid)
+                                selection.clipboard:copy(client.pid)
                             end,
                         },
                         {

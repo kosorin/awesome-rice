@@ -4,7 +4,7 @@ local Gtk = lgi.require("Gtk", "3.0")
 local gtable = require("gears.table")
 
 
----@class Clipboard
+---@class Selection
 ---@field clipboard selection
 ---@field primary selection
 local M = {}

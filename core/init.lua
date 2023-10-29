@@ -1,7 +1,7 @@
 return {
     binding = require("core.binding"),
     client = require("core.client"),
-    clipboard = require("core.clipboard"),
+    selection = require("core.selection"),
     layout = require("core.layout"),
     mouse = require("core.mouse"),
     notification = require("core.notification"),

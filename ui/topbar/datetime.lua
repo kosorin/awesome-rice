@@ -19,7 +19,7 @@ local widget_helper = require("core.widget")
 local htable = require("utils.table")
 local css = require("utils.css")
 local hui = require("utils.thickness")
-local clipboard = require("core.clipboard")
+local selection = require("core.selection")
 
 
 local datetime_widget = { mt = {} }
@@ -37,7 +37,7 @@ function datetime_widget:to_clipboard(what)
     end
     local format = table.concat(formats, " ")
     local text = os.date(format)
-    clipboard.clipboard:copy(text)
+    selection.clipboard:copy(text)
 end
 
 function datetime_widget:show_seconds(show)
