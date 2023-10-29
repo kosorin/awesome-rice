@@ -27,7 +27,6 @@ local config = require("config")
 
 ---@class AppMenu
 ---@field favorites AppMenu.ItemCollection
----@field media_players AppMenu.ItemCollection
 ---@field fallback_category? AppMenu.FallbackCategory
 ---@field categories? table<string, AppMenu.Category>
 local app_menu = {
@@ -41,10 +40,6 @@ local app_menu = {
             id = "code.desktop",
             name = "Code",
         },
-    },
-    media_players = {
-        "spotify.desktop",
-        "freetube.desktop",
     },
     fallback_category = {
         name = "Other",

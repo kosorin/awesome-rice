@@ -14,7 +14,7 @@ local desktop = require("services.desktop")
 local mebox = require("widget.mebox")
 local media_player = require("services.media").player
 local applications_menu_template = require("ui.menu.templates.applications")
-local app_menu = require("app_menu")
+local rice_media = require("rice.media")
 
 
 local play_pause_status = {
@@ -228,7 +228,7 @@ function M.new()
                 end
             end
 
-            local media_players = applications_menu_template.build_items(app_menu.media_players)
+            local media_players = applications_menu_template.build_items(rice_media.menu)
             if #media_players > 0 then
                 if #items > 0 then
                     items[#items + 1] = mebox.separator
