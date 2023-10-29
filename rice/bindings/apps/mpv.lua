@@ -1,4 +1,4 @@
-local binding = require("io.binding")
+local binding = require("core.binding")
 local mod = binding.modifier
 local btn = binding.button
 

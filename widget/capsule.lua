@@ -9,7 +9,7 @@ local base = require("wibox.widget.base")
 local cairo = require("lgi").cairo
 local noice = require("theme.style")
 local uui = require("utils.ui")
-local binding = require("io.binding")
+local binding = require("core.binding")
 
 
 ---@class Capsule.module
