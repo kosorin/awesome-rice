@@ -10,6 +10,7 @@ local opacity_menu_template = require("ui.menu.templates.client.opacity")
 local signals_menu_template = require("ui.menu.templates.client.signals")
 local tags_menu_template = require("ui.menu.templates.client.tags")
 local screens_menu_template = require("ui.menu.templates.client.screens")
+local clipboard = require("core.clipboard")
 
 
 local M = {}
@@ -105,7 +106,7 @@ function M.new()
                             end,
                             callback = function(item, menu)
                                 local client = menu.client --[[@as client]]
-                                aspawn.with_shell(config.commands.copy_text(tostring(client.pid)))
+                                clipboard.clipboard:copy(client.pid)
                             end,
                         },
                         {

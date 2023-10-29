@@ -69,10 +69,6 @@ function config.commands.open(path)
     return "xdg-open \"" .. path .. "\""
 end
 
-function config.commands.copy_text(text)
-    return "echo -n \"" .. text .. "\" | xclip -selection clipboard"
-end
-
 
 local awful_utils = require("awful.util")
 awful_utils.shell = config.apps.shell
