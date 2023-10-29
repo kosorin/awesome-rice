@@ -25,3 +25,14 @@ else
     end
 end
 Dump = dump
+
+---@param c client
+function DumpClient(c)
+    Dump({
+        name = c.name,
+        class = c.class,
+        instance = c.instance,
+        role = c.role,
+        type = c.type,
+    }, "", 1)
+end
