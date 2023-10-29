@@ -280,6 +280,19 @@ theme.notification.default_style = setmetatable({
     timer_bg = theme.common.secondary_66,
     actions_paddings = hui.new { dpi(16), top = 0 },
     actions_spacing = dpi(8),
+    close_button_size = dpi(22),
+    close_button_margins = hui.new { dpi(10), left = 0, right = dpi(16) },
+    close_button = {
+        hover_overlay = theme.common.urgent_bright .. "50",
+        press_overlay = theme.palette.white .. "30",
+        bg = noice.value.Default,
+        fg = noice.value.Default,
+        border_width = 0,
+        shape = function(cr, width, height)
+            gshape.rounded_rect(cr, width, height, dpi(3))
+        end,
+        paddings = hui.new { dpi(3) },
+    },
 }, { __index = theme.popup.default_style })
 
 theme.notification.styles = {
