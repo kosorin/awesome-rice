@@ -67,7 +67,7 @@ local modifier = {
 
 ---@class _Binding
 ---@field awesome_bindings Binding[]
-local binding = {
+local M = {
     awesome_bindings = {},
     trigger_type = trigger_type,
     button = button,
@@ -117,11 +117,11 @@ local binding = {
 }
 
 for i = 1, 10 do
-    table.insert(binding.group.numrow, { trigger = "#" .. i + 9, index = i, number = i == 10 and 0 or i })
+    table.insert(M.group.numrow, { trigger = "#" .. i + 9, index = i, number = i == 10 and 0 or i })
 end
 
 for i = 1, 12 do
-    table.insert(binding.group.fkeys, { trigger = "F" .. i, index = i })
+    table.insert(M.group.fkeys, { trigger = "F" .. i, index = i })
 end
 
 do
@@ -130,7 +130,7 @@ do
 
     ---@param modifiers? key_modifier[]
     ---@return integer|nil # Returns a hash value for a set of modifiers.
-    function binding.get_modifiers_hash(modifiers)
+    function M.get_modifiers_hash(modifiers)
         if not modifiers then
             return 0
         end
@@ -154,9 +154,9 @@ do
     ---@param required? key_modifier[] # A set of required modifiers.
     ---@param exact_match? boolean # If `true` then both `required` and `actual` must contain exactly the same set of modifiers. Otherwise `actual` must contain all `required` modifiers (other modifiers in `actual` will be ignored). Default: `true`
     ---@return boolean
-    function binding.match_modifiers(actual, required, exact_match)
-        local required_hash = binding.get_modifiers_hash(required)
-        local actual_hash = binding.get_modifiers_hash(actual)
+    function M.match_modifiers(actual, required, exact_match)
+        local required_hash = M.get_modifiers_hash(required)
+        local actual_hash = M.get_modifiers_hash(actual)
 
         if required_hash == -1 and actual_hash > 0 then
             return true
@@ -174,22 +174,22 @@ end
 ---@param required_button? button
 ---@param actual_modifiers? key_modifier[]
 ---@param required_modifiers? key_modifier[]
-function binding.match_button(actual_button, required_button, actual_modifiers, required_modifiers)
+function M.match_button(actual_button, required_button, actual_modifiers, required_modifiers)
     if required_button ~= button.any and required_button ~= actual_button then
         return false
     end
-    return binding.match_modifiers(actual_modifiers, required_modifiers)
+    return M.match_modifiers(actual_modifiers, required_modifiers)
 end
 
 ---@param actual_key key
 ---@param required_key? key
 ---@param actual_modifiers? key_modifier[]
 ---@param required_modifiers? key_modifier[]
-function binding.match_key(actual_key, required_key, actual_modifiers, required_modifiers)
+function M.match_key(actual_key, required_key, actual_modifiers, required_modifiers)
     if required_key ~= key.any and required_key ~= actual_key then
         return false
     end
-    return binding.match_modifiers(actual_modifiers, required_modifiers)
+    return M.match_modifiers(actual_modifiers, required_modifiers)
 end
 
 ---@param self Binding
@@ -250,7 +250,7 @@ end
 
 ---@param args Binding.new.args
 ---@return Binding
-function binding.new(args)
+function M.new(args)
     ---@type Binding
     local self = {
         on_press = args.on_press,
@@ -312,8 +312,8 @@ end
 
 ---@param b Binding
 ---@return Binding
-function binding.add_global(b)
-    table.insert(binding.awesome_bindings, b)
+function M.add_global(b)
+    table.insert(M.awesome_bindings, b)
     _ensure_awful_bindings(b)
     awful.keyboard.append_global_keybindings(b._awful.keys)
     awful.mouse.append_global_mousebindings(b._awful.buttons)
@@ -322,8 +322,8 @@ end
 
 ---@param b Binding
 ---@return Binding
-function binding.add_client(b)
-    table.insert(binding.awesome_bindings, b)
+function M.add_client(b)
+    table.insert(M.awesome_bindings, b)
     _ensure_awful_bindings(b)
     awful.keyboard.append_client_keybindings(b._awful.keys)
     awful.mouse.append_client_mousebindings(b._awful.buttons)
@@ -331,16 +331,16 @@ function binding.add_client(b)
 end
 
 ---@param bindings Binding[]
-function binding.add_global_range(bindings)
+function M.add_global_range(bindings)
     for _, b in ipairs(bindings) do
-        binding.add_global(b)
+        M.add_global(b)
     end
 end
 
 ---@param bindings Binding[]
-function binding.add_client_range(bindings)
+function M.add_client_range(bindings)
     for _, b in ipairs(bindings) do
-        binding.add_client(b)
+        M.add_client(b)
     end
 end
 
@@ -350,12 +350,12 @@ end
 ---@param on_release? fun(trigger: BindingTrigger, ...)
 ---@param args? table
 ---@return Binding
-function binding.awful(modifiers, triggers, on_press, on_release, args)
+function M.awful(modifiers, triggers, on_press, on_release, args)
     if type(on_release) == "table" then
         args = on_release
         on_release = nil
     end
-    return binding.new(gtable.crush({
+    return M.new(gtable.crush({
         on_press = on_press,
         on_release = on_release,
         modifiers = modifiers,
@@ -365,7 +365,7 @@ end
 
 ---@param bindings Binding[]
 ---@return awful.key[]
-function binding.awful_keys(bindings)
+function M.awful_keys(bindings)
     return gtable.join(table.unpack(gtable.map(function(b)
         _ensure_awful_bindings(b)
         return b._awful.keys
@@ -374,7 +374,7 @@ end
 
 ---@param bindings Binding[]
 ---@return awful.button[]
-function binding.awful_buttons(bindings)
+function M.awful_buttons(bindings)
     return gtable.join(table.unpack(gtable.map(function(b)
         _ensure_awful_bindings(b)
         return b._awful.buttons
@@ -383,11 +383,11 @@ end
 
 ---@param bindings Binding[]
 ---@return awful.hook[]
-function binding.awful_hooks(bindings)
+function M.awful_hooks(bindings)
     return gtable.join(table.unpack(gtable.map(function(b)
         _ensure_awful_bindings(b)
         return b._awful.hooks
     end, bindings)))
 end
 
-return binding
+return M
