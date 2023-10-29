@@ -8,7 +8,7 @@ local gtable = require("gears.table")
 local config = require("config")
 local common = require("ui.menu.templates.client._common")
 local capsule = require("widget.capsule")
-local hui = require("utils.ui")
+local hui = require("utils.thickness")
 local css = require("utils.css")
 
 

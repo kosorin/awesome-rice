@@ -11,7 +11,8 @@ local ipairs = ipairs
 local sfind = string.find
 local aclient = require("awful.client")
 local beautiful = require("theme.theme")
-local uui = require("utils.ui")
+local uui = require("utils.thickness")
+local ugeometry = require("utils.geometry")
 
 local M = {}
 
@@ -99,20 +100,20 @@ do
         local distance = beautiful.snap.distance or 10
         local gap = uui.thickness(beautiful.snap.gap or 5)
 
-        geo = fix_client_geometry(uui.inflate, client, geo or client:geometry(), gap)
+        geo = fix_client_geometry(ugeometry.inflate, client, geo or client:geometry(), gap)
 
-        geo = snap_inside(geo, uui.shrink(client.screen.geometry, gap), distance)
-        geo = snap_inside(geo, uui.shrink(client.screen.tiling_area, gap), distance)
+        geo = snap_inside(geo, ugeometry.shrink(client.screen.geometry, gap), distance)
+        geo = snap_inside(geo, ugeometry.shrink(client.screen.tiling_area, gap), distance)
 
         for _, other in ipairs(aclient.visible(client.screen)) do
             if other ~= client then
-                local other_geo = fix_client_geometry(uui.inflate, other, other:geometry(), gap)
+                local other_geo = fix_client_geometry(ugeometry.inflate, other, other:geometry(), gap)
                 geo = snap_inside(geo, other_geo, distance)
                 geo = snap_outside(geo, other_geo, distance)
             end
         end
 
-        return fix_client_geometry(uui.shrink, client, geo, gap)
+        return fix_client_geometry(ugeometry.shrink, client, geo, gap)
     end
 end
 
@@ -203,20 +204,20 @@ do
         local distance = beautiful.snap.distance or 10
         local gap = uui.thickness(beautiful.snap.gap or 5)
 
-        geo = fix_client_geometry(uui.inflate, client, original_geo, gap)
+        geo = fix_client_geometry(ugeometry.inflate, client, original_geo, gap)
 
-        geo = snap_inside(geo, uui.shrink(client.screen.geometry, gap), distance, origin)
-        geo = snap_inside(geo, uui.shrink(client.screen.tiling_area, gap), distance, origin)
+        geo = snap_inside(geo, ugeometry.shrink(client.screen.geometry, gap), distance, origin)
+        geo = snap_inside(geo, ugeometry.shrink(client.screen.tiling_area, gap), distance, origin)
 
         for _, other in ipairs(aclient.visible(client.screen)) do
             if other ~= client then
-                local other_geo = fix_client_geometry(uui.inflate, other, other:geometry(), gap)
+                local other_geo = fix_client_geometry(ugeometry.inflate, other, other:geometry(), gap)
                 geo = snap_inside(geo, other_geo, distance, origin)
                 geo = snap_outside(geo, other_geo, distance, origin)
             end
         end
 
-        geo = fix_client_geometry(uui.shrink, client, geo, gap)
+        geo = fix_client_geometry(ugeometry.shrink, client, geo, gap)
 
         return geo
     end

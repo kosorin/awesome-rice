@@ -5,7 +5,7 @@ local find = string.find
 local aclient = require("awful.client")
 local amouse = require("awful.mouse")
 local alayout = require("awful.layout")
-local uui = require("utils.ui")
+local ugeometry = require("utils.geometry")
 
 
 local tilted = {
@@ -124,10 +124,10 @@ function tilted.object:resize(screen, tag, client, corner)
     end
 
     local full_workarea = parameters.workarea
-    local workarea = uui.shrink(full_workarea, layout_descriptor.allow_padding and layout_descriptor.padding[self] or nil)
+    local workarea = ugeometry.shrink(full_workarea, layout_descriptor.allow_padding and layout_descriptor.padding[self] or nil)
     local useless_gap = parameters.useless_gap
 
-    local initial_geometry = uui.inflate(client:geometry(), client.border_width + useless_gap)
+    local initial_geometry = ugeometry.inflate(client:geometry(), client.border_width + useless_gap)
     initial_geometry = {
         x = initial_geometry.x,
         y = initial_geometry.y,
@@ -422,7 +422,7 @@ function tilted.object:arrange(parameters)
         }
     end
 
-    local workarea = uui.shrink(full_workarea, layout_descriptor.allow_padding and layout_descriptor.padding[self] or nil)
+    local workarea = ugeometry.shrink(full_workarea, layout_descriptor.allow_padding and layout_descriptor.padding[self] or nil)
     local useless_gap = parameters.useless_gap
 
     local width = workarea[oi.width]

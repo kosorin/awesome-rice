@@ -8,6 +8,8 @@ local format = string.format
 
 local M = {}
 
+---@alias thickness_value number|number[]|thickness
+
 ---@class thickness : { top: number, right: number, bottom: number, left: number }
 ---@operator add(thickness_value): thickness
 ---@operator sub(thickness_value): thickness
@@ -98,8 +100,6 @@ thickness_mt.__unm = function(self)
     }, thickness_mt)
 end
 
----@alias thickness_value number|number[]|thickness
-
 ---@param value? thickness_value
 ---@return thickness # Returns the same table instance (i.e. the `value` parameter).
 function M.thickness(value)
@@ -157,25 +157,5 @@ function M.thickness(value)
 end
 
 M.zero_thickness = M.thickness(0)
-
----@param geometry geometry
----@param thickness? thickness_value
----@return geometry
-function M.inflate(geometry, thickness)
-    thickness = M.thickness(thickness)
-    return thickness and {
-        x = geometry.x - thickness.left,
-        y = geometry.y - thickness.top,
-        width = geometry.width + thickness.left + thickness.right,
-        height = geometry.height + thickness.top + thickness.bottom,
-    } or geometry
-end
-
----@param geometry geometry
----@param thickness? thickness_value
----@return geometry
-function M.shrink(geometry, thickness)
-    return M.inflate(geometry, -M.thickness(thickness))
-end
 
 return M

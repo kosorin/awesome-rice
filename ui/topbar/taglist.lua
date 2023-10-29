@@ -23,7 +23,7 @@ local widget_helper = require("core.widget")
 local screen_helper = require("core.screen")
 local pango = require("utils.pango")
 local css = require("utils.css")
-local hui = require("utils.ui")
+local hui = require("utils.thickness")
 
 
 local taglist = { mt = {} }

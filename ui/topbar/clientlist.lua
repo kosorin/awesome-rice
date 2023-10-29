@@ -16,7 +16,7 @@ local aplacement = require("awful.placement")
 local widget_helper = require("core.widget")
 local pango = require("utils.pango")
 local desktop = require("services.desktop")
-local hui = require("utils.ui")
+local hui = require("utils.thickness")
 
 
 local clientlist = { mt = {} }

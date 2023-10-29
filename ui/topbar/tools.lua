@@ -13,7 +13,7 @@ local gtable = require("gears.table")
 local mebox = require("widget.mebox")
 local tools_popup = require("ui.popup.tools")
 local css = require("utils.css")
-local hui = require("utils.ui")
+local hui = require("utils.thickness")
 
 
 local power_widget = { mt = {} }

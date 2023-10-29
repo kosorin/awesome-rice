@@ -14,7 +14,7 @@ local widget_helper = require("core.widget")
 local mebox = require("widget.mebox")
 local tag_layout_menu_template = require("ui.menu.templates.tag.layout")
 local main_menu = require("ui.menu.main")
-local hui = require("utils.ui")
+local hui = require("utils.thickness")
 
 
 local layoutbox = { mt = {} }

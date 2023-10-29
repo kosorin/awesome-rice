@@ -23,7 +23,7 @@ local humanizer = require("utils.humanizer")
 local mebox = require("widget.mebox")
 local media_player_menu_template = require("ui.menu.templates.media_player")
 local media_player = require("services.media").player
-local hui = require("utils.ui")
+local hui = require("utils.thickness")
 
 
 ---@type utils.humanizer.relative_time.args

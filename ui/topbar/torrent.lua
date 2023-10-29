@@ -25,7 +25,7 @@ local widget_helper = require("core.widget")
 local mebox = require("widget.mebox")
 local pango = require("utils.pango")
 local css = require("utils.css")
-local hui = require("utils.ui")
+local hui = require("utils.thickness")
 
 
 local file_size_units = setmetatable({ space = pango.thin_space }, { __index = humanizer.file_size_units })

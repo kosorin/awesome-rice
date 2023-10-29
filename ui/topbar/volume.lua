@@ -18,7 +18,7 @@ local mebox = require("widget.mebox")
 local mouse_helper = require("core.mouse")
 local pango = require("utils.pango")
 local css = require("utils.css")
-local hui = require("utils.ui")
+local hui = require("utils.thickness")
 
 
 local volume_widget = { mt = {} }

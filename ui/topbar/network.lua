@@ -18,7 +18,7 @@ local tcolor = require("utils.color")
 local aplacement = require("awful.placement")
 local widget_helper = require("core.widget")
 local htable = require("utils.table")
-local hui = require("utils.ui")
+local hui = require("utils.thickness")
 local ucolor = require("utils.color")
 
 

@@ -6,7 +6,7 @@ local dpi = Dpi
 local aspawn = require("awful.spawn")
 local pango = require("utils.pango")
 local capsule = require("widget.capsule")
-local hui = require("utils.ui")
+local hui = require("utils.thickness")
 local common = require("ui.menu.templates.client._common")
 
 

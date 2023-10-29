@@ -21,7 +21,7 @@ local aplacement = require("awful.placement")
 local widget_helper = require("core.widget")
 local pango = require("utils.pango")
 local css = require("utils.css")
-local hui = require("utils.ui")
+local hui = require("utils.thickness")
 
 
 local function set_text(widget, id, index, text, color)

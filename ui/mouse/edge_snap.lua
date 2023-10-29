@@ -14,7 +14,7 @@ local gshape = require("gears.shape")
 local wibox = require("wibox")
 local cairo = require("lgi").cairo
 local beautiful = require("theme.theme")
-local uui = require("utils.ui")
+local uui = require("utils.thickness")
 
 local M = {}
 

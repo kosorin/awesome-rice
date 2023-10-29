@@ -8,7 +8,7 @@ local gshape = require("gears.shape")
 local base = require("wibox.widget.base")
 local cairo = require("lgi").cairo
 local noice = require("theme.style")
-local uui = require("utils.ui")
+local uui = require("utils.thickness")
 local binding = require("core.binding")
 
 
