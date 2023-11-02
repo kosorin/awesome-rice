@@ -9,6 +9,7 @@ local beautiful = require("theme.theme")
 local mebox = require("widget.mebox")
 local dpi = Dpi
 local wallpaper_service = require("services.wallpaper")
+local places = require("rice.places")
 
 
 local M = {}
@@ -23,7 +24,7 @@ function M.new()
                 {
                     flex = true,
                     text = "Restore",
-                    icon = config.places.theme .. "/icons/shuffle-variant.svg",
+                    icon = beautiful.icon("shuffle-variant.svg"),
                     icon_color = beautiful.palette.gray,
                     callback = function()
                         wallpaper_service.restore()
@@ -52,10 +53,10 @@ function M.new()
             insert(items, {
                 flex = true,
                 text = "Open Directory",
-                icon = config.places.theme .. "/icons/folder-image.svg",
+                icon = beautiful.icon("folder-image.svg"),
                 icon_color = beautiful.palette.blue,
                 callback = function()
-                    awful.spawn(config.commands.open(config.places.wallpapers))
+                    awful.spawn(config.commands.open(places.wallpapers))
                 end,
             })
 

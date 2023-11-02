@@ -32,7 +32,7 @@ return mebox {
             add_separator()
             table.insert(items, {
                 text = "Applications",
-                icon = config.places.theme .. "/icons/apps.svg",
+                icon = beautiful.icon("apps.svg"),
                 icon_color = beautiful.palette.orange,
                 cache_submenu = false,
                 submenu = menu_templates.applications.get_categories_menu,
@@ -43,7 +43,7 @@ return mebox {
             add_separator()
             table.insert(items, {
                 text = "Wallpaper",
-                icon = config.places.theme .. "/icons/image-size-select-actual.svg",
+                icon = beautiful.icon("image-size-select-actual.svg"),
                 icon_color = beautiful.palette.green,
                 submenu = menu_templates.wallpaper.shared,
             })
@@ -52,7 +52,7 @@ return mebox {
         add_separator()
         table.insert(items, {
             text = "Shortcuts",
-            icon = config.places.theme .. "/icons/apple-keyboard-command.svg",
+            icon = beautiful.icon("apple-keyboard-command.svg"),
             icon_color = beautiful.palette.blue,
             callback = function()
                 gtimer.delayed_call(function()
@@ -63,7 +63,7 @@ return mebox {
         add_separator()
         table.insert(items, {
             text = "Exit",
-            icon = config.places.theme .. "/icons/power.svg",
+            icon = beautiful.icon("power.svg"),
             icon_color = beautiful.palette.red,
             submenu = menu_templates.power.shared,
         })

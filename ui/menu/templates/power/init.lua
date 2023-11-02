@@ -58,7 +58,7 @@ function M.new()
             icon = icon,
             icon_color = icon_color,
             mouse_move_show_submenu = false,
-            submenu_icon = config.places.theme .. "/icons/_blank.svg",
+            submenu_icon = beautiful.icon("_blank.svg"),
             submenu = {
                 border_color = beautiful.common.urgent_bright,
                 placement = mebox.placement.confirmation,
@@ -90,21 +90,21 @@ function M.new()
         item_width = dpi(200),
         items_source = {
             mebox.header("Power"),
-            confirmation_item("Shut Down", config.places.theme .. "/icons/power.svg", beautiful.palette.red, power_service.shutdown),
-            confirmation_item("Reboot", config.places.theme .. "/icons/restart.svg", beautiful.palette.yellow, power_service.reboot),
-            confirmation_item("Suspend", config.places.theme .. "/icons/sleep.svg", beautiful.palette.magenta, power_service.suspend),
+            confirmation_item("Shut Down", beautiful.icon("power.svg"), beautiful.palette.red, power_service.shutdown),
+            confirmation_item("Reboot", beautiful.icon("restart.svg"), beautiful.palette.yellow, power_service.reboot),
+            confirmation_item("Suspend", beautiful.icon("sleep.svg"), beautiful.palette.magenta, power_service.suspend),
             mebox.header("Session"),
-            confirmation_item("Log Out", config.places.theme .. "/icons/exit-run.svg", beautiful.palette.green, power_service.kill_session),
+            confirmation_item("Log Out", beautiful.icon("exit-run.svg"), beautiful.palette.green, power_service.kill_session),
             {
                 text = "Lock Session",
-                icon = config.places.theme .. "/icons/lock.svg",
+                icon = beautiful.icon("lock.svg"),
                 icon_color = beautiful.palette.gray,
                 callback = power_service.lock_session,
             },
             mebox.separator,
             mebox.header("Timer"),
             {
-                icon = config.places.theme .. "/icons/timer-outline.svg",
+                icon = beautiful.icon("timer-outline.svg"),
                 submenu = timer_menu_template.shared,
                 on_hide = function(item, menu)
                     -- TODO: Pass `item_widget` in `on_hide` callback?
@@ -140,7 +140,7 @@ function M.new()
             mebox.separator,
             {
                 text = "Awesome",
-                icon = config.places.theme .. "/icons/awesomewm.svg",
+                icon = beautiful.icon("awesomewm.svg"),
                 icon_color = beautiful.palette.blue,
                 submenu = {
                     item_width = dpi(120),
@@ -148,13 +148,13 @@ function M.new()
                     items_source = {
                         {
                             text = "Restart",
-                            icon = config.places.theme .. "/icons/restart.svg",
+                            icon = beautiful.icon("restart.svg"),
                             icon_color = beautiful.palette.orange,
                             callback = function() capi.awesome.restart() end,
                         },
                         {
                             text = "Quit",
-                            icon = config.places.theme .. "/icons/exit-run.svg",
+                            icon = beautiful.icon("exit-run.svg"),
                             icon_color = beautiful.palette.red,
                             callback = function() capi.awesome.quit() end,
                         },
@@ -166,7 +166,7 @@ function M.new()
             {
                 enabled = false,
                 opacity = 1,
-                icon = config.places.theme .. "/icons/timer-play.svg",
+                icon = beautiful.icon("timer-play.svg"),
                 icon_color = beautiful.palette.cyan,
                 on_hide = function(item)
                     item.timer:stop()

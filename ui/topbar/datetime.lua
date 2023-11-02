@@ -70,7 +70,7 @@ local function initialize_date_widget(self, style)
             id = "icon",
             widget = wibox.widget.imagebox,
             resize = true,
-            image = config.places.theme .. "/icons/calendar-month.svg",
+            image = beautiful.icon("calendar-month.svg"),
             stylesheet = css.style { path = { fill = style.fg } },
         },
         {
@@ -105,13 +105,13 @@ local function initialize_date_widget(self, style)
         placement = popup_placement,
         {
             text = "Copy Date",
-            icon = config.places.theme .. "/icons/content-copy.svg",
+            icon = beautiful.icon("content-copy.svg"),
             icon_color = beautiful.palette.gray,
             callback = function() self:to_clipboard("date") end,
         },
         {
             text = "Copy Date &amp; Time",
-            icon = config.places.theme .. "/icons/content-copy.svg",
+            icon = beautiful.icon("content-copy.svg"),
             icon_color = beautiful.palette.gray,
             callback = function() self:to_clipboard() end,
         },
@@ -173,20 +173,20 @@ local function initialize_time_widget(self, style)
         placement = beautiful.wibar.build_placement(time_container, self._private.wibar),
         {
             text = "Copy Time",
-            icon = config.places.theme .. "/icons/content-copy.svg",
+            icon = beautiful.icon("content-copy.svg"),
             icon_color = beautiful.palette.gray,
             callback = function() self:to_clipboard("time") end,
         },
         {
             text = "Copy Date &amp; Time",
-            icon = config.places.theme .. "/icons/content-copy.svg",
+            icon = beautiful.icon("content-copy.svg"),
             icon_color = beautiful.palette.gray,
             callback = function() self:to_clipboard() end,
         },
         mebox.separator,
         {
             text = "Seconds",
-            icon = config.places.theme .. "/icons/clock-fast.svg",
+            icon = beautiful.icon("clock-fast.svg"),
             icon_color = beautiful.palette.gray,
             on_show = function(item) item.checked = not not self._private.seconds end,
             callback = function(item) self:show_seconds(not item.checked) end,

@@ -214,8 +214,8 @@ local function update_playback_status(self, player_data)
         or beautiful.media_player.content_styles.disabled)
 
     self._private.play_pause_button.widget --[[@as wibox.widget.imagebox]]:set_image(is_playing
-        and config.places.theme .. "/icons/pause.svg"
-        or config.places.theme .. "/icons/play.svg")
+        and beautiful.icon("pause.svg")
+        or beautiful.icon("play.svg"))
 
     self._private.playback_bar.opacity = is_playing and 0.5 or 0.2
     self._private.icon.opacity = is_playing and 1 or 0.5
@@ -415,7 +415,7 @@ function M.new(wibar)
                 {
                     id = "#no_player_button.icon",
                     widget = wibox.widget.imagebox,
-                    image = config.places.theme .. "/icons/music.svg",
+                    image = beautiful.icon("music.svg"),
                     resize = true,
                 },
                 {
@@ -458,7 +458,7 @@ function M.new(wibar)
                     {
                         id = "#icon",
                         widget = wibox.widget.imagebox,
-                        image = config.places.theme .. "/icons/music.svg",
+                        image = beautiful.icon("music.svg"),
                         resize = true,
                     },
                 },
@@ -498,7 +498,7 @@ function M.new(wibar)
                         },
                         {
                             widget = wibox.widget.imagebox,
-                            image = config.places.theme .. "/icons/skip-previous.svg",
+                            image = beautiful.icon("skip-previous.svg"),
                             resize = true,
                         },
                     },
@@ -531,7 +531,7 @@ function M.new(wibar)
                         },
                         {
                             widget = wibox.widget.imagebox,
-                            image = config.places.theme .. "/icons/skip-next.svg",
+                            image = beautiful.icon("skip-next.svg"),
                             resize = true,
                         },
                     },

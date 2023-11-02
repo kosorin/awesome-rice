@@ -9,6 +9,7 @@ local format = string.format
 local awful = require("awful")
 local beautiful = require("theme.theme")
 local tcolor = require("utils.color")
+local places = require("rice.places")
 
 
 local screenshot = {}
@@ -44,7 +45,7 @@ function screenshot.take(args)
         command = format("%s \"%s\"", command, args.output)
     else
         local file_name = "$(date '+%y%m%d-%H%M-%S')"
-        command = format("%s \"%s/%s.%s\"", command, config.places.screenshots, file_name, args.format)
+        command = format("%s \"%s/%s.%s\"", command, places.screenshots, file_name, args.format)
     end
 
     awful.spawn.with_shell(command)

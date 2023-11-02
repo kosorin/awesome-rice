@@ -235,7 +235,7 @@ function M.new(default_timeout)
             {
                 layout_id = "#top",
                 text = "Start",
-                icon = config.places.theme .. "/icons/play.svg",
+                icon = beautiful.icon("play.svg"),
                 icon_color = beautiful.palette.green,
                 callback = function(item, menu)
                     local request = menu.power_request or default_request
@@ -250,7 +250,7 @@ function M.new(default_timeout)
                 layout_id = "#top",
                 enabled = false,
                 text = "Stop",
-                icon = config.places.theme .. "/icons/stop.svg",
+                icon = beautiful.icon("stop.svg"),
                 icon_color = beautiful.palette.red,
                 callback = function()
                     power_service.stop_timer()
@@ -272,7 +272,7 @@ function M.new(default_timeout)
                 layout_id = "#hours",
                 layout_add = wibox.layout.align.set_first,
                 width = beautiful.mebox.default_style.item_height,
-                icon = config.places.theme .. "/icons/minus.svg",
+                icon = beautiful.icon("minus.svg"),
                 icon_color = beautiful.palette.white,
                 callback = function()
                     change_hours(-1)
@@ -308,7 +308,7 @@ function M.new(default_timeout)
                 layout_id = "#hours",
                 layout_add = wibox.layout.align.set_third,
                 width = beautiful.mebox.default_style.item_height,
-                icon = config.places.theme .. "/icons/plus.svg",
+                icon = beautiful.icon("plus.svg"),
                 icon_color = beautiful.palette.white,
                 callback = function()
                     change_hours(1)
@@ -319,7 +319,7 @@ function M.new(default_timeout)
                 layout_id = "#minutes",
                 layout_add = wibox.layout.align.set_first,
                 width = beautiful.mebox.default_style.item_height,
-                icon = config.places.theme .. "/icons/minus.svg",
+                icon = beautiful.icon("minus.svg"),
                 icon_color = beautiful.palette.white,
                 callback = function()
                     change_minutes(-1)
@@ -355,7 +355,7 @@ function M.new(default_timeout)
                 layout_id = "#minutes",
                 layout_add = wibox.layout.align.set_third,
                 width = beautiful.mebox.default_style.item_height,
-                icon = config.places.theme .. "/icons/plus.svg",
+                icon = beautiful.icon("plus.svg"),
                 icon_color = beautiful.palette.white,
                 callback = function()
                     change_minutes(1)

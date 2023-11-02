@@ -46,7 +46,7 @@ function power_widget.new(wibar)
             {
                 id = "#icon",
                 widget = wibox.widget.imagebox,
-                image = config.places.theme .. "/icons/toolbox.svg",
+                image = beautiful.icon("toolbox.svg"),
             },
         },
     }

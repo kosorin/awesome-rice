@@ -11,17 +11,19 @@ local format = string.format
 local insert = table.insert
 local awful = require("awful")
 local gfilesystem = require("gears.filesystem")
+local core = require("core")
+local places = require("rice.places")
 
 
 local feh_prefix = ".fehbg"
-local feh_script = config.places.home .. "/" .. feh_prefix
+local feh_script = core.path.home .. "/" .. feh_prefix
 
 local wallpaper_service = {}
 
 function wallpaper_service.get_collections()
     local collections = {}
 
-    local directory = config.places.wallpapers
+    local directory = places.wallpapers
     local file = popen(format('ls -a "%s"', directory))
     if file then
         for filename in file:lines() do

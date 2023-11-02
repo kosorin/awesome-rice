@@ -59,7 +59,7 @@ function M.new()
         end,
         items_source = {
             {
-                icon = config.places.theme .. "/icons/minus.svg",
+                icon = beautiful.icon("minus.svg"),
                 icon_color = beautiful.palette.white,
                 callback = function(item, menu)
                     change_opacity(menu, -step)
@@ -89,7 +89,7 @@ function M.new()
                 end,
             },
             {
-                icon = config.places.theme .. "/icons/plus.svg",
+                icon = beautiful.icon("plus.svg"),
                 icon_color = beautiful.palette.white,
                 callback = function(item, menu)
                     change_opacity(menu, step)
@@ -100,7 +100,7 @@ function M.new()
             {
                 width = dpi(100),
                 text = "Reset",
-                icon = config.places.theme .. "/icons/arrow-u-left-top.svg",
+                icon = beautiful.icon("arrow-u-left-top.svg"),
                 icon_color = beautiful.palette.gray,
                 callback = function(item, menu)
                     set_opacity(menu, max_opacity)

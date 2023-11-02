@@ -104,7 +104,7 @@ function weather_widget.new(wibar)
                 id = "icon",
                 widget = wibox.widget.imagebox,
                 resize = true,
-                image = config.places.theme .. "/icons/thermometer.svg",
+                image = beautiful.icon("thermometer.svg"),
             },
             {
                 id = "text",
@@ -118,7 +118,7 @@ function weather_widget.new(wibar)
                 id = "icon",
                 widget = wibox.widget.imagebox,
                 resize = true,
-                image = config.places.theme .. "/icons/weather-pouring.svg",
+                image = beautiful.icon("weather-pouring.svg"),
             },
             {
                 id = "text",
@@ -140,7 +140,7 @@ function weather_widget.new(wibar)
                 id = "icon",
                 widget = wibox.widget.imagebox,
                 resize = true,
-                image = config.places.theme .. "/icons/thermometer.svg",
+                image = beautiful.icon("thermometer.svg"),
             },
             {
                 id = "text",
@@ -162,7 +162,7 @@ function weather_widget.new(wibar)
                 id = "icon",
                 widget = wibox.widget.imagebox,
                 resize = true,
-                image = config.places.theme .. "/icons/home-thermometer.svg",
+                image = beautiful.icon("home-thermometer.svg"),
             },
             {
                 id = "text",
@@ -189,7 +189,7 @@ function weather_widget.new(wibar)
         placement = beautiful.wibar.build_placement(self, self._private.wibar),
         {
             text = "Open Dashboard",
-            icon = config.places.theme .. "/icons/open-in-new.svg",
+            icon = beautiful.icon("open-in-new.svg"),
             icon_color = beautiful.palette.gray,
             callback = function()
                 -- TODO: Needs rework
@@ -202,7 +202,7 @@ function weather_widget.new(wibar)
         mebox.separator,
         {
             text = "Refresh",
-            icon = config.places.theme .. "/icons/refresh.svg",
+            icon = beautiful.icon("refresh.svg"),
             icon_color = beautiful.palette.gray,
             callback = function()
                 weather_service.update()

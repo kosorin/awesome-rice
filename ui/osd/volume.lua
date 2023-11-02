@@ -152,7 +152,7 @@ function M.new()
                         id = "#icon",
                         widget = wibox.widget.imagebox,
                         resize = true,
-                        image = config.places.theme .. "/icons/volume.svg",
+                        image = beautiful.icon("volume.svg"),
                     },
                     {
                         id = "#text",

@@ -67,7 +67,7 @@ local function refresh_info(container_widget, style, text, icon)
     local icon_widget = container_widget:get_children_by_id("icon")[1]
     icon = style.icon or icon
     if icon then
-        icon_widget:set_image(config.places.theme .. "/icons/" .. icon .. ".svg")
+        icon_widget:set_image(beautiful.icon(icon .. ".svg"))
     end
     icon_widget:set_stylesheet(css.style { path = { fill = style.fg } })
 end
@@ -194,7 +194,7 @@ function network_widget.new(wibar)
                     id = "icon",
                     widget = wibox.widget.imagebox,
                     resize = true,
-                    image = config.places.theme .. "/icons/download.svg",
+                    image = beautiful.icon("download.svg"),
                 },
                 {
                     id = "text",
@@ -208,7 +208,7 @@ function network_widget.new(wibar)
                     id = "icon",
                     widget = wibox.widget.imagebox,
                     resize = true,
-                    image = config.places.theme .. "/icons/upload.svg",
+                    image = beautiful.icon("upload.svg"),
                 },
                 {
                     id = "text",
@@ -238,7 +238,7 @@ function network_widget.new(wibar)
         placement = beautiful.wibar.build_placement(self, self._private.wibar),
         {
             text = "Graph",
-            icon = config.places.theme .. "/icons/chart-line.svg",
+            icon = beautiful.icon("chart-line.svg"),
             icon_color = beautiful.palette.gray,
             on_show = function(item) item.checked = not not self._private.show_graph end,
             callback = function(item) self:show_graph(not item.checked) end,

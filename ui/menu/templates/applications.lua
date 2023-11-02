@@ -258,7 +258,7 @@ local function generate_categories(desktop_files)
     table.insert(categories, mebox.separator)
     table.insert(categories, {
         text = "Reload",
-        icon = config.places.theme .. "/icons/refresh.svg",
+        icon = beautiful.icon("refresh.svg"),
         icon_color = beautiful.palette.gray,
         callback = function() desktop_utils.load_desktop_files() end,
     })

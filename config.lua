@@ -1,6 +1,6 @@
 -- DEPENDENCIES (see below)
 
-local gfilesystem = require("gears.filesystem")
+local core = require("core")
 
 
 local config = {}
@@ -20,14 +20,6 @@ config.features = {
     redshift_widget = false,
     wallpaper_menu = false,
 }
-
-config.places = {}
-config.places.home = os.getenv("HOME")
-config.places.config = os.getenv("XDG_CONFIG_HOME") or (config.places.home .. "/.config")
-config.places.awesome = string.match(gfilesystem.get_configuration_dir(), "^(/?.-)/*$")
-config.places.theme = config.places.awesome .. "/theme"
-config.places.screenshots = config.places.home .. "/inbox/screenshots"
-config.places.wallpapers = config.places.home .. "/media/look/wallpapers"
 
 config.wm = {
     name = "awesome",
@@ -60,7 +52,7 @@ config.power = {
 config.actions = {
     qr_code_clipboard = "qrclip",
     show_launcher = "rofi -show",
-    show_emoji_picker = config.places.config .. "/rofi/emoji-run.sh",
+    show_emoji_picker = core.path.config .. "/rofi/emoji-run.sh",
 }
 
 config.commands = {}

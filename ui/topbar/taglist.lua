@@ -213,7 +213,7 @@ function taglist.new(wibar)
                     {
                         id = "#icon",
                         widget = wibox.widget.imagebox,
-                        image = config.places.theme .. "/icons/plus.svg",
+                        image = beautiful.icon("plus.svg"),
                         resize = true,
                     },
                 },

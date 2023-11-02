@@ -115,7 +115,7 @@ function volume_widget.new(wibar)
                 id = "icon",
                 widget = wibox.widget.imagebox,
                 resize = true,
-                image = config.places.theme .. "/icons/volume.svg",
+                image = beautiful.icon("volume.svg"),
             },
             {
                 id = "text",
@@ -149,13 +149,13 @@ function volume_widget.new(wibar)
         placement = beautiful.wibar.build_placement(self, self._private.wibar),
         {
             text = "Open Mixer",
-            icon = config.places.theme .. "/icons/tune.svg",
+            icon = beautiful.icon("tune.svg"),
             icon_color = beautiful.palette.orange,
             callback = function() self:show_tools(config.apps.mixer) end,
         },
         {
             text = "Open Bluetooth",
-            icon = config.places.theme .. "/icons/bluetooth-settings.svg",
+            icon = beautiful.icon("bluetooth-settings.svg"),
             icon_color = beautiful.palette.blue,
             callback = function() self:show_tools(config.apps.bluetooth_control) end,
         },

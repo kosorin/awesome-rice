@@ -13,8 +13,8 @@ local hui = require("utils.thickness")
 local hwidget = require("core.widget")
 local css = require("utils.css")
 local pango = require("utils.pango")
-local config = require("config")
 local noice = require("theme.style")
+local core = require("core")
 
 
 ---@class Theme
@@ -116,6 +116,17 @@ theme.common = setmetatable({}, hcolor.palette_metatable)
 for k, v in pairs(theme.color_names.common) do
     theme.common[k] = theme.palette[v]
     theme.common[k .. "_bright"] = theme.palette[v .. "_bright"]
+end
+
+----------------------------------------------------------------------------------------------------
+
+function theme.icon(path)
+    if path == false then
+        path = "_blank.svg"
+    elseif type(path) ~= "string" then
+        return nil
+    end
+    return string.format("%s/icons/%s", core.path.theme, path)
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -318,41 +329,41 @@ theme.tooltip.default_style = setmetatable({
 theme.mebox = {
     checkmark = {
         [false] = {
-            icon = config.places.theme .. "/icons/_blank.svg",
+            icon = theme.icon("_blank.svg"),
             color = theme.palette.gray,
         },
         [true] = {
-            icon = config.places.theme .. "/icons/check.svg",
+            icon = theme.icon("check.svg"),
             color = theme.common.fg,
         },
     },
     checkbox = {
         [false] = {
-            icon = config.places.theme .. "/icons/checkbox-blank-outline.svg",
+            icon = theme.icon("checkbox-blank-outline.svg"),
             color = theme.palette.gray,
         },
         [true] = {
-            icon = config.places.theme .. "/icons/checkbox-marked.svg",
+            icon = theme.icon("checkbox-marked.svg"),
             color = theme.palette.gray_bright,
         },
     },
     radiobox = {
         [false] = {
-            icon = config.places.theme .. "/icons/radiobox-blank.svg",
+            icon = theme.icon("radiobox-blank.svg"),
             color = theme.palette.gray,
         },
         [true] = {
-            icon = config.places.theme .. "/icons/radiobox-marked.svg",
+            icon = theme.icon("radiobox-marked.svg"),
             color = theme.palette.gray_bright,
         },
     },
     switch = {
         [false] = {
-            icon = config.places.theme .. "/icons/toggle-switch-off-outline.svg",
+            icon = theme.icon("toggle-switch-off-outline.svg"),
             color = theme.palette.gray,
         },
         [true] = {
-            icon = config.places.theme .. "/icons/toggle-switch.svg",
+            icon = theme.icon("toggle-switch.svg"),
             color = theme.palette.gray_bright,
         },
     },
@@ -700,13 +711,13 @@ do
         paddings = hui.new { dpi(6), dpi(8) },
         spacing = dpi(4),
         icons = {
-            menu = config.places.theme .. "/icons/menu.svg",
-            floating = config.places.theme .. "/icons/arrange-bring-forward.svg",
-            on_top = config.places.theme .. "/icons/chevron-double-up.svg",
-            sticky = config.places.theme .. "/icons/pin.svg",
-            minimize = config.places.theme .. "/icons/window-minimize.svg",
-            maximize = config.places.theme .. "/icons/window-maximize.svg",
-            close = config.places.theme .. "/icons/window-close.svg",
+            menu = theme.icon("menu.svg"),
+            floating = theme.icon("arrange-bring-forward.svg"),
+            on_top = theme.icon("chevron-double-up.svg"),
+            sticky = theme.icon("pin.svg"),
+            minimize = theme.icon("window-minimize.svg"),
+            maximize = theme.icon("window-maximize.svg"),
+            close = theme.icon("window-close.svg"),
         },
         buttons = {
             default = {
@@ -849,19 +860,19 @@ end
 theme.layouts = {
     tiling = {
         text = "Tiling",
-        icon = config.places.theme .. "/icons/layouts/tiling.right.svg",
+        icon = theme.icon("layouts/tiling.right.svg"),
     },
     floating = {
         text = "Floating",
-        icon = config.places.theme .. "/icons/layouts/floating.svg",
+        icon = theme.icon("layouts/floating.svg"),
     },
     max = {
         text = "Maximize",
-        icon = config.places.theme .. "/icons/layouts/max.svg",
+        icon = theme.icon("layouts/max.svg"),
     },
     fullscreen = {
         text = "Fullscreen",
-        icon = config.places.theme .. "/icons/layouts/fullscreen.svg",
+        icon = theme.icon("layouts/fullscreen.svg"),
     },
 }
 

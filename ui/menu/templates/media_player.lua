@@ -19,22 +19,22 @@ local rice_media = require("rice.media")
 
 local play_pause_status = {
     [false] = {
-        icon = config.places.theme .. "/icons/play.svg",
+        icon = beautiful.icon("play.svg"),
         color = beautiful.palette.gray,
     },
     [true] = {
-        icon = config.places.theme .. "/icons/pause.svg",
+        icon = beautiful.icon("pause.svg"),
         color = beautiful.palette.gray_bright,
     },
 }
 
 local pin_status = {
     [false] = {
-        icon = config.places.theme .. "/icons/pin-off.svg",
+        icon = beautiful.icon("pin-off.svg"),
         color = beautiful.palette.gray_75,
     },
     [true] = {
-        icon = config.places.theme .. "/icons/pin.svg",
+        icon = beautiful.icon("pin.svg"),
         color = beautiful.palette.gray_bright,
     },
 }

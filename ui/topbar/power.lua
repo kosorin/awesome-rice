@@ -84,7 +84,7 @@ function power_widget.new(wibar)
             {
                 id = "#icon",
                 widget = wibox.widget.imagebox,
-                image = config.places.theme .. "/icons/power.svg",
+                image = beautiful.icon("power.svg"),
             },
             {
                 id = "#text",

@@ -91,7 +91,7 @@ function redshift_widget.new(wibar, on_dashboard)
                 id = "icon",
                 widget = wibox.widget.imagebox,
                 resize = true,
-                image = config.places.theme .. "/icons/lightbulb-on.svg",
+                image = beautiful.icon("lightbulb-on.svg"),
                 stylesheet = css.style { path = { fill = style.fg } },
             },
             {

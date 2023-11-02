@@ -95,7 +95,7 @@ return {
                 icon = checkbox_style.icon
                 color = checkbox_style.color
             elseif item.submenu then
-                icon = item.submenu_icon or config.places.theme .. "/icons/chevron-right.svg"
+                icon = item.submenu_icon or beautiful.icon("chevron-right.svg")
                 color = style.fg
             end
 

@@ -73,7 +73,7 @@ naughty.connect_signal("request::display", function(n)
                                         widget = capsule,
                                         {
                                             widget = wibox.widget.imagebox,
-                                            image = config.places.theme .. "/icons/close.svg",
+                                            image = beautiful.icon("close.svg"),
                                             resize = true,
                                         },
                                     },

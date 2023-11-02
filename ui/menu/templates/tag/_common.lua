@@ -1,4 +1,4 @@
-local config = require("config")
+local beautiful = require("theme.theme")
 
 
 local M = {}
@@ -33,7 +33,7 @@ function M.build_simple_toggle(text, property, checkbox_type, icon, icon_color)
     return {
         text = text,
         checkbox_type = checkbox_type,
-        icon = icon and (config.places.theme .. icon) or nil,
+        icon = icon,
         icon_color = icon_color,
         on_show = function(item, menu)
             local tag = menu.tag --[[@as tag]]

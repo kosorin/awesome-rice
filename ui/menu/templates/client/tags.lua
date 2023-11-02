@@ -91,7 +91,7 @@ function M.new()
             ---@type MeboxItem.args[]
             local items = {
                 function()
-                    local item = common.build_simple_toggle("Sticky", "sticky", nil, "/icons/pin.svg", beautiful.palette.white)
+                    local item = common.build_simple_toggle("Sticky", "sticky", nil, beautiful.icon("pin.svg"), beautiful.palette.white)
                     item.layout_id = "#sticky"
                     return item
                 end,
@@ -110,7 +110,7 @@ function M.new()
                             return math.max(new_width, old_width)
                         end,
                         text = tag.name,
-                        icon = config.places.theme .. "/icons/tag.svg",
+                        icon = beautiful.icon("tag.svg"),
                         icon_color = beautiful.palette.white,
                         callback = function()
                             client:move_to_tag(tag)
