@@ -75,11 +75,33 @@ local M = {
     group = {
         fkeys = {
             from = "F1",
-            to = "F35",
+            to = "F12",
+            { trigger = "F1", index = 1 },
+            { trigger = "F2", index = 2 },
+            { trigger = "F3", index = 3 },
+            { trigger = "F4", index = 4 },
+            { trigger = "F5", index = 5 },
+            { trigger = "F6", index = 6 },
+            { trigger = "F7", index = 7 },
+            { trigger = "F8", index = 8 },
+            { trigger = "F9", index = 9 },
+            { trigger = "F10", index = 10 },
+            { trigger = "F11", index = 11 },
+            { trigger = "F12", index = 12 },
         },
         numrow = {
             from = "#19",
             to = "#18",
+            { trigger = "#10", index = 1, number = 1 },
+            { trigger = "#11", index = 2, number = 2 },
+            { trigger = "#12", index = 3, number = 3 },
+            { trigger = "#13", index = 4, number = 4 },
+            { trigger = "#14", index = 5, number = 5 },
+            { trigger = "#15", index = 6, number = 6 },
+            { trigger = "#16", index = 7, number = 7 },
+            { trigger = "#17", index = 8, number = 8 },
+            { trigger = "#18", index = 9, number = 9 },
+            { trigger = "#19", index = 10, number = 0 },
         },
         numpad = {
             from = "#90",
@@ -115,14 +137,6 @@ local M = {
         },
     },
 }
-
-for i = 1, 10 do
-    table.insert(M.group.numrow, { trigger = "#" .. i + 9, index = i, number = i == 10 and 0 or i })
-end
-
-for i = 1, 12 do
-    table.insert(M.group.fkeys, { trigger = "F" .. i, index = i })
-end
 
 do
     ---@type { length: integer, [key_modifier]: integer }
