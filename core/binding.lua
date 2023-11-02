@@ -28,6 +28,22 @@ local button = {
 
 local key = {
     any = "Any",
+    backspace = "BackSpace",
+    tab = "Tab",
+    enter = "Return",
+    escape = "Escape",
+    space = "space",
+    prtsc = "Print",
+    pause = "Pause",
+    insert = "Insert",
+    home = "Home",
+    pgup = "Prior",
+    pgdn = "Next",
+    delete = "Delete",
+    end_ = "End",
+    capslock = "Caps_Lock",
+    numlock = "Num_Lock",
+    scrolllock = "Scroll_Lock",
 }
 
 local modifier = {
@@ -72,6 +88,7 @@ local M = {
     trigger_type = trigger_type,
     button = button,
     modifier = modifier,
+    key = key,
     group = {
         fkeys = {
             from = "F1",
