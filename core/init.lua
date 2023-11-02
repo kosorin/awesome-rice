@@ -5,6 +5,7 @@ return {
     layout = require("core.layout"),
     mouse = require("core.mouse"),
     notification = require("core.notification"),
+    path = require("core.path"),
     rule = require("core.rule"),
     screen = require("core.screen"),
     system = require("core.system"),
