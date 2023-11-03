@@ -6,6 +6,7 @@ return {
     mouse = require("core.mouse"),
     notification = require("core.notification"),
     path = require("core.path"),
+    process = require("core.process"),
     rule = require("core.rule"),
     screen = require("core.screen"),
     style = require("core.style"),
