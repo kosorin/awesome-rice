@@ -1,6 +1,6 @@
 -- DEPENDENCIES (feature flag "magnifier_tools"): slop, xclip
 
-local config = require("config")
+local config = require("rice.config")
 if not config.features.magnifier_tools then
     return
 end

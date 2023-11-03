@@ -1,6 +1,6 @@
 -- DEPENDENCIES (feature flag "weather_widget"): curl, lua-dkjson
 
-local config = require("config")
+local config = require("rice.config")
 if not config.features.weather_widget then
     return
 end

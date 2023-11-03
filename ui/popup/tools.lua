@@ -9,7 +9,7 @@ local beautiful = require("theme.theme")
 local dpi = Dpi
 local capsule = require("widget.capsule")
 local noice = require("theme.style")
-local config = require("config")
+local config = require("rice.config")
 local redshift_widget = require("ui.topbar.redshift")
 local ui_controller = require("ui.controller")
 

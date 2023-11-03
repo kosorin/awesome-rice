@@ -2,7 +2,7 @@ local capi = Capi
 local os_execute = os.execute
 local os_time = os.time
 local gtimer = require("gears.timer")
-local config = require("config")
+local config = require("rice.config")
 local naughty = require("naughty")
 local maxinteger = math.maxinteger
 

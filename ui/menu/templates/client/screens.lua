@@ -4,7 +4,7 @@ local beautiful = require("theme.theme")
 local dpi = Dpi
 local mebox = require("widget.mebox")
 local gtable = require("gears.table")
-local config = require("config")
+local config = require("rice.config")
 local common = require("ui.menu.templates.client._common")
 
 

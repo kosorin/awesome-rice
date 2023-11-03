@@ -1,6 +1,6 @@
 -- DEPENDENCIES (feature flag "screenshot_tools"): maim, xclip, xdotool, date
 
-local config = require("config")
+local config = require("rice.config")
 if not config.features.screenshot_tools then
     return
 end

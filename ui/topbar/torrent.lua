@@ -1,4 +1,4 @@
-local config = require("config")
+local config = require("rice.config")
 if not config.features.torrent_widget then
     return
 end

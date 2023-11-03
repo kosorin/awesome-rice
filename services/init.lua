@@ -1,4 +1,4 @@
-local config = require("config")
+local config = require("rice.config")
 
 local services = {
     screenshot = config.features.screenshot_tools and require("services.screenshot") or nil,

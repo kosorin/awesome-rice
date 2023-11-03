@@ -1,4 +1,4 @@
-local config = require("config")
+local config = require("rice.config")
 
 return {
     applications = require("ui.menu.templates.applications"),

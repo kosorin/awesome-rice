@@ -1,6 +1,6 @@
 -- DEPENDENCIES (feature flag "torrent_widget"): transmission-status, lua-dkjson
 
-local config = require("config")
+local config = require("rice.config")
 if not config.features.torrent_widget then
     return
 end

@@ -1,6 +1,6 @@
 -- DEPENDENCIES (feature flag "wallpaper_menu"): feh, cp, ls
 
-local config = require("config")
+local config = require("rice.config")
 if not config.features.wallpaper_menu then
     return
 end

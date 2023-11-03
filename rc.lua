@@ -3,7 +3,6 @@ require("globals")
 
 require("core")
 
-require("config")
 require("theme")
 require("rice")
 require("services")

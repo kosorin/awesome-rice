@@ -7,7 +7,7 @@ local beautiful = require("theme.theme")
 local desktop_utils = require("services.desktop")
 local mebox = require("widget.mebox")
 local hstring = require("utils.string")
-local config = require("config")
+local config = require("rice.config")
 local app_menu = require("rice.apps").menu
 local dpi = Dpi
 

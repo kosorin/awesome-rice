@@ -3,7 +3,7 @@ local wibox = require("wibox")
 local capsule = require("widget.capsule")
 local css = require("utils.css")
 local pango = require("utils.pango")
-local config = require("config")
+local config = require("rice.config")
 local dpi = Dpi
 local hui = require("utils.thickness")
 

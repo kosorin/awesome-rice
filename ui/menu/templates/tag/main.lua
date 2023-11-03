@@ -5,7 +5,7 @@ local naughty = require("naughty")
 local dpi = Dpi
 local mebox = require("widget.mebox")
 local screen_helper = require("core.screen")
-local config = require("config")
+local config = require("rice.config")
 local common = require("ui.menu.templates.tag._common")
 local layout_menu_template = require("ui.menu.templates.tag.layout")
 

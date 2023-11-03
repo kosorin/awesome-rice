@@ -11,7 +11,7 @@ local gtable = require("gears.table")
 local menu_templates = require("ui.menu.templates")
 local mebox = require("widget.mebox")
 local bindbox = require("widget.bindbox")
-local config = require("config")
+local config = require("rice.config")
 
 
 local global_bindings = {

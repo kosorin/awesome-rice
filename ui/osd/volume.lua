@@ -13,7 +13,7 @@ local gtable = require("gears.table")
 local capsule = require("widget.capsule")
 local pango = require("utils.pango")
 local css = require("utils.css")
-local config = require("config")
+local config = require("rice.config")
 local htable = require("utils.table")
 local noice = require("theme.style")
 

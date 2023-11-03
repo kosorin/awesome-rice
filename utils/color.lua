@@ -4,7 +4,6 @@ local math = math
 local string = string
 local gcolor = require("gears.color")
 local gdebug = require("gears.debug")
-local config = require("config")
 
 
 local M = {
@@ -75,11 +74,9 @@ function M.palette_metatable.__index(t, k)
 end
 
 -- TODO: Move this somewhere else
-if config.features.screenshot_tools or config.features.magnifier_tools then
-    function M.format_slop(color)
-        local r, g, b, a = gcolor.parse_color(color)
-        return string.format("%.3f,%.3f,%.3f,%.3f", r, g, b, a)
-    end
+function M.format_slop(color)
+    local r, g, b, a = gcolor.parse_color(color)
+    return string.format("%.3f,%.3f,%.3f,%.3f", r, g, b, a)
 end
 
 return M

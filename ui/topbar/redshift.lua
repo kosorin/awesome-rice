@@ -1,6 +1,6 @@
 -- DEPENDENCIES (feature flag "redshift_widget"): sct
 
-local config = require("config")
+local config = require("rice.config")
 if not config.features.redshift_widget then
     return
 end

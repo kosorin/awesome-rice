@@ -14,7 +14,7 @@ local amousec = require("awful.mouse.client")
 local capsule = require("widget.capsule")
 local mebox = require("widget.mebox")
 local client_menu_template = require("ui.menu.templates.client.main")
-local config = require("config")
+local config = require("rice.config")
 local cclient = require("core.client")
 local css = require("utils.css")
 

@@ -8,7 +8,7 @@ local mod = binding.modifier
 local btn = binding.button
 local pango = require("utils.pango")
 local umath = require("utils.math")
-local config = require("config")
+local config = require("rice.config")
 local common = require("ui.menu.templates.client._common")
 
 
