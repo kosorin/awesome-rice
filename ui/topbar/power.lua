@@ -16,6 +16,7 @@ local gtable = require("gears.table")
 local mebox = require("widget.mebox")
 local power_menu_template = require("ui.menu.templates.power")
 local power_service = require("services.power")
+local power = require("rice.power")
 local humanizer = require("utils.humanizer")
 local hui = require("utils.thickness")
 
@@ -39,7 +40,7 @@ local time_args = {
 
 function power_widget:refresh(status)
     local style = status
-        and (((tonumber(status) or maxinteger) <= power_service.config.alert_threshold)
+        and (((tonumber(status) or maxinteger) <= power.timer.alert_threshold)
             and beautiful.capsule.styles.palette.red
             or beautiful.capsule.styles.palette.orange)
         or beautiful.capsule.styles.normal

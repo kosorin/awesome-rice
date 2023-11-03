@@ -8,6 +8,7 @@ local mod = binding.modifier
 local btn = binding.button
 local power_service = require("services.power")
 local config = require("rice.config")
+local power = require("rice.power")
 local humanizer = require("utils.humanizer")
 local capsule = require("widget.capsule")
 local hui = require("utils.thickness")
@@ -124,7 +125,7 @@ end
 ---@param default_timeout? integer
 ---@return Mebox.new.args
 function M.new(default_timeout)
-    local total_minutes = (default_timeout or power_service.config.default_timeout) // 60
+    local total_minutes = (default_timeout or power.timer.default_timeout) // 60
     local default_hours = floor(total_minutes / 60)
     local default_minutes = floor(total_minutes % 60)
 

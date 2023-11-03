@@ -5,6 +5,7 @@ return {
     layouts = require("rice.layouts"),
     media = require("rice.media"),
     places = require("rice.places"),
+    power = require("rice.power"),
     rules = require("rice.rules"),
     tags = require("rice.tags"),
 }

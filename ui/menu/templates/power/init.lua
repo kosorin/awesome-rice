@@ -12,6 +12,7 @@ local mod = binding.modifier
 local btn = binding.button
 local power_service = require("services.power")
 local config = require("rice.config")
+local power = require("rice.power")
 local pango = require("utils.pango")
 local humanizer = require("utils.humanizer")
 local capsule = require("widget.capsule")
@@ -125,7 +126,7 @@ function M.new()
                                 })
                             end
                             item.text = text
-                            item.style = ((tonumber(status) or maxinteger) <= power_service.config.alert_threshold)
+                            item.style = ((tonumber(status) or maxinteger) <= power.timer.alert_threshold)
                                 and beautiful.capsule.styles.palette.red
                                 or beautiful.capsule.styles.palette.orange
                             item.icon_color = item.style.fg

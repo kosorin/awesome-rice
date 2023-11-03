@@ -2,18 +2,12 @@ local capi = Capi
 local os_execute = os.execute
 local os_time = os.time
 local gtimer = require("gears.timer")
-local config = require("rice.config")
 local naughty = require("naughty")
 local maxinteger = math.maxinteger
+local power = require("rice.power")
 
 
-local power_service = {
-    config = {
-        default_timeout = 3600, -- seconds
-        minimum_timeout = 15, -- seconds
-        alert_threshold = 60, -- seconds
-    },
-}
+local power_service = {}
 
 local function execute(command)
     if DEBUG then
@@ -24,27 +18,27 @@ local function execute(command)
 end
 
 function power_service.shutdown()
-    execute(config.power.shutdown)
+    execute(power.commands.shutdown)
 end
 
 function power_service.reboot()
-    execute(config.power.reboot)
+    execute(power.commands.reboot)
 end
 
 function power_service.suspend()
-    execute(config.power.suspend)
+    execute(power.commands.suspend)
 end
 
 function power_service.kill_session()
-    execute(config.power.kill_session)
+    execute(power.commands.kill_session)
 end
 
 function power_service.lock_session()
-    execute(config.power.lock_session)
+    execute(power.commands.lock_session)
 end
 
 function power_service.lock_screen()
-    execute(config.power.lock_screen)
+    execute(power.commands.lock_screen)
 end
 
 do
@@ -68,7 +62,7 @@ do
     local function timer_tick()
         local status = power_service.get_timer_status()
 
-        if (tonumber(status) or maxinteger) <= power_service.config.alert_threshold then
+        if (tonumber(status) or maxinteger) <= power.timer.alert_threshold then
             local reason = current_timer and current_timer.reason or "Execute"
             if not alert_notification then
                 local execute_action = naughty.action { name = string.format("%s now", reason) }
@@ -122,9 +116,9 @@ do
     function power_service.start_timer(request)
         power_service.stop_timer()
 
-        local timeout = tonumber(request.timeout) or power_service.config.default_timeout
-        if timeout < power_service.config.minimum_timeout then
-            timeout = power_service.config.minimum_timeout
+        local timeout = tonumber(request.timeout) or power.timer.default_timeout
+        if timeout < power.timer.minimum_timeout then
+            timeout = power.timer.minimum_timeout
         end
 
         local action = request.action or power_service.shutdown
