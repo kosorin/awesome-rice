@@ -15,7 +15,7 @@ local pango = require("utils.pango")
 local css = require("utils.css")
 local config = require("rice.config")
 local htable = require("utils.table")
-local noice = require("theme.style")
+local noice = require("core.style")
 
 
 ---@class VolumeOsd.module

@@ -16,7 +16,7 @@ local mod = binding.modifier
 local btn = binding.button
 local widget_helper = require("core.widget")
 local gmath = require("gears.math")
-local noice = require("theme.style")
+local noice = require("core.style")
 local templates = require("widget.mebox.templates")
 local ui_controller = require("ui.controller")
 

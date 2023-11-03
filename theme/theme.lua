@@ -13,7 +13,7 @@ local hui = require("utils.thickness")
 local hwidget = require("core.widget")
 local css = require("utils.css")
 local pango = require("utils.pango")
-local noice = require("theme.style")
+local noice = require("core.style")
 local core = require("core")
 
 
