@@ -1,4 +1,4 @@
 return {
     main = require("ui.menu.main"),
-    switcher = require("ui.menu.switcher"),
+    client_switcher = require("ui.menu.client_switcher"),
 }
