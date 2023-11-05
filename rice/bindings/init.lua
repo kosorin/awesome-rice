@@ -24,6 +24,8 @@ bindbox.main:add_groups {
     },
     {
         name = "Layout",
+        { modifiers = { mod.super, mod.control }, "space", description = "Select next layout" },
+        { modifiers = { mod.shift, mod.super, mod.control }, "space", description = "Select previous layout" },
     },
     {
         name = "Tag",

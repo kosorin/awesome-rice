@@ -143,22 +143,6 @@ local global_bindings = {
 
     binding.new {
         modifiers = { mod.super, mod.control },
-        triggers = "space",
-        path = "Layout",
-        description = "Select next layout",
-        on_press = function() awful.layout.inc(1) end,
-    },
-
-    binding.new {
-        modifiers = { mod.shift, mod.super, mod.control },
-        triggers = "space",
-        path = "Layout",
-        description = "Select previous layout",
-        on_press = function() awful.layout.inc(-1) end,
-    },
-
-    binding.new {
-        modifiers = { mod.super, mod.control },
         triggers = binding.group.arrows_vertical,
         path = "Layout",
         description = "Change the number of primary clients",
