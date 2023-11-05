@@ -176,6 +176,9 @@ return mebox {
                 }, function(trigger)
                     self:select_next(trigger.direction)
                 end),
+                binding.awful({}, "Escape", function()
+                    self:hide()
+                end),
             },
             stop_key = mod_key,
             stop_event = "release",
