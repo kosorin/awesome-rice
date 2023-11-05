@@ -111,6 +111,7 @@ M.object = {}
 ---@field separator_template widget_template
 ---@field header_template widget_template
 ---@field info_template widget_template
+---@field is_hiding boolean
 
 noice.define_style(M.object, {
     bg = { proxy = true },
@@ -454,6 +455,12 @@ function M.object:hide(context)
     if not self.visible then
         return
     end
+
+    if self._private.is_hiding then
+        return
+    end
+    self._private.is_hiding = true
+
     context = context or {}
 
     if self._private.submenu_delay_timer then
@@ -488,6 +495,7 @@ function M.object:hide(context)
     end
 
     self.visible = false
+    self._private.is_hiding = false
 
     self._private.layout = nil
     self._private.layout_container:set_widget(nil)
@@ -683,6 +691,7 @@ function M.object:show(args, context, force)
 
     place(self, args)
 
+    self._private.is_hiding = false
     self.visible = true
 end
 
