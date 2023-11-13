@@ -18,6 +18,7 @@ The following package names are from the Arch repositories or AUR.
 ## Optional
 
 - `feh` - setting wallpaper
+- `dkjson` - Reading JSON Lua Module (Required for Weather and Other Widgets) Install via ```sudo luarocks install dkjson```
 - `maim`, `xdotool` - taking a screenshot
 - `slop` - magnifier (required [`boxzoom`](https://github.com/naelstrof/slop/tree/master/shaderexamples) shader), also screen region selection
 - [`sct`](https://flak.tedunangst.com/post/sct-set-color-temperature) - setting the color temperature of the screen
