@@ -145,7 +145,7 @@ naughty.connect_signal("request::display", function(n)
     end)
     close_button:apply_style(n.style.close_button)
     close_button.buttons = binding.awful_buttons {
-        binding.awful({}, btn.left, function()
+        binding.awful({}, btn.left, nil, function()
             local notification = box._private.notification[1]
             if notification then
                 notification:destroy()
