@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run with Xephyr",
+            "type": "lua-local",
+            "request": "launch",
+            "program": {
+                "command": "${workspaceFolder}/.vscode/run.sh",
+            },
+            "args": [
+                "--config",
+                "${workspaceFolder}/rc.lua",
+                "--bin",
+                "/usr/bin/awesome",
+                "--lib",
+                "/usr/share/awesome/lib",
+                "--lib",
+                "${workspaceFolder}",
+            ],
+        },
+    ],
+}
