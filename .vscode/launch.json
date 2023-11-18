@@ -6,7 +6,7 @@
             "type": "lua-local",
             "request": "launch",
             "program": {
-                "command": "${workspaceFolder}/.vscode/run.sh",
+                "command": "${workspaceFolder}/scripts/run.sh",
             },
             "args": [
                 "--config",
