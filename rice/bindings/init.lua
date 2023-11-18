@@ -24,8 +24,7 @@ bindbox.main:add_groups {
     },
     {
         name = "Layout",
-        { modifiers = { mod.super, mod.control }, "space", description = "Select next layout" },
-        { modifiers = { mod.shift, mod.super, mod.control }, "space", description = "Select previous layout" },
+        { modifiers = { mod.super, mod.control }, "space", description = "Layout switcher" },
     },
     {
         name = "Tag",
@@ -37,7 +36,7 @@ bindbox.main:add_groups {
     },
     {
         name = "Client",
-        { modifiers = { mod.alt }, "Tab", description = "Switcher" },
+        { modifiers = { mod.alt }, "Tab", description = "Client switcher" },
         groups = {
             {
                 name = "State",
