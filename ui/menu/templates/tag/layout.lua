@@ -12,81 +12,6 @@ local mebox = require("widget.mebox")
 
 local M = {}
 
-M.item_template = {
-    id = "#container",
-    widget = capsule,
-    margins = hui.new { dpi(2), 0 },
-    paddings = hui.new { dpi(8), dpi(12) },
-    {
-        layout = wibox.layout.align.horizontal,
-        expand = "inside",
-        nil,
-        {
-            layout = wibox.layout.fixed.horizontal,
-            spacing = dpi(12),
-            {
-                id = "#icon",
-                widget = wibox.widget.imagebox,
-                resize = true,
-            },
-            {
-                id = "#text",
-                widget = wibox.widget.textbox,
-            },
-        },
-        {
-            widget = wibox.container.margin,
-            margins = hui.new { dpi(4), right = 0 },
-            {
-                id = "#right_icon",
-                widget = wibox.widget.imagebox,
-                resize = true,
-            },
-        },
-    },
-    update_callback = function(self, item, menu)
-        self.forced_width = item.width or menu.item_width
-        self.forced_height = item.height or menu.item_height
-
-        local styles = item.selected
-            and beautiful.mebox.item_styles.selected
-            or beautiful.mebox.item_styles.normal
-        local style = item.urgent
-            and styles.urgent
-            or styles.normal
-        self:apply_style(style)
-
-        local icon_widget = self:get_children_by_id("#icon")[1]
-        if icon_widget then
-            local color = style.fg
-            local stylesheet = beautiful.build_layout_stylesheet(color)
-            icon_widget:set_stylesheet(stylesheet)
-            icon_widget:set_image(item.icon)
-        end
-
-        local text_widget = self:get_children_by_id("#text")[1]
-        if text_widget then
-            local text = item.text or ""
-            text_widget:set_markup(pango.span { fgcolor = style.fg, pango.escape(text) })
-        end
-
-        local right_icon_widget = self:get_children_by_id("#right_icon")[1]
-        if right_icon_widget then
-            local checkbox_type = item.checkbox_type or "radiobox"
-            local checkbox_style = beautiful.mebox[checkbox_type][not not item.checked]
-            local icon = checkbox_style.icon
-            local color = checkbox_style.color
-
-            if item.selected then
-                color = style.fg
-            end
-
-            right_icon_widget:set_stylesheet(css.style { path = { fill = color } })
-            right_icon_widget:set_image(icon)
-        end
-    end,
-}
-
 ---@return Mebox.new.args
 function M.new()
     ---@type Mebox.new.args
@@ -124,11 +49,84 @@ function M.new()
                     icon = style.icon,
                     checked = checked,
                     callback = function() tag.layout = layout end,
-                    template = M.item_template,
                 }
             end
             return items
         end,
+        item_template = {
+            id = "#container",
+            widget = capsule,
+            margins = hui.new { dpi(2), 0 },
+            paddings = hui.new { dpi(8), dpi(12) },
+            {
+                layout = wibox.layout.align.horizontal,
+                expand = "inside",
+                nil,
+                {
+                    layout = wibox.layout.fixed.horizontal,
+                    spacing = dpi(12),
+                    {
+                        id = "#icon",
+                        widget = wibox.widget.imagebox,
+                        resize = true,
+                    },
+                    {
+                        id = "#text",
+                        widget = wibox.widget.textbox,
+                    },
+                },
+                {
+                    widget = wibox.container.margin,
+                    margins = hui.new { dpi(4), right = 0 },
+                    {
+                        id = "#right_icon",
+                        widget = wibox.widget.imagebox,
+                        resize = true,
+                    },
+                },
+            },
+            update_callback = function(self, item, menu)
+                self.forced_width = item.width or menu.item_width
+                self.forced_height = item.height or menu.item_height
+
+                local styles = item.selected
+                    and beautiful.mebox.item_styles.selected
+                    or beautiful.mebox.item_styles.normal
+                local style = item.urgent
+                    and styles.urgent
+                    or styles.normal
+                self:apply_style(style)
+
+                local icon_widget = self:get_children_by_id("#icon")[1]
+                if icon_widget then
+                    local color = style.fg
+                    local stylesheet = beautiful.build_layout_stylesheet(color)
+                    icon_widget:set_stylesheet(stylesheet)
+                    icon_widget:set_image(item.icon)
+                end
+
+                local text_widget = self:get_children_by_id("#text")[1]
+                if text_widget then
+                    local text = item.text or ""
+                    text_widget:set_markup(pango.span { fgcolor = style.fg, pango.escape(text) })
+                end
+
+                local right_icon_widget = self:get_children_by_id("#right_icon")[1]
+                if right_icon_widget then
+                    local checkbox_type = item.checkbox_type or "radiobox"
+                    local checkbox_style = beautiful.mebox[checkbox_type][not not item.checked]
+                    local icon = checkbox_style.icon
+                    local color = checkbox_style.color
+
+                    if item.selected then
+                        color = style.fg
+                    end
+
+                    right_icon_widget:set_stylesheet(css.style { path = { fill = color } })
+                    right_icon_widget:set_image(icon)
+                end
+            end,
+        },
     }
 
     return args

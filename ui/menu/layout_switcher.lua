@@ -43,6 +43,53 @@ return mebox(gtable.crush(base_template, {
         end
         return items
     end,
+    item_template = {
+        id = "#container",
+        widget = capsule,
+        margins = hui.new { dpi(2), 0 },
+        paddings = hui.new { dpi(8), dpi(12) },
+        {
+            layout = wibox.layout.fixed.horizontal,
+            spacing = dpi(12),
+            {
+                id = "#icon",
+                widget = wibox.widget.imagebox,
+                resize = true,
+            },
+            {
+                id = "#text",
+                widget = wibox.widget.textbox,
+            },
+        },
+        update_callback = function(self, item, menu)
+            self.forced_width = item.width or menu.item_width
+            self.forced_height = item.height or menu.item_height
+
+            local styles = item.selected
+                and beautiful.mebox.item_styles.selected
+                or beautiful.mebox.item_styles.normal
+            local style = item.urgent
+                and styles.urgent
+                or (item.checked
+                    and styles.active
+                    or styles.normal)
+            self:apply_style(style)
+
+            local icon_widget = self:get_children_by_id("#icon")[1]
+            if icon_widget then
+                local color = style.fg
+                local stylesheet = beautiful.build_layout_stylesheet(color)
+                icon_widget:set_stylesheet(stylesheet)
+                icon_widget:set_image(item.icon)
+            end
+
+            local text_widget = self:get_children_by_id("#text")[1]
+            if text_widget then
+                local text = item.text or ""
+                text_widget:set_markup(pango.span { fgcolor = style.fg, pango.escape(text) })
+            end
+        end,
+    },
     on_show = function(self)
         self.clicked = false
 
