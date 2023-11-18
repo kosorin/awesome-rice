@@ -28,6 +28,22 @@ local button = {
 
 local key = {
     any = "Any",
+    backspace = "BackSpace",
+    tab = "Tab",
+    enter = "Return",
+    escape = "Escape",
+    space = "space",
+    prtsc = "Print",
+    pause = "Pause",
+    insert = "Insert",
+    home = "Home",
+    pgup = "Prior",
+    pgdn = "Next",
+    delete = "Delete",
+    end_ = "End",
+    capslock = "Caps_Lock",
+    numlock = "Num_Lock",
+    scrolllock = "Scroll_Lock",
 }
 
 local modifier = {
@@ -72,6 +88,7 @@ local M = {
     trigger_type = trigger_type,
     button = button,
     modifier = modifier,
+    key = key,
     group = {
         fkeys = {
             from = "F1",
@@ -134,6 +151,14 @@ local M = {
         mouse_wheel = {
             { trigger = button.wheel_up, direction = "up", y = 1 },
             { trigger = button.wheel_down, direction = "down", y = -1 },
+        },
+        vim_updown = {
+            { trigger = "k", direction = "up", y = 1 },
+            { trigger = "j", direction = "down", y = -1 },
+        },
+        vim_leftright = {
+            { trigger = "h", direction = "left", x = -1 },
+            { trigger = "l", direction = "right", x = 1 },
         },
     },
 }
