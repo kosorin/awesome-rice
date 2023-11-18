@@ -4,6 +4,7 @@ local beautiful = require("theme.theme")
 local dpi = Dpi
 local mebox = require("widget.mebox")
 local aspawn = require("awful.spawn")
+local awful = require("awful")
 local config = require("rice.config")
 local common = require("ui.menu.templates.client._common")
 local opacity_menu_template = require("ui.menu.templates.client.opacity")
@@ -76,6 +77,20 @@ function M.new()
                         common.build_simple_toggle("Below", "below", "radiobox", beautiful.icon("chevron-down.svg"), beautiful.palette.white),
                         mebox.separator,
                         mebox.header("Window"),
+                        {
+                            text = "Title Bar",
+                            icon = beautiful.icon("dock-top.svg"),
+                            icon_color = beautiful.palette.white,
+                            on_show = function(item, menu)
+                                local client = menu.client --[[@as client]]
+                                local _, size = client:titlebar_top()
+                                item.checked = size > 0
+                            end,
+                            callback = function(item, menu)
+                                local client = menu.client --[[@as client]]
+                                awful.titlebar.toggle(client, "top")
+                            end,
+                        },
                         {
                             text = "Opacity",
                             icon = beautiful.icon("circle-opacity.svg"),

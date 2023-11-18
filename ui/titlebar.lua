@@ -284,7 +284,9 @@ end
 
 capi.client.connect_signal("request::titlebars", function(client, _, args)
     local titlebar
-    if args.properties.titlebars_enabled == "toolbox" then
+    local titlebar_type = args.properties and args.properties.titlebars_enabled
+
+    if titlebar_type == "toolbox" then
         titlebar = toolbox_titlebar
     else
         titlebar = default_titlebar
