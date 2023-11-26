@@ -12,7 +12,10 @@ local apps = {
         favorites = {
             "Alacritty.desktop",
             "speedcrunch.desktop",
-            "brave-browser.desktop",
+            {
+                id = "firefox.desktop",
+                name = "Firefox",
+            },
             "spotify.desktop",
             "freetube.desktop",
             {
