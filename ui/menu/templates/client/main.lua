@@ -5,6 +5,7 @@ local dpi = Dpi
 local mebox = require("widget.mebox")
 local aspawn = require("awful.spawn")
 local awful = require("awful")
+local gdebug = require("gears.debug")
 local config = require("rice.config")
 local common = require("ui.menu.templates.client._common")
 local opacity_menu_template = require("ui.menu.templates.client.opacity")
@@ -12,6 +13,7 @@ local signals_menu_template = require("ui.menu.templates.client.signals")
 local tags_menu_template = require("ui.menu.templates.client.tags")
 local screens_menu_template = require("ui.menu.templates.client.screens")
 local selection = require("core.selection")
+local json = require("dkjson")
 
 
 local M = {}
@@ -129,6 +131,37 @@ function M.new()
                             icon = beautiful.icon("target.svg"),
                             icon_color = beautiful.palette.red,
                             submenu = signals_menu_template.shared,
+                        },
+                        mebox.separator,
+                        {
+                            text = "Copy info",
+                            icon = beautiful.icon("content-copy.svg"),
+                            icon_color = beautiful.palette.gray,
+                            callback = function(item, menu)
+                                local client = menu.client --[[@as client]]
+                                local data = {
+                                    pid = client.pid,
+                                    name = client.name,
+                                    instance = client.instance,
+                                    class = client.class,
+                                    role = client.role,
+                                    type = client.type,
+                                }
+                                local result = json.encode
+                                    and json.encode(data, {
+                                        indent = true,
+                                        keyorder = {
+                                            "pid",
+                                            "name",
+                                            "instance",
+                                            "class",
+                                            "role",
+                                            "type",
+                                        },
+                                    })
+                                    or gdebug.dump_return(data)
+                                selection.clipboard:copy(result)
+                            end,
                         },
                     },
                 },
