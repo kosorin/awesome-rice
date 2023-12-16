@@ -455,19 +455,24 @@ do
     local empty_tag = {}
     local floating_layout = require("awful.layout.suit.floating")
 
+    local function is_floating(client)
+        return client.floating or (client.first_tag or empty_tag).layout == floating_layout
+    end
+
     local function try_store(client)
-        if client.floating or (client.first_tag or empty_tag).layout == floating_layout then
+        if is_floating(client) then
             client.floating_geometry = client:geometry()
         end
     end
 
     local function try_restore(client)
-        if client.floating or (client.first_tag or empty_tag).layout == floating_layout then
+        if is_floating(client) then
             client:geometry(client.floating_geometry)
         end
     end
 
     capi.client.connect_signal("manage", try_store)
+    capi.client.connect_signal("tagged", try_restore)
     capi.client.connect_signal("property::geometry", try_store)
     capi.tag.connect_signal("property::layout", function(tag)
         for _, client in ipairs(tag:clients()) do
