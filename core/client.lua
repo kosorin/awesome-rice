@@ -451,4 +451,29 @@ function M.fullscreen(client, on_primary_screen)
     client:raise()
 end
 
+do
+    local empty_tag = {}
+    local floating_layout = require("awful.layout.suit.floating")
+
+    local function try_store(client)
+        if client.floating or (client.first_tag or empty_tag).layout == floating_layout then
+            client.floating_geometry = client:geometry()
+        end
+    end
+
+    local function try_restore(client)
+        if client.floating or (client.first_tag or empty_tag).layout == floating_layout then
+            client:geometry(client.floating_geometry)
+        end
+    end
+
+    capi.client.connect_signal("manage", try_store)
+    capi.client.connect_signal("property::geometry", try_store)
+    capi.tag.connect_signal("property::layout", function(tag)
+        for _, client in ipairs(tag:clients()) do
+            try_restore(client)
+        end
+    end)
+end
+
 return M
