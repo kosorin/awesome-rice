@@ -9,9 +9,9 @@ local tilted = require("layouts.tilted")
 local layouts = {
     list = core.layout.initialize_list {
         tilted.new("tiling"),
-        awful.layout.suit.floating,
         awful.layout.suit.max,
         awful.layout.suit.max.fullscreen,
+        awful.layout.suit.floating,
     },
 }
 
