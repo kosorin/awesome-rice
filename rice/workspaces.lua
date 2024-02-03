@@ -12,6 +12,14 @@ local gtable = require("gears.table")
 ---@field factories table<string, fun(): table>[]
 local workspaces = {
     factories = {
+        hearthstone = function()
+            return {
+                name = "Hearthstone",
+                screen = capi.screen.primary,
+                volatile = true,
+                layout = awful.layout.suit.floating,
+            }
+        end,
         chat = function()
             return {
                 name = "Chat",
