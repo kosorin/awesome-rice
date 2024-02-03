@@ -91,14 +91,4 @@ do
     end, { "awful.spawn", "awful.rules" }, {})
 end
 
-ruled.client.add_rule_source("fix_new_tag", function(client, properties)
-    local new_tag = properties.new_tag
-    if type(new_tag) ~= "table" then
-        return
-    end
-    if not new_tag.screen then
-        new_tag.screen = client.screen or capi.screen.primary
-    end
-end, {}, { "awful.spawn", "awful.rules" })
-
 return M
