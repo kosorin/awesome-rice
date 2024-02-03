@@ -12,4 +12,5 @@ return {
     system = require("core.system"),
     tag = require("core.tag"),
     widget = require("core.widget"),
+    workspace = require("core.workspace"),
 }

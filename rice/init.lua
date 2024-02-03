@@ -8,4 +8,5 @@ return {
     power = require("rice.power"),
     rules = require("rice.rules"),
     tags = require("rice.tags"),
+    workspaces = require("rice.workspaces"),
 }
