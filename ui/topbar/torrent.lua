@@ -157,19 +157,19 @@ function torrent_widget.new(wibar)
             text = "Open Transmission",
             icon = beautiful.icon("open-in-new.svg"),
             icon_color = beautiful.palette.gray,
-            callback = function() awful.spawn.spawn(config.commands.open("http://localhost:9091/transmission/web/")) end,
+            callback = function() awful.spawn.spawn(config.commands.open("http://127.0.0.1:9091/transmission/web/")) end,
         },
         {
             text = "Open Sonarr",
             icon = beautiful.icon("open-in-new.svg"),
             icon_color = beautiful.palette.gray,
-            callback = function() awful.spawn.spawn(config.commands.open("http://localhost:8989/")) end,
+            callback = function() awful.spawn.spawn(config.commands.open("http://127.0.0.1:8989/")) end,
         },
         {
             text = "Open Radarr",
             icon = beautiful.icon("open-in-new.svg"),
             icon_color = beautiful.palette.gray,
-            callback = function() awful.spawn.spawn(config.commands.open("http://localhost:7878/")) end,
+            callback = function() awful.spawn.spawn(config.commands.open("http://127.0.0.1:7878/")) end,
         },
         mebox.separator,
         {
