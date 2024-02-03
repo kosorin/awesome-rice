@@ -35,10 +35,8 @@ local workspaces = {
     },
 }
 
-capi.awesome.connect_signal("request::workspaces", function()
-    for key, factory in workspaces.factories do
-        core_workspaces.add(key, factory)
-    end
-end)
+for key, factory in pairs(workspaces.factories) do
+    core_workspaces.add(key, factory)
+end
 
 return workspaces

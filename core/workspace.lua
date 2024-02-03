@@ -1,5 +1,5 @@
 local capi = Capi
-local awful = require("awful")
+local atag = require("awful.tag")
 local ruled = require("ruled")
 local core_tag = require("core.tag")
 
@@ -20,9 +20,10 @@ do
     function Item:get_tag()
         local tag = self.container.value
         if not tag or not tag.activated then
-            self.container.value = awful.tag.add(self.key, core_tag.build(self:factory()))
+            tag = atag.add(self.key, core_tag.build(self:factory()))
+            self.container.value = tag
         end
-        return self.container.value
+        return tag
     end
 
     function M.add(key, factory)
@@ -44,12 +45,10 @@ function ruled.client.high_priority_properties.workspace(client, value, properti
         return
     end
 
-    if client.screen ~= tag.screen then
-        client.screen = tag.screen
-        properties.screen = tag.screen
-    end
-
+    properties.screen = tag.screen
+    client.screen = tag.screen
     client:tags { tag }
+    return tag
 end
 
 capi.screen.connect_signal("request::desktop_decoration", function(screen)
