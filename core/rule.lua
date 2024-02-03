@@ -5,9 +5,26 @@ local ipairs = ipairs
 local open = io.open
 local awful = require("awful")
 local ruled = require("ruled")
+local gtimer = require("gears.timer")
 
 
 local M = {}
+
+function M.delayed_callback(callback, timeout)
+    if type(callback) ~= "function" then
+        return nil
+    end
+    return function(client)
+        gtimer {
+            timeout = tonumber(timeout) or 0.1,
+            autostart = true,
+            single_shot = true,
+            callback = function()
+                callback(client)
+            end,
+        }
+    end
+end
 
 do
     local blacklisted_snids = setmetatable({}, { __mode = "v" })
