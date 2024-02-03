@@ -51,8 +51,4 @@ function ruled.client.high_priority_properties.workspace(client, value, properti
     return tag
 end
 
-capi.screen.connect_signal("request::desktop_decoration", function(screen)
-    capi.awesome.emit_signal("request::workspaces", screen)
-end)
-
 return M
