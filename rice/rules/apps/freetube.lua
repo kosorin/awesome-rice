@@ -1,12 +1,10 @@
-local core_tag = require("core.tag")
-
 return {
     {
         rule = {
             class = "^FreeTube$",
         },
         properties = {
-            new_tag = core_tag.build {
+            new_tag = {
                 name = "FreeTube",
                 volatile = true,
             },

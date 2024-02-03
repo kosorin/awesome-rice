@@ -1,5 +1,3 @@
-local core_tag = require("core.tag")
-
 return {
     {
         rule = {
@@ -8,7 +6,7 @@ return {
         properties = {
             floating = false,
             switch_to_tags = true,
-            new_tag = core_tag.build {
+            new_tag = {
                 name = "Xephyr",
                 volatile = true,
                 selected = true,

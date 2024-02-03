@@ -1,22 +1,22 @@
 local capi = Capi
 local ipairs = ipairs
-local awful = require("awful")
+local tostring = tostring
 local gtable = require("gears.table")
 
 
 local M = {}
 
+---@param args table
+---@return table
 function M.build(args)
-    local tag = {}
-    capi.awesome.emit_signal("tag::build", tag)
-    return gtable.crush(tag, args or {})
-end
-
-function M.add(args)
     args = args or {}
     args.screen = args.screen or capi.screen.primary
-    args.name = args.name or tostring(1 + (# args.screen.tags or 0))
-    return awful.tag.add(args.name, M.build(args))
+    args.name = args.name or tostring(1 + #args.screen.tags)
+
+    local tag = {}
+    capi.awesome.emit_signal("tag::build", tag, args)
+    gtable.crush(tag, args)
+    return tag
 end
 
 capi.screen.connect_signal("tag::history::update", function(screen)

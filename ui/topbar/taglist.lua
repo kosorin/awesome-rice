@@ -204,10 +204,16 @@ function taglist.new(wibar)
                     border_width = 0,
                     buttons = binding.awful_buttons {
                         binding.awful({}, btn.left, function()
-                            core_tag.add { screen = wibar.screen, volatile = true }:view_only()
+                            awful.tag.add(nil, core_tag.build {
+                                wibar.screen,
+                                volatile = true,
+                            }):view_only()
                         end),
                         binding.awful({}, btn.middle, function()
-                            core_tag.add { screen = wibar.screen, volatile = true }
+                            awful.tag.add(nil, core_tag.build {
+                                wibar.screen,
+                                volatile = true,
+                            })
                         end),
                     },
                     {
