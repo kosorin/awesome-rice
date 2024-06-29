@@ -430,7 +430,7 @@ if config.features.screenshot_tools then
 end
 
 if config.features.wallpaper_menu then
-    gtable.join(global_bindings, {
+    global_bindings = {
 
         binding.new {
             modifiers = { mod.shift, mod.super, mod.control },
@@ -440,7 +440,7 @@ if config.features.wallpaper_menu then
             on_press = function() services.wallpaper.restore() end,
         },
 
-    })
+        table.unpack(global_bindings) }
 end
 
 return global_bindings
