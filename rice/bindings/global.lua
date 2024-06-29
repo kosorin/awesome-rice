@@ -270,14 +270,6 @@ local global_bindings = {
         on_press = function() awful.spawn(config.actions.qr_code_clipboard) end,
     },
 
-    binding.new {
-        modifiers = { mod.super },
-        triggers = "z",
-        path = "Action",
-        description = "Magnifier",
-        on_press = function() services.magnifier.run() end,
-    },
-
 
     binding.new {
         modifiers = {},
@@ -429,6 +421,19 @@ if config.features.wallpaper_menu then
             path = "Action",
             description = "Restore wallpaper",
             on_press = function() services.wallpaper.restore() end,
+        },
+
+        table.unpack(global_bindings) }
+end
+
+if config.features.magnifier_tools then
+    global_bindings = {
+        binding.new {
+            modifiers = { mod.super },
+            triggers = "z",
+            path = "Action",
+            description = "Magnifier",
+            on_press = function() services.magnifier.run() end,
         },
 
         table.unpack(global_bindings) }
