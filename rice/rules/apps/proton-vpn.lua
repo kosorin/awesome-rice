@@ -7,7 +7,7 @@ return {
             class = "^Protonvpn$",
         },
         properties = {
-            titlebars_enabled = "toolbox",
+            titlebars_enabled = false,
             floating = true,
             ontop = true,
             sticky = true,
