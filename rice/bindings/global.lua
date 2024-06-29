@@ -375,58 +375,49 @@ local global_bindings = {
 }
 
 if config.features.screenshot_tools then
-    gtable.join(global_bindings, {
+    global_bindings = {
 
         binding.new {
             modifiers = {},
             triggers = "Print",
-            path = { "Screenshot", "Save to file" },
-            description = "Interactive selection",
-            on_press = function() services.screenshot.take { mode = "selection", shader = "boxzoom" } end,
-        },
-
-        binding.new {
-            modifiers = { mod.alt },
-            triggers = "Print",
-            path = { "Screenshot", "Save to file" },
-            description = "Current window",
-            on_press = function() services.screenshot.take { mode = "window" } end,
+            path = { "Screenshot" },
+            description = "Start a manual capture",
+            on_press = function() awful.spawn.with_shell("flameshot gui") end,
         },
 
         binding.new {
             modifiers = { mod.control },
             triggers = "Print",
-            path = { "Screenshot", "Save to file" },
-            description = "Full screen",
-            on_press = function() services.screenshot.take { mode = nil } end,
-        },
-
-
-        binding.new {
-            modifiers = { mod.super },
-            triggers = "Print",
-            path = { "Screenshot", "Copy to clipboard" },
-            description = "Interactive selection",
-            on_press = function() services.screenshot.take { mode = "selection", shader = "boxzoom", output = "clipboard" } end,
+            path = { "Screenshot" },
+            description = "Capture a window",
+            on_press = function() awful.spawn.with_shell("flameshot gui --region \"$(slop -q -c 1,0,0,0.5 -b 5 -n 0 -l -t 9999999)\"") end,
         },
 
         binding.new {
-            modifiers = { mod.alt, mod.super },
+            modifiers = { mod.shift },
             triggers = "Print",
-            path = { "Screenshot", "Copy to clipboard" },
-            description = "Current window",
-            on_press = function() services.screenshot.take { mode = "window", output = "clipboard" } end,
+            path = { "Screenshot" },
+            description = "Capture a single screen",
+            on_press = function() awful.spawn.with_shell("flameshot gui --region \"$(printf '%s' \"$DISPLAY\" | sd '^:(\\d+)' 'screen$1')\"") end,
         },
 
         binding.new {
-            modifiers = { mod.control, mod.super },
+            modifiers = { mod.control, mod.shift },
             triggers = "Print",
-            path = { "Screenshot", "Copy to clipboard" },
-            description = "Full screen",
-            on_press = function() services.screenshot.take { mode = nil, output = "clipboard" } end,
+            path = { "Screenshot" },
+            description = "Capture the entire desktop",
+            on_press = function() awful.spawn.with_shell("flameshot gui --region all") end,
         },
 
-    })
+        binding.new {
+            modifiers = { mod.alt },
+            triggers = "Print",
+            path = { "Screenshot" },
+            description = "Open the capture launcher",
+            on_press = function() awful.spawn.with_shell("flameshot launcher") end,
+        },
+
+        table.unpack(global_bindings) }
 end
 
 if config.features.wallpaper_menu then

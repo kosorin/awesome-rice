@@ -1,7 +1,6 @@
 local config = require("rice.config")
 
 local services = {
-    screenshot = config.features.screenshot_tools and require("services.screenshot") or nil,
     magnifier = config.features.magnifier_tools and require("services.magnifier") or nil,
     volume = require("services.volume"),
     weather = config.features.weather_widget and require("services.weather") or nil,

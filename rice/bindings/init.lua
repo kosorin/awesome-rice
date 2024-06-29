@@ -57,14 +57,6 @@ bindbox.main:add_groups {
     },
     {
         name = "Screenshot",
-        groups = {
-            {
-                name = "Save to File",
-            },
-            {
-                name = "Copy to Clipboard",
-            },
-        },
     },
 }
 
