@@ -205,13 +205,13 @@ function taglist.new(wibar)
                     buttons = binding.awful_buttons {
                         binding.awful({}, btn.left, function()
                             awful.tag.add(nil, core_tag.build {
-                                wibar.screen,
+                                screen = wibar.screen,
                                 volatile = true,
                             }):view_only()
                         end),
                         binding.awful({}, btn.middle, function()
                             awful.tag.add(nil, core_tag.build {
-                                wibar.screen,
+                                screen = wibar.screen,
                                 volatile = true,
                             })
                         end),
