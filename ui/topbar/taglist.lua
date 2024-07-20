@@ -53,9 +53,6 @@ function taglist:rename_tag_inline(tag)
                 if name:match("^%s*$") then
                     name = tostring(tag.index)
                 end
-                if not name:match("^%d") then
-                    name = format("%d:%s", tag.index, name)
-                end
                 textbox:set_text(name)
                 tag.name = name
                 capi.mousegrabber.stop()
