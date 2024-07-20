@@ -4,7 +4,7 @@ local beautiful = require("theme.theme")
 return {
     {
         rule = {
-            class = "^Localsend_app$",
+            class = "^Localsend$",
         },
         properties = {
             titlebars_enabled = "toolbox",
