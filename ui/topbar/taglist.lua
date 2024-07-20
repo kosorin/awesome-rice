@@ -157,6 +157,11 @@ function taglist.new(wibar)
                 end
 
                 root_container:add(item.root)
+
+                if type(tag.first_update_callback) == "function" then
+                    tag.first_update_callback(self, tag)
+                    tag.first_update_callback = nil
+                end
             end
         end,
         buttons = binding.awful_buttons {
@@ -204,12 +209,18 @@ function taglist.new(wibar)
                             awful.tag.add(nil, core_tag.build {
                                 screen = wibar.screen,
                                 volatile = true,
+                                first_update_callback = function(taglist, tag)
+                                    taglist:rename_tag_inline(tag)
+                                end,
                             }):view_only()
                         end),
                         binding.awful({}, btn.middle, function()
                             awful.tag.add(nil, core_tag.build {
                                 screen = wibar.screen,
                                 volatile = true,
+                                first_update_callback = function(taglist, tag)
+                                    taglist:rename_tag_inline(tag)
+                                end,
                             })
                         end),
                     },
