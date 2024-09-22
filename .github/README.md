@@ -14,24 +14,28 @@ The following package names are from the Arch repositories or AUR.
 - `playerctl` - controlling media player
 - `xdg-open` (from `xdg-utils`) - opening files or URLs in the preferred applications
 - `xclip` - copying things to the clipboard
-- `yay/pacman/aurc` - Requires a package manager to install dependencies from the AUR and non-aur, can include [`Aurc`](https://github.com/statulr/aurc), [`Pacman`]([https://github.com/](https://gitlab.archlinux.org/pacman/pacman), or/and for some dependencies [`yay`](https://github.com/Jguer/yay)
+- `yay/pacman/aurc` - Requires a package manager to install dependencies from the AUR and non-aur, can include [`Aurc`](https://github.com/statulr/aurc), [`Pacman`](https://gitlab.archlinux.org/pacman/pacman), or/and for some dependencies [`yay`](https://github.com/Jguer/yay)
 ## Optional
 
-- `feh` - setting wallpaper
-- `luarocks` - Requires luarocks and the lua package to install dkjson and any other potential lua-modules
+- [`feh`](https://archlinux.org/packages/extra/x86_64/feh/) - setting wallpaper
+- [`luarocks`](https://luarocks.org/) - Requires luarocks and the lua package to install dkjson and any other potential lua-modules
 - `dkjson` - Reading JSON Lua Module (Required for Weather and Other Widgets) Install via ```sudo luarocks install dkjson```
-- `maim`, `xdotool` - taking a screenshot
-- `slop` - magnifier (required [`boxzoom`](https://github.com/naelstrof/slop/tree/master/shaderexamples) shader), also screen region selection
+- [`maim`](https://github.com/naelstrof/maim), [`xdotool`](https://github.com/jordansissel/xdotool) - taking a screenshot
+- [`slop`](https://archlinux.org/packages/extra/x86_64/slop/) - magnifier (required [`boxzoom`](https://github.com/naelstrof/slop/tree/master/shaderexamples) shader), also screen region selection
 - [`sct`](https://flak.tedunangst.com/post/sct-set-color-temperature) - setting the color temperature of the screen
 
 ## Recommended
 
-- `rofi` - application launcher ([here](https://gist.github.com/kosorin/2e613eb2e09f4f619b3f9f6c3c688c6b) is the config to match the style of this rice)
-- `picom` - compositor for a better look
+- [`rofi`](https://github.com/davatorium/rofi) - application launcher ([here](https://gist.github.com/kosorin/2e613eb2e09f4f619b3f9f6c3c688c6b) is the config to match the style of this rice)
+- [`picom`](https://github.com/yshui/picom) - compositor for a better look
 
 ## Fonts
 
 - Nerd Font - use any Nerd Font that you like
+Here are some recommendations:
+[Iosevka Nerd Font](https://archlinux.org/packages/extra/any/ttf-iosevka-nerd/)
+[JetBrains Mono Nerd Font](https://archlinux.org/packages/extra/any/ttf-jetbrains-mono-nerd/)
+[Firacode Nerd](https://archlinux.org/packages/extra/any/ttf-firacode-nerd/)
 
 
 # Installation
