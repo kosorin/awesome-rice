@@ -68,31 +68,7 @@ local client_bindings = {
             end
         end,
     },
-    
-    binding.new {
-        modifiers = { mod.super, mod.shift },
-        triggers = {
-            { trigger = "Left", action = -1 },
-            { trigger = "Right", action = 1 },
-        },
-        path = { "Tag", "Client" },
-        description = "Move client to previous/next tag",
-        on_press = function(trigger, client)
-            -- Get current tag
-            local current_tag = client.screen.selected_tags[1]
-            -- Set new tag reference index
-            local tag = client.screen.tags[current_tag.index + trigger.action]
-            if tag then
-                -- Move client
-                client:move_to_tag(tag)
-                -- Switch to 'tag' and select client to maintain focus
-                tag.selected = true
-                current_tag.selected = false
-                client.selected = true
-            end
-        end,
-    },
-    
+
     binding.new {
         modifiers = { mod.control, mod.super, mod.shift },
         triggers = binding.group.numrow,
@@ -104,6 +80,38 @@ local client_bindings = {
                 client:toggle_tag(tag)
             end
         end,
+    },
+
+    binding.new {
+        modifiers = { mod.super, mod.shift },
+        triggers = {
+            { trigger = ",", x = -1 },
+            { trigger = ".", x = 1 },
+        },
+        path = { "Tag", "Client" },
+        description = "Move client to previous/next tag",
+        on_press = function(trigger, client)
+            -- Get current tag
+            local current_tag = client.screen.selected_tags[1]
+            -- Set new tag reference index
+            local tag = client.screen.tags[current_tag.index + trigger.x]
+            if tag then
+                -- Move client
+                client:move_to_tag(tag)
+                -- Switch to 'tag' and select client to maintain focus
+                tag.selected = true
+                current_tag.selected = false
+                client.selected = true
+            end
+        end,
+    },
+
+    binding.new {
+        modifiers = { mod.super, mod.shift },
+        triggers = "s",
+        path = { "Tag", "Client" },
+        description = "Keep on all tags (sticky)",
+        on_press = function(_, client) client.sticky = not client.sticky end,
     },
 
     binding.new {
@@ -218,15 +226,6 @@ local client_bindings = {
         path = { "Client", "State" },
         description = "Minimize",
         on_press = function(_, client) client.minimized = true end,
-    },
-
-
-    binding.new {
-        modifiers = { mod.super, mod.shift },
-        triggers = "s",
-        path = { "Tag", "Client" },
-        description = "Keep on all tags (sticky)",
-        on_press = function(_, client) client.sticky = not client.sticky end,
     },
 }
 
