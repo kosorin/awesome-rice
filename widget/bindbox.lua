@@ -408,16 +408,6 @@ local function get_trigger_markup(self, binding)
         end
     end
 
-    if binding.target then
-        trigger_text = trigger_text .. pango.span {
-            fgalpha = "50%",
-            size = "smaller",
-            " (",
-            pango.escape(binding.target),
-            ")",
-        }
-    end
-
     return modifier_markup .. trigger_box(trigger_text)
 end
 
