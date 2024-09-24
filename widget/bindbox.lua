@@ -28,72 +28,78 @@ local s25p = pango.span { size = "25%", " " }
 local s50p = pango.span { size = "50%", " " }
 local force_ltr = "&#x200E;"
 local mouse_label_icon = ""
+
+---@class Bindbox.label
+---@field text string
+---@field find_terms? string[]
+
+---@type { [string|integer]: Bindbox.label }
 local labels = {
-    [btn.left]            = mouse_label_icon .. " Left",
-    [btn.middle]          = mouse_label_icon .. " Middle",
-    [btn.right]           = mouse_label_icon .. " Right",
-    [btn.wheel_up]        = mouse_label_icon .. " Wheel Up",
-    [btn.wheel_down]      = mouse_label_icon .. " Wheel Down",
-    [btn.wheel_left]      = mouse_label_icon .. " Wheel Left",
-    [btn.wheel_right]     = mouse_label_icon .. " Wheel Right",
-    [btn.extra_back]      = mouse_label_icon .. " Back",
-    [btn.extra_forward]   = mouse_label_icon .. " Forward",
+    [btn.left]            = { text = mouse_label_icon .. " Left", find_terms = { "mouse", "left" } },
+    [btn.middle]          = { text = mouse_label_icon .. " Middle", find_terms = { "mouse", "middle" } },
+    [btn.right]           = { text = mouse_label_icon .. " Right", find_terms = { "mouse", "right" } },
+    [btn.wheel_up]        = { text = mouse_label_icon .. " Wheel Up", find_terms = { "mouse", "wheel", "up" } },
+    [btn.wheel_down]      = { text = mouse_label_icon .. " Wheel Down", find_terms = { "mouse", "wheel", "down" } },
+    [btn.wheel_left]      = { text = mouse_label_icon .. " Wheel Left", find_terms = { "mouse", "wheel", "left" } },
+    [btn.wheel_right]     = { text = mouse_label_icon .. " Wheel Right", find_terms = { "mouse", "wheel", "right" } },
+    [btn.extra_back]      = { text = mouse_label_icon .. " Back", find_terms = { "mouse", "back" } },
+    [btn.extra_forward]   = { text = mouse_label_icon .. " Forward", find_terms = { "mouse", "forward" } },
     --
-    Control               = "Ctrl",
-    Mod1                  = "Alt",
-    ISO_Level3_Shift      = "Alt Gr",
-    Mod4                  = "Super",
+    Control               = { text = "Ctrl", find_terms = { "ctrl" } },
+    Mod1                  = { text = "Alt", find_terms = { "alt" } },
+    ISO_Level3_Shift      = { text = "Alt Gr", find_terms = { "altgr" } },
+    Mod4                  = { text = "Super", find_terms = { "super" } },
     --
-    Insert                = "Ins",
-    Delete                = "Del",
-    Next                  = "PgDn",
-    Prior                 = "PgUp",
-    Left                  = "" .. s25p,
-    Up                    = "" .. s25p,
-    Right                 = "" .. s25p,
-    Down                  = "" .. s25p,
-    Escape                = "Esc",
-    Tab                   = "Tab",
-    space                 = "Space",
-    Return                = "Enter",
-    BackSpace             = " ",
+    Insert                = { text = "Ins", find_terms = { "ins", "insert" } },
+    Delete                = { text = "Del", find_terms = { "del", "delete" } },
+    Next                  = { text = "PgDn", find_terms = { "pgdn", "pagedown", "page" } },
+    Prior                 = { text = "PgUp", find_terms = { "pgup", "pageup", "page" } },
+    Left                  = { text = "" .. s25p, find_terms = { "left", "arrow" } },
+    Up                    = { text = "" .. s25p, find_terms = { "up", "arrow" } },
+    Right                 = { text = "" .. s25p, find_terms = { "right", "arrow" } },
+    Down                  = { text = "" .. s25p, find_terms = { "down", "arrow" } },
+    Escape                = { text = "Esc", find_terms = { "esc", "escape" } },
+    Tab                   = { text = "Tab", find_terms = { "tab" } },
+    space                 = { text = "Space", find_terms = { "space" } },
+    Return                = { text = "Enter", find_terms = { "enter" } },
+    BackSpace             = { text = " ", find_terms = { "backspace" } },
     --
-    KP_End                = "Num1",
-    KP_Down               = "Num2",
-    KP_Next               = "Num3",
-    KP_Left               = "Num4",
-    KP_Begin              = "Num5",
-    KP_Right              = "Num6",
-    KP_Home               = "Num7",
-    KP_Up                 = "Num8",
-    KP_Prior              = "Num9",
-    KP_Insert             = "Num0",
-    KP_Delete             = "Num.",
-    KP_Divide             = "Num/",
-    KP_Multiply           = "Num*",
-    KP_Subtract           = "Num-",
-    KP_Add                = "Num+",
-    KP_Enter              = "NumEnter",
+    KP_End                = { text = "Num1", find_terms = { "numpad", "1" } },
+    KP_Down               = { text = "Num2", find_terms = { "numpad", "2" } },
+    KP_Next               = { text = "Num3", find_terms = { "numpad", "3" } },
+    KP_Left               = { text = "Num4", find_terms = { "numpad", "4" } },
+    KP_Begin              = { text = "Num5", find_terms = { "numpad", "5" } },
+    KP_Right              = { text = "Num6", find_terms = { "numpad", "6" } },
+    KP_Home               = { text = "Num7", find_terms = { "numpad", "7" } },
+    KP_Up                 = { text = "Num8", find_terms = { "numpad", "8" } },
+    KP_Prior              = { text = "Num9", find_terms = { "numpad", "9" } },
+    KP_Insert             = { text = "Num0", find_terms = { "numpad", "0" } },
+    KP_Delete             = { text = "Num.", find_terms = { "numpad", "." } },
+    KP_Divide             = { text = "Num/", find_terms = { "numpad", "/" } },
+    KP_Multiply           = { text = "Num*", find_terms = { "numpad", "*" } },
+    KP_Subtract           = { text = "Num-", find_terms = { "numpad", "-" } },
+    KP_Add                = { text = "Num+", find_terms = { "numpad", "+" } },
+    KP_Enter              = { text = "NumEnter", find_terms = { "numpad", "enter" } },
     --
-    dead_acute            = "´",
-    dead_circumflex       = "^",
-    dead_grave            = "`",
+    dead_acute            = { text = "´" },
+    dead_circumflex       = { text = "^" },
+    dead_grave            = { text = "`" },
     --
-    XF86MonBrightnessUp   = "󰃟 +",
-    XF86MonBrightnessDown = "󰃟 -",
-    XF86AudioRaiseVolume  = force_ltr .. "ﱛ",
-    XF86AudioLowerVolume  = force_ltr .. "ﱜ",
-    XF86AudioMute         = force_ltr .. "ﱝ",
-    XF86AudioPlay         = "契",
-    XF86AudioPause        = "",
-    XF86AudioStop         = "栗",
-    XF86AudioPrev         = "玲",
-    XF86AudioNext         = "怜",
-    XF86AudioRewind       = "丹",
-    XF86AudioForward      = "",
+    XF86MonBrightnessUp   = { text = "󰃟 +", find_terms = { "brightness" } },
+    XF86MonBrightnessDown = { text = "󰃟 -", find_terms = { "brightness" } },
+    XF86AudioRaiseVolume  = { text = force_ltr .. "ﱛ", find_terms = { "volume" } },
+    XF86AudioLowerVolume  = { text = force_ltr .. "ﱜ", find_terms = { "volume" } },
+    XF86AudioMute         = { text = force_ltr .. "ﱝ", find_terms = { "volume" } },
+    XF86AudioPlay         = { text = "契", find_terms = { "media" } },
+    XF86AudioPause        = { text = "", find_terms = { "media" } },
+    XF86AudioStop         = { text = "栗", find_terms = { "media" } },
+    XF86AudioPrev         = { text = "玲", find_terms = { "media" } },
+    XF86AudioNext         = { text = "怜", find_terms = { "media" } },
+    XF86AudioRewind       = { text = "丹", find_terms = { "media" } },
+    XF86AudioForward      = { text = "", find_terms = { "media" } },
     --
-    Print                 = "" .. s50p,
-    XF86Calculator        = "" .. s50p,
+    Print                 = { text = "" .. s50p, find_terms = { "printscreen" } },
+    XF86Calculator        = { text = "" .. s50p, find_terms = { "calculator" } },
 }
 
 
@@ -143,7 +149,11 @@ end
 ---@field find_dim_bg unknown
 ---@field find_dim_fg unknown
 ---@field find_highlight_bg unknown
+---@field find_highlight_bg_alpha unknown
 ---@field find_highlight_fg unknown
+---@field find_highlight_trigger_bg unknown
+---@field find_highlight_trigger_bg_alpha unknown
+---@field find_highlight_trigger_fg unknown
 ---@field group_path_separator_markup unknown
 ---@field slash_separator_markup unknown
 ---@field plus_separator_markup unknown
@@ -187,7 +197,11 @@ noice.define_style(M.object, {
     find_dim_bg = {},
     find_dim_fg = {},
     find_highlight_bg = {},
+    find_highlight_bg_alpha = {},
     find_highlight_fg = {},
+    find_highlight_trigger_bg = {},
+    find_highlight_trigger_bg_alpha = {},
+    find_highlight_trigger_fg = {},
     group_path_separator_markup = {},
     slash_separator_markup = {},
     plus_separator_markup = {},
@@ -239,116 +253,165 @@ end
 
 ---@param modifier key_modifier
 ---@return string
+---@return Bindbox.label?
 local function get_modifier_label(modifier)
-    return labels[modifier] or modifier
+    local label = labels[modifier]
+    return label and label.text or modifier, label
 end
 
 ---@param trigger BindingTrigger.value
 ---@return string
+---@return Bindbox.label?
 local function get_trigger_label(trigger)
     local label
+    local label_text
     local tt = type(trigger)
     if tt == pbinding.trigger_type.key then
         local keysym, keyprint = awful.keyboard.get_key_name(trigger)
-        label = labels[keysym] or keyprint or keysym
+        label = labels[keysym]
+        label_text = label and label.text or keyprint or keysym
     elseif tt == pbinding.trigger_type.button then
         label = labels[trigger]
+        label_text = label and label.text
     end
-    return label or tostring(trigger)
+    return label_text or tostring(trigger), label
 end
 
----@class Bindbox.highlight.args
----@field find_terms? string[]
+---@class Bindbox.highlight.part
+---@field highlight boolean
+---@field from integer
+---@field to integer
+
+---@class Bindbox.highlight.result
+---@field triggers? boolean[]
+---@field description? Bindbox.highlight.part[]
 
 ---@param self Bindbox
----@param text string
----@param args? Bindbox.highlight.args
----@return string
----@return boolean
-local function highlight_text(self, text, args)
-    text = text or ""
-
-    if #text == 0 or not args or not args.find_terms or #args.find_terms == 0 then
-        return text, true
+---@param binding Binding
+---@param find_terms string[]
+---@return Bindbox.highlight.result?
+local function get_binding_highlighting(self, binding, find_terms)
+    if #find_terms == 0 then
+        return nil
     end
 
-    local substitutions = {}
+    ---@type Bindbox.highlight.result
+    local result = {}
 
-    local function is_available(from, to)
-        for _, s in ipairs(substitutions) do
-            if from <= s.to and to >= s.from then
-                return false
-            end
-        end
-        return true
-    end
+    do
+        local highlighted_triggers = {}
 
-    local total_found = 0
-    local lower_text = string.lower(text)
-    for _, ft in ipairs(args.find_terms) do
-        local found = false
-        local from = 1
-        local to
-        while true do
-            from, to = string.find(lower_text, ft, from, true)
-            if from == nil then
-                break
+        local handled_find_terms = { count = 0 }
+
+        ---@param label_text string
+        ---@param label? Bindbox.label
+        ---@return boolean
+        local function handle_highlighting(label_text, label)
+            local label_find_terms = label and label.find_terms
+
+            if not label_find_terms or #label_find_terms == 0 then
+                label_find_terms = { string.lower(label_text) }
             end
-            if is_available(from, to) then
-                table.insert(substitutions, { matched = true, from = from, to = to })
-                if not found then
-                    found = true
-                    total_found = total_found + 1
+
+            for _, lft in ipairs(label_find_terms) do
+                for i, ft in ipairs(find_terms) do
+                    if not handled_find_terms[i] and lft == ft then
+                        handled_find_terms.count = handled_find_terms.count + 1
+                        handled_find_terms[i] = true
+                        return true
+                    end
                 end
             end
-            from = to + 1
+
+            return false
         end
-    end
 
-    if total_found ~= #args.find_terms then
-        return pango.span {
-            fgcolor = self.find_dim_fg,
-            bgcolor = self.find_dim_bg,
-            pango.escape(text),
-        }, false
-    end
-
-    table.sort(substitutions, function(a, b) return a.from < b.from end)
-
-    local parts = {}
-    local length = #text
-    local next_substitution = substitutions[1]
-    local i = 1
-    while i <= length do
-        if next_substitution then
-            if next_substitution.from == i then
-                table.insert(parts, next_substitution)
-                i = next_substitution.to + 1
-                table.remove(substitutions, 1)
-                next_substitution = substitutions[1]
-            else
-                table.insert(parts, { from = i, to = next_substitution.from - 1 })
-                i = next_substitution.from
+        for i, m in ipairs(binding.modifiers) do
+            local label_text, label = get_modifier_label(m)
+            if handle_highlighting(label_text, label) then
+                highlighted_triggers[i] = true
             end
-        else
-            table.insert(parts, { from = i, to = length })
-            break
+        end
+
+        for _, t in ipairs(binding.triggers) do
+            local label_text, label = get_trigger_label(t.trigger)
+            if handle_highlighting(label_text, label) then
+                highlighted_triggers[0] = true
+            end
+        end
+
+        if handled_find_terms.count == #find_terms then
+            result.triggers = highlighted_triggers
         end
     end
 
-    return table.concat(gtable.map(function(part)
-        local capture = string.sub(text, part.from, part.to)
-        if part.matched then
-            return pango.span {
-                fgcolor = self.find_highlight_fg,
-                bgcolor = self.find_highlight_bg,
-                bgalpha = "100%",
-                pango.escape(capture),
-            }
-        else
-            return capture
+    do
+        local description = binding.description or ""
+
+        if #description > 0 then
+            description = string.lower(description)
+
+            ---@type Bindbox.highlight.part[]
+            local parts = {}
+            local found_find_terms = 0
+
+            local function is_available(from, to)
+                for _, s in ipairs(parts) do
+                    if from <= s.to and to >= s.from then
+                        return false
+                    end
+                end
+                return true
+            end
+
+            for _, ft in ipairs(find_terms) do
+                ---@type integer?, integer?
+                local from, to = 1, nil
+                while true do
+                    from, to = string.find(description, ft, from, true)
+                    if not from then
+                        break
+                    end
+                    if is_available(from, to) then
+                        table.insert(parts, { highlight = true, from = from, to = to })
+                        found_find_terms = found_find_terms + 1
+                        break
+                    end
+                    from = to + 1
+                end
+            end
+
+            if found_find_terms == #find_terms then
+                table.sort(parts, function(a, b) return a.from < b.from end)
+
+                ---@type Bindbox.highlight.part[]
+                local merged_parts = {}
+                local length = #description
+                local next_part = parts[1]
+                local i = 1
+                while i <= length do
+                    if next_part then
+                        if next_part.from == i then
+                            table.insert(merged_parts, next_part)
+                            i = next_part.to + 1
+                            table.remove(parts, 1)
+                            next_part = parts[1]
+                        else
+                            table.insert(merged_parts, { from = i, to = next_part.from - 1 })
+                            i = next_part.from
+                        end
+                    else
+                        table.insert(merged_parts, { from = i, to = length })
+                        break
+                    end
+                end
+
+                result.description = merged_parts
+            end
         end
-    end, parts), ""), true
+    end
+
+    return result
 end
 
 ---@param self Bindbox
@@ -371,52 +434,89 @@ end
 
 ---@param self Bindbox
 ---@param binding Binding
+---@param highlight_result? Bindbox.highlight.result
 ---@return string
-local function get_trigger_markup(self, binding)
-    local function trigger_box(content)
+local function get_trigger_markup(self, binding, highlight_result)
+    local dim_triggers = highlight_result and not highlight_result.triggers and not highlight_result.description
+
+    ---@param index integer
+    ---@return boolean?
+    local function highlight_trigger(index)
+        return highlight_result and highlight_result.triggers and highlight_result.triggers[index]
+    end
+
+    ---@param content string
+    ---@param highlight? boolean
+    local function trigger_box(content, highlight)
         return pango.span {
-            bgcolor = self.trigger_bg,
-            bgalpha = self.trigger_bg_alpha,
-            " ",
-            content,
-            " ",
+            fgcolor = highlight and self.find_highlight_trigger_fg or (dim_triggers and self.find_dim_fg or self.trigger_fg),
+            bgcolor = highlight and self.find_highlight_trigger_bg or self.trigger_bg,
+            bgalpha = highlight and self.find_highlight_trigger_bg_alpha or self.trigger_bg_alpha,
+            " " .. content .. " ",
         }
     end
 
-    local modifier_markup = ""
-    if #binding.modifiers > 0 then
-        local modifier_label_markups = gtable.map(function(m)
-            return trigger_box(get_modifier_label(m))
-        end, binding.modifiers)
-        modifier_markup = table.concat(modifier_label_markups, self.plus_separator_markup) ..
-            self.plus_separator_markup
+    local result_markup = ""
+
+    for i, m in ipairs(binding.modifiers) do
+        local modifier_label_text = get_modifier_label(m)
+        local modifier_markup = trigger_box(modifier_label_text, highlight_trigger(i))
+        result_markup = result_markup .. modifier_markup .. self.plus_separator_markup
     end
 
-    local trigger_text
     if binding.text then
-        trigger_text = binding.text
+        local trigger_label_text = binding.text or ""
+        local trigger_markup = trigger_box(trigger_label_text, highlight_trigger(0))
+        result_markup = result_markup .. trigger_markup
+    elseif binding.from and binding.to then
+        local from_label_text = get_trigger_label(binding.from)
+        local to_label_text = get_trigger_label(binding.to)
+        local trigger_label_text = from_label_text .. self.range_separator_markup .. to_label_text
+        local trigger_markup = trigger_box(trigger_label_text, highlight_trigger(0))
+        result_markup = result_markup .. trigger_markup
     else
-        if binding.from and binding.to then
-            local from = get_trigger_label(binding.from)
-            local to = get_trigger_label(binding.to)
-            trigger_text = from .. self.range_separator_markup .. to
-        else
-            local trigger_labels = gtable.map(function(t)
-                return get_trigger_label(t.trigger)
-            end, binding.triggers)
-            trigger_text = table.concat(trigger_labels, self.slash_separator_markup)
-        end
+        local trigger_label_texts = gtable.map(function(t) return get_trigger_label(t.trigger) end, binding.triggers)
+        local trigger_label_text = table.concat(trigger_label_texts, self.slash_separator_markup)
+        local trigger_markup = trigger_box(trigger_label_text, highlight_trigger(0))
+        result_markup = result_markup .. trigger_markup
     end
 
-    return modifier_markup .. trigger_box(trigger_text)
+    return result_markup
 end
 
 ---@param self Bindbox
 ---@param binding Binding
----@param highlight_args? Bindbox.highlight.args
+---@param highlight_result? Bindbox.highlight.result
 ---@return string
-local function get_description_markup(self, binding, highlight_args)
-    return select(1, highlight_text(self, binding.description, highlight_args))
+local function get_description_markup(self, binding, highlight_result)
+    local description = binding.description or ""
+
+    if not highlight_result then
+        return description
+    elseif not highlight_result.description and not highlight_result.triggers then
+        return pango.span {
+            fgcolor = self.find_dim_fg,
+            bgcolor = self.find_dim_bg,
+            pango.escape(description),
+        }
+    elseif not highlight_result.description then
+        return description
+    else
+        return table.concat(gtable.map(function(part)
+            ---@cast part Bindbox.highlight.part
+            local capture = string.sub(description, part.from, part.to)
+            if part.highlight then
+                return pango.span {
+                    fgcolor = self.find_highlight_fg,
+                    bgcolor = self.find_highlight_bg,
+                    bgalpha = self.find_highlight_bg_alpha,
+                    pango.escape(capture),
+                }
+            else
+                return capture
+            end
+        end, highlight_result.description), "")
+    end
 end
 
 ---@param self Bindbox
@@ -781,15 +881,12 @@ local function find(self, query, data)
     end
     self._private.find.hash = hash
 
-    local highlight_args = {
-        find_terms = terms,
-    }
-
     for _, group in ipairs(data) do
         for _, item in ipairs(group) do
-            item.trigger.highlighted = get_trigger_markup(self, item.binding)
+            local highlight_result = get_binding_highlighting(self, item.binding, terms)
+            item.trigger.highlighted = get_trigger_markup(self, item.binding, highlight_result)
             item.trigger.widget:set_markup(item.trigger.highlighted)
-            item.description.highlighted = get_description_markup(self, item.binding, highlight_args)
+            item.description.highlighted = get_description_markup(self, item.binding, highlight_result)
             item.description.widget:set_markup(item.description.highlighted)
         end
     end
