@@ -39,11 +39,20 @@ Here are some recommendations:
 
 
 # Installation
-
+### Manual
 Backup your current config and download the files from GitHub to the empty `~/.config/awesome` directory:
 
     $ git clone https://github.com/kosorin/awesome-rice.git ~/.config/awesome
 
+### Auto Installer
+You may use our autoinstall script, which is only supported on Arch Linux for now (this does not configure your .xinitrc) 
+```sh
+git clone https://github.com/kosorin/awesome-rice.git ~/arice
+cd arice
+chmod +x install.sh
+./install.sh
+```
+- Be aware we always recommend manual installation as everyone's computer is different, and sometimes there might be problems depending on what you have installed
 
 # Setup
 
