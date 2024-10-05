@@ -269,27 +269,6 @@ local global_bindings = {
     },
 
     binding.new {
-        modifiers = { mod.alt, mod.super },
-        triggers = {
-            { trigger = "/" },
-        },
-        path = "Tag",
-        description = "Delete empty tags (except the first tag)",
-        on_press = function(trigger)
-            local screen = awful.screen.focused()
-            if not screen then
-                return
-            end
-            for i, tag in ipairs(screen.tags) do
-                if i > 1 then
-                    -- tag:delete() is safe - it deletes a tag only if it's empty
-                    tag:delete()
-                end
-            end
-        end,
-    },
-
-    binding.new {
         modifiers = { mod.super },
         triggers = "Escape",
         path = "Tag",
