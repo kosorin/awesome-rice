@@ -48,13 +48,11 @@ function ruled.client.high_priority_properties.new_tag(client, value, properties
         args = {
             name = client.class,
             screen = client.screen,
-            volatile = true,
         }
     elseif value_type == "string" then
         args = {
             name = value,
             screen = client.screen,
-            volatile = true,
         }
     elseif value_type == "table" then
         args = gtable.clone(value)

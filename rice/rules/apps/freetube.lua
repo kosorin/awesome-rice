@@ -6,7 +6,6 @@ return {
         properties = {
             new_tag = {
                 name = "FreeTube",
-                volatile = true,
             },
         },
     },

@@ -16,20 +16,16 @@ local workspaces = {
             return {
                 name = "Hearthstone",
                 screen = capi.screen.primary,
-                volatile = true,
-                layout = awful.layout.suit.floating,
             }
         end,
         chat = function()
             return {
                 name = "Chat",
-                volatile = true,
             }
         end,
         git = function()
             return {
                 name = "Git",
-                volatile = true,
             }
         end,
     },
