@@ -9,15 +9,7 @@ local layouts = require("rice.layouts")
 ---@field names string[] # List of default tag names for each screen
 local tags = {
     names = {
-        "1",
-        "2",
-        "3",
-        "4",
-        "5",
-        "6",
-        "7",
-        "8",
-        "9",
+        "main",
     },
 }
 
