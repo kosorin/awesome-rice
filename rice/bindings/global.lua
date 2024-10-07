@@ -1,6 +1,7 @@
 local capi = Capi
 local awful = require("awful")
 local aplacement = require("awful.placement")
+local ctag = require("core.tag")
 local cclient = require("core.client")
 local binding = require("core.binding")
 local mod = binding.modifier
@@ -183,8 +184,7 @@ local global_bindings = {
         path = "Tag",
         description = "Show only the specified tag",
         on_press = function(trigger)
-            local screen = awful.screen.focused()
-            local tag = screen and screen.tags[trigger.index]
+            local tag = ctag.get_or_create(trigger.index)
             if tag then
                 tag:view_only()
             end
@@ -197,8 +197,7 @@ local global_bindings = {
         path = "Tag",
         description = "Toggle tag",
         on_press = function(trigger)
-            local screen = awful.screen.focused()
-            local tag = screen and screen.tags[trigger.index]
+            local tag = ctag.get_or_create(trigger.index)
             if tag then
                 awful.tag.viewtoggle(tag)
             end
@@ -214,6 +213,59 @@ local global_bindings = {
         path = "Tag",
         description = "View previous/next tag",
         on_press = function(trigger) trigger.action() end,
+    },
+
+    binding.new {
+        modifiers = { mod.control, mod.super },
+        triggers = {
+            { trigger = ",", direction = -1 },
+            { trigger = ".", direction = 1 },
+        },
+        path = "Tag",
+        description = "Move tag to the left/right",
+        on_press = function(trigger)
+            local screen = awful.screen.focused()
+            if not screen then
+                return
+            end
+            local tag = screen.selected_tag
+            if not tag then
+                return
+            end
+            local other_tag = screen.tags[tag.index + trigger.direction]
+            if not other_tag then
+                return
+            end
+            tag:swap(other_tag)
+        end,
+    },
+
+    binding.new {
+        modifiers = { mod.super },
+        triggers = {
+            { trigger = "/" },
+        },
+        path = "Tag",
+        description = "Create and select a new tag",
+        on_press = function(trigger)
+            awful.tag.add(nil, ctag.build {
+                screen = awful.screen.focused(),
+            }):view_only()
+        end,
+    },
+
+    binding.new {
+        modifiers = { mod.control, mod.super },
+        triggers = {
+            { trigger = "/" },
+        },
+        path = "Tag",
+        description = "Create a new tag",
+        on_press = function(trigger)
+            awful.tag.add(nil, ctag.build {
+                screen = awful.screen.focused(),
+            })
+        end,
     },
 
     binding.new {

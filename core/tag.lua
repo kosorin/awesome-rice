@@ -3,6 +3,7 @@ local type = type
 local ipairs = ipairs
 local tostring = tostring
 local ruled = require("ruled")
+local ascreen = require("awful.screen")
 local atag = require("awful.tag")
 local gtable = require("gears.table")
 
@@ -22,6 +23,23 @@ function M.build(args)
     return tag
 end
 
+---@param tag_index integer
+---@param screen? screen
+---@return tag?
+function M.get_or_create(tag_index, screen)
+    screen = screen or ascreen.focused()
+    if not screen then
+        return nil
+    end
+    local tag = screen.tags[tag_index]
+    if not tag then
+        tag = atag.add(nil, M.build {
+            screen = screen,
+        })
+    end
+    return tag
+end
+
 function ruled.client.high_priority_properties.new_tag(client, value, properties)
     local value_type = type(value)
 
@@ -30,13 +48,11 @@ function ruled.client.high_priority_properties.new_tag(client, value, properties
         args = {
             name = client.class,
             screen = client.screen,
-            volatile = true,
         }
     elseif value_type == "string" then
         args = {
             name = value,
             screen = client.screen,
-            volatile = true,
         }
     elseif value_type == "table" then
         args = gtable.clone(value)

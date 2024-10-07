@@ -203,13 +203,11 @@ function taglist.new(wibar)
                         binding.awful({}, btn.left, function()
                             awful.tag.add(nil, core_tag.build {
                                 screen = wibar.screen,
-                                volatile = true,
                             }):view_only()
                         end),
                         binding.awful({}, btn.middle, function()
                             awful.tag.add(nil, core_tag.build {
                                 screen = wibar.screen,
-                                volatile = true,
                             })
                         end),
                     },

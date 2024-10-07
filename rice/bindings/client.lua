@@ -2,6 +2,7 @@ local capi = Capi
 local awful = require("awful")
 local aplacement = require("awful.placement")
 local beautiful = require("theme.theme")
+local ctag = require("core.tag")
 local cclient = require("core.client")
 local binding = require("core.binding")
 local mod = binding.modifier
@@ -62,7 +63,7 @@ local client_bindings = {
         path = { "Tag", "Client" },
         description = "Move to tag",
         on_press = function(trigger, client)
-            local tag = client.screen.tags[trigger.index]
+            local tag = ctag.get_or_create(trigger.index, client.screen)
             if tag then
                 client:move_to_tag(tag)
             end
@@ -75,7 +76,7 @@ local client_bindings = {
         path = { "Tag", "Client" },
         description = "Toggle on tag",
         on_press = function(trigger, client)
-            local tag = client.screen.tags[trigger.index]
+            local tag = ctag.get_or_create(trigger.index, client.screen)
             if tag then
                 client:toggle_tag(tag)
             end
@@ -91,18 +92,30 @@ local client_bindings = {
         path = { "Tag", "Client" },
         description = "Move client to previous/next tag",
         on_press = function(trigger, client)
-            -- Get current tag
             local current_tag = client.screen.selected_tags[1]
-            -- Set new tag reference index
             local tag = client.screen.tags[current_tag.index + trigger.x]
             if tag then
-                -- Move client
+                tag:view_only()
                 client:move_to_tag(tag)
-                -- Switch to 'tag' and select client to maintain focus
-                tag.selected = true
-                current_tag.selected = false
                 client.selected = true
             end
+        end,
+    },
+
+    binding.new {
+        modifiers = { mod.super, mod.shift },
+        triggers = {
+            { trigger = "/" },
+        },
+        path = { "Tag", "Client" },
+        description = "Move client to a new tag",
+        on_press = function(trigger, client)
+            local tag = awful.tag.add(nil, ctag.build {
+                screen = awful.screen.focused(),
+            })
+            tag:view_only()
+            client:move_to_tag(tag)
+            client.selected = true
         end,
     },
 

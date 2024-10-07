@@ -77,7 +77,6 @@ local modifier = {
 ---@field text? string
 ---@field from? string
 ---@field to? string
----@field target? string
 ---@field order integer
 ---@field package _awful? { keys: awful.key[], buttons: awful.button[], hooks: awful.hook[] }
 
@@ -284,7 +283,6 @@ end
 ---@field text? string
 ---@field from? string
 ---@field to? string
----@field target? string
 ---@field order? integer
 
 ---@param args Binding.new.args
@@ -300,7 +298,6 @@ function M.new(args)
         text = args.text,
         from = args.from,
         to = args.to,
-        target = args.target,
         order = args.order,
     }
 
