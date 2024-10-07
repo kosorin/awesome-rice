@@ -86,6 +86,7 @@ function taglist:show_tag_menu(tag)
 end
 
 function taglist.new(wibar)
+    local plus_button_initialized
     local self
     self = awful.widget.taglist {
         screen = wibar.screen,
@@ -95,7 +96,15 @@ function taglist.new(wibar)
                 self._private.cache = cache
             end
 
-            local root_container = layout.widget
+            local root_container = layout.widget.children[1]
+
+            if not plus_button_initialized then
+                plus_button_initialized = true
+
+                local plus_button = layout.widget.children[2]
+                local plus_button_icon = layout:get_children_by_id("#icon")[1]
+                plus_button_icon:set_stylesheet(css.style { path = { fill = gcolor.ensure_pango_color(plus_button.fg) } })
+            end
 
             root_container:reset()
             for index, tag in ipairs(tags) do
@@ -176,6 +185,39 @@ function taglist.new(wibar)
             right = -beautiful.wibar.spacing / 2,
             {
                 layout = wibox.layout.fixed.horizontal,
+                {
+                    layout = wibox.layout.fixed.horizontal,
+                },
+                {
+                    widget = capsule,
+                    margins = hui.new {
+                        beautiful.wibar.paddings.top,
+                        beautiful.wibar.spacing / 2,
+                        beautiful.wibar.paddings.bottom,
+                    },
+                    paddings = hui.new { dpi(6) },
+                    bg = tcolor.transparent,
+                    fg = beautiful.capsule.styles.disabled.fg,
+                    border_width = 0,
+                    buttons = binding.awful_buttons {
+                        binding.awful({}, btn.left, function()
+                            awful.tag.add(nil, core_tag.build {
+                                screen = wibar.screen,
+                            }):view_only()
+                        end),
+                        binding.awful({}, btn.middle, function()
+                            awful.tag.add(nil, core_tag.build {
+                                screen = wibar.screen,
+                            })
+                        end),
+                    },
+                    {
+                        id = "#icon",
+                        widget = wibox.widget.imagebox,
+                        image = beautiful.icon("plus.svg"),
+                        resize = true,
+                    },
+                },
             },
         },
         widget_template = {
