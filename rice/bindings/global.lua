@@ -246,7 +246,7 @@ local global_bindings = {
             { trigger = "/" },
         },
         path = "Tag",
-        description = "Create and select a new tag",
+        description = "Create a new tag and switch to it",
         on_press = function(trigger)
             awful.tag.add(nil, ctag.build {
                 screen = awful.screen.focused(),

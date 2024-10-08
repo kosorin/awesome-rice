@@ -120,6 +120,21 @@ local client_bindings = {
     },
 
     binding.new {
+        modifiers = { mod.control, mod.super, mod.shift },
+        triggers = {
+            { trigger = "/" },
+        },
+        path = { "Tag", "Client" },
+        description = "Move client to a new tag and switch to it",
+        on_press = function(trigger, client)
+            local tag = awful.tag.add(nil, ctag.build {
+                screen = awful.screen.focused(),
+            })
+            client:move_to_tag(tag)
+        end,
+    },
+
+    binding.new {
         modifiers = { mod.super, mod.shift },
         triggers = "s",
         path = { "Tag", "Client" },
