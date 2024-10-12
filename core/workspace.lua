@@ -26,6 +26,8 @@ do
         return tag
     end
 
+    ---@param key string
+    ---@param factory fun(): tag
     function M.add(key, factory)
         M.items[key] = setmetatable({
             key = key,

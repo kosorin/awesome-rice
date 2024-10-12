@@ -54,6 +54,14 @@ local global_bindings = {
     },
 
     binding.new {
+        modifiers = { mod.super },
+        triggers = btn.right,
+        path = "Awesome",
+        description = "Resize tiling clients",
+        on_press = function() cclient.mouse_resize() end,
+    },
+
+    binding.new {
         modifiers = {},
         triggers = btn.right,
         path = "Awesome",

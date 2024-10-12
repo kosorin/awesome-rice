@@ -1,15 +1,10 @@
 local capi = Capi
 local pairs = pairs
-local tostring = tostring
-local awful = require("awful")
 local core_workspaces = require("core.workspace")
-local layouts = require("rice.layouts")
-local tags = require("rice.tags")
-local gtable = require("gears.table")
 
 
 ---@class Rice.Workspaces
----@field factories table<string, fun(): table>[]
+---@field factories table<string, fun(): tag>
 local workspaces = {
     factories = {
         hearthstone = function()
