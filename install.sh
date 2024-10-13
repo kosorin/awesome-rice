@@ -6,8 +6,8 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-# Required packages
-required_packages=(
+# All optional packages (merged from required and optional)
+packages=(
   xorg-server
   xorg-xinit
   xorg-xrandr
@@ -17,12 +17,7 @@ required_packages=(
   playerctl
   xdg-utils
   xclip
-  nerd-fonts-complete
   alacritty
-)
-
-# Optional packages
-optional_packages=(
   feh
   luarocks
   dkjson
@@ -54,56 +49,30 @@ fi
 echo -e "${YELLOW}Updating package list...${NC}"
 sudo pacman -Syu --noconfirm
 
-# Ask if the user uses an NVIDIA GPU
-read -p "Do you use an NVIDIA GPU? (y/n): " use_nvidia
-
-if [[ $use_nvidia == "y" || $use_nvidia == "Y" ]]; then
-  # Ask if the user wants proprietary or open-source NVIDIA packages
-  read -p "Do you want to install proprietary or open-source NVIDIA packages? (proprietary/open-source): " nvidia_choice
-
-  if [[ $nvidia_choice == "proprietary" ]]; then
-    echo -e "${YELLOW}Installing proprietary NVIDIA packages...${NC}"
-    sudo pacman -S --noconfirm nvidia nvidia-utils nvidia-settings
-  elif [[ $nvidia_choice == "open-source" ]]; then
-    echo -e "${YELLOW}Installing open-source NVIDIA packages...${NC}"
-    sudo pacman -S --noconfirm xf86-video-nouveau
-  else
-    echo -e "${RED}Invalid choice. Skipping NVIDIA packages installation.${NC}"
-  fi
-fi
-
-# Install required packages
-echo -e "${YELLOW}Installing required packages...${NC}"
-for package in "${required_packages[@]}"; do
-  if yay -Qi $package &> /dev/null; then
-    yay -S --noconfirm $package
-  else
-    sudo pacman -S --noconfirm $package
-  fi
-done
-
-# Prompt user for optional packages
-read -p "Do you want to install optional packages for extra features? (y/n): " install_optional
-
-if [[ $install_optional == "y" || $install_optional == "Y" ]]; then
-  echo -e "${YELLOW}Installing optional packages...${NC}"
-  for package in "${optional_packages[@]}"; do
-    if [[ $package == "luarocks" ]]; then
-      sudo pacman -S --noconfirm luarocks
-    elif [[ $package == "dkjson" ]]; then
-      if ! command -v luarocks &> /dev/null; then
-        echo -e "${RED}luarocks is not installed. Skipping dkjson installation.${NC}"
-      else
-        sudo luarocks install dkjson
-      fi
-    elif yay -Qi $package &> /dev/null; then
+# Prompt user for each package installation
+for package in "${packages[@]}"; do
+  read -p "Do you want to install $package? (y/n): " install_package
+  if [[ $install_package == "y" || $install_package == "Y" ]]; then
+    if yay -Qi $package &> /dev/null; then
       yay -S --noconfirm $package
     else
       sudo pacman -S --noconfirm $package
     fi
+  else
+    echo -e "${RED}Skipping $package installation.${NC}"
+  fi
+done
+
+# Ask the user if they want to install yay-specific packages
+read -p "Do you want to install yay-specific packages (e.g., nerd-fonts-complete)? (y/n): " install_yay_packages
+
+if [[ $install_yay_packages == "y" || $install_yay_packages == "Y" ]]; then
+  echo -e "${YELLOW}Installing yay-specific packages...${NC}"
+  for package in "${yay_packages[@]}"; do
+    yay -S --noconfirm $package
   done
 else
-  echo -e "${RED}Skipping optional packages installation.${NC}"
+  echo -e "${RED}Skipping yay-specific packages installation.${NC}"
 fi
 
 # Ask if the user wants to install the rofi and picom rice
