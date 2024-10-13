@@ -19,7 +19,7 @@ local datetime_widget = require("ui.topbar.datetime")
 local tools_widget = require("ui.topbar.tools")
 local power_widget = require("ui.topbar.power")
 local media_player_widget = require("ui.topbar.media_player")
-
+local spotify_button = require("ui.topbar.spotify")
 
 capi.screen.connect_signal("request::desktop_decoration", function(screen)
     ---@cast screen screen
@@ -88,6 +88,7 @@ capi.screen.connect_signal("request::desktop_decoration", function(screen)
         right:add(systray_widget.new(wibar))
         right:add(datetime_widget.new(wibar))
         right:add(power_widget.new(wibar))
+        right:add(spotify_button) -- REMOVE THIS LINE TO REMOVE THE SPOTIFY OPTION
     else
         right:add(power_widget.new(wibar))
     end
