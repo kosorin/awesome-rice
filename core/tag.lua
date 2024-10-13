@@ -1,7 +1,6 @@
 local capi = Capi
 local type = type
 local ipairs = ipairs
-local tostring = tostring
 local ruled = require("ruled")
 local ascreen = require("awful.screen")
 local atag = require("awful.tag")
@@ -15,7 +14,7 @@ local M = {}
 function M.build(args)
     args = args or {}
     args.screen = args.screen or capi.screen.primary
-    args.name = args.name or tostring(1 + #args.screen.tags)
+    args.name = args.name or ""
 
     local tag = {}
     capi.awesome.emit_signal("tag::build", tag, args)

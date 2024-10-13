@@ -1,13 +1,12 @@
 local capi = Capi
 local ipairs = ipairs
-local format = string.format
+local tostring = tostring
 local awful = require("awful")
 local common = require("awful.widget.common")
 local base = require("wibox.widget.base")
 local wibox = require("wibox")
 local beautiful = require("theme.theme")
 local tcolor = require("utils.color")
-local config = require("rice.config")
 local binding = require("core.binding")
 local mod = binding.modifier
 local btn = binding.button
@@ -18,8 +17,6 @@ local gcolor = require("gears.color")
 local core_tag = require("core.tag")
 local mebox = require("widget.mebox")
 local tag_menu_template = require("ui.menu.templates.tag.main")
-local aplacement = require("awful.placement")
-local widget_helper = require("core.widget")
 local screen_helper = require("core.screen")
 local pango = require("utils.pango")
 local css = require("utils.css")
@@ -27,6 +24,22 @@ local hui = require("utils.thickness")
 
 
 local taglist = { mt = {} }
+
+local function set_tag_label(textbox, name, index)
+    if not name or name:match("^%s*$") then
+        name = ""
+    end
+
+    local is_valid = #name > 0
+
+    local text = is_valid
+        and pango.escape(name)
+        or tostring(index)
+
+    textbox:set_markup_silently(text)
+
+    return name
+end
 
 function taglist:rename_tag_inline(tag)
     if not tag or not tag.activated then
@@ -49,12 +62,7 @@ function taglist:rename_tag_inline(tag)
                 new_name = value
             end,
             done_callback = function()
-                local name = new_name or old_name or ""
-                if name:match("^%s*$") then
-                    name = tostring(tag.index)
-                end
-                textbox:set_text(name)
-                tag.name = name
+                tag.name = set_tag_label(textbox, new_name or old_name or "", tag.index)
                 capi.mousegrabber.stop()
             end,
         }
@@ -91,11 +99,14 @@ function taglist.new(wibar)
     self = awful.widget.taglist {
         screen = wibar.screen,
         filter = awful.widget.taglist.filter.all,
-        update_function = function(layout, buttons, label, cache, tags, args)
+        update_function = function(layout, buttons, _, cache, tags, args)
+            ---@cast tags tag[]
+
             if not self._private.cache or self._private.cache ~= cache then
                 self._private.cache = cache
             end
 
+            local styles = beautiful.taglist.item
             local root_container = layout.widget.children[1]
 
             if not plus_button_initialized then
@@ -126,7 +137,7 @@ function taglist.new(wibar)
                     item = {
                         buttons = buttons,
                         root = root,
-                        container = root:get_children_by_id("#container")[1],
+                        container = root:get_children_by_id("#container")[1] --[[@as Capsule]],
                         text = root:get_children_by_id("#text")[1],
                     }
                     cache[tag] = item
@@ -140,20 +151,26 @@ function taglist.new(wibar)
                     end
                 end
 
-                local text, bg, _, _, item_args = label(tag, item.text)
-                text = text or ""
-                item_args = item_args or {}
-
                 if item.container then
-                    item.container.bg = bg
-                    item.container.border_width = item_args.shape_border_width
-                    item.container.border_color = item_args.shape_border_color
+                    local is_empty = #tag:clients() == 0
+                    local style
+                    if tag.selected then
+                        style = styles.active
+                    elseif tag.urgent then
+                        style = styles.urgent
+                    elseif tag.volatile then
+                        style = styles.volatile
+                    elseif is_empty then
+                        style = styles.empty
+                    else
+                        style = styles.normal
+                    end
+
+                    item.container:apply_style(style)
                 end
 
                 if item.text then
-                    if not item.text:set_markup_silently(text) then
-                        item.text:set_markup(pango.i(pango.escape("<invalid>")))
-                    end
+                    set_tag_label(item.text, tag.name, index)
                 end
 
                 root_container:add(item.root)

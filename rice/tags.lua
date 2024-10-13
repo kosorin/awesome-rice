@@ -23,7 +23,7 @@ end)
 
 capi.screen.connect_signal("request::desktop_decoration", function(screen)
     for index, name in pairs(tags.names) do
-        awful.tag.add(name, core_tag.build {
+        awful.tag.add(nil, core_tag.build {
             name = name,
             screen = screen,
             selected = index == 1,
