@@ -2,6 +2,7 @@ local capi = Capi
 local tostring = tostring
 local beautiful = require("theme.theme")
 local dpi = Dpi
+local core_client = require("core.client")
 local mebox = require("widget.mebox")
 local aspawn = require("awful.spawn")
 local awful = require("awful")
@@ -134,33 +135,13 @@ function M.new()
                         },
                         mebox.separator,
                         {
-                            text = "Copy info",
+                            text = "Copy rule",
                             icon = beautiful.icon("content-copy.svg"),
                             icon_color = beautiful.palette.gray,
                             callback = function(item, menu)
                                 local client = menu.client --[[@as client]]
-                                local data = {
-                                    pid = client.pid,
-                                    name = client.name,
-                                    instance = client.instance,
-                                    class = client.class,
-                                    role = client.role,
-                                    type = client.type,
-                                }
-                                local result = json.encode
-                                    and json.encode(data, {
-                                        indent = true,
-                                        keyorder = {
-                                            "pid",
-                                            "name",
-                                            "instance",
-                                            "class",
-                                            "role",
-                                            "type",
-                                        },
-                                    })
-                                    or gdebug.dump_return(data)
-                                selection.clipboard:copy(result)
+                                local rule_string = core_client.get_rule_string(client)
+                                selection.clipboard:copy(rule_string)
                             end,
                         },
                     },

@@ -15,4 +15,8 @@ function M.trim_end(s)
     return s and string.gsub(s, "(.-)%s*$", "%1") or nil
 end
 
+function M.escape_pattern(s)
+    return s and string.gsub(s, "([%.%+%-%*%?%^%$%(%)%[%]])", "%%%1") or nil
+end
+
 return M

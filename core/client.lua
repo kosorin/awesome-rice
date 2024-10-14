@@ -1,6 +1,10 @@
 local capi = Capi
+local type = type
+local tostring = tostring
 local ipairs = ipairs
+local string = string
 local math = math
+local ustring = require("utils.string")
 local aclient = require("awful.client")
 local alayout = require("awful.layout")
 local ascreen = require("awful.screen")
@@ -22,6 +26,36 @@ local M = {
     floating_move_step = 50,
     tiling_resize_factor = 0.02,
 }
+
+function M.get_rule_string(client)
+    local data = {
+        { key = "instance", value = client.instance },
+        { key = "class", value = client.class },
+        { key = "name", value = client.name },
+        { key = "role", value = client.role },
+        { key = "type", value = client.type },
+    }
+
+    local rule = "{\n"
+
+    for _, item in ipairs(data) do
+        local value
+        local value_type = type(item.value)
+        if value_type == "string" then
+            value = string.format("\"^%s$\"", ustring.escape_pattern(item.value))
+        elseif value_type == "number" or value_type == "boolean" then
+            value = tostring(item.value)
+        else
+            value = nil
+        end
+
+        if value ~= nil then
+            rule = string.format("%s    %s = %s,\n", rule, item.key, value)
+        end
+    end
+
+    return rule .. "}"
+end
 
 ---@param client client
 ---@return boolean|nil
