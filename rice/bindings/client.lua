@@ -108,7 +108,7 @@ local client_bindings = {
             { trigger = "/" },
         },
         path = { "Tag", "Client" },
-        description = "Move client to a new tag",
+        description = "Move client to a new tag and switch to it",
         on_press = function(trigger, client)
             local tag = awful.tag.add(nil, ctag.build {
                 screen = awful.screen.focused(),
@@ -125,7 +125,7 @@ local client_bindings = {
             { trigger = "/" },
         },
         path = { "Tag", "Client" },
-        description = "Move client to a new tag and switch to it",
+        description = "Move client to a new tag",
         on_press = function(trigger, client)
             local tag = awful.tag.add(nil, ctag.build {
                 screen = awful.screen.focused(),
